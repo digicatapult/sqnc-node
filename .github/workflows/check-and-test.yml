@@ -50,6 +50,8 @@ jobs:
           mv $TEMP/sccache-v*-x86_64-unknown-linux-musl/sccache $TEMP/sccache
           rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
           chmod +x $TEMP/sccache
+      - name: Install rustfmt
+        run: rustup component add rustfmt
       - name: Cache cargo registry
         uses: actions/cache@v2
         with:
