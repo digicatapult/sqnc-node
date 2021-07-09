@@ -22,7 +22,8 @@ pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadata> {
     id: TokenId,
     owner: AccountId,
     creator: AccountId,
-    block_number: BlockNumber,
+    created_at: BlockNumber,
+    destroyed_at: Option<BlockNumber>,
     metadata: TokenMetadata,
     parents: Vec<TokenId>,
     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
@@ -127,30 +128,35 @@ pub mod pallet {
             let last = LastToken::<T>::get();
 
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) = outputs
-                .iter()
-                .fold((last, Vec::new()), |(last, children), (owner, metadata)| {
-                    let next = _next_token(last);
-                    <TokensById<T>>::insert(
-                        next,
-                        Token {
-                            id: next,
-                            owner: owner.clone(),
-                            creator: sender.clone(),
-                            block_number: now,
-                            metadata: metadata.clone(),
-                            parents: inputs.clone(),
-                            children: None,
-                        },
-                    );
-                    let mut next_children = children.clone();
-                    next_children.push(next);
-                    (next, next_children)
-                });
+            let (last, children) =
+                outputs
+                    .iter()
+                    .fold((last, Vec::new()), |(last, children), (owner, metadata)| {
+                        let next = _next_token(last);
+                        <TokensById<T>>::insert(
+                            next,
+                            Token {
+                                id: next,
+                                owner: owner.clone(),
+                                creator: sender.clone(),
+                                created_at: now,
+                                destroyed_at: None,
+                                metadata: metadata.clone(),
+                                parents: inputs.clone(),
+                                children: None,
+                            },
+                        );
+                        let mut next_children = children.clone();
+                        next_children.push(next);
+                        (next, next_children)
+                    });
 
             // Burn inputs
             inputs.iter().for_each(|id| {
-                <TokensById<T>>::mutate(id, |token| (*token).children = Some(children.clone()));
+                <TokensById<T>>::mutate(id, |token| {
+                    (*token).children = Some(children.clone());
+                    (*token).destroyed_at = Some(now);
+                });
             });
 
             <LastToken<T>>::put(last);

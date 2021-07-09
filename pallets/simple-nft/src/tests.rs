@@ -7,7 +7,11 @@ use frame_support::{assert_err, assert_ok};
 fn it_works_for_creating_simple_token() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
-        assert_ok!(SimpleNFT::run_process(Origin::signed(1), Vec::new(), vec![(1, 42)]));
+        assert_ok!(SimpleNFT::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![(1, 42)]
+        ));
         // last token should be 1
         assert_eq!(SimpleNFT::last_token(), 1);
         // get the token
@@ -18,7 +22,8 @@ fn it_works_for_creating_simple_token() {
                 id: 1,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 42,
                 parents: Vec::new(),
                 children: None
@@ -46,7 +51,8 @@ fn it_works_for_creating_many_token() {
                 id: 1,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 42,
                 parents: Vec::new(),
                 children: None
@@ -59,7 +65,8 @@ fn it_works_for_creating_many_token() {
                 id: 2,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 43,
                 parents: Vec::new(),
                 children: None
@@ -72,7 +79,8 @@ fn it_works_for_creating_many_token() {
                 id: 3,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 44,
                 parents: Vec::new(),
                 children: None
@@ -86,7 +94,11 @@ fn it_works_for_destroying_single_token() {
     new_test_ext().execute_with(|| {
         SimpleNFT::run_process(Origin::signed(1), Vec::new(), vec![(1, 42)]).unwrap();
         // create a token with no parents
-        assert_ok!(SimpleNFT::run_process(Origin::signed(1), vec![1], Vec::new()));
+        assert_ok!(SimpleNFT::run_process(
+            Origin::signed(1),
+            vec![1],
+            Vec::new()
+        ));
         // assert no more tokens were created
         assert_eq!(SimpleNFT::last_token(), 1);
         // get the old token
@@ -97,7 +109,8 @@ fn it_works_for_destroying_single_token() {
                 id: 1,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 42,
                 parents: Vec::new(),
                 children: Some(Vec::new())
@@ -109,9 +122,18 @@ fn it_works_for_destroying_single_token() {
 #[test]
 fn it_works_for_destroying_many_tokens() {
     new_test_ext().execute_with(|| {
-        SimpleNFT::run_process(Origin::signed(1), Vec::new(), vec![(1, 42), (1, 43), (1, 44)]).unwrap();
+        SimpleNFT::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![(1, 42), (1, 43), (1, 44)],
+        )
+        .unwrap();
         // create a token with no parents
-        assert_ok!(SimpleNFT::run_process(Origin::signed(1), vec![1, 2, 3], Vec::new()));
+        assert_ok!(SimpleNFT::run_process(
+            Origin::signed(1),
+            vec![1, 2, 3],
+            Vec::new()
+        ));
         // assert no more tokens were created
         assert_eq!(SimpleNFT::last_token(), 3);
         // get the old token
@@ -122,7 +144,8 @@ fn it_works_for_destroying_many_tokens() {
                 id: 1,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 42,
                 parents: Vec::new(),
                 children: Some(Vec::new())
@@ -135,7 +158,8 @@ fn it_works_for_destroying_many_tokens() {
                 id: 2,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 43,
                 parents: Vec::new(),
                 children: Some(Vec::new())
@@ -148,7 +172,8 @@ fn it_works_for_destroying_many_tokens() {
                 id: 3,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 44,
                 parents: Vec::new(),
                 children: Some(Vec::new())
@@ -161,8 +186,12 @@ fn it_works_for_destroying_many_tokens() {
 fn it_works_for_creating_and_destroy_single_tokens() {
     new_test_ext().execute_with(|| {
         SimpleNFT::run_process(Origin::signed(1), Vec::new(), vec![(1, 42)]).unwrap();
-        // create a token with no parents
-        assert_ok!(SimpleNFT::run_process(Origin::signed(1), vec![1], vec![(2, 43)]));
+        // create a token with a parent
+        assert_ok!(SimpleNFT::run_process(
+            Origin::signed(1),
+            vec![1],
+            vec![(2, 43)]
+        ));
         // assert 1 more token was created
         assert_eq!(SimpleNFT::last_token(), 2);
         // get the old token
@@ -173,7 +202,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
                 id: 1,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 42,
                 parents: Vec::new(),
                 children: Some(vec![2])
@@ -186,7 +216,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
                 id: 2,
                 owner: 2,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 43,
                 parents: vec![1],
                 children: None
@@ -199,7 +230,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
 fn it_works_for_creating_and_destroy_many_tokens() {
     new_test_ext().execute_with(|| {
         SimpleNFT::run_process(Origin::signed(1), Vec::new(), vec![(1, 42), (1, 43)]).unwrap();
-        // create a token with no parents
+        // create a token with 2 parents
         assert_ok!(SimpleNFT::run_process(
             Origin::signed(1),
             vec![1, 2],
@@ -215,7 +246,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                 id: 1,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 42,
                 parents: Vec::new(),
                 children: Some(vec![3, 4])
@@ -228,7 +260,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                 id: 2,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: Some(0),
                 metadata: 43,
                 parents: Vec::new(),
                 children: Some(vec![3, 4])
@@ -242,7 +275,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                 id: 3,
                 owner: 1,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 44,
                 parents: vec![1, 2],
                 children: None
@@ -255,7 +289,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                 id: 4,
                 owner: 2,
                 creator: 1,
-                block_number: 0,
+                created_at: 0,
+                destroyed_at: None,
                 metadata: 45,
                 parents: vec![1, 2],
                 children: None
