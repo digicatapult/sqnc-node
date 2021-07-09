@@ -74,6 +74,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-build-cache-debug-
+      - name: Cargo format
+        uses: actions-rs/cargo@v1
+        env:
+          RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+          SCCACHE_DIR: ${{ runner.temp }}/cache
+        with:
+          command: fmt
       - name: Cargo check
         uses: actions-rs/cargo@v1
         env:
