@@ -21,28 +21,28 @@ use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
 pub trait WeightInfo {
-	fn run_process(i: usize, o: usize) -> Weight;
+    fn run_process(i: usize, o: usize) -> Weight;
 }
 
 /// Weight functions for pallet_simple_nft.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn run_process(i: usize, o: usize) -> Weight {
-		(28_242_000 as Weight)
-			// Standard Error: 1_447_000
-			.saturating_add((14_888_000 as Weight).saturating_mul(i as Weight))
-			// Standard Error: 1_447_000
-			.saturating_add((8_397_000 as Weight).saturating_mul(o as Weight))
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(i as Weight)))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(i as Weight)))
-			.saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(o as Weight)))
-	}
+    fn run_process(i: usize, o: usize) -> Weight {
+        (28_242_000 as Weight)
+            // Standard Error: 1_447_000
+            .saturating_add((14_888_000 as Weight).saturating_mul(i as Weight))
+            // Standard Error: 1_447_000
+            .saturating_add((8_397_000 as Weight).saturating_mul(o as Weight))
+            .saturating_add(T::DbWeight::get().reads(1 as Weight))
+            .saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(i as Weight)))
+            .saturating_add(T::DbWeight::get().writes(1 as Weight))
+            .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(i as Weight)))
+            .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(o as Weight)))
+    }
 }
 
 impl WeightInfo for () {
-	fn run_process(_: usize, _: usize) -> Weight {
-		(0 as Weight)
-	}
+    fn run_process(_: usize, _: usize) -> Weight {
+        (0 as Weight)
+    }
 }
