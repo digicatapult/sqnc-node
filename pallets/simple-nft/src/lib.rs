@@ -57,7 +57,26 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn on_runtime_upgrade() -> frame_support::weights::Weight {
+            frame_support::debug::info!("WE ARE HERE");
+
+            0
+            // if !UpgradedToU32RefCount::get() {
+            //     Account::<T>::translate::<(T::Index, u8, T::AccountData), _>(|_key, (nonce, rc, data)| {
+            //         Some(AccountInfo {
+            //             nonce,
+            //             refcount: rc as RefCount,
+            //             data,
+            //         })
+            //     });
+            //     UpgradedToU32RefCount::put(true);
+            //     T::MaximumBlockWeight::get()
+            // } else {
+            //     0
+            // }
+        }
+    }
 
     /// Storage value definition
     #[pallet::storage]
