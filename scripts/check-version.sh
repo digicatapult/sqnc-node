@@ -3,20 +3,6 @@
 # exit when any command fails
 set -e
 
-function check_versions_consistent () {
-  local NODE_VERSION=$(tomlq .package.version ./node/Cargo.toml | sed 's/"//g')
-  local RUNTIME_VERSION=$(tomlq .package.version ./runtime/Cargo.toml | sed 's/"//g')
-
-  if [ "$NODE_VERSION" != "$RUNTIME_VERSION" ]; then
-    echo "Inconsistent versions detected"
-    echo "NODE_VERSION: $NODE_VERSION"
-    echo "RUNTIME_VERSION: $RUNTIME_VERSION"
-    exit 1
-  fi
-}
-
-check_versions_consistent
-
 function check_version_greater () {
   local current=$1
   local git_versions="${2:-0.0.0}"
