@@ -6,6 +6,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use sp_api::impl_runtime_apis;
@@ -255,6 +256,22 @@ impl pallet_sudo::Config for Runtime {
     type Call = Call;
 }
 
+parameter_types! {
+    pub const MaxWellKnownNodes: u32 = 8;
+    pub const MaxPeerIdLength: u32 = 128;
+}
+
+impl pallet_node_authorization::Config for Runtime {
+    type Event = Event;
+    type MaxWellKnownNodes = MaxWellKnownNodes;
+    type MaxPeerIdLength = MaxPeerIdLength;
+    type AddOrigin = EnsureRoot<AccountId>;
+    type RemoveOrigin = EnsureRoot<AccountId>;
+    type SwapOrigin = EnsureRoot<AccountId>;
+    type ResetOrigin = EnsureRoot<AccountId>;
+    type WeightInfo = ();
+}
+
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
@@ -279,6 +296,7 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment::{Module, Storage},
         Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
+        NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
     }
 );
 
