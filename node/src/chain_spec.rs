@@ -61,6 +61,16 @@ pub fn development_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
                     get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
                 ],
+                Some(NodeAuthorizationConfig {
+                    nodes: vec![(
+                        OpaquePeerId(
+                            bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2")
+                                .into_vec()
+                                .unwrap(),
+                        ),
+                        get_account_id_from_seed::<sr25519::Public>("Alice"),
+                    )],
+                }),
                 true,
             )
         },
@@ -169,6 +179,9 @@ pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
                 sudo_account.clone(),
                 // Pre-funded accounts
                 endowed_accounts.iter().map(|k| k.clone()).collect(),
+                Some(NodeAuthorizationConfig {
+                    nodes: vec![], //TODO add staging peer IDs and accounts
+                }),
                 true,
             )
         },
@@ -220,6 +233,34 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
                     get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
                 ],
+                Some(NodeAuthorizationConfig {
+                    nodes: vec![
+                        (
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Alice"),
+                        ),
+                        (
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Bob"),
+                        ),
+                        (
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+                        ),
+                    ],
+                }),
                 true,
             )
         },
@@ -242,6 +283,7 @@ fn testnet_genesis(
     initial_authorities: Vec<(AuraId, GrandpaId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
+    node_authorization_config: Option<NodeAuthorizationConfig>,
     _enable_println: bool,
 ) -> GenesisConfig {
     GenesisConfig {
@@ -264,6 +306,6 @@ fn testnet_genesis(
             // Assign network admin rights.
             key: root_key,
         }),
-        pallet_node_authorization: Some(NodeAuthorizationConfig { nodes: vec![] }),
+        pallet_node_authorization: node_authorization_config,
     }
 }
