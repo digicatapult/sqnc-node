@@ -5,6 +5,10 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
+use frame_support::migration::{take_storage_value, put_storage_value};
+use frame_support::Hashable;
+use codec::Codec;
+use sp_std::collections::btree_map::BTreeMap;
 
 #[cfg(test)]
 mod mock;
@@ -17,7 +21,18 @@ mod benchmarking;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
+pub struct OldToken<AccountId, TokenId, BlockNumber, TokenMetadata> {
+    id: TokenId,
+    owner: AccountId,
+    creator: AccountId,
+    block_number: BlockNumber,
+    metadata: TokenMetadata,
+    parents: Vec<TokenId>,
+    children: Option<Vec<TokenId>>,
+}
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadata> {
     id: TokenId,
     owner: AccountId,
@@ -46,7 +61,7 @@ pub mod pallet {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        type TokenId: Parameter + AtLeast32Bit + Default + Copy;
+        type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
         type TokenMetadata: Parameter + Default + Copy;
 
         type WeightInfo: WeightInfo;
@@ -59,22 +74,44 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            frame_support::debug::info!("WE ARE HERE");
+            frame_support::debug::info!("Upgrading runtime");
+
+            let last_token = LastToken::<T>::get();
+            let mut token_id = T::TokenId::default();
+
+            // Read all the tokens into a map
+            let mut old_tokens: BTreeMap<T::TokenId, OldToken<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadata>> = BTreeMap::new();
+            while token_id < last_token {
+                token_id = token_id + One::one();
+                let key_hash = token_id.blake2_128_concat();
+                let old_token: OldToken<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadata> = take_storage_value(b"SimpleNFTModule", b"TokensById", &key_hash).unwrap();
+                old_tokens.insert(token_id, old_token);
+            }
+
+            // Update and replace the token in storage
+            for (token_id, old_token) in old_tokens.iter() {
+                let key_hash = token_id.blake2_128_concat();
+                let new_token = Token {
+                    id: token_id,
+                    owner: old_token.owner,
+                    creator: old_token.creator,
+                    created_at: old_token.block_number,
+                    destroyed_at: match old_token.children.as_ref() {
+                        None => { None }
+                        Some(arr) => { 
+                            if arr.len() > 0 { Some(old_tokens.get(&arr[0]).unwrap().block_number) }
+                            else { Some(<frame_system::Module<T>>::block_number()) }
+                        }
+                    },
+                    metadata: old_token.metadata,
+                    parents: old_token.parents,
+                    children: old_token.children,
+                };
+
+                put_storage_value(b"SimpleNFTModule", b"TokensById", &key_hash, new_token);
+            }
 
             0
-            // if !UpgradedToU32RefCount::get() {
-            //     Account::<T>::translate::<(T::Index, u8, T::AccountData), _>(|_key, (nonce, rc, data)| {
-            //         Some(AccountInfo {
-            //             nonce,
-            //             refcount: rc as RefCount,
-            //             data,
-            //         })
-            //     });
-            //     UpgradedToU32RefCount::put(true);
-            //     T::MaximumBlockWeight::get()
-            // } else {
-            //     0
-            // }
         }
     }
 
