@@ -257,7 +257,7 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-    pub const MaxWellKnownNodes: u32 = 8;
+    pub const MaxWellKnownNodes: u32 = 16;
     pub const MaxPeerIdLength: u32 = 128;
 }
 
