@@ -157,8 +157,11 @@ pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
     ];
 
     let endowed_accounts: Vec<AccountId> = vec![
+        // 5Fpk38Xk2eixKwtNRnUn1YTcUuKbgSmF8G2wgRoqGUmgtG1o
         hex!["a64ad684438ae298d875f66e24e4f98f2d4689e008d431534f5c6adffd1ea26b"].into(),
+        // 5DtQJtJurJbniRA1LaFu9JgoL5Myi4C29EBfqtoJpcoEydLp
         hex!["509cf0e9e9c49855cf888f9af6bd481174399d6fdbe4d43041e6ed8a960b6a2c"].into(),
+        // 5H8iVfXZ89B8eByqEdwdRYuVJReEeETnC24GdVXj4LjSg27z
         hex!["e03c4bcf92683e004bb95bfffef863e4ecf1c9a1fc661c5807ac48e22b060b20"].into(),
     ];
 
@@ -180,7 +183,98 @@ pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
                 // Pre-funded accounts
                 endowed_accounts.iter().map(|k| k.clone()).collect(),
                 Some(NodeAuthorizationConfig {
-                    nodes: vec![], //TODO add staging peer IDs and accounts
+                    nodes: vec![
+                        (
+                            // stage bootnode
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWCVhZ8Hm496zf4sugFekVyZtuE98b1XuySQUxztNvAQY6")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage red
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWRSxrnHyBjePLXcNyCaJE31oWFpoya5PrsYb3DUHP5QW7")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage green
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWKZGsMiJvispaQgVk2PDjECbT1FFx7VVoEF91wzquSho7")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage blue
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWSbedmDP2M8odLSFEMshWzAu6Rc8Hq24rw9xq1s1eCJzy")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage2 red
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWDW6qHkgpnxzb5FPbSwRU3paUirLeiEbTHRBQ7VwfcciV")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[1].clone(),
+                        ),
+                        (
+                            // stage2 green
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWQ2ignqpwNmXM8gCBaesg7VCupLHkXkcrKge2yzvyiKL4")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[1].clone(),
+                        ),
+                        (
+                            // stage2 blue
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWFkrb3zMP5Gijk6MYWUShPMRTdXeox3z5ppr4HzKztjDe")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[1].clone(),
+                        ),
+                        (
+                            // stage3 red
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWG4N23D8Ny4ZPyqv4zBwJN3YGUtrhURP8ZUAkJTip14hK")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[2].clone(),
+                        ),
+                        (
+                            // stage3 green
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWN48NLTwN4gyjbaPYX1hzgmewGKN3iYAphh24NaZb5TWF")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[2].clone(),
+                        ),
+                        (
+                            // stage3 blue
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWHxeSevn6pdXCfaz13eEKPEgubZbt3W2mg3Lwaaa5HRpP")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[2].clone(),
+                        ),
+                    ],
                 }),
                 true,
             )
