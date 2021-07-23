@@ -2,6 +2,7 @@
 
 use crate::{mock::*, Error, Token};
 use frame_support::{assert_err, assert_ok};
+use frame_support::traits::OnRuntimeUpgrade;
 
 #[test]
 fn it_works_for_creating_simple_token() {
@@ -378,5 +379,42 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         assert_eq!(token_1, SimpleNFT::tokens_by_id(1));
         // asset old token hasn't changed
         assert_eq!(token_2, SimpleNFT::tokens_by_id(2));
+    });
+}
+
+#[test]
+fn it_upgrades_from_main_successfully() {
+    new_test_ext().execute_with(|| {
+
+        // Create one token
+        SimpleNFT::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![(1, 42)]
+        );
+
+        let old_token = SimpleNFT::tokens_by_id(1);
+
+        // SimpleNFT::run_process(Origin::signed(1), Vec::new(), vec![(1, 42), (1, 43)]).unwrap();
+
+        // Perform upgrade
+		// assert_eq!(
+        //     SimpleNFT::on_runtime_upgrade(),
+        //     <Runtime as frame_system::Config>::DbWeight::get().reads_writes(1, 2),
+        // );
+
+        assert_eq!(
+            old_token,
+            Token {
+                id: 1,
+                owner: 1,
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: 42,
+                parents: Vec::new(),
+                children: None
+            }
+        );
     });
 }
