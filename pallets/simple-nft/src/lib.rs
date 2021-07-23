@@ -89,14 +89,14 @@ pub mod pallet {
             }
 
             // Update and replace the token in storage
-            for (token_id, old_token) in old_tokens.iter() {
+            for (token_id, old_token) in old_tokens.clone() {
                 let key_hash = token_id.blake2_128_concat();
                 let new_token = Token {
                     id: token_id,
                     owner: old_token.owner,
                     creator: old_token.creator,
                     created_at: old_token.block_number,
-                    destroyed_at: match old_token.children.as_ref() {
+                    destroyed_at: match old_token.children.clone() {
                         None => { None }
                         Some(arr) => { 
                             if arr.len() > 0 { Some(old_tokens.get(&arr[0]).unwrap().block_number) }
@@ -111,7 +111,10 @@ pub mod pallet {
                 put_storage_value(b"SimpleNFTModule", b"TokensById", &key_hash, new_token);
             }
 
-            0
+            // Return the weight consumed by the migration.
+            (50_000_000 as Weight)
+                .saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(old_tokens.len() as Weight)))
+                .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(old_tokens.len() as Weight)))
         }
     }
 
