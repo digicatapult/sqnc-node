@@ -10,10 +10,6 @@ use sp_runtime::traits::One;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::prelude::*;
 
-// use crate::mock::new_test_ext;
-// use frame_support::traits::OnRuntimeUpgrade;
-// use frame_support::{assert_err, assert_ok};
-
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct OldToken<AccountId, TokenId, BlockNumber, TokenMetadata> {
