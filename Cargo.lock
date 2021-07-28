@@ -3842,7 +3842,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-simple-nft"
-version = "1.0.0"
+version = "2.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -7913,7 +7913,7 @@ dependencies = [
 
 [[package]]
 name = "vitalam-node-runtime"
-version = "1.0.0"
+version = "2.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",

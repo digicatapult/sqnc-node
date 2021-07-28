@@ -1,14 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use codec::Codec;
 use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
+
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
-use frame_support::migration::{take_storage_value, put_storage_value};
-use frame_support::Hashable;
-use codec::Codec;
-use sp_std::collections::btree_map::BTreeMap;
 
 #[cfg(test)]
 mod mock;
@@ -19,17 +17,7 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
-pub struct OldToken<AccountId, TokenId, BlockNumber, TokenMetadata> {
-    id: TokenId,
-    owner: AccountId,
-    creator: AccountId,
-    block_number: BlockNumber,
-    metadata: TokenMetadata,
-    parents: Vec<TokenId>,
-    children: Option<Vec<TokenId>>,
-}
+mod migration;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -74,47 +62,7 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            frame_support::debug::info!("Upgrading runtime");
-
-            let last_token = LastToken::<T>::get();
-            let mut token_id = T::TokenId::default();
-
-            // Read all the tokens into a map
-            let mut old_tokens: BTreeMap<T::TokenId, OldToken<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadata>> = BTreeMap::new();
-            while token_id < last_token {
-                token_id = token_id + One::one();
-                let key_hash = token_id.blake2_128_concat();
-                let old_token: OldToken<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadata> = take_storage_value(b"SimpleNFTModule", b"TokensById", &key_hash).unwrap();
-                old_tokens.insert(token_id, old_token);
-            }
-
-            // Update and replace the token in storage
-            for (token_id, old_token) in old_tokens.clone() {
-                let key_hash = token_id.blake2_128_concat();
-                let new_token = Token {
-                    id: token_id,
-                    owner: old_token.owner,
-                    creator: old_token.creator,
-                    created_at: old_token.block_number,
-                    destroyed_at: match old_token.children.clone() {
-                        None => { None }
-                        Some(arr) => { 
-                            if arr.len() > 0 { Some(old_tokens.get(&arr[0]).unwrap().block_number) }
-                            else { Some(<frame_system::Module<T>>::block_number()) }
-                        }
-                    },
-                    metadata: old_token.metadata,
-                    parents: old_token.parents,
-                    children: old_token.children,
-                };
-
-                put_storage_value(b"SimpleNFTModule", b"TokensById", &key_hash, new_token);
-            }
-
-            // Return the weight consumed by the migration.
-            (50_000_000 as Weight)
-                .saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(old_tokens.len() as Weight)))
-                .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(old_tokens.len() as Weight)))
+            migration::on_runtime_upgrade::<T, Pallet<T>>()
         }
     }
 
@@ -187,28 +135,27 @@ pub mod pallet {
             let last = LastToken::<T>::get();
 
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) =
-                outputs
-                    .iter()
-                    .fold((last, Vec::new()), |(last, children), (owner, metadata)| {
-                        let next = _next_token(last);
-                        <TokensById<T>>::insert(
-                            next,
-                            Token {
-                                id: next,
-                                owner: owner.clone(),
-                                creator: sender.clone(),
-                                created_at: now,
-                                destroyed_at: None,
-                                metadata: metadata.clone(),
-                                parents: inputs.clone(),
-                                children: None,
-                            },
-                        );
-                        let mut next_children = children.clone();
-                        next_children.push(next);
-                        (next, next_children)
-                    });
+            let (last, children) = outputs
+                .iter()
+                .fold((last, Vec::new()), |(last, children), (owner, metadata)| {
+                    let next = _next_token(last);
+                    <TokensById<T>>::insert(
+                        next,
+                        Token {
+                            id: next,
+                            owner: owner.clone(),
+                            creator: sender.clone(),
+                            created_at: now,
+                            destroyed_at: None,
+                            metadata: metadata.clone(),
+                            parents: inputs.clone(),
+                            children: None,
+                        },
+                    );
+                    let mut next_children = children.clone();
+                    next_children.push(next);
+                    (next, next_children)
+                });
 
             // Burn inputs
             inputs.iter().for_each(|id| {
