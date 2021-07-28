@@ -96,7 +96,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("vitalam-node"),
     impl_name: create_runtime_str!("vitalam-node"),
     authoring_version: 1,
-    spec_version: 101,
+    spec_version: 200,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
