@@ -40,6 +40,31 @@ Note that if you want to reset the state of your chain (for example because you'
 
 This will delete your dev chain so that it can be started from scratch again.
 
+### Node Authorization
+The node uses the [node-authorization](https://docs.rs/pallet-node-authorization/3.0.0/pallet_node_authorization/index.html) pallet to manage a configurable set of nodes for a permissioned network. The pre-configured well-known network for `local` chain contains `Alice`, `Bob`, `Charlie` and `Eve`. A node will not peer with the rest of the network unless the owner (account) starts the node with a `node-key` that corresponds to their `PeerId` and `AccountId` saved in `wellKnownNodes` storage. The set of `PeerId`s is initially configured in [`GenesisConfig`](node/src/chain_spec.rs). For example, to run and peer `Alice` and `Bob`, call the following two commands:
+
+```bash
+./target/release/vitalam-node \
+--chain=local \
+--base-path /tmp/validator1 \
+--alice \
+--node-key 0000000000000000000000000000000000000000000000000000000000000001 \
+--port 30333 \
+--ws-port 9944 
+```
+
+```bash
+./target/release/vitalam-node \
+--chain=local \
+--base-path /tmp/validator2 \
+--bob \
+--node-key=0000000000000000000000000000000000000000000000000000000000000002 \
+--port 30334 \
+--ws-port 9945
+```
+
+For `dev` chain, the network only contains a node for `Alice` so other nodes will not peer unless added to the well-known network, either by editing `chain_spec.rs` or using [dispatchable calls](https://docs.rs/pallet-node-authorization/3.0.0/pallet_node_authorization/enum.Call.html) at runtime. Also see [example](https://digicatapult.atlassian.net/wiki/spaces/EN/pages/1738014910/Example).
+
 ### Calculating weights
 
 To calculate the weights for the `pallet_simple_nft` you first must ensure the node is built with the benchmarking feature enabled:
