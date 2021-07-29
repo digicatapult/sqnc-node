@@ -1,8 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use codec::Codec;
 use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
+
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
 
@@ -15,14 +17,16 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+mod migration;
+
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-
 pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadata> {
     id: TokenId,
     owner: AccountId,
     creator: AccountId,
-    block_number: BlockNumber,
+    created_at: BlockNumber,
+    destroyed_at: Option<BlockNumber>,
     metadata: TokenMetadata,
     parents: Vec<TokenId>,
     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
@@ -45,7 +49,7 @@ pub mod pallet {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        type TokenId: Parameter + AtLeast32Bit + Default + Copy;
+        type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
         type TokenMetadata: Parameter + Default + Copy;
 
         type WeightInfo: WeightInfo;
@@ -56,7 +60,11 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn on_runtime_upgrade() -> frame_support::weights::Weight {
+            migration::on_runtime_upgrade::<T, Pallet<T>>()
+        }
+    }
 
     /// Storage value definition
     #[pallet::storage]
@@ -137,7 +145,8 @@ pub mod pallet {
                             id: next,
                             owner: owner.clone(),
                             creator: sender.clone(),
-                            block_number: now,
+                            created_at: now,
+                            destroyed_at: None,
                             metadata: metadata.clone(),
                             parents: inputs.clone(),
                             children: None,
@@ -150,7 +159,10 @@ pub mod pallet {
 
             // Burn inputs
             inputs.iter().for_each(|id| {
-                <TokensById<T>>::mutate(id, |token| (*token).children = Some(children.clone()));
+                <TokensById<T>>::mutate(id, |token| {
+                    (*token).children = Some(children.clone());
+                    (*token).destroyed_at = Some(now);
+                });
             });
 
             <LastToken<T>>::put(last);
