@@ -63,7 +63,12 @@ pub fn development_config() -> Result<ChainSpec, String> {
                 ],
                 Some(NodeAuthorizationConfig {
                     nodes: vec![(
-                        OpaquePeerId(get_from_seed::<sr25519::Public>("Alice").to_vec()),
+                        //0000000000000000000000000000000000000000000000000000000000000001
+                        OpaquePeerId(
+                            bs58::decode("12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp")
+                                .into_vec()
+                                .unwrap(),
+                        ),
                         get_account_id_from_seed::<sr25519::Public>("Alice"),
                     )],
                 }),
@@ -326,16 +331,40 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                 Some(NodeAuthorizationConfig {
                     nodes: vec![
                         (
-                            OpaquePeerId(get_from_seed::<sr25519::Public>("Alice").to_vec()),
+                            // 0000000000000000000000000000000000000000000000000000000000000001
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
                             get_account_id_from_seed::<sr25519::Public>("Alice"),
                         ),
                         (
-                            OpaquePeerId(get_from_seed::<sr25519::Public>("Bob").to_vec()),
+                            // 0000000000000000000000000000000000000000000000000000000000000002
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
                             get_account_id_from_seed::<sr25519::Public>("Bob"),
                         ),
                         (
-                            OpaquePeerId(get_from_seed::<sr25519::Public>("Charlie").to_vec()),
+                            // 0000000000000000000000000000000000000000000000000000000000000003
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
                             get_account_id_from_seed::<sr25519::Public>("Charlie"),
+                        ),
+                        (
+                            // 0000000000000000000000000000000000000000000000000000000000000004
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWSsChzF81YDUKpe9Uk5AHV5oqAaXAcWNSPYgoLauUk4st")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Eve"),
                         ),
                     ],
                 }),
