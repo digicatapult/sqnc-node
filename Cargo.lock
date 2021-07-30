@@ -3806,6 +3806,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-node-authorization"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f40338264aeaa8927153af5ac21b738a9f1463b4db2362a0f181a335fc1da873"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-randomness-collective-flip"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7878,6 +7894,7 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 name = "vitalam-node"
 version = "1.0.1"
 dependencies = [
+ "bs58",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "hex-literal",
@@ -7925,6 +7942,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
+ "pallet-node-authorization",
  "pallet-randomness-collective-flip",
  "pallet-simple-nft",
  "pallet-sudo",

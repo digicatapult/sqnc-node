@@ -1,11 +1,12 @@
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_core::OpaquePeerId; // A struct wraps Vec<u8>, represents as our `PeerId`.
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use vitalam_node_runtime::{
-    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig, SystemConfig,
-    WASM_BINARY,
+    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, NodeAuthorizationConfig, Signature,
+    SudoConfig, SystemConfig, WASM_BINARY,
 };
 const DEFAULT_PROTOCOL_ID: &str = "vam";
 
@@ -60,6 +61,17 @@ pub fn development_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
                     get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
                 ],
+                Some(NodeAuthorizationConfig {
+                    nodes: vec![(
+                        //0000000000000000000000000000000000000000000000000000000000000001
+                        OpaquePeerId(
+                            bs58::decode("12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp")
+                                .into_vec()
+                                .unwrap(),
+                        ),
+                        get_account_id_from_seed::<sr25519::Public>("Alice"),
+                    )],
+                }),
                 true,
             )
         },
@@ -146,8 +158,11 @@ pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
     ];
 
     let endowed_accounts: Vec<AccountId> = vec![
+        // 5Fpk38Xk2eixKwtNRnUn1YTcUuKbgSmF8G2wgRoqGUmgtG1o
         hex!["a64ad684438ae298d875f66e24e4f98f2d4689e008d431534f5c6adffd1ea26b"].into(),
+        // 5DtQJtJurJbniRA1LaFu9JgoL5Myi4C29EBfqtoJpcoEydLp
         hex!["509cf0e9e9c49855cf888f9af6bd481174399d6fdbe4d43041e6ed8a960b6a2c"].into(),
+        // 5H8iVfXZ89B8eByqEdwdRYuVJReEeETnC24GdVXj4LjSg27z
         hex!["e03c4bcf92683e004bb95bfffef863e4ecf1c9a1fc661c5807ac48e22b060b20"].into(),
     ];
 
@@ -168,6 +183,100 @@ pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
                 sudo_account.clone(),
                 // Pre-funded accounts
                 endowed_accounts.iter().map(|k| k.clone()).collect(),
+                Some(NodeAuthorizationConfig {
+                    nodes: vec![
+                        (
+                            // stage bootnode
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWCVhZ8Hm496zf4sugFekVyZtuE98b1XuySQUxztNvAQY6")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage red
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWRSxrnHyBjePLXcNyCaJE31oWFpoya5PrsYb3DUHP5QW7")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage green
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWKZGsMiJvispaQgVk2PDjECbT1FFx7VVoEF91wzquSho7")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage blue
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWSbedmDP2M8odLSFEMshWzAu6Rc8Hq24rw9xq1s1eCJzy")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[0].clone(),
+                        ),
+                        (
+                            // stage2 red
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWDW6qHkgpnxzb5FPbSwRU3paUirLeiEbTHRBQ7VwfcciV")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[1].clone(),
+                        ),
+                        (
+                            // stage2 green
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWQ2ignqpwNmXM8gCBaesg7VCupLHkXkcrKge2yzvyiKL4")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[1].clone(),
+                        ),
+                        (
+                            // stage2 blue
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWFkrb3zMP5Gijk6MYWUShPMRTdXeox3z5ppr4HzKztjDe")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[1].clone(),
+                        ),
+                        (
+                            // stage3 red
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWG4N23D8Ny4ZPyqv4zBwJN3YGUtrhURP8ZUAkJTip14hK")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[2].clone(),
+                        ),
+                        (
+                            // stage3 green
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWN48NLTwN4gyjbaPYX1hzgmewGKN3iYAphh24NaZb5TWF")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[2].clone(),
+                        ),
+                        (
+                            // stage3 blue
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWHxeSevn6pdXCfaz13eEKPEgubZbt3W2mg3Lwaaa5HRpP")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            endowed_accounts[2].clone(),
+                        ),
+                    ],
+                }),
                 true,
             )
         },
@@ -219,6 +328,46 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
                     get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
                 ],
+                Some(NodeAuthorizationConfig {
+                    nodes: vec![
+                        (
+                            // 0000000000000000000000000000000000000000000000000000000000000001
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Alice"),
+                        ),
+                        (
+                            // 0000000000000000000000000000000000000000000000000000000000000002
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Bob"),
+                        ),
+                        (
+                            // 0000000000000000000000000000000000000000000000000000000000000003
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+                        ),
+                        (
+                            // 0000000000000000000000000000000000000000000000000000000000000004
+                            OpaquePeerId(
+                                bs58::decode("12D3KooWSsChzF81YDUKpe9Uk5AHV5oqAaXAcWNSPYgoLauUk4st")
+                                    .into_vec()
+                                    .unwrap(),
+                            ),
+                            get_account_id_from_seed::<sr25519::Public>("Eve"),
+                        ),
+                    ],
+                }),
                 true,
             )
         },
@@ -241,6 +390,7 @@ fn testnet_genesis(
     initial_authorities: Vec<(AuraId, GrandpaId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
+    node_authorization_config: Option<NodeAuthorizationConfig>,
     _enable_println: bool,
 ) -> GenesisConfig {
     GenesisConfig {
@@ -263,5 +413,6 @@ fn testnet_genesis(
             // Assign network admin rights.
             key: root_key,
         }),
+        pallet_node_authorization: node_authorization_config,
     }
 }
