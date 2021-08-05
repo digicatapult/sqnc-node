@@ -94,14 +94,13 @@ Then follow the instructions at the top of [`docker-compose.yaml`](docker-compos
 
 ## API
 
-### SimpleNFT pallet
-
-The `SimpleNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval. In order to use the API within `polkadot.js` you'll need to configure the following additional types:
+In order to use the API within `polkadot.js` you'll need to configure the following additional types:
 
 ```json
 {
   "Address": "MultiAddress",
   "LookupSource": "MultiAddress",
+  "PeerId": "(Vec<u8>", # for node-authorization pallet
   "TokenId": "u128",
   "TokenMetadata": "Hash",
   "Token": {
@@ -116,6 +115,10 @@ The `SimpleNFT` pallet exposes an extrinsic for minting/burning tokens and a sto
   }
 }
 ```
+
+### SimpleNFT pallet
+
+The `SimpleNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval. All of the additional types listed above, apart from `PeerId`, are for the `SimpleNFT` pallet.
 
 Note: The json object with types, described above, has been upgraded from `"Address": "AccountId", "LookupSource": "AccountId"` to `"Address": "MultiAddress", "LookupSource": "MultiAddress"` and it also needs to be used in conjunction with the new version of _PolkaDot JS_, **v4.7.2** or higher.
 
