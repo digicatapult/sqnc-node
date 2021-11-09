@@ -1,9 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+
 use codec::Codec;
 use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
+use sp_std::collections::btree_map::BTreeMap;
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -21,13 +23,13 @@ mod migration;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadata> {
+pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
     id: TokenId,
     owner: AccountId,
     creator: AccountId,
     created_at: BlockNumber,
     destroyed_at: Option<BlockNumber>,
-    metadata: TokenMetadata,
+    metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
     parents: Vec<TokenId>,
     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
 }
@@ -50,7 +52,8 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
-        type TokenMetadata: Parameter + Default + Copy;
+        type TokenMetadataKey: Parameter + Default + Copy + Ord;
+        type TokenMetadataValue: Parameter + Default + Copy;
 
         type WeightInfo: WeightInfo;
     }
@@ -61,9 +64,9 @@ pub mod pallet {
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            migration::on_runtime_upgrade::<T, Pallet<T>>()
-        }
+        // fn on_runtime_upgrade() -> frame_support::weights::Weight {
+        //     migration::on_runtime_upgrade::<T, Pallet<T>>()
+        // }
     }
 
     /// Storage value definition
@@ -78,7 +81,7 @@ pub mod pallet {
         _,
         Blake2_128Concat,
         T::TokenId,
-        Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadata>,
+        Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
         ValueQuery, /*, DefaultForExampleStorage*/
     >;
 
@@ -109,7 +112,7 @@ pub mod pallet {
         pub(super) fn run_process(
             origin: OriginFor<T>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<(T::AccountId, T::TokenMetadata)>,
+            outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;

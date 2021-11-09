@@ -61,7 +61,8 @@ impl pallet_simple_nft::Config for Test {
     type Event = Event;
 
     type TokenId = u64;
-    type TokenMetadata = u64;
+    type TokenMetadataKey = u64;
+    type TokenMetadataValue = u64;
 
     type WeightInfo = ();
 }
