@@ -321,7 +321,7 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
         );
         // assert no more tokens were created
         assert_eq!(SimpleNFTModule::last_token(), 1);
-        // asset old token hasn't changed
+        // assert old token hasn't changed
         assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
     });
 }
@@ -343,9 +343,9 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
         );
         // assert no more tokens were created
         assert_eq!(SimpleNFTModule::last_token(), 2);
-        // asset old token hasn't changed
+        // assert old token hasn't changed
         assert_eq!(token_1, SimpleNFTModule::tokens_by_id(1));
-        // asset old token hasn't changed
+        // assert old token hasn't changed
         assert_eq!(token_2, SimpleNFTModule::tokens_by_id(2));
     });
 }
@@ -366,7 +366,7 @@ fn it_fails_for_destroying_single_burnt_token() {
         );
         // assert no more tokens were created
         assert_eq!(SimpleNFTModule::last_token(), 1);
-        // asset old token hasn't changed
+        // assert old token hasn't changed
         assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
     });
 }
@@ -390,9 +390,30 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         );
         // assert no more tokens were created
         assert_eq!(SimpleNFTModule::last_token(), 2);
-        // asset old token hasn't changed
+        // assert old token hasn't changed
         assert_eq!(token_1, SimpleNFTModule::tokens_by_id(1));
-        // asset old token hasn't changed
+        // assert old token hasn't changed
         assert_eq!(token_2, SimpleNFTModule::tokens_by_id(2));
+    });
+}
+
+
+#[test]
+fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
+    new_test_ext().execute_with(|| {
+        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
+        let metadata_too_many = BTreeMap::from_iter(vec![(0, 42), (1, 42), (2, 42)]);
+        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata0.clone())]).unwrap();
+        // get old token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        // Try to create token with too many metadata items
+        assert_err!(
+            SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata_too_many.clone())]),
+            Error::<Test>::TooManyMetadataItems
+        );
+        // assert no more tokens were created
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // assert old token hasn't changed
+        assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
     });
 }

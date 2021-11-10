@@ -1,6 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-
 use codec::Codec;
 use codec::{Decode, Encode};
 pub use pallet::*;
@@ -56,6 +55,18 @@ pub mod pallet {
         type TokenMetadataValue: Parameter + Default;
 
         type WeightInfo: WeightInfo;
+
+        // Maximum number of metadata items allowed per token
+        #[pallet::constant]
+        type MaxMetadataCount: Get<u32>;
+        
+        // Maximum length in bytes of MetadataKey
+        #[pallet::constant]
+        type MaxMetadataKeyLength: Get<u32>;
+     
+        // Maximum length in bytes of MetadataValue        
+        #[pallet::constant]
+        type MaxMetadataValueLength: Get<u32>;
     }
 
     #[pallet::pallet]
@@ -101,6 +112,8 @@ pub mod pallet {
         NotOwned,
         /// Mutation was attempted on token that has already been burnt
         AlreadyBurnt,
+        /// Mutation was attempted with too many metadata items
+        TooManyMetadataItems,
     }
 
     // The pallet's dispatchable functions.
@@ -124,6 +137,11 @@ pub mod pallet {
             // TODO: add extra checks that origin is allowed to create tokens generically
 
             // INPUT VALIDATION
+
+            // check metadata count
+            for output in outputs.iter() {
+                ensure!(output.1.len() <= T::MaxMetadataCount::get() as usize, Error::<T>::TooManyMetadataItems);
+            }
 
             // check origin owns inputs and that inputs have not been burnt
             for id in inputs.iter() {

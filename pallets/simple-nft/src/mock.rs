@@ -57,6 +57,12 @@ impl system::Config for Test {
     type SS58Prefix = SS58Prefix;
 }
 
+parameter_types! {
+    pub const MaxMetadataCount: u32 = 2;
+    pub const MaxMetadataKeyLength: u32 = 16;
+    pub const MaxMetadataValueLength: u32 = 16;
+}
+
 impl pallet_simple_nft::Config for Test {
     type Event = Event;
 
@@ -65,6 +71,10 @@ impl pallet_simple_nft::Config for Test {
     type TokenMetadataValue = u64;
 
     type WeightInfo = ();
+
+    type MaxMetadataCount = MaxMetadataCount;
+    type MaxMetadataKeyLength = MaxMetadataKeyLength;
+    type MaxMetadataValueLength = MaxMetadataValueLength;
 }
 
 // This function basically just builds a genesis storage key/value store according to
