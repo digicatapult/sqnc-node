@@ -276,7 +276,8 @@ impl pallet_node_authorization::Config for Runtime {
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
-    type TokenMetadata = Hash;
+    type TokenMetadataKey = Vec<u8>;
+    type TokenMetadataValue = Vec<u8>;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
 }
 

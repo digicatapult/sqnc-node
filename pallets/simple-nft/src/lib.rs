@@ -52,8 +52,8 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
-        type TokenMetadataKey: Parameter + Default + Copy + Ord;
-        type TokenMetadataValue: Parameter + Default + Copy;
+        type TokenMetadataKey: Parameter + Default + Ord;
+        type TokenMetadataValue: Parameter + Default;
 
         type WeightInfo: WeightInfo;
     }
