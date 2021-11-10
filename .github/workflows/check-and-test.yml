@@ -69,7 +69,7 @@ jobs:
             ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-index-
       - name: Cache sccache
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ${{ runner.temp }}/cache
           key: ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
