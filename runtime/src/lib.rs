@@ -275,7 +275,6 @@ impl pallet_node_authorization::Config for Runtime {
 parameter_types! {
     pub const MaxMetadataCount: u32 = 16;
     pub const MaxMetadataKeyLength: u32 = 128;
-    pub const MaxMetadataValueLength: u32 = 128;
 }
 
 /// Configure the template pallet in pallets/simple-nft.
@@ -283,11 +282,10 @@ impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
     type TokenMetadataKey = Vec<u8>;
-    type TokenMetadataValue = Vec<u8>;
+    type TokenMetadataValue = Hash;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = MaxMetadataCount;
     type MaxMetadataKeyLength = MaxMetadataKeyLength;
-    type MaxMetadataValueLength = MaxMetadataValueLength;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

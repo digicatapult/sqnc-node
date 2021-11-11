@@ -12,6 +12,9 @@ use sp_runtime::{
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
+/// A hash of some data used by the chain.
+pub type Hash = sp_core::H256;
+
 // For testing the pallet, we construct most of a mock runtime. This means
 // first constructing a configuration type (`Test`) which `impl`s each of the
 // configuration traits of pallets we want to use.
@@ -60,7 +63,6 @@ impl system::Config for Test {
 parameter_types! {
     pub const MaxMetadataCount: u32 = 2;
     pub const MaxMetadataKeyLength: u32 = 16;
-    pub const MaxMetadataValueLength: u32 = 16;
 }
 
 impl pallet_simple_nft::Config for Test {
@@ -68,13 +70,12 @@ impl pallet_simple_nft::Config for Test {
 
     type TokenId = u64;
     type TokenMetadataKey = u64;
-    type TokenMetadataValue = u64;
+    type TokenMetadataValue = Hash;
 
     type WeightInfo = ();
 
     type MaxMetadataCount = MaxMetadataCount;
     type MaxMetadataKeyLength = MaxMetadataKeyLength;
-    type MaxMetadataValueLength = MaxMetadataValueLength;
 }
 
 // This function basically just builds a genesis storage key/value store according to

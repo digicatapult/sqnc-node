@@ -3,6 +3,7 @@
 use crate::{mock::*, Error, Token};
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::iter::FromIterator;
+use sp_core::H256;
 use frame_support::{assert_err, assert_ok};
 // use frame_support::traits::OnRuntimeUpgrade;
 
@@ -10,7 +11,7 @@ use frame_support::{assert_err, assert_ok};
 fn it_works_for_creating_simple_token() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
-        let metadata = BTreeMap::from_iter(vec![(0, 42)]);
+        let metadata = BTreeMap::from_iter(vec![(0, H256::zero())]);
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
@@ -40,9 +41,9 @@ fn it_works_for_creating_simple_token() {
 fn it_works_for_creating_many_token() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
-        let metadata2 = BTreeMap::from_iter(vec![(0, 44)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata2 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
@@ -99,7 +100,7 @@ fn it_works_for_creating_many_token() {
 #[test]
 fn it_works_for_destroying_single_token() {
     new_test_ext().execute_with(|| {
-        let metadata = BTreeMap::from_iter(vec![(0, 42)]);
+        let metadata = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata.clone())]).unwrap();
         // create a token with no parents
         assert_ok!(SimpleNFTModule::run_process(Origin::signed(1), vec![1], Vec::new()));
@@ -126,9 +127,9 @@ fn it_works_for_destroying_single_token() {
 #[test]
 fn it_works_for_destroying_many_tokens() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
-        let metadata2 = BTreeMap::from_iter(vec![(0, 44)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata2 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(
             Origin::signed(1), 
             Vec::new(), 
@@ -191,8 +192,8 @@ fn it_works_for_destroying_many_tokens() {
 #[test]
 fn it_works_for_creating_and_destroy_single_tokens() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata0.clone())]).unwrap();
         // create a token with a parent
         assert_ok!(SimpleNFTModule::run_process(Origin::signed(1), vec![1], vec![(2, metadata1.clone())]));
@@ -233,10 +234,10 @@ fn it_works_for_creating_and_destroy_single_tokens() {
 #[test]
 fn it_works_for_creating_and_destroy_many_tokens() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
-        let metadata2 = BTreeMap::from_iter(vec![(0, 44)]);
-        let metadata3 = BTreeMap::from_iter(vec![(0, 45)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata2 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata3 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata0.clone()), (1, metadata1.clone())]).unwrap();
         // create a token with 2 parents
         assert_ok!(SimpleNFTModule::run_process(
@@ -310,7 +311,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 #[test]
 fn it_fails_for_destroying_single_token_as_other_signer() {
     new_test_ext().execute_with(|| {
-        let metadata = BTreeMap::from_iter(vec![(0, 42)]);
+        let metadata = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata.clone())]).unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);
@@ -329,8 +330,8 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
 #[test]
 fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(2), Vec::new(), vec![(1, metadata0.clone())]).unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata1.clone())]).unwrap();
         // get old token
@@ -353,8 +354,8 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
 #[test]
 fn it_fails_for_destroying_single_burnt_token() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata0.clone())]).unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), vec![1], Vec::new()).unwrap();
         // get old token
@@ -374,9 +375,9 @@ fn it_fails_for_destroying_single_burnt_token() {
 #[test]
 fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata1 = BTreeMap::from_iter(vec![(0, 43)]);
-        let metadata2 = BTreeMap::from_iter(vec![(0, 44)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata2 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata0.clone()), (1, metadata1.clone())]).unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), vec![1], Vec::new()).unwrap();
         // get old token
@@ -401,8 +402,8 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
 #[test]
 fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
     new_test_ext().execute_with(|| {
-        let metadata0 = BTreeMap::from_iter(vec![(0, 42)]);
-        let metadata_too_many = BTreeMap::from_iter(vec![(0, 42), (1, 42), (2, 42)]);
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata_too_many = BTreeMap::from_iter(vec![(0, H256::zero()), (1, H256::zero()), (2, H256::zero())]);
         SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(1, metadata0.clone())]).unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);

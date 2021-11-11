@@ -61,10 +61,6 @@ pub mod pallet {
         // Maximum length in bytes of MetadataKey
         #[pallet::constant]
         type MaxMetadataKeyLength: Get<u32>;
-     
-        // Maximum length in bytes of MetadataValue        
-        #[pallet::constant]
-        type MaxMetadataValueLength: Get<u32>;
     }
 
     #[pallet::pallet]
