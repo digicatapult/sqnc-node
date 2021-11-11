@@ -57,10 +57,6 @@ pub mod pallet {
         // Maximum number of metadata items allowed per token
         #[pallet::constant]
         type MaxMetadataCount: Get<u32>;
-        
-        // Maximum length in bytes of MetadataKey
-        #[pallet::constant]
-        type MaxMetadataKeyLength: Get<u32>;
     }
 
     #[pallet::pallet]

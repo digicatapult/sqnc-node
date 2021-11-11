@@ -62,7 +62,6 @@ impl system::Config for Test {
 
 parameter_types! {
     pub const MaxMetadataCount: u32 = 2;
-    pub const MaxMetadataKeyLength: u32 = 16;
 }
 
 impl pallet_simple_nft::Config for Test {
@@ -75,7 +74,6 @@ impl pallet_simple_nft::Config for Test {
     type WeightInfo = ();
 
     type MaxMetadataCount = MaxMetadataCount;
-    type MaxMetadataKeyLength = MaxMetadataKeyLength;
 }
 
 // This function basically just builds a genesis storage key/value store according to
