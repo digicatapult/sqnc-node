@@ -26,6 +26,7 @@ serde = { features = ['derive'], optional = true, version = '1.0.101' }
 
 # local dependencies
 pallet-simple-nft = { version = '2.0.0', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
+pallet-ipfs-key = { version = '2.0.0', default-features = false, package = 'pallet-ipfs-key', path = '../pallets/ipfs-key' }
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
 frame-executive = { default-features = false, version = '3.0.0' }
 frame-support = { default-features = false, version = '3.0.0' }
@@ -37,6 +38,7 @@ pallet-balances = { default-features = false, version = '3.0.0' }
 pallet-grandpa = { default-features = false, version = '3.0.0' }
 pallet-node-authorization = { default-features = false, version = '3.0.0' }
 pallet-randomness-collective-flip = { default-features = false, version = '3.0.0' }
+pallet-scheduler = { default-features = false, version = '3.0.0' }
 pallet-sudo = { default-features = false, version = '3.0.0' }
 pallet-timestamp = { default-features = false, version = '3.0.0' }
 pallet-transaction-payment = { default-features = false, version = '3.0.0' }
@@ -94,4 +96,5 @@ std = [
     'sp-transaction-pool/std',
     'sp-version/std',
     'pallet-simple-nft/std',
+    'pallet-ipfs-key/std',
 ]

@@ -43,6 +43,9 @@ pub use sp_runtime::{Perbill, Permill};
 /// Import the template pallet.
 pub use pallet_simple_nft;
 
+/// Import the ipfs key rotation pallet
+pub use pallet_ipfs_key;
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -259,6 +262,12 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
     pub const MaxWellKnownNodes: u32 = 16;
     pub const MaxPeerIdLength: u32 = 128;
+    pub const KeyLength: u32 = 32;
+    pub const RefreshPeriod: u32 = 5 * MINUTES;
+
+    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
+        BlockWeights::get().max_block;
+	pub const MaxScheduledPerBlock: u32 = 50;
 }
 
 impl pallet_node_authorization::Config for Runtime {
@@ -272,12 +281,35 @@ impl pallet_node_authorization::Config for Runtime {
     type WeightInfo = ();
 }
 
+impl pallet_scheduler::Config for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type PalletsOrigin = OriginCaller;
+	type Call = Call;
+	type MaximumWeight = MaximumSchedulerWeight;
+	type ScheduleOrigin = EnsureRoot<AccountId>;
+	type MaxScheduledPerBlock = MaxScheduledPerBlock;
+	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+}
+
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
     type TokenMetadata = Hash;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_ipfs_key::Config for Runtime {
+    type Event = Event;
+    type KeyLength = KeyLength;
+    type RefreshPeriod = RefreshPeriod;
+    type ScheduleCall = Call;
+    type UpdateOrigin = EnsureRoot<AccountId>;
+    type RotateOrigin = EnsureRoot<AccountId>;
+    type Randomness = RandomnessCollectiveFlip;
+    type PalletsOrigin = OriginCaller;
+    type Scheduler = Scheduler;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -297,6 +329,8 @@ construct_runtime!(
         Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
+        Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
+        IpfsKey: pallet_ipfs_key::{Module, Call, Storage, Event<T>},
     }
 );
 
