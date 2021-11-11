@@ -116,6 +116,8 @@ pub mod pallet {
     pub(super) type IpfsKeySchedule<T: Config> = StorageValue<_, Option<<<T as pallet::Config>::Scheduler as ScheduleNamed<T::BlockNumber, T::ScheduleCall, T::PalletsOrigin>>::Address>, ValueQuery>;
 
     #[pallet::event]
+    #[pallet::metadata(Vec<u8> = "IpfsKey")]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // IPFS key was updated.
         UpdateIpfsKey(Vec<u8>),
@@ -153,6 +155,7 @@ pub mod pallet {
 
             let new_ipfs_key = generate_key::<T>();
             <IpfsKey<T>>::put(&new_ipfs_key);
+            Self::deposit_event(Event::UpdateIpfsKey(new_ipfs_key));
 
             Ok(().into())
         }
