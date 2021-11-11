@@ -18,8 +18,6 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-mod migration;
-
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
@@ -74,11 +72,7 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        // fn on_runtime_upgrade() -> frame_support::weights::Weight {
-        //     migration::on_runtime_upgrade::<T, Pallet<T>>()
-        // }
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     /// Storage value definition
     #[pallet::storage]
