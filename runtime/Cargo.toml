@@ -96,5 +96,6 @@ std = [
     'sp-transaction-pool/std',
     'sp-version/std',
     'pallet-simple-nft/std',
+    'pallet-scheduler/std',
     'pallet-symmetric-key/std',
 ]

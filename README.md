@@ -102,7 +102,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "Address": "MultiAddress",
   "LookupSource": "MultiAddress",
   "PeerId": "Vec<u8>",
-  "IpfsKey": "Vec<u8>",
+  "Key": "Vec<u8>",
   "TokenId": "u128",
   "TokenMetadata": "Hash",
   "Token": {
