@@ -2,14 +2,15 @@
 
 pub use pallet::*;
 use frame_support::traits::{
-    LockIdentifier, Randomness, schedule::{Named as ScheduleNamed, DispatchTime, LOWEST_PRIORITY}
+    Randomness, schedule::{Named as ScheduleNamed, DispatchTime, LOWEST_PRIORITY}
 };
 use sp_runtime::traits::Dispatchable;
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
 
-const IPFS_KEY_ID: LockIdentifier = *b"ipfs_key";
+const KEY_ROTATE_ID: [u8; 12] = *b"SymmetricKey";
+const KEY_RANDOM_ID: [u8; 13] = *b"SYMMETRIC_KEY";
 
 // #[cfg(test)]
 // mod mock;
@@ -57,9 +58,9 @@ pub mod pallet {
         #[pallet::constant]
         type KeyLength: Get<u32>;
 
-        /// The origin which can update the IPFS key
+        /// The origin which can update the key
 	    type UpdateOrigin: EnsureOrigin<Self::Origin>;
-        /// The origin which can rotate the IPFS key
+        /// The origin which can rotate the key
 	    type RotateOrigin: EnsureOrigin<Self::Origin>;
 
         type Randomness: Randomness<Self::Hash>;
@@ -79,25 +80,24 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_initialize(_block_number: T::BlockNumber) -> frame_support::weights::Weight {
-            let existing_schedule = <IpfsKeySchedule<T>>::get();
+            let existing_schedule = <KeyScheduleId<T>>::get();
 
             match existing_schedule {
                 None => {
-                    let schedule_result = T::Scheduler::schedule_named(
-                        IPFS_KEY_ID.encode(),
+                    let id: Vec<u8> = KEY_ROTATE_ID.encode();
+                    if T::Scheduler::schedule_named(
+                        id.clone(),
                         DispatchTime::After(T::BlockNumber::from(1u32)),
                         Some((T::RefreshPeriod::get(), u32::max_value())),
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),
-                        Call::rotate_ipfs_key().into(),
-                    );
-
-                    if schedule_result.is_err() {
-                        frame_support::print("Ahhhhh");
+                        Call::rotate_key().into(),
+                    ).is_err() {
+                        frame_support::print("Error initialising symmetric key rotation schedule");
                         return 0;
                     }
 
-                    <IpfsKeySchedule<T>>::put(Some(schedule_result.unwrap()));
+                    <KeyScheduleId<T>>::put(Some(id));
 
                     0
                 }
@@ -108,24 +108,24 @@ pub mod pallet {
 
     /// Storage map definition
     #[pallet::storage]
-    #[pallet::getter(fn ipfs_key)]
-    pub(super) type IpfsKey<T: Config> = StorageValue<_, Vec<u8>, ValueQuery>;
+    #[pallet::getter(fn key)]
+    pub(super) type Key<T: Config> = StorageValue<_, Vec<u8>, ValueQuery>;
 
     #[pallet::storage]
-    #[pallet::getter(fn ipfs_key_schedule)]
-    pub(super) type IpfsKeySchedule<T: Config> = StorageValue<_, Option<<<T as pallet::Config>::Scheduler as ScheduleNamed<T::BlockNumber, T::ScheduleCall, T::PalletsOrigin>>::Address>, ValueQuery>;
+    #[pallet::getter(fn key_schedule)]
+    pub(super) type KeyScheduleId<T: Config> = StorageValue<_, Option<Vec<u8>>, ValueQuery>;
 
     #[pallet::event]
-    #[pallet::metadata(Vec<u8> = "IpfsKey")]
+    #[pallet::metadata(Vec<u8> = "Key")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        // IPFS key was updated.
-        UpdateIpfsKey(Vec<u8>),
+        // key was updated.
+        UpdateKey(Vec<u8>),
     }
 
     #[pallet::error]
     pub enum Error<T> {
-        // The supplied IPFS key had incorrect length
+        // The supplied key had incorrect length
         IncorrectKeyLength,
     }
 
@@ -134,28 +134,28 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         // TODO benchmark weights
         #[pallet::weight(10_000)]
-        pub(super) fn update_ipfs_key(
+        pub(super) fn update_key(
             origin: OriginFor<T>,
-            new_ipfs_key: Vec<u8>
+            new_key: Vec<u8>
         ) -> DispatchResultWithPostInfo {
             T::UpdateOrigin::ensure_origin(origin)?;
-            ensure!(new_ipfs_key.len() == T::KeyLength::get() as usize, Error::<T>::IncorrectKeyLength);
+            ensure!(new_key.len() == T::KeyLength::get() as usize, Error::<T>::IncorrectKeyLength);
 
-            <IpfsKey<T>>::put(&new_ipfs_key);
+            <Key<T>>::put(&new_key);
 
             Ok(().into())
         }
 
         // TODO benchmark weights
         #[pallet::weight(10_000)]
-        pub(super) fn rotate_ipfs_key(
+        pub(super) fn rotate_key(
             origin: OriginFor<T>
         ) -> DispatchResultWithPostInfo {
             T::RotateOrigin::ensure_origin(origin)?;
 
-            let new_ipfs_key = generate_key::<T>();
-            <IpfsKey<T>>::put(&new_ipfs_key);
-            Self::deposit_event(Event::UpdateIpfsKey(new_ipfs_key));
+            let new_key = generate_key::<T>();
+            <Key<T>>::put(&new_key);
+            Self::deposit_event(Event::UpdateKey(new_key));
 
             Ok(().into())
         }
@@ -166,7 +166,7 @@ pub mod pallet {
         let mut output = Vec::<u8>::new();
 
         while output.len() < key_length {
-            let random_seed = T::Randomness::random(&b"IPFS_SWARM_KEY"[..]);
+            let random_seed = T::Randomness::random(&KEY_RANDOM_ID[..]);
             let random = random_seed.as_ref();
             output.extend_from_slice(random);
         }

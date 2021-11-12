@@ -40,12 +40,6 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
-pub use pallet_simple_nft;
-
-/// Import the ipfs key rotation pallet
-pub use pallet_ipfs_key;
-
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -262,12 +256,6 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
     pub const MaxWellKnownNodes: u32 = 16;
     pub const MaxPeerIdLength: u32 = 128;
-    pub const KeyLength: u32 = 32;
-    pub const RefreshPeriod: u32 = 5 * MINUTES;
-
-    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
-        BlockWeights::get().max_block;
-	pub const MaxScheduledPerBlock: u32 = 50;
 }
 
 impl pallet_node_authorization::Config for Runtime {
@@ -279,6 +267,12 @@ impl pallet_node_authorization::Config for Runtime {
     type SwapOrigin = EnsureRoot<AccountId>;
     type ResetOrigin = EnsureRoot<AccountId>;
     type WeightInfo = ();
+}
+
+parameter_types! {
+    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
+        BlockWeights::get().max_block;
+	pub const MaxScheduledPerBlock: u32 = 50;
 }
 
 impl pallet_scheduler::Config for Runtime {
@@ -300,7 +294,12 @@ impl pallet_simple_nft::Config for Runtime {
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_ipfs_key::Config for Runtime {
+parameter_types! {
+    pub const KeyLength: u32 = 32;
+    pub const RefreshPeriod: u32 = 5 * MINUTES;
+}
+
+impl pallet_symmetric_key::Config for Runtime {
     type Event = Event;
     type KeyLength = KeyLength;
     type RefreshPeriod = RefreshPeriod;
@@ -330,7 +329,7 @@ construct_runtime!(
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
-        IpfsKey: pallet_ipfs_key::{Module, Call, Storage, Event<T>},
+        IpfsKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},
     }
 );
 

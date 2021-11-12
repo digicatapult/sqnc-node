@@ -4,7 +4,7 @@ description = 'A FRAME pallet for handling a shared IPFS swarm key'
 edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/vitalam-node/'
-name = 'pallet-ipfs-key'
+name = 'pallet-symmetric-key'
 version = "2.0.0"
 
 [package.metadata.docs.rs]

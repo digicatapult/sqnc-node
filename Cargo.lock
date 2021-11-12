@@ -3806,21 +3806,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-ipfs-key"
-version = "2.0.0"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
 name = "pallet-node-authorization"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3910,6 +3895,21 @@ dependencies = [
  "frame-system",
  "parity-scale-codec",
  "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-symmetric-key"
+version = "2.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -7971,12 +7971,12 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
- "pallet-ipfs-key",
  "pallet-node-authorization",
  "pallet-randomness-collective-flip",
  "pallet-scheduler",
  "pallet-simple-nft",
  "pallet-sudo",
+ "pallet-symmetric-key",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
