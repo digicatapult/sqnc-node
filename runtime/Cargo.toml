@@ -63,7 +63,6 @@ runtime-benchmarks = [
     'frame-system-benchmarking',
     'frame-system/runtime-benchmarks',
     'pallet-balances/runtime-benchmarks',
-#     'pallet-membership/runtime-benchmarks',
     'pallet-timestamp/runtime-benchmarks',
     'pallet-simple-nft/runtime-benchmarks',
     'sp-runtime/runtime-benchmarks',
