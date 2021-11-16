@@ -38,12 +38,102 @@ fn it_works_for_creating_simple_token() {
 }
 
 #[test]
+fn it_works_for_creating_token_with_multiple_metadata_items() {
+    new_test_ext().execute_with(|| {
+        // create a token with no parents
+        let metadata = BTreeMap::from_iter(vec![(0, H256::zero()), (1, H256::zero())]);
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![(1, metadata.clone())]
+        ));
+        // last token should be 1
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // get the token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        assert_eq!(
+            token,
+            Token {
+                id: 1,
+                owner: 1,
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata.clone(),
+                parents: Vec::new(),
+                children: None
+            }
+        );
+    });
+}
+
+#[test]
 fn it_works_for_creating_many_token() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
         let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
         let metadata2 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![(1, metadata0.clone()), (1, metadata1.clone()), (1, metadata2.clone())]
+        ));
+        // last token should be 3
+        assert_eq!(SimpleNFTModule::last_token(), 3);
+        // get the token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        assert_eq!(
+            token,
+            Token {
+                id: 1,
+                owner: 1,
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata0.clone(),
+                parents: Vec::new(),
+                children: None
+            }
+        );
+        let token = SimpleNFTModule::tokens_by_id(2);
+        assert_eq!(
+            token,
+            Token {
+                id: 2,
+                owner: 1,
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata1.clone(),
+                parents: Vec::new(),
+                children: None
+            }
+        );
+        let token = SimpleNFTModule::tokens_by_id(3);
+        assert_eq!(
+            token,
+            Token {
+                id: 3,
+                owner: 1,
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata2.clone(),
+                parents: Vec::new(),
+                children: None
+            }
+        );
+    });
+}
+
+#[test]
+fn it_works_for_creating_many_token_with_varied_metadata() {
+    new_test_ext().execute_with(|| {
+        // create a token with no parents
+        let metadata0 = BTreeMap::from_iter(vec![(0, H256::zero()), (1, H256::zero())]);
+        let metadata1 = BTreeMap::from_iter(vec![(0, H256::zero())]);
+        let metadata2 = BTreeMap::from_iter(vec![(1, H256::zero())]);
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
