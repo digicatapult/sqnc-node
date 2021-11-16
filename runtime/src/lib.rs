@@ -280,7 +280,7 @@ parameter_types! {
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
-    type TokenMetadataKey = Vec<u8>;
+    type TokenMetadataKey = [u8; 32];
     type TokenMetadataValue = Hash;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = MaxMetadataCount;
