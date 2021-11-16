@@ -283,29 +283,6 @@ impl pallet_simple_nft::Config for Runtime {
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
 }
 
-// parameter_types! {
-//     pub const InitializeMembers: u64 = <u64>InitializeMembers;
-//     pub const ChangeMembers: u64 = 64;
-// }
-
-// impl <u64>InitializeMembers for TestChangeMembers {
-//     fn initialize_members(members: &[u64]) {
-//         MEMBERS.with(|m| *m.borrow_mut() = members.to_vec());
-//     }
-// }
-
-// use std::collections::HashMap;
-// let mut membershipMap::HashMap::new();
-//
-// membershipMap.insert(String::from("MembershipOne", "One")
-// membershipMap.insert(String::from("MembershipTwo", "Two")
-// membershipMap.insert(String::from("MembershipThree", "Three")
-// membershipMap.insert(String::from("MembershipFour", "Four")
-// membershipMap.insert(String::from("MembershipFive", "Five")
-
-
-
-
 pub struct DummyChangeMembers;
 impl<T: core::cmp::Ord + core::clone::Clone> ChangeMembers<T> for DummyChangeMembers {
     fn change_members_sorted(_incoming: &[T], _outgoing: &[T], _new: &[T]) {
@@ -330,11 +307,6 @@ impl pallet_membership::Config for Runtime {
     type PrimeOrigin = EnsureRoot<AccountId>;
     type MembershipInitialized = DummyChangeMembers;
     type MembershipChanged = DummyChangeMembers;
-
-//     type MembershipInitialized: pallet_membership::members::InitializeMembers;
-//     type MembershipChanged: pallet_membership::members::ChangeMembers;
-//     type MaxMembers = Get<u32>;
-//     type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
