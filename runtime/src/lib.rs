@@ -6,6 +6,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use codec::{Decode, Encode};
 use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
@@ -276,12 +277,25 @@ parameter_types! {
     pub const MaxMetadataCount: u32 = 16;
 }
 
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+pub enum MetadataValue {
+    File(Hash),
+    Literal([u8; 32]),
+    None
+}
+
+impl Default for MetadataValue {
+    fn default() -> Self {
+        MetadataValue::None
+    }
+}
+
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
     type TokenMetadataKey = [u8; 32];
-    type TokenMetadataValue = Hash;
+    type TokenMetadataValue = MetadataValue;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = MaxMetadataCount;
 }
