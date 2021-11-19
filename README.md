@@ -42,6 +42,7 @@ Note that if you want to reset the state of your chain (for example because you'
 This will delete your dev chain so that it can be started from scratch again.
 
 ### Node Authorization
+
 The node uses the [node-authorization](https://docs.rs/pallet-node-authorization/3.0.0/pallet_node_authorization/index.html) pallet to manage a configurable set of nodes for a permissioned network. The pre-configured well-known network for `local` chain contains `Alice`, `Bob`, `Charlie` and `Eve`. A node will not peer with the rest of the network unless the owner (account) starts the node with a `node-key` that corresponds to their `PeerId` and `AccountId` saved in `wellKnownNodes` storage. The set of `PeerId`s is initially configured in [`GenesisConfig`](node/src/chain_spec.rs). For example, to run and peer `Alice` and `Bob`, call the following two commands:
 
 ```bash
@@ -51,7 +52,7 @@ The node uses the [node-authorization](https://docs.rs/pallet-node-authorization
 --alice \
 --node-key 0000000000000000000000000000000000000000000000000000000000000001 \
 --port 30333 \
---ws-port 9944 
+--ws-port 9944
 ```
 
 ```bash
@@ -102,14 +103,15 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "LookupSource": "MultiAddress",
   "PeerId": "(Vec<u8>", # for node-authorization pallet
   "TokenId": "u128",
-  "TokenMetadata": "Hash",
+  "TokenMetadataKey": "[u8; 32]",
+  "TokenMetadataValue": "Hash",
   "Token": {
     "id": "TokenId",
     "owner": "AccountId",
     "creator": "AccountId",
     "created_at": "BlockNumber",
     "destroyed_at": "Option<BlockNumber>",
-    "metadata": "TokenMetadata",
+    "metadata": "BTreeMap<TokenMetadataKey, TokenMetadataValue>",
     "parents": "Vec<TokenId>",
     "children": "Option<Vec<TokenId>>"
   }
@@ -126,16 +128,22 @@ Two storage endpoints are then exposed under `SimpleNFT` for the id of the last 
 
 ```rust
 LastToken get(fn last_token): T::TokenId;
-TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::TokenId, T::TokenMetadata>;
+TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>;
 ```
 
 Tokens can be minted/burnt by calling the following extrinsic under `SimpleNFT`:
 
 ```rust
-pub fn run_process(origin, inputs: Vec<T::TokenId>, metadata: Vec<T::TokenMetadata>) -> dispatch::DispatchResult { ... }
+pub fn run_process(origin, inputs: Vec<T::TokenId>, outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)> -> dispatch::DispatchResult { ... }
 ```
 
 All of this functionality can be easily accessed using [https://polkadot.js.org/apps](https://polkadot.js.org/apps) against a running `dev` node. You will need to add a network endpoint of `ws://localhost:9944` under `Settings` and apply the above type configurations in the `Settings/Developer` tab.
+
+Pallet tests can be run with:
+
+```bash
+cargo test -p pallet-simple-nft
+```
 
 ## Repo Structure
 

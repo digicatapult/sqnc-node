@@ -4,6 +4,7 @@ use codec::Codec;
 use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
+use sp_std::collections::btree_map::BTreeMap;
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -17,17 +18,15 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-mod migration;
-
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadata> {
+pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
     id: TokenId,
     owner: AccountId,
     creator: AccountId,
     created_at: BlockNumber,
     destroyed_at: Option<BlockNumber>,
-    metadata: TokenMetadata,
+    metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
     parents: Vec<TokenId>,
     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
 }
@@ -50,9 +49,14 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
-        type TokenMetadata: Parameter + Default + Copy;
+        type TokenMetadataKey: Parameter + Default + Ord;
+        type TokenMetadataValue: Parameter + Default;
 
         type WeightInfo: WeightInfo;
+
+        // Maximum number of metadata items allowed per token
+        #[pallet::constant]
+        type MaxMetadataCount: Get<u32>;
     }
 
     #[pallet::pallet]
@@ -60,11 +64,7 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            migration::on_runtime_upgrade::<T, Pallet<T>>()
-        }
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     /// Storage value definition
     #[pallet::storage]
@@ -78,7 +78,7 @@ pub mod pallet {
         _,
         Blake2_128Concat,
         T::TokenId,
-        Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadata>,
+        Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
         ValueQuery, /*, DefaultForExampleStorage*/
     >;
 
@@ -98,6 +98,8 @@ pub mod pallet {
         NotOwned,
         /// Mutation was attempted on token that has already been burnt
         AlreadyBurnt,
+        /// Mutation was attempted with too many metadata items
+        TooManyMetadataItems,
     }
 
     // The pallet's dispatchable functions.
@@ -109,7 +111,7 @@ pub mod pallet {
         pub(super) fn run_process(
             origin: OriginFor<T>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<(T::AccountId, T::TokenMetadata)>,
+            outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -121,6 +123,11 @@ pub mod pallet {
             // TODO: add extra checks that origin is allowed to create tokens generically
 
             // INPUT VALIDATION
+
+            // check metadata count
+            for output in outputs.iter() {
+                ensure!(output.1.len() <= T::MaxMetadataCount::get() as usize, Error::<T>::TooManyMetadataItems);
+            }
 
             // check origin owns inputs and that inputs have not been burnt
             for id in inputs.iter() {
