@@ -10,11 +10,11 @@ use sp_runtime::{
     traits::{BlakeTwo256, IdentityLookup},
 };
 
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
-
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
+
+/// A hash of some data used by the chain.
+pub type Hash = sp_core::H256;
 
 // For testing the pallet, we construct most of a mock runtime. This means
 // first constructing a configuration type (`Test`) which `impl`s each of the
