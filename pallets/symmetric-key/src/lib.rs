@@ -12,29 +12,13 @@ use sp_std::prelude::*;
 const KEY_ROTATE_ID: [u8; 12] = *b"SymmetricKey";
 const KEY_RANDOM_ID: [u8; 13] = *b"SYMMETRIC_KEY";
 
-// #[cfg(test)]
-// mod mock;
-
-// #[cfg(test)]
-// mod tests;
+#[cfg(test)]
+mod tests;
 
 // #[cfg(feature = "runtime-benchmarks")]
 // mod benchmarking;
 
 // mod migration;
-
-// #[derive(Encode, Decode, Default, Clone, PartialEq)]
-// #[cfg_attr(feature = "std", derive(Debug))]
-// pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadata> {
-//     id: TokenId,
-//     owner: AccountId,
-//     creator: AccountId,
-//     created_at: BlockNumber,
-//     destroyed_at: Option<BlockNumber>,
-//     metadata: TokenMetadata,
-//     parents: Vec<TokenId>,
-//     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
-// }
 
 // pub mod weights;
 
@@ -62,7 +46,7 @@ pub mod pallet {
 	    type UpdateOrigin: EnsureOrigin<Self::Origin>;
         /// The origin which can rotate the key
 	    type RotateOrigin: EnsureOrigin<Self::Origin>;
-
+        /// Source of randomness when generating new keys. In production this should come from a secure source such as the Babe pallet
         type Randomness: Randomness<Self::Hash>;
 
         #[pallet::constant]
