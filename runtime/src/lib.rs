@@ -292,6 +292,7 @@ impl<T: core::cmp::Ord + core::clone::Clone> ChangeMembers<T> for DummyChangeMem
 
     }
 }
+
 impl<T: core::cmp::Ord + core::clone::Clone> InitializeMembers<T> for DummyChangeMembers {
     fn initialize_members(_members: &[T]) {
 
