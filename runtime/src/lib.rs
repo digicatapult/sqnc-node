@@ -309,6 +309,7 @@ impl pallet_symmetric_key::Config for Runtime {
     type Randomness = RandomnessCollectiveFlip;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
+    type WeightInfo = pallet_symmetric_key::weights::SubstrateWeight<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

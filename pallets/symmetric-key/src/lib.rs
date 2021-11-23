@@ -18,11 +18,9 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-// mod migration;
+pub mod weights;
 
-// pub mod weights;
-
-// pub use weights::WeightInfo;
+pub use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -55,6 +53,8 @@ pub mod pallet {
 	    type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
         /// The Scheduler.
 	    type Scheduler: ScheduleNamed<Self::BlockNumber, Self::ScheduleCall, Self::PalletsOrigin>;
+
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -116,8 +116,7 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        // TODO benchmark weights
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::update_key())]
         pub(super) fn update_key(
             origin: OriginFor<T>,
             new_key: Vec<u8>
@@ -130,8 +129,8 @@ pub mod pallet {
             Ok(().into())
         }
 
-        // TODO benchmark weights
-        #[pallet::weight(10_000)]
+
+        #[pallet::weight(T::WeightInfo::rotate_key())]
         pub(super) fn rotate_key(
             origin: OriginFor<T>
         ) -> DispatchResultWithPostInfo {
