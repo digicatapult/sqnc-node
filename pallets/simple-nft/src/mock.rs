@@ -1,5 +1,6 @@
 // Creating mock runtime here
 
+use codec::{Decode, Encode};
 use crate as pallet_simple_nft;
 use frame_support::parameter_types;
 use frame_system as system;
@@ -61,7 +62,20 @@ impl system::Config for Test {
 }
 
 parameter_types! {
-    pub const MaxMetadataCount: u32 = 2;
+    pub const MaxMetadataCount: u32 = 3;
+}
+
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+pub enum MetadataValue {
+    File(Hash),
+    Literal([u8; 1]),
+    None
+}
+
+impl Default for MetadataValue {
+    fn default() -> Self {
+        MetadataValue::None
+    }
 }
 
 impl pallet_simple_nft::Config for Test {
@@ -69,7 +83,7 @@ impl pallet_simple_nft::Config for Test {
 
     type TokenId = u64;
     type TokenMetadataKey = u64;
-    type TokenMetadataValue = Hash;
+    type TokenMetadataValue = MetadataValue;
 
     type WeightInfo = ();
 

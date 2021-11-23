@@ -104,7 +104,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "PeerId": "(Vec<u8>", # for node-authorization pallet
   "TokenId": "u128",
   "TokenMetadataKey": "[u8; 32]",
-  "TokenMetadataValue": "Hash",
+  "TokenMetadataValue": "MetadataValue",
   "Token": {
     "id": "TokenId",
     "owner": "AccountId",
@@ -114,7 +114,14 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "metadata": "BTreeMap<TokenMetadataKey, TokenMetadataValue>",
     "parents": "Vec<TokenId>",
     "children": "Option<Vec<TokenId>>"
-  }
+  },
+  "MetadataValue": {
+    "_enum": {
+      "File": "Hash",
+      "Literal": "[u8; 32]",
+      "None": "null",
+    },
+  },
 }
 ```
 
