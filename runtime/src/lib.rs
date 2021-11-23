@@ -27,7 +27,10 @@ use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime, parameter_types,
-    traits::{KeyOwnerProofSystem, Randomness},
+    traits::{
+        KeyOwnerProofSystem, Randomness,
+        ChangeMembers, InitializeMembers,
+    },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         IdentityFee, Weight,
@@ -300,6 +303,33 @@ impl pallet_simple_nft::Config for Runtime {
     type MaxMetadataCount = MaxMetadataCount;
 }
 
+pub struct DummyChangeMembers;
+impl<T: core::cmp::Ord + core::clone::Clone> ChangeMembers<T> for DummyChangeMembers {
+    fn change_members_sorted(_incoming: &[T], _outgoing: &[T], _new: &[T]) {
+
+    }
+    fn set_prime(_who: Option<T>) {
+
+    }
+}
+
+impl<T: core::cmp::Ord + core::clone::Clone> InitializeMembers<T> for DummyChangeMembers {
+    fn initialize_members(_members: &[T]) {
+
+    }
+}
+
+impl pallet_membership::Config for Runtime {
+    type Event = Event;
+    type AddOrigin = EnsureRoot<AccountId>;
+    type RemoveOrigin = EnsureRoot<AccountId>;
+    type SwapOrigin = EnsureRoot<AccountId>;
+    type ResetOrigin = EnsureRoot<AccountId>;
+    type PrimeOrigin = EnsureRoot<AccountId>;
+    type MembershipInitialized = DummyChangeMembers;
+    type MembershipChanged = DummyChangeMembers;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
     pub enum Runtime where
@@ -317,6 +347,7 @@ construct_runtime!(
         Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
+        Membership: pallet_membership::{Module, Call, Storage, Event<T>, Config<T>}
     }
 );
 

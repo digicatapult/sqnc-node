@@ -7,3 +7,6 @@
 weights/*.rs
 
 .DS_Store
+*.iml
+.idea
+.vscode
