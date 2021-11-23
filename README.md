@@ -69,18 +69,18 @@ For `dev` chain, the network only contains a node for `Alice` so other nodes wil
 
 ### Calculating weights
 
-To calculate the weights for the `pallet_simple_nft` you first must ensure the node is built with the benchmarking feature enabled:
+To calculate the weights for a pallet you first must ensure the node is built with the benchmarking feature enabled:
 
 ```bash
 cargo build --release --features runtime-benchmarks
 ```
 
-Then you can run the benchmark tool with
+Then you can run the benchmark tool with for example
 
 ```bash
 ./target/release/vitalam-node benchmark \
     --pallet 'pallet_simple_nft' \
-    --extrinsic 'run_process' \
+    --extrinsic '*' \
     --output ./weights/
 ```
 
