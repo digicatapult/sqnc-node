@@ -5,6 +5,10 @@ use frame_support::{
     parameter_types,
     weights::{
         Weight,
+    },
+    traits::{
+        TestRandomness,
+        OnInitialize,
     }
 };
 use frame_system as system;
@@ -16,6 +20,8 @@ use sp_runtime::{
 };
 
 mod update_key;
+mod rotate_key;
+mod schedule;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -32,7 +38,6 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: system::{Module, Call, Config, Storage, Event<T>},
-        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
         Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
         SymmetricKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},
     }
@@ -46,7 +51,7 @@ parameter_types! {
 
 impl system::Config for Test {
     type BaseCallFilter = ();
-    type BlockWeights = ();
+    type BlockWeights = BlockWeights;
     type BlockLength = ();
     type DbWeight = ();
     type Origin = Origin;
@@ -93,7 +98,7 @@ impl pallet_symmetric_key::Config for Test {
     type ScheduleCall = Call;
     type UpdateOrigin = system::EnsureRoot<u64>;
     type RotateOrigin = system::EnsureRoot<u64>;
-    type Randomness = RandomnessCollectiveFlip;
+    type Randomness = TestRandomness;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
 }
