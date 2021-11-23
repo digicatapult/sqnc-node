@@ -139,6 +139,31 @@ pub fn run_process(origin, inputs: Vec<T::TokenId>, metadata: Vec<T::TokenMetada
 
 All of this functionality can be easily accessed using [https://polkadot.js.org/apps](https://polkadot.js.org/apps) against a running `dev` node. You will need to add a network endpoint of `ws://localhost:9944` under `Settings` and apply the above type configurations in the `Settings/Developer` tab.
 
+### IPFSKey pallet
+
+The `IPFSKey` pallet facilitates the generation and scheduled rotation of a fixed length symmetric encryption key that is distributed to all chain participants. In this instance the key is to be used as an IPFS swarm key.
+
+Two storage values are exposed by this pallet:
+
+```rust
+#[pallet::storage]
+#[pallet::getter(fn key)]
+pub(super) type Key<T: Config> = StorageValue<_, Vec<u8>, ValueQuery>;
+
+#[pallet::storage]
+#[pallet::getter(fn key_schedule)]
+pub(super) type KeyScheduleId<T: Config> = StorageValue<_, Option<Vec<u8>>, ValueQuery>;
+```
+
+The first exposes the maintained swarm key, whilst the latter the handle used with the `pallet-scheduling` frame pallet for setting a rotation schedule. This schedule is configured for a 7 day rotation.
+
+Two extrinsics are exposed by this pallet, one for updating a shared symmetric key and one for forcing a rotation of the key based on a configured randomness source. In the `runtime` in this repository these can only be called by `sudo`:
+
+```rust
+pub(super) fn update_key(origin: OriginFor<T>, new_key: Vec<u8>) -> DispatchResultWithPostInfo { ... }
+pub(super) fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo { ... }
+```
+
 ## Repo Structure
 
 A Substrate project consists of a number of components that are spread across a few

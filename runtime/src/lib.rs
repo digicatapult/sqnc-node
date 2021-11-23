@@ -296,7 +296,7 @@ impl pallet_simple_nft::Config for Runtime {
 
 parameter_types! {
     pub const KeyLength: u32 = 32;
-    pub const RefreshPeriod: u32 = 5 * MINUTES;
+    pub const RefreshPeriod: u32 = 7 * DAYS;
 }
 
 impl pallet_symmetric_key::Config for Runtime {
@@ -522,6 +522,7 @@ impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
             add_benchmark!(params, batches, pallet_simple_nft, SimpleNFTModule);
+            add_benchmark!(params, batches, pallet_symmetric_key, IpfsKey);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

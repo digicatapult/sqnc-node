@@ -15,8 +15,8 @@ const KEY_RANDOM_ID: [u8; 13] = *b"SYMMETRIC_KEY";
 #[cfg(test)]
 mod tests;
 
-// #[cfg(feature = "runtime-benchmarks")]
-// mod benchmarking;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 // mod migration;
 
