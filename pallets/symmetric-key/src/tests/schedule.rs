@@ -1,12 +1,5 @@
 use super::*;
 
-use frame_support::{
-	assert_ok, assert_err,
-	dispatch::{
-		DispatchError
-	}
-};
-
 #[test]
 fn schedule_before_first_call() {
 	new_test_ext().execute_with(|| {

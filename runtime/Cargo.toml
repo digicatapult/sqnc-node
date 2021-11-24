@@ -26,7 +26,7 @@ serde = { features = ['derive'], optional = true, version = '1.0.101' }
 
 # local dependencies
 pallet-simple-nft = { version = '2.0.0', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
-pallet-symmetric-key = { version = '2.0.0', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
+pallet-symmetric-key = { version = '1.0.0', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
 frame-executive = { default-features = false, version = '3.0.0' }
 frame-support = { default-features = false, version = '3.0.0' }
