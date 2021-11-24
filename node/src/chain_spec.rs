@@ -5,8 +5,8 @@ use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use vitalam_node_runtime::{
-    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, NodeAuthorizationConfig, MembershipConfig, Signature,
-    SudoConfig, SystemConfig, WASM_BINARY,
+    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
+    Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 const DEFAULT_PROTOCOL_ID: &str = "vam";
 
@@ -415,8 +415,8 @@ fn testnet_genesis(
         }),
         pallet_node_authorization: node_authorization_config,
         pallet_membership: Some(MembershipConfig {
-             members: endowed_accounts.iter().map(|k| k.clone()).collect(),
-             .. Default::default()
+            members: endowed_accounts.iter().map(|k| k.clone()).collect(),
+            ..Default::default()
         }),
     }
 }

@@ -3,13 +3,8 @@
 use crate as pallet_symmetric_key;
 use frame_support::{
     parameter_types,
-    weights::{
-        Weight,
-    },
-    traits::{
-        TestRandomness,
-        OnInitialize,
-    }
+    traits::{OnInitialize, TestRandomness},
+    weights::Weight,
 };
 use frame_system as system;
 use sp_core::H256;
@@ -19,9 +14,9 @@ use sp_runtime::{
     Perbill,
 };
 
-mod update_key;
 mod rotate_key;
 mod schedule;
+mod update_key;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -46,7 +41,7 @@ parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
     pub BlockWeights: frame_system::limits::BlockWeights =
-		frame_system::limits::BlockWeights::simple_max(1_000_000);
+        frame_system::limits::BlockWeights::simple_max(1_000_000);
 }
 
 impl system::Config for Test {
@@ -74,17 +69,17 @@ impl system::Config for Test {
     type SS58Prefix = SS58Prefix;
 }
 parameter_types! {
-	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
+    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
 }
 impl pallet_scheduler::Config for Test {
-	type Event = Event;
-	type Origin = Origin;
-	type PalletsOrigin = OriginCaller;
-	type Call = Call;
-	type MaximumWeight = MaximumSchedulerWeight;
-	type ScheduleOrigin = system::EnsureRoot<u64>;
-	type MaxScheduledPerBlock = ();
-	type WeightInfo = ();
+    type Event = Event;
+    type Origin = Origin;
+    type PalletsOrigin = OriginCaller;
+    type Call = Call;
+    type MaximumWeight = MaximumSchedulerWeight;
+    type ScheduleOrigin = system::EnsureRoot<u64>;
+    type MaxScheduledPerBlock = ();
+    type WeightInfo = ();
 }
 
 parameter_types! {

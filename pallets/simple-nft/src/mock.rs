@@ -1,7 +1,7 @@
 // Creating mock runtime here
 
-use codec::{Decode, Encode};
 use crate as pallet_simple_nft;
+use codec::{Decode, Encode};
 use frame_support::parameter_types;
 use frame_system as system;
 use sp_core::H256;
@@ -69,7 +69,7 @@ parameter_types! {
 pub enum MetadataValue {
     File(Hash),
     Literal([u8; 1]),
-    None
+    None,
 }
 
 impl Default for MetadataValue {

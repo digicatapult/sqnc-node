@@ -1,9 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use pallet::*;
 use frame_support::traits::{
-    Randomness, schedule::{Named as ScheduleNamed, DispatchTime, LOWEST_PRIORITY}
+    schedule::{DispatchTime, Named as ScheduleNamed, LOWEST_PRIORITY},
+    Randomness,
 };
+pub use pallet::*;
 use sp_runtime::traits::Dispatchable;
 
 /// A FRAME pallet for handling non-fungible tokens
@@ -33,7 +34,7 @@ pub mod pallet {
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// what does this do!!!!
-        type ScheduleCall: Parameter + Dispatchable<Origin=Self::Origin> + From<Call<Self>>;
+        type ScheduleCall: Parameter + Dispatchable<Origin = Self::Origin> + From<Call<Self>>;
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -41,18 +42,19 @@ pub mod pallet {
         type KeyLength: Get<u32>;
 
         /// The origin which can update the key
-	    type UpdateOrigin: EnsureOrigin<Self::Origin>;
+        type UpdateOrigin: EnsureOrigin<Self::Origin>;
         /// The origin which can rotate the key
-	    type RotateOrigin: EnsureOrigin<Self::Origin>;
-        /// Source of randomness when generating new keys. In production this should come from a secure source such as the Babe pallet
+        type RotateOrigin: EnsureOrigin<Self::Origin>;
+        /// Source of randomness when generating new keys.
+        /// In production this should come from a secure source such as the Babe pallet
         type Randomness: Randomness<Self::Hash>;
 
         #[pallet::constant]
         type RefreshPeriod: Get<Self::BlockNumber>;
         /// Overarching type of all pallets origins.
-	    type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
+        type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
         /// The Scheduler.
-	    type Scheduler: ScheduleNamed<Self::BlockNumber, Self::ScheduleCall, Self::PalletsOrigin>;
+        type Scheduler: ScheduleNamed<Self::BlockNumber, Self::ScheduleCall, Self::PalletsOrigin>;
 
         type WeightInfo: WeightInfo;
     }
@@ -76,7 +78,9 @@ pub mod pallet {
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),
                         Call::rotate_key().into(),
-                    ).is_err() {
+                    )
+                    .is_err()
+                    {
                         frame_support::print("Error initialising symmetric key rotation schedule");
                         return 0;
                     }
@@ -85,7 +89,7 @@ pub mod pallet {
 
                     0
                 }
-                Some(_) => 0
+                Some(_) => 0,
             }
         }
     }
@@ -117,23 +121,20 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(T::WeightInfo::update_key())]
-        pub(super) fn update_key(
-            origin: OriginFor<T>,
-            new_key: Vec<u8>
-        ) -> DispatchResultWithPostInfo {
+        pub(super) fn update_key(origin: OriginFor<T>, new_key: Vec<u8>) -> DispatchResultWithPostInfo {
             T::UpdateOrigin::ensure_origin(origin)?;
-            ensure!(new_key.len() == T::KeyLength::get() as usize, Error::<T>::IncorrectKeyLength);
+            ensure!(
+                new_key.len() == T::KeyLength::get() as usize,
+                Error::<T>::IncorrectKeyLength
+            );
 
             <Key<T>>::put(&new_key);
 
             Ok(().into())
         }
 
-
         #[pallet::weight(T::WeightInfo::rotate_key())]
-        pub(super) fn rotate_key(
-            origin: OriginFor<T>
-        ) -> DispatchResultWithPostInfo {
+        pub(super) fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::RotateOrigin::ensure_origin(origin)?;
 
             let new_key = generate_key::<T>();
@@ -157,4 +158,3 @@ pub mod pallet {
         (&output[0..key_length]).to_vec()
     }
 }
-

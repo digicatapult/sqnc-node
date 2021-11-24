@@ -27,10 +27,7 @@ use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime, parameter_types,
-    traits::{
-        KeyOwnerProofSystem, Randomness,
-        ChangeMembers, InitializeMembers,
-    },
+    traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         IdentityFee, Weight,
@@ -298,7 +295,7 @@ parameter_types! {
 pub enum MetadataValue {
     File(Hash),
     Literal([u8; 32]),
-    None
+    None,
 }
 
 impl Default for MetadataValue {
@@ -319,18 +316,12 @@ impl pallet_simple_nft::Config for Runtime {
 
 pub struct DummyChangeMembers;
 impl<T: core::cmp::Ord + core::clone::Clone> ChangeMembers<T> for DummyChangeMembers {
-    fn change_members_sorted(_incoming: &[T], _outgoing: &[T], _new: &[T]) {
-
-    }
-    fn set_prime(_who: Option<T>) {
-
-    }
+    fn change_members_sorted(_incoming: &[T], _outgoing: &[T], _new: &[T]) {}
+    fn set_prime(_who: Option<T>) {}
 }
 
 impl<T: core::cmp::Ord + core::clone::Clone> InitializeMembers<T> for DummyChangeMembers {
-    fn initialize_members(_members: &[T]) {
-
-    }
+    fn initialize_members(_members: &[T]) {}
 }
 
 impl pallet_membership::Config for Runtime {

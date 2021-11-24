@@ -36,13 +36,13 @@ fn mk_inputs<T: Config>(i: u32) -> Result<Vec<T::TokenId>, &'static str> {
     Ok(inputs)
 }
 
-fn mk_outputs<T: Config>(o: u32) -> Result<Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)>, &'static str> {
+fn mk_outputs<T: Config>(
+    o: u32,
+) -> Result<Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)>, &'static str> {
     let owner: T::AccountId = account("owner", 0, SEED);
     let mut metadata = BTreeMap::new();
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
-    let outputs = (0..o)
-        .map(|_| (owner.clone(), metadata.clone()))
-        .collect::<Vec<_>>();
+    let outputs = (0..o).map(|_| (owner.clone(), metadata.clone())).collect::<Vec<_>>();
 
     Ok(outputs)
 }
