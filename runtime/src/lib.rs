@@ -6,6 +6,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use codec::{Decode, Encode};
 use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
@@ -26,7 +27,10 @@ use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime, parameter_types,
-    traits::{KeyOwnerProofSystem, Randomness},
+    traits::{
+        KeyOwnerProofSystem, Randomness,
+        ChangeMembers, InitializeMembers,
+    },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         IdentityFee, Weight,
@@ -286,12 +290,58 @@ impl pallet_scheduler::Config for Runtime {
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+    pub const MaxMetadataCount: u32 = 16;
+}
+
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+pub enum MetadataValue {
+    File(Hash),
+    Literal([u8; 32]),
+    None
+}
+
+impl Default for MetadataValue {
+    fn default() -> Self {
+        MetadataValue::None
+    }
+}
+
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
-    type TokenMetadata = Hash;
+    type TokenMetadataKey = [u8; 32];
+    type TokenMetadataValue = MetadataValue;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
+    type MaxMetadataCount = MaxMetadataCount;
+}
+
+pub struct DummyChangeMembers;
+impl<T: core::cmp::Ord + core::clone::Clone> ChangeMembers<T> for DummyChangeMembers {
+    fn change_members_sorted(_incoming: &[T], _outgoing: &[T], _new: &[T]) {
+
+    }
+    fn set_prime(_who: Option<T>) {
+
+    }
+}
+
+impl<T: core::cmp::Ord + core::clone::Clone> InitializeMembers<T> for DummyChangeMembers {
+    fn initialize_members(_members: &[T]) {
+
+    }
+}
+
+impl pallet_membership::Config for Runtime {
+    type Event = Event;
+    type AddOrigin = EnsureRoot<AccountId>;
+    type RemoveOrigin = EnsureRoot<AccountId>;
+    type SwapOrigin = EnsureRoot<AccountId>;
+    type ResetOrigin = EnsureRoot<AccountId>;
+    type PrimeOrigin = EnsureRoot<AccountId>;
+    type MembershipInitialized = DummyChangeMembers;
+    type MembershipChanged = DummyChangeMembers;
 }
 
 parameter_types! {
@@ -331,6 +381,7 @@ construct_runtime!(
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         IpfsKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},
+        Membership: pallet_membership::{Module, Call, Storage, Event<T>, Config<T>}
     }
 );
 

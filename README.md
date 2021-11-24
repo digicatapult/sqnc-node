@@ -104,17 +104,25 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "PeerId": "Vec<u8>",
   "Key": "Vec<u8>",
   "TokenId": "u128",
-  "TokenMetadata": "Hash",
+  "TokenMetadataKey": "[u8; 32]",
+  "TokenMetadataValue": "MetadataValue",
   "Token": {
     "id": "TokenId",
     "owner": "AccountId",
     "creator": "AccountId",
     "created_at": "BlockNumber",
     "destroyed_at": "Option<BlockNumber>",
-    "metadata": "TokenMetadata",
+    "metadata": "BTreeMap<TokenMetadataKey, TokenMetadataValue>",
     "parents": "Vec<TokenId>",
     "children": "Option<Vec<TokenId>>"
-  }
+  },
+  "MetadataValue": {
+    "_enum": {
+      "File": "Hash",
+      "Literal": "[u8; 32]",
+      "None": "null",
+    },
+  },
 }
 ```
 
@@ -128,16 +136,22 @@ Two storage endpoints are then exposed under `SimpleNFT` for the id of the last 
 
 ```rust
 LastToken get(fn last_token): T::TokenId;
-TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::TokenId, T::TokenMetadata>;
+TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>;
 ```
 
 Tokens can be minted/burnt by calling the following extrinsic under `SimpleNFT`:
 
 ```rust
-pub fn run_process(origin, inputs: Vec<T::TokenId>, metadata: Vec<T::TokenMetadata>) -> dispatch::DispatchResult { ... }
+pub fn run_process(origin, inputs: Vec<T::TokenId>, outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)> -> dispatch::DispatchResult { ... }
 ```
 
 All of this functionality can be easily accessed using [https://polkadot.js.org/apps](https://polkadot.js.org/apps) against a running `dev` node. You will need to add a network endpoint of `ws://localhost:9944` under `Settings` and apply the above type configurations in the `Settings/Developer` tab.
+
+Pallet tests can be run with:
+
+```bash
+cargo test -p pallet-simple-nft
+```
 
 ### IPFSKey pallet
 
@@ -162,6 +176,12 @@ Two extrinsics are exposed by this pallet, one for updating a shared symmetric k
 ```rust
 pub(super) fn update_key(origin: OriginFor<T>, new_key: Vec<u8>) -> DispatchResultWithPostInfo { ... }
 pub(super) fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo { ... }
+```
+
+Pallet tests can be run with:
+
+```bash
+cargo test -p pallet-symmetric-key
 ```
 
 ## Repo Structure
