@@ -126,7 +126,10 @@ pub mod pallet {
 
             // check metadata count
             for output in outputs.iter() {
-                ensure!(output.1.len() <= T::MaxMetadataCount::get() as usize, Error::<T>::TooManyMetadataItems);
+                ensure!(
+                    output.1.len() <= T::MaxMetadataCount::get() as usize,
+                    Error::<T>::TooManyMetadataItems
+                );
             }
 
             // check origin owns inputs and that inputs have not been burnt

@@ -3851,6 +3851,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-scheduler"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11230ac868a04833d27a18f37d00572d26866f4718e9cce0557d698e3997b6d6"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-session"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3896,6 +3912,22 @@ dependencies = [
  "frame-system",
  "parity-scale-codec",
  "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-symmetric-key"
+version = "1.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-scheduler",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -7907,7 +7939,7 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 
 [[package]]
 name = "vitalam-node"
-version = "2.1.1"
+version = "2.3.0"
 dependencies = [
  "bs58",
  "frame-benchmarking",
@@ -7960,8 +7992,10 @@ dependencies = [
  "pallet-membership",
  "pallet-node-authorization",
  "pallet-randomness-collective-flip",
+ "pallet-scheduler",
  "pallet-simple-nft",
  "pallet-sudo",
+ "pallet-symmetric-key",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",

@@ -69,18 +69,18 @@ For `dev` chain, the network only contains a node for `Alice` so other nodes wil
 
 ### Calculating weights
 
-To calculate the weights for the `pallet_simple_nft` you first must ensure the node is built with the benchmarking feature enabled:
+To calculate the weights for a pallet you first must ensure the node is built with the benchmarking feature enabled:
 
 ```bash
 cargo build --release --features runtime-benchmarks
 ```
 
-Then you can run the benchmark tool with
+Then you can run the benchmark tool with for example
 
 ```bash
 ./target/release/vitalam-node benchmark \
     --pallet 'pallet_simple_nft' \
-    --extrinsic 'run_process' \
+    --extrinsic '*' \
     --output ./weights/
 ```
 
@@ -101,7 +101,8 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
 {
   "Address": "MultiAddress",
   "LookupSource": "MultiAddress",
-  "PeerId": "(Vec<u8>", # for node-authorization pallet
+  "PeerId": "Vec<u8>",
+  "Key": "Vec<u8>",
   "TokenId": "u128",
   "TokenMetadataKey": "[u8; 32]",
   "TokenMetadataValue": "MetadataValue",
@@ -150,6 +151,37 @@ Pallet tests can be run with:
 
 ```bash
 cargo test -p pallet-simple-nft
+```
+
+### IPFSKey pallet
+
+The `IPFSKey` pallet facilitates the generation and scheduled rotation of a fixed length symmetric encryption key that is distributed to all chain participants. In this instance the key is to be used as an IPFS swarm key.
+
+Two storage values are exposed by this pallet:
+
+```rust
+#[pallet::storage]
+#[pallet::getter(fn key)]
+pub(super) type Key<T: Config> = StorageValue<_, Vec<u8>, ValueQuery>;
+
+#[pallet::storage]
+#[pallet::getter(fn key_schedule)]
+pub(super) type KeyScheduleId<T: Config> = StorageValue<_, Option<Vec<u8>>, ValueQuery>;
+```
+
+The first exposes the maintained swarm key, whilst the latter the handle used with the `pallet-scheduling` frame pallet for setting a rotation schedule. This schedule is configured for a 7 day rotation.
+
+Two extrinsics are exposed by this pallet, one for updating a shared symmetric key and one for forcing a rotation of the key based on a configured randomness source. In the `runtime` in this repository these can only be called by `sudo`:
+
+```rust
+pub(super) fn update_key(origin: OriginFor<T>, new_key: Vec<u8>) -> DispatchResultWithPostInfo { ... }
+pub(super) fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo { ... }
+```
+
+Pallet tests can be run with:
+
+```bash
+cargo test -p pallet-symmetric-key
 ```
 
 ## Repo Structure

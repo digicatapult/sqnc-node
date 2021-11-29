@@ -18,29 +18,32 @@
 #![allow(unused_imports)]
 
 use frame_support::{traits::Get, weights::Weight};
+
 use sp_std::marker::PhantomData;
+use sp_std::prelude::*;
 
 pub trait WeightInfo {
-    fn run_process(i: usize, o: usize) -> Weight;
+    fn update_key() -> Weight;
+    fn rotate_key() -> Weight;
 }
 
-/// Weight functions for pallet_simple_nft.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-    fn run_process(i: usize, o: usize) -> Weight {
-        (104_267_000 as Weight)
-            // Standard Error: 6_647_000
-            .saturating_add((13_768_000 as Weight).saturating_mul(i as Weight))
+    fn update_key() -> Weight {
+        (2_000_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
+    }
+    fn rotate_key() -> Weight {
+        (18_000_000 as Weight)
             .saturating_add(T::DbWeight::get().reads(1 as Weight))
-            .saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(i as Weight)))
             .saturating_add(T::DbWeight::get().writes(1 as Weight))
-            .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(i as Weight)))
-            .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(o as Weight)))
     }
 }
 
 impl WeightInfo for () {
-    fn run_process(_: usize, _: usize) -> Weight {
+    fn update_key() -> Weight {
+        (0 as Weight)
+    }
+    fn rotate_key() -> Weight {
         (0 as Weight)
     }
 }
