@@ -20,9 +20,9 @@ mod benchmarking;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
+pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
     id: TokenId,
-    owner: AccountId,
+    owner: BTreeMap<RoleKey, AccountId>,
     creator: AccountId,
     created_at: BlockNumber,
     destroyed_at: Option<BlockNumber>,
@@ -49,6 +49,8 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
+        type RoleKey: Parameter + Default + Ord;
+
         type TokenMetadataKey: Parameter + Default + Ord;
         type TokenMetadataValue: Parameter + Default;
 
@@ -78,7 +80,7 @@ pub mod pallet {
         _,
         Blake2_128Concat,
         T::TokenId,
-        Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
+        Token<T::AccountId, T::RoleKey, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
         ValueQuery, /*, DefaultForExampleStorage*/
     >;
 
@@ -111,7 +113,10 @@ pub mod pallet {
         pub(super) fn run_process(
             origin: OriginFor<T>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)>,
+            outputs: Vec<(
+                BTreeMap<T::RoleKey, T::AccountId>,
+                BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>,
+            )>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -135,7 +140,7 @@ pub mod pallet {
             // check origin owns inputs and that inputs have not been burnt
             for id in inputs.iter() {
                 let token = <TokensById<T>>::get(id);
-                ensure!(token.owner == sender, Error::<T>::NotOwned);
+                ensure!(token.owner[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
                 ensure!(token.children == None, Error::<T>::AlreadyBurnt);
             }
 

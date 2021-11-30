@@ -28,9 +28,11 @@ pub trait WeightInfo {
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     fn run_process(i: usize, o: usize) -> Weight {
-        (104_267_000 as Weight)
-            // Standard Error: 6_647_000
-            .saturating_add((13_768_000 as Weight).saturating_mul(i as Weight))
+        (0 as Weight)
+            // Standard Error: 3_008_000
+            .saturating_add((14_764_000 as Weight).saturating_mul(i as Weight))
+            // Standard Error: 3_008_000
+            .saturating_add((10_806_000 as Weight).saturating_mul(o as Weight))
             .saturating_add(T::DbWeight::get().reads(1 as Weight))
             .saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(i as Weight)))
             .saturating_add(T::DbWeight::get().writes(1 as Weight))
