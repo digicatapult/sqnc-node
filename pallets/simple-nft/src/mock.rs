@@ -68,6 +68,7 @@ parameter_types! {
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
     Admin,
+    NotAdmin,
 }
 
 impl Default for Role {

@@ -497,6 +497,26 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 }
 
 #[test]
+fn it_fails_for_destroying_single_token_as_incorrect_role() {
+    new_test_ext().execute_with(|| {
+        let owner = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotAdmin, 2)]);
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
+        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(owner.clone(), metadata.clone())]).unwrap();
+        // get old token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        // Try to destroy token as incorrect user
+        assert_err!(
+            SimpleNFTModule::run_process(Origin::signed(2), vec![1], Vec::new()),
+            Error::<Test>::NotOwned
+        );
+        // assert no more tokens were created
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // assert old token hasn't changed
+        assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
+    });
+}
+
+#[test]
 fn it_fails_for_destroying_single_token_as_other_signer() {
     new_test_ext().execute_with(|| {
         let owner = BTreeMap::from_iter(vec![(Default::default(), 1)]);
