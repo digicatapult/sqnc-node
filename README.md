@@ -125,7 +125,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     }
   },
   "Role": {
-    "_enum": ["Owner"]
+    "_enum": ["Admin", "ManufacturingEngineer", "ProcurementBuyer", "ProcurementPlanner", "Supplier"]
   }
 }
 ```
