@@ -81,6 +81,7 @@ Then you can run the benchmark tool with for example
 ./target/release/vitalam-node benchmark \
     --pallet 'pallet_simple_nft' \
     --extrinsic '*' \
+    --repeat 1000 \
     --output ./weights/
 ```
 

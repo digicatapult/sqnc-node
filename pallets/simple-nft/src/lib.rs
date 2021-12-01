@@ -100,9 +100,9 @@ pub mod pallet {
         NotOwned,
         /// Mutation was attempted on token that has already been burnt
         AlreadyBurnt,
-        /// Minting token attempted with too many metadata items
+        /// Token mint was attempted with too many metadata items
         TooManyMetadataItems,
-        /// Minting token attempted without setting a default role
+        /// Token mint was attempted without setting a default role
         NoDefaultRole,
     }
 
