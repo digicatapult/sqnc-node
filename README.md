@@ -109,7 +109,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "TokenMetadataValue": "MetadataValue",
   "Token": {
     "id": "TokenId",
-    "owner": "BTreeMap<RoleKey, AccountId>",
+    "roles": "BTreeMap<RoleKey, AccountId>",
     "creator": "AccountId",
     "created_at": "BlockNumber",
     "destroyed_at": "Option<BlockNumber>",

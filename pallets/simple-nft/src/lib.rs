@@ -22,7 +22,7 @@ mod benchmarking;
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
     id: TokenId,
-    owner: BTreeMap<RoleKey, AccountId>,
+    roles: BTreeMap<RoleKey, AccountId>,
     creator: AccountId,
     created_at: BlockNumber,
     destroyed_at: Option<BlockNumber>,
@@ -145,7 +145,7 @@ pub mod pallet {
             // check origin owns inputs and that inputs have not been burnt
             for id in inputs.iter() {
                 let token = <TokensById<T>>::get(id);
-                ensure!(token.owner[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
+                ensure!(token.roles[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
                 ensure!(token.children == None, Error::<T>::AlreadyBurnt);
             }
 
@@ -157,13 +157,13 @@ pub mod pallet {
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
             let (last, children) = outputs
                 .iter()
-                .fold((last, Vec::new()), |(last, children), (owner, metadata)| {
+                .fold((last, Vec::new()), |(last, children), (roles, metadata)| {
                     let next = _next_token(last);
                     <TokensById<T>>::insert(
                         next,
                         Token {
                             id: next,
-                            owner: owner.clone(),
+                            roles: roles.clone(),
                             creator: sender.clone(),
                             created_at: now,
                             destroyed_at: None,

@@ -13,13 +13,13 @@ const SEED: u32 = 0;
 
 fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
     let account_id: T::AccountId = account("owner", 0, SEED);
-    let mut owner = BTreeMap::new();
+    let mut roles = BTreeMap::new();
     let mut metadata = BTreeMap::new();
-    owner.insert(T::RoleKey::default(), account_id.clone());
+    roles.insert(T::RoleKey::default(), account_id.clone());
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
     // let _ = T::Currency::make_free_balance_be(&owner, BalanceOf::<T>::max_value());
 
-    let outputs: Vec<_> = (0..r).map(|_| (owner.clone(), metadata.clone())).collect();
+    let outputs: Vec<_> = (0..r).map(|_| (roles.clone(), metadata.clone())).collect();
     SimpleNFT::<T>::run_process(RawOrigin::Signed(account_id.clone()).into(), Vec::new(), outputs)?;
 
     let expected_last_token = nth_token_id::<T>(r)?;
@@ -48,11 +48,11 @@ fn mk_outputs<T: Config>(
     &'static str,
 > {
     let account_id: T::AccountId = account("owner", 0, SEED);
-    let mut owner = BTreeMap::new();
+    let mut roles = BTreeMap::new();
     let mut metadata = BTreeMap::new();
-    owner.insert(T::RoleKey::default(), account_id.clone());
+    roles.insert(T::RoleKey::default(), account_id.clone());
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
-    let outputs = (0..o).map(|_| (owner.clone(), metadata.clone())).collect::<Vec<_>>();
+    let outputs = (0..o).map(|_| (roles.clone(), metadata.clone())).collect::<Vec<_>>();
 
     Ok(outputs)
 }
