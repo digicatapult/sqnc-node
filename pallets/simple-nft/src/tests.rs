@@ -644,3 +644,28 @@ fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
         assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
     });
 }
+
+#[test]
+fn it_fails_for_creating_single_token_with_no_default_role() {
+    new_test_ext().execute_with(|| {
+        let owner = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let owner_empty = BTreeMap::new();
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
+        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(owner.clone(), metadata.clone())]).unwrap();
+        // get old token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        // Try to create token without setting default role in owner
+        assert_err!(
+            SimpleNFTModule::run_process(
+                Origin::signed(1),
+                Vec::new(),
+                vec![(owner_empty.clone(), metadata.clone())]
+            ),
+            Error::<Test>::NoDefaultRole
+        );
+        // assert no more tokens were created
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // assert old token hasn't changed
+        assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
+    });
+}

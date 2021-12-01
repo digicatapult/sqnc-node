@@ -293,11 +293,11 @@ parameter_types! {
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
-    Admin,
-    ManufacturingEngineer,
-    ProcurementBuyer,
-    ProcurementPlanner,
-    Supplier,
+    Admin = 0,
+    ManufacturingEngineer = 1,
+    ProcurementBuyer = 2,
+    ProcurementPlanner = 3,
+    Supplier = 4,
 }
 
 impl Default for Role {

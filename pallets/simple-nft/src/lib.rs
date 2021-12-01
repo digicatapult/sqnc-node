@@ -100,8 +100,10 @@ pub mod pallet {
         NotOwned,
         /// Mutation was attempted on token that has already been burnt
         AlreadyBurnt,
-        /// Mutation was attempted with too many metadata items
+        /// Minting token attempted with too many metadata items
         TooManyMetadataItems,
+        /// Minting token attempted without setting a default role
+        NoDefaultRole,
     }
 
     // The pallet's dispatchable functions.
@@ -129,8 +131,11 @@ pub mod pallet {
 
             // INPUT VALIDATION
 
-            // check metadata count
             for output in outputs.iter() {
+                // check at least a default role has been set
+                ensure!(output.0.contains_key(&T::RoleKey::default()), Error::<T>::NoDefaultRole);
+
+                // check metadata count
                 ensure!(
                     output.1.len() <= T::MaxMetadataCount::get() as usize,
                     Error::<T>::TooManyMetadataItems
