@@ -136,6 +136,37 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
 }
 
 #[test]
+fn it_works_for_creating_token_with_multiple_roles() {
+    new_test_ext().execute_with(|| {
+        // create a token with no parents
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotAdmin, 2)]);
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![(roles.clone(), metadata.clone())]
+        ));
+        // last token should be 1
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // get the token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        assert_eq!(
+            token,
+            Token {
+                id: 1,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata.clone(),
+                parents: Vec::new(),
+                children: None
+            }
+        );
+    });
+}
+
+#[test]
 fn it_works_for_creating_many_token() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
