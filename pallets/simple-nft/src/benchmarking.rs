@@ -19,7 +19,7 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
     // let _ = T::Currency::make_free_balance_be(&owner, BalanceOf::<T>::max_value());
 
-    let outputs: Vec<_> = (0..r).map(|_| (roles.clone(), metadata.clone())).collect();
+    let outputs: Vec<_> = (0..r).map(|_| (roles.clone(), metadata.clone(), None)).collect();
     SimpleNFT::<T>::run_process(RawOrigin::Signed(account_id.clone()).into(), Vec::new(), outputs)?;
 
     let expected_last_token = nth_token_id::<T>(r)?;
@@ -40,10 +40,12 @@ fn mk_inputs<T: Config>(i: u32) -> Result<Vec<T::TokenId>, &'static str> {
 
 fn mk_outputs<T: Config>(
     o: u32,
+    inputs_length: usize,
 ) -> Result<
     Vec<(
         BTreeMap<T::RoleKey, T::AccountId>,
         BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>,
+        Option<u32>,
     )>,
     &'static str,
 > {
@@ -52,9 +54,19 @@ fn mk_outputs<T: Config>(
     let mut metadata = BTreeMap::new();
     roles.insert(T::RoleKey::default(), account_id.clone());
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
-    let outputs = (0..o).map(|_| (roles.clone(), metadata.clone())).collect::<Vec<_>>();
+    let outputs = (0..o)
+        .map(|_| (roles.clone(), metadata.clone(), valid_parent_index(inputs_length, o)))
+        .collect::<Vec<_>>();
 
     Ok(outputs)
+}
+
+fn valid_parent_index(input_len: usize, output_count: u32) -> Option<u32> {
+    if (output_count as usize) <= input_len {
+        Some(output_count-1)
+    } else {
+        None
+    }
 }
 
 fn nth_token_id<T: Config>(iteration: u32) -> Result<T::TokenId, &'static str> {
@@ -69,7 +81,7 @@ benchmarks! {
 
     add_nfts::<T>(i)?;
     let inputs = mk_inputs::<T>(i)?;
-    let outputs = mk_outputs::<T>(o)?;
+    let outputs = mk_outputs::<T>(o, inputs.len())?;
     let caller: T::AccountId = account("owner", 0, SEED);
   }: _(RawOrigin::Signed(caller), inputs, outputs)
   verify {

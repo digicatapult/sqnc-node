@@ -5,6 +5,7 @@ use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::collections::btree_map::BTreeMap;
+use sp_std::collections::btree_set::BTreeSet;
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -22,6 +23,7 @@ mod benchmarking;
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
     id: TokenId,
+    original_id: TokenId,
     roles: BTreeMap<RoleKey, AccountId>,
     creator: AccountId,
     created_at: BlockNumber,
@@ -104,6 +106,10 @@ pub mod pallet {
         TooManyMetadataItems,
         /// Token mint was attempted without setting a default role
         NoDefaultRole,
+        /// Index for the consumed token to set as parent is out of bounds
+        OutOfBoundsParent,
+        /// Attempted to set the same parent on multiple tokens to mint
+        DuplicateParents,
     }
 
     // The pallet's dispatchable functions.
@@ -118,6 +124,7 @@ pub mod pallet {
             outputs: Vec<(
                 BTreeMap<T::RoleKey, T::AccountId>,
                 BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>,
+                Option<u32>,
             )>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
@@ -131,6 +138,9 @@ pub mod pallet {
 
             // INPUT VALIDATION
 
+            // check multiple tokens are not trying to have the same parent
+            let mut parent_indices = BTreeSet::new();
+
             for output in outputs.iter() {
                 // check at least a default role has been set
                 ensure!(output.0.contains_key(&T::RoleKey::default()), Error::<T>::NoDefaultRole);
@@ -140,6 +150,13 @@ pub mod pallet {
                     output.1.len() <= T::MaxMetadataCount::get() as usize,
                     Error::<T>::TooManyMetadataItems
                 );
+
+                // check parent index
+                if output.2.is_some() {
+                    let index = output.2.unwrap() as usize;
+                    ensure!(inputs.get(index).is_some(), Error::<T>::OutOfBoundsParent);
+                    ensure!(parent_indices.insert(index), Error::<T>::DuplicateParents);
+                }
             }
 
             // check origin owns inputs and that inputs have not been burnt
@@ -155,14 +172,20 @@ pub mod pallet {
             let last = LastToken::<T>::get();
 
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) = outputs
-                .iter()
-                .fold((last, Vec::new()), |(last, children), (roles, metadata)| {
+            let (last, children) = outputs.iter().fold(
+                (last, Vec::new()),
+                |(last, children), (roles, metadata, parent_index)| {
                     let next = _next_token(last);
+                    let original_id = if parent_index.is_some() {
+                        inputs.get(parent_index.unwrap() as usize).unwrap().clone()
+                    } else {
+                        next
+                    };
                     <TokensById<T>>::insert(
                         next,
                         Token {
                             id: next,
+                            original_id: original_id,
                             roles: roles.clone(),
                             creator: sender.clone(),
                             created_at: now,
@@ -175,7 +198,8 @@ pub mod pallet {
                     let mut next_children = children.clone();
                     next_children.push(next);
                     (next, next_children)
-                });
+                },
+            );
 
             // Burn inputs
             inputs.iter().for_each(|id| {
