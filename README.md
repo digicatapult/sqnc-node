@@ -147,7 +147,7 @@ TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::RoleKe
 Tokens can be minted/burnt by calling the following extrinsic under `SimpleNFT`:
 
 ```rust
-pub fn run_process(origin, inputs: Vec<T::TokenId>, outputs: Vec<(BTreeMap<T::RoleKey, T::AccountId>, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)> -> dispatch::DispatchResult { ... }
+pub fn run_process(origin, inputs: Vec<T::TokenId>, outputs: Vec<(BTreeMap<T::RoleKey, T::AccountId>, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>, Option<u32>)> -> dispatch::DispatchResult { ... }
 ```
 
 All of this functionality can be easily accessed using [https://polkadot.js.org/apps](https://polkadot.js.org/apps) against a running `dev` node. You will need to add a network endpoint of `ws://localhost:9944` under `Settings` and apply the above type configurations in the `Settings/Developer` tab.

@@ -5,6 +5,7 @@ use super::*;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
 use sp_std::{boxed::Box, vec, vec::Vec};
+use core::convert::TryInto;
 
 #[allow(unused)]
 use crate::Module as SimpleNFT;
@@ -40,7 +41,7 @@ fn mk_inputs<T: Config>(i: u32) -> Result<Vec<T::TokenId>, &'static str> {
 
 fn mk_outputs<T: Config>(
     o: u32,
-    inputs_length: usize,
+    inputs_len: u32,
 ) -> Result<
     Vec<(
         BTreeMap<T::RoleKey, T::AccountId>,
@@ -55,15 +56,15 @@ fn mk_outputs<T: Config>(
     roles.insert(T::RoleKey::default(), account_id.clone());
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
     let outputs = (0..o)
-        .map(|_| (roles.clone(), metadata.clone(), valid_parent_index(inputs_length, o)))
+        .map(|output_index| (roles.clone(), metadata.clone(), valid_parent_index(inputs_len, output_index)))
         .collect::<Vec<_>>();
 
     Ok(outputs)
 }
 
-fn valid_parent_index(input_len: usize, output_count: u32) -> Option<u32> {
-    if (output_count as usize) <= input_len {
-        Some(output_count-1)
+fn valid_parent_index(input_len: u32, output_count: u32) -> Option<u32> {
+    if input_len > 0 && output_count < input_len {
+        Some(output_count)
     } else {
         None
     }
@@ -81,7 +82,7 @@ benchmarks! {
 
     add_nfts::<T>(i)?;
     let inputs = mk_inputs::<T>(i)?;
-    let outputs = mk_outputs::<T>(o, inputs.len())?;
+    let outputs = mk_outputs::<T>(o, inputs.len().try_into().unwrap())?;
     let caller: T::AccountId = account("owner", 0, SEED);
   }: _(RawOrigin::Signed(caller), inputs, outputs)
   verify {
