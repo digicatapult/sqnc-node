@@ -122,8 +122,10 @@ jobs:
         CACHE_DEST: /var/lib/docker/buildkit/cache.db
       # need sudo access to move to /var/lib/docker/buildkit/cache.db which is hopefully not going to change 🤞
       run: |
-        sudo mv $CACHE_SOURCE $CACHE_DEST
-        sudo chmod 0777 $CACHE_DEST
+        if [ -f "$CACHE_SOURCE" ]; then
+          sudo mv $CACHE_SOURCE $CACHE_DEST
+          sudo chmod 0777 $CACHE_DEST
+        fi
     - name: Generate tags
       id: generate-tags
       env:
