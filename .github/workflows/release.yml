@@ -111,11 +111,19 @@ jobs:
         # this is horrible as you can't set the path but it probably works see:
         # https://github.com/moby/buildkit/issues/1474
         # https://github.com/moby/buildkit/issues/1512
-        path: /var/lib/docker/buildkit/cache.db
+        path: ${{ runner.temp }}/cache.db
         key: ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}
           ${{ runner.os }}-docker-sccache-
+    - name: Move cache in
+      env:
+        CACHE_SOURCE: ${{ runner.temp }}/cache.db
+        CACHE_DEST: /var/lib/docker/buildkit/cache.db
+      # need sudo access to move to /var/lib/docker/buildkit/cache.db which is hopefully not going to change 🤞
+      run: |
+        sudo mv $CACHE_SOURCE $CACHE_DEST
+        sudo chmod 0777 $CACHE_DEST
     - name: Generate tags
       id: generate-tags
       env:
@@ -170,6 +178,14 @@ jobs:
           org.opencontainers.image.created=${{ needs.get-version.outputs.build_date }}
     - name: Publish image
       run: docker push --all-tags ghcr.io/digicatapult/vitalam-node
+    # need sudo access to move from /var/lib/docker/buildkit/cache.db which is hopefully not going to change 🤞
+    - name: Move cache out
+      env:
+        CACHE_SOURCE: /var/lib/docker/buildkit/cache.db
+        CACHE_DEST: ${{ runner.temp }}/cache.db
+      run: |
+        sudo mv $CACHE_SOURCE $CACHE_DEST
+        sudo chmod 0777 $CACHE_DEST
 
   # Github releases are only performed when the release version changes
   build-release:
