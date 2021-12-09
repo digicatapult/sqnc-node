@@ -2,10 +2,10 @@
 
 use super::*;
 
+use core::convert::TryInto;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
 use sp_std::{boxed::Box, vec, vec::Vec};
-use core::convert::TryInto;
 
 #[allow(unused)]
 use crate::Module as SimpleNFT;
@@ -56,7 +56,13 @@ fn mk_outputs<T: Config>(
     roles.insert(T::RoleKey::default(), account_id.clone());
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
     let outputs = (0..o)
-        .map(|output_index| (roles.clone(), metadata.clone(), valid_parent_index(inputs_len, output_index)))
+        .map(|output_index| {
+            (
+                roles.clone(),
+                metadata.clone(),
+                valid_parent_index(inputs_len, output_index),
+            )
+        })
         .collect::<Vec<_>>();
 
     Ok(outputs)
