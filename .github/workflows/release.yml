@@ -38,9 +38,10 @@ jobs:
           echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
 
   # Docker build  are always performed but are only version tagged on new version
-  build-docker-dependencies:
-    name: Build Docker Dependency Layers
+  build-docker-build-base:
+    name: Build Docker Build Base Image
     runs-on: ubuntu-latest
+    needs: [get-version]
     steps:
     - uses: actions/checkout@master
     - name: Setup QEMU
@@ -56,9 +57,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ runner.temp }}/docker-buildx-cache
-        key: ${{ runner.os }}-docker-buildx-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+        key: ${{ runner.os }}-docker-buildx-${{ needs.get-version.outputs.toolchain }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-docker-buildx-${{ hashFiles('**/Cargo.lock') }}
+          ${{ runner.os }}-docker-buildx-${{ needs.get-version.outputs.toolchain }}
           ${{ runner.os }}-docker-buildx-
     - name: Build Dependency layers
       uses: docker/build-push-action@v2
@@ -66,11 +67,13 @@ jobs:
         push: false
         builder: ${{ steps.buildx.outputs.name }}
         cache-from: type=local,src=${{ runner.temp }}/docker-buildx-cache
-        cache-to: type=local,dest=${{ runner.temp }}/docker-buildx-cache-new
+        cache-to: type=local,dest=${{ runner.temp }}/docker-buildx-cache-new,mode=max
         context: .
+        build-args: |
+          RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
         file: ./Dockerfile
         platforms: linux/amd64
-        target: dependencies
+        target: build-base
     - name: Move cache
       env:
         CACHE_NEW: ${{ runner.temp }}/docker-buildx-cache-new
@@ -82,7 +85,7 @@ jobs:
   build-docker:
     name: Build Docker
     runs-on: ubuntu-latest
-    needs: [get-version, build-docker-dependencies]
+    needs: [get-version, build-docker-build-base]
     steps:
     - uses: actions/checkout@master
     - name: Setup QEMU
@@ -98,10 +101,21 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ runner.temp }}/docker-buildx-cache
-        key: ${{ runner.os }}-docker-buildx-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+        key: ${{ runner.os }}-docker-buildx--${{ needs.get-version.outputs.toolchain }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-docker-buildx-${{ hashFiles('**/Cargo.lock') }}
+          ${{ runner.os }}-docker-buildx--${{ needs.get-version.outputs.toolchain }}
           ${{ runner.os }}-docker-buildx-
+    - name: Cache Docker sccache
+      uses: actions/cache@v2
+      with:
+        # this is horrible as you can't set the path but it probably works see:
+        # https://github.com/moby/buildkit/issues/1474
+        # https://github.com/moby/buildkit/issues/1512
+        path: /var/lib/docker/buildkit/cache.db
+        key: ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}
+          ${{ runner.os }}-docker-sccache-
     - name: Generate tags
       id: generate-tags
       env:
@@ -135,8 +149,10 @@ jobs:
         load: true
         builder: ${{ steps.buildx.outputs.name }}
         cache-from: type=local,src=${{ runner.temp }}/docker-buildx-cache
-        cache-to: type=local,dest=${{ runner.temp }}/docker-buildx-cache-temp
+        cache-to: type=local,dest=${{ runner.temp }}/docker-buildx-cache-temp,mode=max
         context: .
+        build-args: |
+          RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
         file: ./Dockerfile
         platforms: linux/amd64
         tags: |
@@ -200,9 +216,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ runner.temp }}/cache
-          key: ${{ runner.os }}-cargo-build-cache-release-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+          key: ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-cache-release-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-
             ${{ runner.os }}-cargo-build-cache-release-
       - name: Cargo build
         uses: actions-rs/cargo@v1

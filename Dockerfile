@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.2
+
 # build base that sets up common dependencies of the build
 FROM rust:alpine as build-base
 
@@ -15,45 +17,25 @@ RUN set -ex; \
   rm -rf /sccache-v*-x86_64-unknown-linux-musl /sccache-v*-x86_64-unknown-linux-musl.tar.gz /fetch; \
   chmod +x /sccache;
 
-WORKDIR vitalam-node
-COPY ./rust-toolchain .
-RUN rustup install $(cat ./rust-toolchain) && rustup target add wasm32-unknown-unknown --toolchain $(cat ./rust-toolchain)
-RUN cargo +$(cat ./rust-toolchain) install cargo-chef
-
-# planner image to get the dependencies list that can be built seperately
-
-FROM build-base as planner
-
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
-
-# build the dependencies list based on the list from "planner"
-
-FROM build-base as dependencies
-
-COPY --from=planner vitalam-node/recipe.json recipe.json
-RUN PROTOC=$(which protoc) \
-  PROTOC_INCLUDE=/usr/include \
-  RUSTFLAGS=-Ctarget-feature=-crt-static \
-  RUSTC_WRAPPER=/sccache \
-  SCCACHE_DIR=/cache \
-  cargo chef cook --release --recipe-path recipe.json && \
-  rm -rf /vitalam-node
-
-# build the vitalam-node image
+WORKDIR /build
+ARG RUST_TOOLCHAIN=nightly-2021-11-09
+RUN rustup install $RUST_TOOLCHAIN && \
+  rustup target add wasm32-unknown-unknown --toolchain $RUST_TOOLCHAIN
 
 FROM build-base as build
 
 COPY . .
-COPY --from=dependencies /cache /cache
-COPY --from=dependencies /usr/local/cargo /usr/local/cargo
 
-RUN PROTOC=$(which protoc) \
-  PROTOC_INCLUDE=/usr/include \
-  RUSTFLAGS=-Ctarget-feature=-crt-static \
-  RUSTC_WRAPPER=/sccache \
-  SCCACHE_DIR=/cache \
-  cargo build --release
+RUN --mount=type=cache,mode=0755,id=sccache,target=/cache \
+    --mount=type=tmpfs,target=/build/target \
+    PROTOC=$(which protoc) \
+    PROTOC_INCLUDE=/usr/include \
+    RUSTFLAGS=-Ctarget-feature=-crt-static \
+    RUSTC_WRAPPER=/sccache \
+    SCCACHE_DIR=/cache \
+    SCCACHE_IDLE_TIMEOUT=0 \
+    cargo build --release && \
+    cp /build/target/release/vitalam-node /vitalam-node
 
 # build the runtime image that will actually contain the final built executable
 
@@ -63,13 +45,11 @@ RUN apk update
 RUN apk add libgcc libstdc++
 
 RUN mkdir /vitalam-node /data
-COPY --from=build /vitalam-node/target/release/vitalam-node /vitalam-node
-
-COPY ./scripts/start-node-docker.sh /vitalam-node/run.sh
+COPY --from=build /vitalam-node /vitalam-node
 
 WORKDIR /vitalam-node
 
-CMD /vitalam-node/run.sh
+CMD /vitalam-node/vitalam-node
 
 EXPOSE 30333 9933 9944
 
