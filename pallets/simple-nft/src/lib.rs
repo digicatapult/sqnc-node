@@ -20,9 +20,9 @@ mod benchmarking;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Token<AccountId, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
+pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord, TokenMetadataValue> {
     id: TokenId,
-    owner: AccountId,
+    roles: BTreeMap<RoleKey, AccountId>,
     creator: AccountId,
     created_at: BlockNumber,
     destroyed_at: Option<BlockNumber>,
@@ -49,6 +49,8 @@ pub mod pallet {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec;
+        type RoleKey: Parameter + Default + Ord;
+
         type TokenMetadataKey: Parameter + Default + Ord;
         type TokenMetadataValue: Parameter + Default;
 
@@ -78,7 +80,7 @@ pub mod pallet {
         _,
         Blake2_128Concat,
         T::TokenId,
-        Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
+        Token<T::AccountId, T::RoleKey, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
         ValueQuery, /*, DefaultForExampleStorage*/
     >;
 
@@ -98,8 +100,10 @@ pub mod pallet {
         NotOwned,
         /// Mutation was attempted on token that has already been burnt
         AlreadyBurnt,
-        /// Mutation was attempted with too many metadata items
+        /// Token mint was attempted with too many metadata items
         TooManyMetadataItems,
+        /// Token mint was attempted without setting a default role
+        NoDefaultRole,
     }
 
     // The pallet's dispatchable functions.
@@ -111,7 +115,10 @@ pub mod pallet {
         pub(super) fn run_process(
             origin: OriginFor<T>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)>,
+            outputs: Vec<(
+                BTreeMap<T::RoleKey, T::AccountId>,
+                BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>,
+            )>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -124,8 +131,11 @@ pub mod pallet {
 
             // INPUT VALIDATION
 
-            // check metadata count
             for output in outputs.iter() {
+                // check at least a default role has been set
+                ensure!(output.0.contains_key(&T::RoleKey::default()), Error::<T>::NoDefaultRole);
+
+                // check metadata count
                 ensure!(
                     output.1.len() <= T::MaxMetadataCount::get() as usize,
                     Error::<T>::TooManyMetadataItems
@@ -135,7 +145,7 @@ pub mod pallet {
             // check origin owns inputs and that inputs have not been burnt
             for id in inputs.iter() {
                 let token = <TokensById<T>>::get(id);
-                ensure!(token.owner == sender, Error::<T>::NotOwned);
+                ensure!(token.roles[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
                 ensure!(token.children == None, Error::<T>::AlreadyBurnt);
             }
 
@@ -147,13 +157,13 @@ pub mod pallet {
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
             let (last, children) = outputs
                 .iter()
-                .fold((last, Vec::new()), |(last, children), (owner, metadata)| {
+                .fold((last, Vec::new()), |(last, children), (roles, metadata)| {
                     let next = _next_token(last);
                     <TokensById<T>>::insert(
                         next,
                         Token {
                             id: next,
-                            owner: owner.clone(),
+                            roles: roles.clone(),
                             creator: sender.clone(),
                             created_at: now,
                             destroyed_at: None,

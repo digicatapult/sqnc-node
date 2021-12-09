@@ -291,6 +291,21 @@ parameter_types! {
     pub const MaxMetadataCount: u32 = 16;
 }
 
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
+pub enum Role {
+    Admin = 0,
+    ManufacturingEngineer = 1,
+    ProcurementBuyer = 2,
+    ProcurementPlanner = 3,
+    Supplier = 4,
+}
+
+impl Default for Role {
+    fn default() -> Self {
+        Role::Admin
+    }
+}
+
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
 pub enum MetadataValue {
     File(Hash),
@@ -308,6 +323,7 @@ impl Default for MetadataValue {
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
     type TokenId = u128;
+    type RoleKey = Role;
     type TokenMetadataKey = [u8; 32];
     type TokenMetadataValue = MetadataValue;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;

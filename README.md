@@ -81,6 +81,7 @@ Then you can run the benchmark tool with for example
 ./target/release/vitalam-node benchmark \
     --pallet 'pallet_simple_nft' \
     --extrinsic '*' \
+    --repeat 1000 \
     --output ./weights/
 ```
 
@@ -104,11 +105,12 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "PeerId": "Vec<u8>",
   "Key": "Vec<u8>",
   "TokenId": "u128",
+  "RoleKey": "Role",
   "TokenMetadataKey": "[u8; 32]",
   "TokenMetadataValue": "MetadataValue",
   "Token": {
     "id": "TokenId",
-    "owner": "AccountId",
+    "roles": "BTreeMap<RoleKey, AccountId>",
     "creator": "AccountId",
     "created_at": "BlockNumber",
     "destroyed_at": "Option<BlockNumber>",
@@ -120,15 +122,18 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "_enum": {
       "File": "Hash",
       "Literal": "[u8; 32]",
-      "None": "null",
-    },
+      "None": "null"
+    }
   },
+  "Role": {
+    "_enum": ["Admin", "ManufacturingEngineer", "ProcurementBuyer", "ProcurementPlanner", "Supplier"]
+  }
 }
 ```
 
 ### SimpleNFT pallet
 
-The `SimpleNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval. All of the additional types listed above, apart from `PeerId`, are for the `SimpleNFT` pallet.
+The `SimpleNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval.
 
 Note: The json object with types, described above, has been upgraded from `"Address": "AccountId", "LookupSource": "AccountId"` to `"Address": "MultiAddress", "LookupSource": "MultiAddress"` and it also needs to be used in conjunction with the new version of _PolkaDot JS_, **v4.7.2** or higher.
 
@@ -136,13 +141,13 @@ Two storage endpoints are then exposed under `SimpleNFT` for the id of the last 
 
 ```rust
 LastToken get(fn last_token): T::TokenId;
-TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>;
+TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::RoleKey, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>;
 ```
 
 Tokens can be minted/burnt by calling the following extrinsic under `SimpleNFT`:
 
 ```rust
-pub fn run_process(origin, inputs: Vec<T::TokenId>, outputs: Vec<(T::AccountId, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)> -> dispatch::DispatchResult { ... }
+pub fn run_process(origin, inputs: Vec<T::TokenId>, outputs: Vec<(BTreeMap<T::RoleKey, T::AccountId>, BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>)> -> dispatch::DispatchResult { ... }
 ```
 
 All of this functionality can be easily accessed using [https://polkadot.js.org/apps](https://polkadot.js.org/apps) against a running `dev` node. You will need to add a network endpoint of `ws://localhost:9944` under `Settings` and apply the above type configurations in the `Settings/Developer` tab.
