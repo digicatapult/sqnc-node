@@ -1,41 +1,71 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.3-labs
 
-# build base that sets up common dependencies of the build
-FROM rust:alpine as build-base
-
-RUN apk add --no-cache \
-  clang clang-dev clang-libs pkgconfig bearssl-dev git \
-  gcc make g++ linux-headers protobuf protobuf-dev musl-dev
-
-RUN set -ex; \
-  wget https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_amd64 -P /; \
-  mv /fetch_linux_amd64 /fetch; \
-  chmod +x /fetch; \
-  /fetch --repo="https://github.com/mozilla/sccache" --tag="~>0.2.15" --release-asset="^sccache-v[0-9.]*-x86_64-unknown-linux-musl.tar.gz$" /; \
-  tar -xvf /sccache-v*-x86_64-unknown-linux-musl.tar.gz -C /; \
-  mv /sccache-v*-x86_64-unknown-linux-musl/sccache /sccache; \
-  rm -rf /sccache-v*-x86_64-unknown-linux-musl /sccache-v*-x86_64-unknown-linux-musl.tar.gz /fetch; \
-  chmod +x /sccache;
-
-WORKDIR /build
-ARG RUST_TOOLCHAIN=nightly-2021-11-09
-RUN rustup install $RUST_TOOLCHAIN && \
-  rustup target add wasm32-unknown-unknown --toolchain $RUST_TOOLCHAIN
-
-FROM build-base as build
+ARG BUILD_BASE_VERSION=nightly-2021-11-09-alpine3.14
+FROM ghcr.io/digicatapult/substrate-docker-build-base:BUILD_BASE_VERSION as build
 
 COPY . .
 
-RUN --mount=type=cache,mode=0755,id=sccache,target=/cache \
-    --mount=type=tmpfs,target=/build/target \
-    PROTOC=$(which protoc) \
-    PROTOC_INCLUDE=/usr/include \
-    RUSTFLAGS=-Ctarget-feature=-crt-static \
-    RUSTC_WRAPPER=/sccache \
-    SCCACHE_DIR=/cache \
-    SCCACHE_IDLE_TIMEOUT=0 \
-    cargo build --release && \
-    cp /build/target/release/vitalam-node /vitalam-node
+# local sccache config args
+ARG BUILD_CONFIG_SCCACHE_LOCAL=1
+ARG BUILD_CONFIG_SCCACHE_CACHE_SIZE=10G
+
+# S3 sccache config args
+ARG BUILD_CONFIG_SCCACHE_BUCKET
+ARG BUILD_CONFIG_AWS_ACCESS_KEY_ID
+ARG BUILD_CONFIG_AWS_SECRET_ACCESS_KEY
+ARG BUILD_CONFIG_AWS_IAM_CREDENTIALS_URL
+ARG BUILD_CONFIG_SCCACHE_ENDPOINT
+ARG BUILD_CONFIG_SCCACHE_S3_USE_SSL
+ARG BUILD_CONFIG_SCCACHE_S3_KEY_PREFIX
+
+# Redis sccache config args
+ARG BUILD_CONFIG_SCCACHE_REDIS
+
+# Memcached sccache config args
+ARG BUILD_CONFIG_SCCACHE_MEMCACHED
+
+# Google Cloud Storage sccache args
+ARG BUILD_CONFIG_SCCACHE_GCS_BUCKET
+ARG BUILD_CONFIG_SCCACHE_GCS_KEY_PATH
+ARG BUILD_CONFIG_SCCACHE_GCS_CREDENTIALS_URL
+ARG BUILD_CONFIG_SCCACHE_GCS_RW_MODE
+
+# Azure blob storage scccache args
+ARG BUILD_CONFIG_SCCACHE_AZURE_CONNECTION_STRING
+ARG BUILD_CONFIG_SCCACHE_AZURE_BLOB_CONTAINER
+
+# setup build envs
+COPY <<EOF /build/build-envs
+PROTOC=$(which protoc)
+PROTOC_INCLUDE=/usr/include
+RUSTFLAGS=-Ctarget-feature=-crt-static
+RUSTC_WRAPPER=/sccache
+SCCACHE_DIR=$([[ -z "$BUILD_CONFIG_SCCACHE_LOCAL" ]] || echo "/cache")
+SCCACHE_CACHE_SIZE=$BUILD_CONFIG_SCCACHE_CACHE_SIZE
+SCCACHE_BUCKET=$BUILD_CONFIG_SCCACHE_BUCKET
+AWS_ACCESS_KEY_ID=$BUILD_CONFIG_AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY=$BUILD_CONFIG_AWS_SECRET_ACCESS_KEY
+AWS_IAM_CREDENTIALS_URL=$BUILD_CONFIG_AWS_IAM_CREDENTIALS_URL
+SCCACHE_ENDPOINT=$BUILD_CONFIG_SCCACHE_ENDPOINT
+SCCACHE_S3_USE_SSL=$BUILD_CONFIG_SCCACHE_S3_USE_SSL
+SCCACHE_S3_KEY_PREFIX=$BUILD_CONFIG_SCCACHE_S3_KEY_PREFIX
+SCCACHE_REDIS=$BUILD_CONFIG_SCCACHE_REDIS
+SCCACHE_MEMCACHED=$BUILD_CONFIG_SCCACHE_MEMCACHED
+SCCACHE_GCS_BUCKET=$BUILD_CONFIG_SCCACHE_GCS_BUCKET
+SCCACHE_GCS_KEY_PATH=$BUILD_CONFIG_SCCACHE_GCS_KEY_PATH
+SCCACHE_GCS_CREDENTIALS_URL=$BUILD_CONFIG_SCCACHE_GCS_CREDENTIALS_URL
+SCCACHE_GCS_RW_MODE=$BUILD_CONFIG_SCCACHE_GCS_RW_MODE
+SCCACHE_AZURE_CONNECTION_STRING=$BUILD_CONFIG_SCCACHE_AZURE_CONNECTION_STRING
+SCCACHE_AZURE_BLOB_CONTAINER=$BUILD_CONFIG_SCCACHE_AZURE_BLOB_CONTAINER
+SCCACHE_IDLE_TIMEOUT=0
+EOF
+
+RUN <<EOF
+source /build/build-envs
+cargo build --release
+cp /build/target/release/vitalam-node /vitalam-node
+rm -rf /build/target
+EOF
 
 # build the runtime image that will actually contain the final built executable
 
@@ -52,5 +82,3 @@ WORKDIR /vitalam-node
 CMD /vitalam-node/vitalam-node
 
 EXPOSE 30333 9933 9944
-
-# docker run -it --rm -h node-0 -e IDENTITY=dev -e WS=true -p 30333:30333 -p 9944:9944 -p 9933:9933 vitalam-substrate-node ./run.sh
