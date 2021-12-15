@@ -154,7 +154,7 @@ jobs:
         BRANCH: ${{ github.ref_name }}
       run: |
         TAG=$(echo "$BRANCH" | sed 's/\//-/g')
-        echo "##[set-output name=branch_tag;]ghcr.io/digicatapult/vitalam-node:$TAG";
+        echo "##[set-output name=branch_tag;]branch-$TAG";
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v1
       with:
@@ -176,7 +176,7 @@ jobs:
         file: ./Dockerfile
         platforms: linux/amd64
         tags: |
-          ghcr.io/digicatapult/vitalam-node:branch-${{ steps.generate-tags.outputs.branch_tag }}
+          ghcr.io/digicatapult/vitalam-node:${{ steps.generate-tags.outputs.branch_tag }}
         labels: |
           org.opencontainers.image.title=vitalam-node
           org.opencontainers.image.description=${{ github.event.repository.description }}
