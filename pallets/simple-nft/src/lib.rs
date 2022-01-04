@@ -33,6 +33,14 @@ pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord
     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
 }
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct Output<AccountId, RoleKey, TokenMetadataKey: Ord, TokenMetadataValue> {
+    roles: BTreeMap<RoleKey, AccountId>,
+    metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
+    parent_index: Option<u32>,
+}
+
 pub mod weights;
 
 pub use weights::WeightInfo;
@@ -121,11 +129,7 @@ pub mod pallet {
         pub(super) fn run_process(
             origin: OriginFor<T>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<(
-                BTreeMap<T::RoleKey, T::AccountId>,
-                BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>,
-                Option<u32>,
-            )>,
+            outputs: Vec<Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -143,17 +147,20 @@ pub mod pallet {
 
             for output in outputs.iter() {
                 // check at least a default role has been set
-                ensure!(output.0.contains_key(&T::RoleKey::default()), Error::<T>::NoDefaultRole);
+                ensure!(
+                    output.roles.contains_key(&T::RoleKey::default()),
+                    Error::<T>::NoDefaultRole
+                );
 
                 // check metadata count
                 ensure!(
-                    output.1.len() <= T::MaxMetadataCount::get() as usize,
+                    output.metadata.len() <= T::MaxMetadataCount::get() as usize,
                     Error::<T>::TooManyMetadataItems
                 );
 
                 // check parent index
-                if output.2.is_some() {
-                    let index = output.2.unwrap() as usize;
+                if output.parent_index.is_some() {
+                    let index = output.parent_index.unwrap() as usize;
                     ensure!(inputs.get(index).is_some(), Error::<T>::OutOfBoundsParent);
                     ensure!(parent_indices.insert(index), Error::<T>::DuplicateParents);
                 }
@@ -172,34 +179,31 @@ pub mod pallet {
             let last = LastToken::<T>::get();
 
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) = outputs.iter().fold(
-                (last, Vec::new()),
-                |(last, children), (roles, metadata, parent_index)| {
-                    let next = _next_token(last);
-                    let original_id = if parent_index.is_some() {
-                        inputs.get(parent_index.unwrap() as usize).unwrap().clone()
-                    } else {
-                        next
-                    };
-                    <TokensById<T>>::insert(
-                        next,
-                        Token {
-                            id: next,
-                            original_id: original_id,
-                            roles: roles.clone(),
-                            creator: sender.clone(),
-                            created_at: now,
-                            destroyed_at: None,
-                            metadata: metadata.clone(),
-                            parents: inputs.clone(),
-                            children: None,
-                        },
-                    );
-                    let mut next_children = children.clone();
-                    next_children.push(next);
-                    (next, next_children)
-                },
-            );
+            let (last, children) = outputs.iter().fold((last, Vec::new()), |(last, children), output| {
+                let next = _next_token(last);
+                let original_id = if output.parent_index.is_some() {
+                    inputs.get(output.parent_index.unwrap() as usize).unwrap().clone()
+                } else {
+                    next
+                };
+                <TokensById<T>>::insert(
+                    next,
+                    Token {
+                        id: next,
+                        original_id: original_id,
+                        roles: output.roles.clone(),
+                        creator: sender.clone(),
+                        created_at: now,
+                        destroyed_at: None,
+                        metadata: output.metadata.clone(),
+                        parents: inputs.clone(),
+                        children: None,
+                    },
+                );
+                let mut next_children = children.clone();
+                next_children.push(next);
+                (next, next_children)
+            });
 
             // Burn inputs
             inputs.iter().for_each(|id| {
