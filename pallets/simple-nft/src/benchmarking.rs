@@ -9,6 +9,7 @@ use sp_std::{boxed::Box, vec, vec::Vec};
 
 #[allow(unused)]
 use crate::Module as SimpleNFT;
+use crate::Output;
 
 const SEED: u32 = 0;
 
@@ -20,7 +21,13 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
     // let _ = T::Currency::make_free_balance_be(&owner, BalanceOf::<T>::max_value());
 
-    let outputs: Vec<_> = (0..r).map(|_| (roles.clone(), metadata.clone(), None)).collect();
+    let outputs: Vec<_> = (0..r)
+        .map(|_| Output {
+            roles: roles.clone(),
+            metadata: metadata.clone(),
+            parent_index: None,
+        })
+        .collect();
     SimpleNFT::<T>::run_process(RawOrigin::Signed(account_id.clone()).into(), Vec::new(), outputs)?;
 
     let expected_last_token = nth_token_id::<T>(r)?;
@@ -42,26 +49,17 @@ fn mk_inputs<T: Config>(i: u32) -> Result<Vec<T::TokenId>, &'static str> {
 fn mk_outputs<T: Config>(
     o: u32,
     inputs_len: u32,
-) -> Result<
-    Vec<(
-        BTreeMap<T::RoleKey, T::AccountId>,
-        BTreeMap<T::TokenMetadataKey, T::TokenMetadataValue>,
-        Option<u32>,
-    )>,
-    &'static str,
-> {
+) -> Result<Vec<Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>, &'static str> {
     let account_id: T::AccountId = account("owner", 0, SEED);
     let mut roles = BTreeMap::new();
     let mut metadata = BTreeMap::new();
     roles.insert(T::RoleKey::default(), account_id.clone());
     metadata.insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default());
     let outputs = (0..o)
-        .map(|output_index| {
-            (
-                roles.clone(),
-                metadata.clone(),
-                valid_parent_index(inputs_len, output_index),
-            )
+        .map(|output_index| Output {
+            roles: roles.clone(),
+            metadata: metadata.clone(),
+            parent_index: valid_parent_index(inputs_len, output_index),
         })
         .collect::<Vec<_>>();
 
