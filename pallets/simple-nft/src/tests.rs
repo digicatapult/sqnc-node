@@ -1,6 +1,6 @@
 // Tests to be written here
 
-use crate::{mock::*, Error, Token};
+use crate::{mock::*, Error, Output, Token};
 use frame_support::{assert_err, assert_ok};
 use sp_core::H256;
 use sp_std::collections::btree_map::BTreeMap;
@@ -16,7 +16,11 @@ fn it_works_for_creating_token_with_file() {
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles.clone(), metadata.clone())]
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None
+            }]
         ));
         // last token should be 1
         assert_eq!(SimpleNFTModule::last_token(), 1);
@@ -26,6 +30,7 @@ fn it_works_for_creating_token_with_file() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -47,7 +52,11 @@ fn it_works_for_creating_token_with_literal() {
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles.clone(), metadata.clone())]
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None
+            }]
         ));
         // last token should be 1
         assert_eq!(SimpleNFTModule::last_token(), 1);
@@ -57,6 +66,7 @@ fn it_works_for_creating_token_with_literal() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -78,7 +88,11 @@ fn it_works_for_creating_token_with_no_metadata_value() {
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles.clone(), metadata.clone())]
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None
+            }]
         ));
         // last token should be 1
         assert_eq!(SimpleNFTModule::last_token(), 1);
@@ -88,6 +102,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -113,7 +128,11 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles.clone(), metadata.clone())]
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None
+            }]
         ));
         // last token should be 1
         assert_eq!(SimpleNFTModule::last_token(), 1);
@@ -123,6 +142,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -144,7 +164,11 @@ fn it_works_for_creating_token_with_multiple_roles() {
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles.clone(), metadata.clone())]
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None
+            }]
         ));
         // last token should be 1
         assert_eq!(SimpleNFTModule::last_token(), 1);
@@ -154,6 +178,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -178,9 +203,21 @@ fn it_works_for_creating_many_token() {
             Origin::signed(1),
             Vec::new(),
             vec![
-                (roles.clone(), metadata0.clone()),
-                (roles.clone(), metadata1.clone()),
-                (roles.clone(), metadata2.clone())
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata0.clone(),
+                    parent_index: None
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata1.clone(),
+                    parent_index: None
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata2.clone(),
+                    parent_index: None
+                }
             ]
         ));
         // last token should be 3
@@ -191,6 +228,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -205,6 +243,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 2,
+                original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -219,6 +258,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 3,
+                original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -243,9 +283,21 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Origin::signed(1),
             Vec::new(),
             vec![
-                (roles.clone(), metadata0.clone()),
-                (roles.clone(), metadata1.clone()),
-                (roles.clone(), metadata2.clone())
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata0.clone(),
+                    parent_index: None
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata1.clone(),
+                    parent_index: None
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata2.clone(),
+                    parent_index: None
+                }
             ]
         ));
         // last token should be 3
@@ -256,6 +308,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -270,6 +323,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 2,
+                original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -284,6 +338,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 3,
+                original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -301,7 +356,16 @@ fn it_works_for_destroying_single_token() {
     new_test_ext().execute_with(|| {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // create a token with no parents
         assert_ok!(SimpleNFTModule::run_process(Origin::signed(1), vec![1], Vec::new()));
         // assert no more tokens were created
@@ -312,6 +376,7 @@ fn it_works_for_destroying_single_token() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -335,9 +400,21 @@ fn it_works_for_destroying_many_tokens() {
             Origin::signed(1),
             Vec::new(),
             vec![
-                (roles.clone(), metadata0.clone()),
-                (roles.clone(), metadata1.clone()),
-                (roles.clone(), metadata2.clone()),
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata0.clone(),
+                    parent_index: None,
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata1.clone(),
+                    parent_index: None,
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata2.clone(),
+                    parent_index: None,
+                },
             ],
         )
         .unwrap();
@@ -355,6 +432,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -369,6 +447,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 2,
+                original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -383,6 +462,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 3,
+                original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -398,16 +478,29 @@ fn it_works_for_destroying_many_tokens() {
 #[test]
 fn it_works_for_creating_and_destroy_single_tokens() {
     new_test_ext().execute_with(|| {
-        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
-        let roles2 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let roles0 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
         let metadata0 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         let metadata1 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles1.clone(), metadata0.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles0.clone(),
+                metadata: metadata0.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // create a token with a parent
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             vec![1],
-            vec![(roles2.clone(), metadata1.clone())]
+            vec![Output {
+                roles: roles1.clone(),
+                metadata: metadata1.clone(),
+                parent_index: Some(0)
+            }]
         ));
         // assert 1 more token was created
         assert_eq!(SimpleNFTModule::last_token(), 2);
@@ -417,7 +510,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             token,
             Token {
                 id: 1,
-                roles: roles1.clone(),
+                original_id: 1,
+                roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
@@ -431,7 +525,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             token,
             Token {
                 id: 2,
-                roles: roles2.clone(),
+                original_id: 1,
+                roles: roles1.clone(),
                 creator: 1,
                 created_at: 0,
                 destroyed_at: None,
@@ -446,8 +541,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
 #[test]
 fn it_works_for_creating_and_destroy_many_tokens() {
     new_test_ext().execute_with(|| {
-        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
-        let roles2 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let roles0 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
         let metadata0 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         let metadata1 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         let metadata2 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
@@ -455,14 +550,36 @@ fn it_works_for_creating_and_destroy_many_tokens() {
         SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles1.clone(), metadata0.clone()), (roles1.clone(), metadata1.clone())],
+            vec![
+                Output {
+                    roles: roles0.clone(),
+                    metadata: metadata0.clone(),
+                    parent_index: None,
+                },
+                Output {
+                    roles: roles0.clone(),
+                    metadata: metadata1.clone(),
+                    parent_index: None,
+                },
+            ],
         )
         .unwrap();
-        // create a token with 2 parents
+        // create 2 tokens with 2 parents
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
             vec![1, 2],
-            vec![(roles1.clone(), metadata2.clone()), (roles2.clone(), metadata3.clone())]
+            vec![
+                Output {
+                    roles: roles0.clone(),
+                    metadata: metadata2.clone(),
+                    parent_index: Some(0)
+                },
+                Output {
+                    roles: roles1.clone(),
+                    metadata: metadata3.clone(),
+                    parent_index: Some(1)
+                },
+            ]
         ));
         // assert 2 more tokens were created
         assert_eq!(SimpleNFTModule::last_token(), 4);
@@ -472,7 +589,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 1,
-                roles: roles1.clone(),
+                original_id: 1,
+                roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
@@ -486,7 +604,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 2,
-                roles: roles1.clone(),
+                original_id: 2,
+                roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
@@ -501,7 +620,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 3,
-                roles: roles1.clone(),
+                original_id: 1,
+                roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
                 destroyed_at: None,
@@ -515,7 +635,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 4,
-                roles: roles2.clone(),
+                original_id: 2,
+                roles: roles1.clone(),
                 creator: 1,
                 created_at: 0,
                 destroyed_at: None,
@@ -532,7 +653,16 @@ fn it_fails_for_destroying_single_token_as_incorrect_role() {
     new_test_ext().execute_with(|| {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotAdmin, 2)]);
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);
         // Try to destroy token as incorrect user
@@ -552,7 +682,16 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
     new_test_ext().execute_with(|| {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);
         // Try to destroy token as incorrect user
@@ -573,8 +712,26 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let metadata0 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         let metadata1 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(2), Vec::new(), vec![(roles.clone(), metadata0.clone())]).unwrap();
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata1.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(2),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata0.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata1.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // get old token
         let token_1 = SimpleNFTModule::tokens_by_id(1);
         let token_2 = SimpleNFTModule::tokens_by_id(2);
@@ -598,13 +755,30 @@ fn it_fails_for_destroying_single_burnt_token() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let metadata0 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         let metadata1 = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata0.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata0.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), vec![1], Vec::new()).unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);
         // Try to destroy token as incorrect user
         assert_err!(
-            SimpleNFTModule::run_process(Origin::signed(1), vec![1], vec![(roles.clone(), metadata1.clone())]),
+            SimpleNFTModule::run_process(
+                Origin::signed(1),
+                vec![1],
+                vec![Output {
+                    roles: roles.clone(),
+                    metadata: metadata1.clone(),
+                    parent_index: None
+                }]
+            ),
             Error::<Test>::AlreadyBurnt
         );
         // assert no more tokens were created
@@ -624,7 +798,18 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         SimpleNFTModule::run_process(
             Origin::signed(1),
             Vec::new(),
-            vec![(roles.clone(), metadata0.clone()), (roles.clone(), metadata1.clone())],
+            vec![
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata0.clone(),
+                    parent_index: None,
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata1.clone(),
+                    parent_index: None,
+                },
+            ],
         )
         .unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), vec![1], Vec::new()).unwrap();
@@ -634,7 +819,15 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         let token_2 = SimpleNFTModule::tokens_by_id(2);
         // Try to destroy token as incorrect user
         assert_err!(
-            SimpleNFTModule::run_process(Origin::signed(1), vec![1, 2], vec![(roles.clone(), metadata2.clone())]),
+            SimpleNFTModule::run_process(
+                Origin::signed(1),
+                vec![1, 2],
+                vec![Output {
+                    roles: roles.clone(),
+                    metadata: metadata2.clone(),
+                    parent_index: None,
+                },],
+            ),
             Error::<Test>::AlreadyBurnt
         );
         // assert no more tokens were created
@@ -643,6 +836,87 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         assert_eq!(token_1, SimpleNFTModule::tokens_by_id(1));
         // assert old token hasn't changed
         assert_eq!(token_2, SimpleNFTModule::tokens_by_id(2));
+    });
+}
+
+#[test]
+fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
+    new_test_ext().execute_with(|| {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
+        // get old token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        // try to use an out of bounds index to set parents from one of the inputs
+        assert_err!(
+            SimpleNFTModule::run_process(
+                Origin::signed(2),
+                vec![1],
+                vec![Output {
+                    roles: roles.clone(),
+                    metadata: metadata.clone(),
+                    parent_index: Some(10),
+                },],
+            ),
+            Error::<Test>::OutOfBoundsParent
+        );
+        // assert no more tokens were created
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // assert old token hasn't changed
+        assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
+    });
+}
+
+#[test]
+fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
+    new_test_ext().execute_with(|| {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
+        // get old token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        // try to set two tokens to have the same parent
+        assert_err!(
+            SimpleNFTModule::run_process(
+                Origin::signed(2),
+                vec![1],
+                vec![
+                    Output {
+                        roles: roles.clone(),
+                        metadata: metadata.clone(),
+                        parent_index: Some(0),
+                    },
+                    Output {
+                        roles: roles.clone(),
+                        metadata: metadata.clone(),
+                        parent_index: Some(0),
+                    },
+                ],
+            ),
+            Error::<Test>::DuplicateParents
+        );
+        // assert no more tokens were created
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // assert old token hasn't changed
+        assert_eq!(token, SimpleNFTModule::tokens_by_id(1));
     });
 }
 
@@ -657,7 +931,16 @@ fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
             (2, MetadataValue::None),
             (3, MetadataValue::None),
         ]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata0.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata0.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);
         // Try to create token with too many metadata items
@@ -665,7 +948,11 @@ fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
             SimpleNFTModule::run_process(
                 Origin::signed(1),
                 Vec::new(),
-                vec![(roles.clone(), metadata_too_many.clone())]
+                vec![Output {
+                    roles: roles.clone(),
+                    metadata: metadata_too_many.clone(),
+                    parent_index: None,
+                },],
             ),
             Error::<Test>::TooManyMetadataItems
         );
@@ -682,7 +969,16 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let roles_empty = BTreeMap::new();
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
-        SimpleNFTModule::run_process(Origin::signed(1), Vec::new(), vec![(roles.clone(), metadata.clone())]).unwrap();
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
         // get old token
         let token = SimpleNFTModule::tokens_by_id(1);
         // Try to create token without setting default role in roles
@@ -690,7 +986,11 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
             SimpleNFTModule::run_process(
                 Origin::signed(1),
                 Vec::new(),
-                vec![(roles_empty.clone(), metadata.clone())]
+                vec![Output {
+                    roles: roles_empty.clone(),
+                    metadata: metadata.clone(),
+                    parent_index: None,
+                },],
             ),
             Error::<Test>::NoDefaultRole
         );
