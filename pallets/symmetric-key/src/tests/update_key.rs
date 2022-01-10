@@ -7,8 +7,14 @@ use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 fn update_key_as_root() {
     new_test_ext().execute_with(|| {
         let new_key = (0..32).collect::<Vec<u8>>();
+        System::set_block_number(1);
+
         assert_ok!(SymmetricKey::update_key(Origin::root(), new_key.clone()));
         assert_eq!(SymmetricKey::key(), new_key.clone());
+        assert_eq!(
+            System::events().iter().last().unwrap().event,
+            Event::pallet_symmetric_key(pallet_symmetric_key::Event::UpdateKey(new_key)),
+        )
     });
 }
 

@@ -129,6 +129,7 @@ pub mod pallet {
             );
 
             <Key<T>>::put(&new_key);
+            Self::deposit_event(Event::UpdateKey(new_key));
 
             Ok(().into())
         }
