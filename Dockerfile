@@ -26,31 +26,31 @@ FROM build-base as build
 
 COPY . .
 
-RUN --mount=type=cache,mode=0755,id=sccache,target=/cache \
-    --mount=type=tmpfs,target=/build/target \
-    PROTOC=$(which protoc) \
-    PROTOC_INCLUDE=/usr/include \
-    RUSTFLAGS=-Ctarget-feature=-crt-static \
-    RUSTC_WRAPPER=/sccache \
-    SCCACHE_DIR=/cache \
-    SCCACHE_IDLE_TIMEOUT=0 \
-    cargo build --release && \
-    cp /build/target/release/vitalam-node /vitalam-node
+# RUN --mount=type=cache,mode=0755,id=sccache,target=/cache \
+#     --mount=type=tmpfs,target=/build/target \
+#     PROTOC=$(which protoc) \
+#     PROTOC_INCLUDE=/usr/include \
+#     RUSTFLAGS=-Ctarget-feature=-crt-static \
+#     RUSTC_WRAPPER=/sccache \
+#     SCCACHE_DIR=/cache \
+#     SCCACHE_IDLE_TIMEOUT=0 \
+#     cargo build --release && \
+#     cp /build/target/release/vitalam-node /vitalam-node
 
-# build the runtime image that will actually contain the final built executable
+# # build the runtime image that will actually contain the final built executable
 
-FROM alpine:3.12 AS runtime
+# FROM alpine:3.12 AS runtime
 
-RUN apk update
-RUN apk add libgcc libstdc++
+# RUN apk update
+# RUN apk add libgcc libstdc++
 
-RUN mkdir /vitalam-node /data
-COPY --from=build /vitalam-node /vitalam-node
+# RUN mkdir /vitalam-node /data
+# COPY --from=build /vitalam-node /vitalam-node
 
-WORKDIR /vitalam-node
+# WORKDIR /vitalam-node
 
-CMD /vitalam-node/vitalam-node
+# CMD /vitalam-node/vitalam-node
 
-EXPOSE 30333 9933 9944
+# EXPOSE 30333 9933 9944
 
 # docker run -it --rm -h node-0 -e IDENTITY=dev -e WS=true -p 30333:30333 -p 9944:9944 -p 9933:9933 vitalam-substrate-node ./run.sh
