@@ -95,7 +95,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("vitalam-node"),
     impl_name: create_runtime_str!("vitalam-node"),
     authoring_version: 1,
-    spec_version: 201,
+    spec_version: 210,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -307,13 +307,14 @@ impl Default for Role {
 }
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
-pub enum MetadataValue {
+pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 32]),
+    TokenId(TokenId),
     None,
 }
 
-impl Default for MetadataValue {
+impl <T>Default for MetadataValue<T> {
     fn default() -> Self {
         MetadataValue::None
     }
@@ -325,7 +326,7 @@ impl pallet_simple_nft::Config for Runtime {
     type TokenId = u128;
     type RoleKey = Role;
     type TokenMetadataKey = [u8; 32];
-    type TokenMetadataValue = MetadataValue;
+    type TokenMetadataValue = MetadataValue<Self::TokenId>;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = MaxMetadataCount;
 }
