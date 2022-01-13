@@ -62,7 +62,7 @@ impl system::Config for Test {
 }
 
 parameter_types! {
-    pub const MaxMetadataCount: u32 = 3;
+    pub const MaxMetadataCount: u32 = 4;
 }
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
@@ -78,13 +78,14 @@ impl Default for Role {
 }
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
-pub enum MetadataValue {
+pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 1]),
+    TokenId(TokenId),
     None,
 }
 
-impl Default for MetadataValue {
+impl<T> Default for MetadataValue<T> {
     fn default() -> Self {
         MetadataValue::None
     }
@@ -96,7 +97,7 @@ impl pallet_simple_nft::Config for Test {
     type TokenId = u64;
     type RoleKey = Role;
     type TokenMetadataKey = u64;
-    type TokenMetadataValue = MetadataValue;
+    type TokenMetadataValue = MetadataValue<Self::TokenId>;
 
     type WeightInfo = ();
 

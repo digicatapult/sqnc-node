@@ -127,6 +127,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "_enum": {
       "File": "Hash",
       "Literal": "[u8; 32]",
+      "TokenId": "TokenId",
       "None": "null"
     }
   },
