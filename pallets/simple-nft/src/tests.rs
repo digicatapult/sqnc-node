@@ -80,6 +80,42 @@ fn it_works_for_creating_token_with_literal() {
 }
 
 #[test]
+fn it_works_for_creating_token_with_token_id_in_metadata() {
+    new_test_ext().execute_with(|| {
+        // create a token with no parents
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::TokenId(0))]);
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None
+            }]
+        ));
+        // last token should be 1
+        assert_eq!(SimpleNFTModule::last_token(), 1);
+        // get the token
+        let token = SimpleNFTModule::tokens_by_id(1);
+        assert_eq!(
+            token,
+            Token {
+                id: 1,
+                original_id: 1,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata.clone(),
+                parents: Vec::new(),
+                children: None
+            }
+        );
+    });
+}
+
+#[test]
 fn it_works_for_creating_token_with_no_metadata_value() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
@@ -123,7 +159,8 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
         let metadata = BTreeMap::from_iter(vec![
             (0, MetadataValue::File(H256::zero())),
             (1, MetadataValue::Literal([0])),
-            (2, MetadataValue::None),
+            (2, MetadataValue::TokenId(0)),
+            (3, MetadataValue::None),
         ]);
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
@@ -930,6 +967,7 @@ fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
             (1, MetadataValue::None),
             (2, MetadataValue::None),
             (3, MetadataValue::None),
+            (4, MetadataValue::None),
         ]);
         SimpleNFTModule::run_process(
             Origin::signed(1),
