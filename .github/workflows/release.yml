@@ -41,7 +41,7 @@ jobs:
   build-docker-build-base:
     name: Build Docker Build Base Image
     runs-on: ubuntu-latest
-    needs: [get-version]
+    needs: [get-version, build-release]
     steps:
     - uses: actions/checkout@master
     - name: Setup QEMU
@@ -193,7 +193,7 @@ jobs:
   build-release:
     name: Build release
     runs-on: ubuntu-latest
-    needs: [build-docker, get-version]
+    needs: [get-version]
     if: ${{ needs.get-version.outputs.is_new_version == 'true' }}
 
     steps:
