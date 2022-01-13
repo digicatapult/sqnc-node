@@ -25,5 +25,3 @@ WORKDIR /vitalam-node
 ENTRYPOINT [ "/vitalam-node/vitalam-node" ]
 
 EXPOSE 30333 9933 9944
-
-#docker run -it --rm -h node-0 -e IDENTITY=dev -e WS=true -p 30333:30333 -p 9944:9944 -p 9933:9933 vitalam-substrate-node ./run.sh
