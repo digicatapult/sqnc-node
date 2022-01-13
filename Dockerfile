@@ -6,10 +6,10 @@ WORKDIR /tmp/vitalam-node/
 
 RUN curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_amd64 --output ./fetch && chmod +x ./fetch
 
-ARG VITALAM_VERSION
+ARG VITALAM_VERSION=latest
 
-RUN ./fetch --repo="https://github.com/digicatapult/vitalam-node" --tag="${VITALAM_VERSION}" --release-asset="vitalam-node-${VITALAM_VERSION}-x86_64-unknown-linux-gnu.tar.gz" ./ \
-  && tar -xzf ./vitalam-node-${VITALAM_VERSION}-x86_64-unknown-linux-gnu.tar.gz 
+RUN ./fetch --repo="https://github.com/digicatapult/vitalam-node" --tag="${VITALAM_VERSION}" --release-asset="vitalam-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./ \
+  && tar -xzf ./vitalam-node-*-x86_64-unknown-linux-gnu.tar.gz 
 
 FROM bitnami/minideb:bullseye AS runtime
 
