@@ -73,7 +73,7 @@ jobs:
           RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
         file: ./Dockerfile
         platforms: linux/amd64
-        target: build-base
+        target: setup
     - name: Move cache
       env:
         CACHE_NEW: ${{ runner.temp }}/docker-buildx-cache-new
