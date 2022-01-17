@@ -30,8 +30,7 @@ function get_current_version() {
   branch_name="(unnamed branch)"     # detached HEAD (or possibly github workflow?)
   branch_name=${branch_name##refs/heads/}
 
-  if [ $GITHUB_REF != "" ]; then
-    printf "Github reference: %s" $GITHUB_REF
+  if [ $GITHUB_HEAD_REF != "" ]; then
     branch_name=$GITHUB_HEAD_REF
   fi
 
