@@ -23,6 +23,27 @@ function check_version_greater () {
   fi
 }
 
+function get_current_version() {
+  CURRENT_VERSION=$(tomlq package.version -f ./node/Cargo.toml | sed 's/"//g')
+
+  branch_name="$(git symbolic-ref HEAD 2>/dev/null)" ||
+  branch_name="(unnamed branch)"     # detached HEAD
+
+  branch_name=${branch_name##refs/heads/}
+
+  if [ "$branch_name" != "main" ]; then
+    CURRENT_VERSION=$(printf '%s-%s' "$CURRENT_VERSION" "$branch_name")
+    IS_PRERELEASE=true;
+  fi
+
+  release_type="release"
+  if [ $IS_PRERELEASE ]; then
+    release_type="prerelease"
+  fi
+  
+  printf "Current %s found to be %s\n" "$release_type" "$CURRENT_VERSION"
+}
+
 function install_tomlq() {
   echo "checking tomlq installation";
   if ! command -v tomlq &> /dev/null; then
@@ -31,7 +52,6 @@ function install_tomlq() {
   else
     echo "tomlq installation found";
   fi
-    echo "closing";
 }
 
 install_tomlq
@@ -39,13 +59,14 @@ install_tomlq
 # Get published git tags that match semver regex with a "v" prefixbash then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from node Cargo.toml
-CURRENT_VERSION=$(tomlq package.version -f ./node/Cargo.toml | sed 's/"//g')
+
+get_current_version
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
   echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
   echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   echo "##[set-output name=IS_NEW_VERSION;]true"
-  if [[ $CURRENT_VERSION =~ [-] ]]; then
+  if [ $IS_PRERELEASE ]; then
     echo "##[set-output name=IS_PRERELEASE;]true"
   else
     echo "##[set-output name=IS_PRERELEASE;]false"
