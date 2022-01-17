@@ -24,7 +24,7 @@ function check_version_greater () {
 }
 
 function get_current_version() {
-  CURRENT_VERSION=$(tomlq .package.version -f ./node/Cargo.toml | sed 's/"//g')
+  CURRENT_VERSION=$(tomlq .package.version ./node/Cargo.toml | sed 's/"//g')
 
   branch_name="$(git symbolic-ref HEAD 2>/dev/null)" ||
   branch_name="(unnamed branch)"     # detached HEAD (or possibly github workflow?)
@@ -32,6 +32,12 @@ function get_current_version() {
 
   if [ $GITHUB_REF != "" ]; then
     printf "Github reference: %s" $GITHUB_REF
+    echo $GITHUB_REF
+    echo $GITHUB_REF_NAME
+    echo $GITHUB_REF_PROTECTED
+    echo $GITHUB_REF_TYPE
+    echo $GITHUB_HEAD_REF
+    echo $GITHUB_BASE_REF
     branch_name=${GITHUB_REF##*/}
   fi
 
