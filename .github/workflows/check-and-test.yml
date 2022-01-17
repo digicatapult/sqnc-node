@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
       - run: git fetch --tags
-      - run: cargo install tomlq
+      - run: pip3 install yq
       - name: Get Build Version
         id: get_version
         run: ./scripts/check-version.sh
