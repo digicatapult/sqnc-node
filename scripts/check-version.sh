@@ -44,18 +44,6 @@ function get_current_version() {
   printf "Current %s found to be %s\n" "$release_type" "$CURRENT_VERSION"
 }
 
-function install_tomlq() {
-  echo "checking tomlq installation";
-  if ! command -v tomlq &> /dev/null; then
-    echo "installing tomlq";
-    cargo install tomlq;
-  else
-    echo "tomlq installation found";
-  fi
-}
-
-install_tomlq
-
 # Get published git tags that match semver regex with a "v" prefixbash then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from node Cargo.toml
