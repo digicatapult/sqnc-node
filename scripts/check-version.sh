@@ -23,10 +23,23 @@ function check_version_greater () {
   fi
 }
 
-# Get published git tags that match semver regex with a "v" prefix then remove the "v" character
+function install_tomlq() {
+  echo "checking tomlq installation";
+  if ! command -v tomlq &> /dev/null; then
+    echo "installing tomlq";
+    cargo install tomlq;
+  else
+    echo "tomlq installation found";
+  fi
+    echo "closing";
+}
+
+install_tomlq
+
+# Get published git tags that match semver regex with a "v" prefixbash then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from node Cargo.toml
-CURRENT_VERSION=$(tomlq .package.version ./node/Cargo.toml | sed 's/"//g')
+CURRENT_VERSION=$(tomlq package.version -f ./node/Cargo.toml | sed 's/"//g')
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
   echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
