@@ -32,13 +32,7 @@ function get_current_version() {
 
   if [ $GITHUB_REF != "" ]; then
     printf "Github reference: %s" $GITHUB_REF
-    echo $GITHUB_REF
-    echo $GITHUB_REF_NAME
-    echo $GITHUB_REF_PROTECTED
-    echo $GITHUB_REF_TYPE
-    echo $GITHUB_HEAD_REF
-    echo $GITHUB_BASE_REF
-    branch_name=${GITHUB_REF##*/}
+    branch_name=$GITHUB_HEAD_REF
   fi
 
   if [ "$branch_name" != "main" ]; then
