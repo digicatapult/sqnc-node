@@ -194,7 +194,7 @@ jobs:
     name: Build release
     runs-on: ubuntu-latest
     needs: [get-version]
-    if: ${{ needs.get-version.outputs.is_new_version == 'true' }}
+    if: ${{ needs.get-version.outputs.is_new_version == 'true' ||  needs.get-version.outputs.is_prerelease == 'true'}}
 
     steps:
       - uses: actions/checkout@master
