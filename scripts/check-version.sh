@@ -62,6 +62,8 @@ function get_current_version() {
   if [ $IS_PRERELEASE ]; then
     release_type="prerelease"
   fi
+
+  CURRENT_VERSION=$(echo $CURRENT_VERSION | sed -e 's#/#_#g')
   
   printf "Current %s found to be %s\n" "$release_type" "$CURRENT_VERSION"
 }
