@@ -23,7 +23,7 @@ function check_version_greater () {
   fi
 }
 
-assert_tomlq() {
+function assert_tomlq() {
   printf "Checking for presense of tomlq..."
   local path_to_executable=$(command -v tomlq)
 
