@@ -41,7 +41,7 @@ function assert_tomlq() {
   fi
 }
 
-function get_current_version() {
+function get_working_copy_version() {
   assert_tomlq
   CURRENT_VERSION=$(tomlq .package.version ./node/Cargo.toml | sed 's/"//g')
 
@@ -53,9 +53,11 @@ function get_current_version() {
     branch_name=$GITHUB_HEAD_REF
   fi
 
-  if [ "$branch_name" != "main" ]; then
-    CURRENT_VERSION=$(printf '%s-%s' "$CURRENT_VERSION" "$branch_name")
+  if ! [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
     IS_PRERELEASE=true;
+  elif [[ "$branch_name" != "main" ]]; then
+    IS_PRERELEASE=true;
+    CURRENT_VERSION=$(printf '%s-%s' "$CURRENT_VERSION" "$branch_name")
   fi
 
   release_type="release"
@@ -72,7 +74,7 @@ function get_current_version() {
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from node Cargo.toml
 
-get_current_version
+get_working_copy_version
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS" || $IS_PRERELEASE; then
   echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
