@@ -57,7 +57,7 @@ function get_working_copy_version() {
     IS_PRERELEASE=true;
     CURRENT_VERSION=$(printf '%s-%s' "$CURRENT_VERSION" "$branch_name")
   elif ! [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-      IS_PRERELEASE=true;
+    IS_PRERELEASE=true;
   fi
 
   release_type="release"
