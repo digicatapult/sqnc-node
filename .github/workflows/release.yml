@@ -171,7 +171,6 @@ jobs:
         platforms: linux/amd64
         tags: |
           ghcr.io/digicatapult/vitalam-node:${{ github.sha }}
-          ghcr.io/digicatapult/vitalam-node:latest-dev
           ${{ steps.generate-tags.outputs.VERSION_TAG }}
           ${{ steps.generate-tags.outputs.LATEST_TAG }}
         labels: |
