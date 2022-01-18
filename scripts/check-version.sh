@@ -65,6 +65,7 @@ function get_working_copy_version() {
     release_type="prerelease"
   fi
 
+  SANE_BRANCH_NAME_KEY=$(echo $branch_name | sed -e 's#/#_#g')
   CURRENT_VERSION=$(echo $CURRENT_VERSION | sed -e 's#/#_#g')
   
   printf "Current %s found to be %s\n" "$release_type" "$CURRENT_VERSION"
@@ -78,6 +79,7 @@ get_working_copy_version
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS" || $IS_PRERELEASE; then
   echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
+  echo "##[set-output name=SANE_BRANCH_NAME_KEY;]$SANE_BRANCH_NAME_KEY"
   echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   echo "##[set-output name=IS_NEW_VERSION;]true"
   if [ $IS_PRERELEASE ]; then

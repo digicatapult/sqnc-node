@@ -22,6 +22,7 @@ jobs:
     outputs:
       is_new_version: ${{ steps.get_version.outputs.IS_NEW_VERSION }}
       version: ${{ steps.get_version.outputs.VERSION }}
+      sane_branch_name_key: ${{ steps.get_version.outputs.SANE_BRANCH_NAME_KEY }}
       build_date: ${{ steps.get_version.outputs.BUILD_DATE }}
       is_prerelease: ${{ steps.get_version.outputs.IS_PRERELEASE }}
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
@@ -61,10 +62,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ runner.temp }}/docker-buildx-cache
-        key: ${{ runner.os }}-docker-buildx-${{ needs.get-version.outputs.toolchain }}-${{ github.sha }}
+        key: ${{ runner.os }}-docker-buildx-${{ needs.get-version.outputs.toolchain }}-{{needs.get-version.outputs.sane_branch_name_key}}-${{ github.sha }}
         restore-keys: |
+          ${{ runner.os }}-docker-buildx-${{ needs.get-version.outputs.toolchain }}-{{needs.get-version.outputs.sane_branch_name_key}}
           ${{ runner.os }}-docker-buildx-${{ needs.get-version.outputs.toolchain }}
-          ${{ runner.os }}-docker-buildx-
     - name: Build Dependency layers
       uses: docker/build-push-action@v2
       with:
@@ -116,8 +117,9 @@ jobs:
         # https://github.com/moby/buildkit/issues/1474
         # https://github.com/moby/buildkit/issues/1512
         path: ${{ runner.temp }}/cache.db
-        key: ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}-${{ github.sha }}
+        key: ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
         restore-keys: |
+          ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}
           ${{ runner.os }}-docker-sccache--${{ needs.get-version.outputs.toolchain }}
           ${{ runner.os }}-docker-sccache-
     - name: Move cache in
@@ -237,9 +239,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ runner.temp }}/cache
-          key: ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+          key: ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}
             ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-
             ${{ runner.os }}-cargo-build-cache-release-
       - name: Cargo build
