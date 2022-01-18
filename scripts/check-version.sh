@@ -53,11 +53,11 @@ function get_working_copy_version() {
     branch_name=$GITHUB_HEAD_REF
   fi
 
-  if ! [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-    IS_PRERELEASE=true;
-  elif [[ "$branch_name" != "main" ]]; then
+  if [[ "$branch_name" != "main" ]]; then
     IS_PRERELEASE=true;
     CURRENT_VERSION=$(printf '%s-%s' "$CURRENT_VERSION" "$branch_name")
+  elif ! [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+      IS_PRERELEASE=true;
   fi
 
   release_type="release"
