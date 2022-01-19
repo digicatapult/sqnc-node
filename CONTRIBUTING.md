@@ -20,10 +20,7 @@ The following is a set of guidelines for contributing to VITALam and its package
 [Styleguides](#styleguides)
 
 - [Git Commit Messages](#git-commit-messages)
-
-[Additional Notes](#additional-notes)
-
-- [Issue and Pull Request Labels](#issue-and-pull-request-labels)
+- [Pull Request Labels](#pull-request-labels)
 
 ## Code of Conduct
 
@@ -138,3 +135,17 @@ While the prerequisites above must be satisfied prior to having your pull reques
   - :arrow_up: `:arrow_up:` when upgrading dependencies
   - :arrow_down: `:arrow_down:` when downgrading dependencies
   - :shirt: `:shirt:` when removing linter warnings
+
+### Pull Request Labels
+
+| Label name        | :mag_right:                                    | Description                                                                          |
+| ----------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `breaking-change` | [search][search-digicat-label-breaking-change] | Pull requests that add functionality with incompatible API changes (MAJOR SemVer)    |
+| `feature `        | [search][search-digicat-label-feature]         | Pull requests that add functionality with backwards compatibility (MINOR SemVer)     |
+| `chore`           | [search][search-digicat-label-chore]           | Simple changes or improvements to the code base so it can be worked with more easily |
+| `bug`             | [search][search-digicat-label-bug]             | Pull requests that fix bugs                                                          |
+
+[search-digicat-label-breaking-change]: https://github.com/search?q=is%3Apr+user%3Adigicatapult+label%3Abreaking-change
+[search-digicat-label-feature]: https://github.com/search?q=is%3Apr+user%3Adigicatapult+label%3Afeature
+[search-digicat-label-chore]: https://github.com/search?q=is%3Apr+user%3Adigicatapult+label%3Achore
+[search-digicat-label-bug]: https://github.com/search?q=is%3Apr+user%3Adigicatapult+label%3Abug
