@@ -186,6 +186,7 @@ jobs:
         context: .
         build-args: |
           RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
+          VITALAM_VERSION=${{ needs.get-version.outputs.version }}
         file: ./Dockerfile
         platforms: linux/amd64
         tags: |
