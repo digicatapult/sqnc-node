@@ -67,13 +67,13 @@ parameter_types! {
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
-    Admin,
-    NotAdmin,
+    Owner,
+    NotOwner,
 }
 
 impl Default for Role {
     fn default() -> Self {
-        Role::Admin
+        Role::Owner
     }
 }
 

@@ -293,16 +293,18 @@ parameter_types! {
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
-    Admin = 0,
-    ManufacturingEngineer = 1,
-    ProcurementBuyer = 2,
-    ProcurementPlanner = 3,
-    Supplier = 4,
+    Owner = 0,
+    Customer = 1,
+    AdditiveManufacturer = 2,
+    Laboratory = 3,
+    Buyer = 4,
+    Supplier = 5,
+    Reviewer = 6,
 }
 
 impl Default for Role {
     fn default() -> Self {
-        Role::Admin
+        Role::Owner
     }
 }
 
@@ -314,7 +316,7 @@ pub enum MetadataValue<TokenId> {
     None,
 }
 
-impl <T>Default for MetadataValue<T> {
+impl<T> Default for MetadataValue<T> {
     fn default() -> Self {
         MetadataValue::None
     }
