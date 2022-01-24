@@ -196,7 +196,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
 fn it_works_for_creating_token_with_multiple_roles() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
-        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotAdmin, 2)]);
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotOwner, 2)]);
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
@@ -688,7 +688,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 #[test]
 fn it_fails_for_destroying_single_token_as_incorrect_role() {
     new_test_ext().execute_with(|| {
-        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotAdmin, 2)]);
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotOwner, 2)]);
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
         SimpleNFTModule::run_process(
             Origin::signed(1),
