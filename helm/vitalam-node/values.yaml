@@ -1,5 +1,5 @@
 image:
-  repository: gchr.io/digiatapult/vitalam-node
+  repository: gchr.io/digicatapult/vitalam-node
   tag: latest
   pullPolicy: Always
 
@@ -153,4 +153,4 @@ tolerations: []
 
 affinity: {}
 
-storageClass: "default"
+storageClass: ""
