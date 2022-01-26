@@ -16,8 +16,8 @@ kubectl:
 googleCloudSdk:
   image:
     repository: google/cloud-sdk
-    tag: slim # more lightweight than the full image and still contains gsutil
-  #serviceAccountKey: ""
+    tag: slim  # more lightweight than the full image and still contains gsutil
+  # serviceAccountKey: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -52,7 +52,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-#extraLabels:
+# extraLabels:
 #  type: rpc
 
 node:
@@ -61,15 +61,15 @@ node:
   dataVolumeSize: 10Gi
   replicas: 1
   role: full
-  #customChainspecUrl:
-  #chainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
-  #chainDataSnapshotFormat: 7z
-  #chainPath: ""
-  #chainDataKubernetesVolumeSnapshot: ""
-  #chainDataGcsBucketUrl: ""
+  # customChainspecUrl:
+  # chainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
+  # chainDataSnapshotFormat: 7z
+  # chainPath: ""
+  # chainDataKubernetesVolumeSnapshot: ""
+  # chainDataGcsBucketUrl: ""
   collator:
-     isParachain: false
-     #relayChain: polkadot
+    isParachain: false
+     # relayChain: polkadot
   #  relayChainCustomChainspecUrl: ""
   #  relayChainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
   #  relayChainDataSnapshotFormat: 7z
@@ -93,12 +93,12 @@ node:
   #    scheme: "sr25519"
   #    seed: "//Alice//babe"
   persistGeneratedNodeKey: false
-  #customNodeKey: ""
+  # customNodeKey: ""
   resources: {}
   serviceMonitor:
     enabled: false
-    #namespace: monitoring
-    #interval: 10s
+    # namespace: monitoring
+    # interval: 10s
     # scrapeTimeout: 10s
   perNodeServices:
     createClusterIPService: true
@@ -106,7 +106,7 @@ node:
     setPublicAddressToExternalIp:
       enabled: false
       ipRetrievalServiceUrl: https://ifconfig.io
-  #podManagementPolicy: Parallel
+  # podManagementPolicy: Parallel
 
   # Enables Jaeger Agent as a sidecar
   tracing:
