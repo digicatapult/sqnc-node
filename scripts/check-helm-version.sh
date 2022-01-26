@@ -24,9 +24,9 @@ function check_version_greater () {
 }
 
 # Get published chart version from github-pages deployment
-PUBLISHED_VERSIONS=$(curl -s https://$GITHUB_REPOSITORY_OWNER.github.io/$(echo "$GITHUB_REPOSITORY" | \
-awk -F / '{print $2}')/index.yaml | \
-yq eval '.entries."wasp-thingy91" | .[0].version' -)
+REPOSITORY_NAME=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
+PUBLISHED_VERSIONS=$(curl -s https://$GITHUB_REPOSITORY_OWNER.github.io/$REPOSITORY_NAME/index.yaml | \
+yq eval '.entries.[env(REPOSITORY_NAME)] | .[0].version' -)
 # Get the current version from helm chart
 CURRENT_VERSION=$(yq eval '.version' ./helm/vitalam-node/Chart.yaml)
 
