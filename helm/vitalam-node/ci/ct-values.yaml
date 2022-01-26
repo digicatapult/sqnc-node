@@ -2,3 +2,5 @@ image:
   repository: vitalam-node
   tag: latest
   PullPolicy: Never
+node:
+  dataVolumeSize: 1Gi
