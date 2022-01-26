@@ -95,7 +95,7 @@ jobs:
           context: .
           build-args: |
             RUST_TOOLCHAIN=${{ needs.check-version.outputs.toolchain }}
-            VITALAM_VERSION=${{ needs.check-version.outputs.version }}
+            VITALAM_VERSION=${{ needs.check-version.outputs.app-version }}
           load: true
           file: ./Dockerfile
           tags: |
@@ -128,7 +128,6 @@ jobs:
       - name: Get Versions
         run: |
           echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
-          echo "##[set-output name=VERSION;]$(tomlq .package.version node/Cargo.toml | tr -d '"')"
       - name: Skipping release as version has not increased
         if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
         shell: bash
