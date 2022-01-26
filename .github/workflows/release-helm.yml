@@ -1,0 +1,146 @@
+name: Release helm charts
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'helm/vitalam-node'
+
+jobs:
+
+  preconditions:
+    runs-on: ubuntu-latest
+    outputs:
+      repo_name: ${{ steps.repo_ids.outputs.REPO_NAME }}
+      org_name: ${{ steps.repo_ids.outputs.ORG_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Check token
+        run: |
+          if [ -z "${{ secrets.GITHUB_TOKEN }}"]; then
+            echo "Must provide a GITHUB_TOKEN secret in order to run release workflow"
+            exit 1
+          fi
+      - name: Get repository identifiers
+        id: repo_ids
+        run: |
+          REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          ORG_NAME=$(echo "${{ github.event.repository.owner.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "::set-output name=REPO_NAME::$REPO_NAME"
+          echo "::set-output name=ORG_NAME::$ORG_NAME"
+
+
+  helm-lint:
+    runs-on: ubuntu-latest
+    needs: [preconditions]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.0.1
+      - name: Run chart-testing (lint)
+        run: ct lint --validate-maintainers false --charts helm/${{ needs.preconditions.outputs.repo_name }}/
+
+  helm-test:
+    runs-on: ubuntu-latest
+    needs: [preconditions]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          buildkitd-flags: "--debug"
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.0.1
+      - name: Setup Minikube
+        uses: manusa/actions-setup-minikube@v2.3.0
+        with:
+          minikube version: 'v1.17.1'
+          kubernetes version: 'v1.19.2'
+      - name: Login to minikube docker registry
+        run: eval $(minikube -p minikube docker-env)
+      - name: Build and Publish image
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          load: true
+          file: ./Dockerfile
+          tags: |
+            ${{ needs.preconditions.outputs.repo_name }}:latest
+          labels: |
+            org.opencontainers.image.title=${{ needs.preconditions.outputs.repo_name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Run chart-testing (install)
+        run: ct install  --charts helm/${{ needs.preconditions.outputs.repo_name }}/
+
+  check-version:
+    name: "Check version"
+    runs-on: ubuntu-latest
+    outputs:
+      is_new_version: ${{ steps.get_version.outputs.IS_NEW_VERSION }}
+      version: ${{ steps.get_version.outputs.VERSION }}
+      build_date: ${{ steps.get_version.outputs.BUILD_DATE }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --depth=1 --tags origin
+      - name: Install yq
+        run: sudo snap install yq
+      - name: Check Helm Version
+        id: get_version
+        run: ./scripts/check-helm-version.sh
+        shell: bash
+      - name: Skipping release as version has not increased
+        if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
+        shell: bash
+        run: |
+          echo "Skipping release as current version has already been published"
+
+  publish:
+    name: "Publish package"
+    needs:
+      - preconditions
+      - helm-lint
+      - helm-test
+      - check-version
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-version.outputs.is_new_version == 'true' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Publish Helm charts
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          charts_dir: helm

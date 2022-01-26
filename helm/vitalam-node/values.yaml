@@ -1,0 +1,156 @@
+image:
+  repository: gchr.io/digicatapult/vitalam-node
+  tag: latest
+  pullPolicy: Always
+
+initContainer:
+  image:
+    repository: crazymax/7zip
+    tag: latest
+
+kubectl:
+  image:
+    repository: bitnami/kubectl
+    tag: latest
+
+googleCloudSdk:
+  image:
+    repository: google/cloud-sdk
+    tag: slim # more lightweight than the full image and still contains gsutil
+  #serviceAccountKey: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+ingress:
+  enabled: false
+  annotations: {}
+  #  kubernetes.io/ingress.class: nginx
+  #  kubernetes.io/tls-acme: "true"
+  rules: []
+  #  - host: chart-example.local
+  #    paths:
+  #      - serviceName: node
+  #        servicePort: 9944
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+#extraLabels:
+#  type: rpc
+
+node:
+  chain: "local"
+  command: "./vitalam-node"
+  dataVolumeSize: 10Gi
+  replicas: 1
+  role: full
+  #customChainspecUrl:
+  #chainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
+  #chainDataSnapshotFormat: 7z
+  #chainPath: ""
+  #chainDataKubernetesVolumeSnapshot: ""
+  #chainDataGcsBucketUrl: ""
+  collator:
+     isParachain: false
+     #relayChain: polkadot
+  #  relayChainCustomChainspecUrl: ""
+  #  relayChainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
+  #  relayChainDataSnapshotFormat: 7z
+  #  relayChainPath: ""
+  #  relayChainDataKubernetesVolumeSnapshot: ""
+  #  relayChainDataGcsBucketUrl: ""
+  #  relayChainFlags:
+  enableStartupProbe: true
+  enableReadinessProbe: true
+  flags:
+    - "--rpc-external"
+    - "--ws-external"
+    - "--rpc-methods=safe"
+    - "--rpc-cors=all"
+    # - "--prometheus-external"
+  keys: {}
+  #  - type: "gran"
+  #    scheme: "ed25519"
+  #    seed: "//Alice//gran"
+  #  - type: "babe"
+  #    scheme: "sr25519"
+  #    seed: "//Alice//babe"
+  persistGeneratedNodeKey: false
+  #customNodeKey: ""
+  resources: {}
+  serviceMonitor:
+    enabled: false
+    #namespace: monitoring
+    #interval: 10s
+    # scrapeTimeout: 10s
+  perNodeServices:
+    createClusterIPService: true
+    createP2pNodePortService: true
+    setPublicAddressToExternalIp:
+      enabled: false
+      ipRetrievalServiceUrl: https://ifconfig.io
+  #podManagementPolicy: Parallel
+
+  # Enables Jaeger Agent as a sidecar
+  tracing:
+    enabled: false
+
+  # Enables Sustrate API as a sidecar
+  substrateApiSidecar:
+    enabled: false
+
+# https://github.com/paritytech/substrate-api-sidecar
+substrateApiSidecar:
+  image:
+    repository: parity/substrate-api-sidecar
+    tag: latest
+  env: {}
+  resources: {}
+
+# https://github.com/jaegertracing/jaeger
+jaegerAgent:
+  image:
+    repository: jaegertracing/jaeger-agent
+    tag: latest
+  ports:
+    # accept jaeger.thrift over compact thrift protocol
+    compactPort: 6831
+    # accept jaeger.thrift over binary thrift protocol
+    binaryPort: 6832
+    # (HTTP) serve configs, sampling strategies
+    samplingPort: 5778
+  collector:
+    url: null
+    # Jaeger Default GRPC port is 14250
+    port: 14250
+  env: {}
+  resources: {}
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+terminationGracePeriodSeconds: 60
+
+tolerations: []
+
+affinity: {}
+
+storageClass: ""
