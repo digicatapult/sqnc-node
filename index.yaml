@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  vitalam-node:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2022-01-26T11:41:43.646283Z"
+    description: A Helm chart for Kubernetes
+    digest: 0597e3f36d909fe88b1f1704578a6e4dbcc285797518495900e4f1ab94889bd3
+    name: vitalam-node
+    type: application
+    urls:
+    - https://digicatapult.github.io/vitalam-node/vitalam-node-0.0.1.tgz
+    version: 0.0.1
+generated: "2022-01-26T11:41:43.64425Z"
