@@ -18,6 +18,20 @@ entries:
   vitalam-node:
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2022-01-26T17:09:37.801601354Z"
+    description: A Helm chart to deploy vitalam nodes
+    digest: 5e029c91ca770b2313c4dd3489a8551d1c3c17f71a62570e62943c0a4def0d61
+    maintainers:
+    - email: opensource@digicatapult.org.uk
+      name: digicatapult
+      url: www.digicatapult.org.uk
+    name: vitalam-node
+    type: application
+    urls:
+    - https://digicatapult.github.io/vitalam-node/vitalam-node-0.23.4.tgz
+    version: 0.23.4
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2022-01-26T11:41:43.646283Z"
     description: A Helm chart for Kubernetes
     digest: 0597e3f36d909fe88b1f1704578a6e4dbcc285797518495900e4f1ab94889bd3
@@ -26,4 +40,4 @@ entries:
     urls:
     - https://digicatapult.github.io/vitalam-node/vitalam-node-0.0.1.tgz
     version: 0.0.1
-generated: "2022-01-26T16:38:26.290099709Z"
+generated: "2022-01-26T17:09:37.800485235Z"
