@@ -5,15 +5,15 @@ set -e
 
 function check_version_greater () {
   local current=$1
-  local git_versions="${2:-0.0.0}"
+  local published_versions="${2:-0.0.0}"
 
-  # check if current exists in git_versions, if so not a new version
-  if [ -n "$(printf "$git_versions" | grep -Fx $current)" ]; then
+  # check if current exists in published_versions, if so not a new version
+  if [ -n "$(printf "$published_versions" | grep -Fx $current)" ]; then
     return 1
   fi
 
   # sort all - note crazy hack to deal with prerelease versions by appending a _ character to release versions
-  local sorted_versions=($(printf "$git_versions\n$current" | awk '{ if ($1 ~ /-/) print; else print $0"_" ; }' | sort -rV | sed 's/_$//'))
+  local sorted_versions=($(printf "$published_versions\n$current" | awk '{ if ($1 ~ /-/) print; else print $0"_" ; }' | sort -rV | sed 's/_$//'))
 
   # check if the top sorted version equals the current verison. If so we have a new version
   if [ "${sorted_versions[0]}" == "$current" ]; then
