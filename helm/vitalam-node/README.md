@@ -1,4 +1,4 @@
-# Substrate/Polkadot node helm chart
+# VitalAM-node helm chart
 
 Forked from https://paritytech.github.io/helm-charts/
 ## Installing the chart
