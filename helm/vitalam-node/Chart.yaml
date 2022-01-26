@@ -1,10 +1,10 @@
 apiVersion: v2
-name: node
+name: vitalam-node
 maintainers:
   - name: digicatapult
     email: opensource@digicatapult.org.uk
     url: www.digicatapult.org.uk
-description: A Helm chart to deploy Substrate/Polkadot nodes
+description: A Helm chart to deploy vitalam nodes
 type: application
-version: 0.23.3
+version: 0.23.4
 appVersion: "0.0.1"
