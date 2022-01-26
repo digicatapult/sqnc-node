@@ -1,5 +1,9 @@
 apiVersion: v2
 name: node
+maintainers:
+  - name: digicatapult
+    email: opensource@digicatapult.org.uk
+    url: www.digicatapult.org.uk
 description: A Helm chart to deploy Substrate/Polkadot nodes
 type: application
 version: 0.23.2
