@@ -1,11 +1,11 @@
 [package]
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
-description = 'A FRAME pallet for handling non-fungible tokens'
+description = 'A FRAME pallet for validating something.... TODO'
 edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/vitalam-node/'
-name = 'pallet-simple-nft'
-version = "2.1.0"
+name = 'pallet-process-validation'
+version = "1.0.0"
 
 
 [package.metadata.docs.rs]

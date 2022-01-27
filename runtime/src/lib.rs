@@ -329,8 +329,20 @@ impl pallet_simple_nft::Config for Runtime {
     type RoleKey = Role;
     type TokenMetadataKey = [u8; 32];
     type TokenMetadataValue = MetadataValue<Self::TokenId>;
+    type ProcessValidator = ProcessValidation;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = MaxMetadataCount;
+}
+
+impl pallet_process_validation::Config for Runtime {
+    type Event = Event;
+    type ProcessIdentifier = [u8; 32];
+    type CreateProcessOrigin = EnsureRoot<AccountId>;
+    type DisableProcessOrigin = EnsureRoot<AccountId>;
+    type WeightInfo = pallet_process_validation::weights::SubstrateWeight<Runtime>;
+    type RoleKey = Role;
+    type TokenMetadataKey = [u8; 32];
+    type TokenMetadataValue = MetadataValue<u128>;
 }
 
 pub struct DummyChangeMembers;
@@ -388,6 +400,7 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment::{Module, Storage},
         Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
+        ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         IpfsKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},

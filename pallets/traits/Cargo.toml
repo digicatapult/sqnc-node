@@ -1,0 +1,24 @@
+[package]
+name = "vitalam-pallet-traits"
+version = "1.0.0"
+edition = "2018"
+authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
+license = 'Apache-2.0'
+repository = 'https://github.com/digicatapult/vitalam-node/'
+description = "Common pallet traits for the vitalam-node"
+
+[dependencies.codec]
+default-features = false
+features = ['derive']
+package = 'parity-scale-codec'
+version = '2.0.0'
+
+[dependencies]
+sp-std = { version = '3.0', default-features = false }
+frame-support = { default-features = false, version = '3.0.0' }
+
+[features]
+default = ['std']
+std = [
+	'sp-std/std',
+]
