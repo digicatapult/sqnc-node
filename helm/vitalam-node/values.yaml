@@ -1,5 +1,5 @@
 image:
-  repository: gchr.io/digicatapult/vitalam-node
+  repository: ghcr.io/digicatapult/vitalam-node
   tag: latest
   pullPolicy: Always
 
@@ -82,8 +82,10 @@ node:
   flags:
     - "--rpc-external"
     - "--ws-external"
-    - "--rpc-methods=safe"
+    - "--rpc-methods=Unsafe"
     - "--rpc-cors=all"
+    - "--unsafe-ws-external"
+    - "--unsafe-rpc-external"
     # - "--prometheus-external"
   keys: {}
   #  - type: "gran"
