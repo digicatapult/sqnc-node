@@ -91,20 +91,20 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        // TODO implement correct events for extrinsics
+        // TODO: implement correct events for extrinsics including params
         ProcessCreated,
         ProcessDisabled
     }
 
     #[pallet::error]
     pub enum Error<T> {
-        // TODO implement errors for extrinsics
+        // TODO: implement errors for extrinsics
     }
 
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        // TODO implement create_process with correct parameters and impl
+        // TODO: implement create_process with correct parameters and impl
         #[pallet::weight(T::WeightInfo::create_process())]
         pub(super) fn create_process(
             origin: OriginFor<T>
@@ -116,7 +116,7 @@ pub mod pallet {
             Ok(().into())
         }
 
-        // TODO implement disable_process with correct parameters and impl
+        // TODO: implement disable_process with correct parameters and impl
         #[pallet::weight(T::WeightInfo::disable_process())]
         pub(super) fn disable_process(
             origin: OriginFor<T>
@@ -131,7 +131,7 @@ pub mod pallet {
 impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue> for Pallet<T> {
     type ProcessIdentifier = T::ProcessIdentifier;
 
-    // TODO: add arguments for validate process and implement so it can be used by pallet-simple-nft
+    // TODO: implement lookup of process and checking of restrictions
     fn validate_process(
         _id: T::ProcessIdentifier,
         _version: u32,

@@ -6,7 +6,7 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::collections::btree_set::BTreeSet;
-use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
+use vitalam_pallet_traits::{ProcessValidator};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -130,12 +130,8 @@ pub mod pallet {
         #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
         pub(super) fn run_process(
             origin: OriginFor<T>,
-            process: Option<(
-                <<T as pallet::Config>::ProcessValidator as ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>::ProcessIdentifier,
-                u32
-            )>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+            outputs: Vec<Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -143,15 +139,6 @@ pub mod pallet {
             let now = <frame_system::Module<T>>::block_number();
             // Helper closures function
             let _next_token = |id: T::TokenId| -> T::TokenId { id + One::one() };
-
-            // TODO: make this error appropriately
-            // TODO pass inputs properly
-            let _process_valid = match process {
-                Some(p) => {
-                    T::ProcessValidator::validate_process(p.0, p.1, sender.clone(), &vec![], &outputs)
-                },
-                None => true
-            };
 
             // check multiple tokens are not trying to have the same parent
             let mut parent_indices = BTreeSet::new();
