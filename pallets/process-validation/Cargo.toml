@@ -1,6 +1,6 @@
 [package]
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
-description = 'A FRAME pallet for validating something.... TODO'
+description = 'A FRAME pallet for storing and evaluating process validation restrictions'
 edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/vitalam-node/'
