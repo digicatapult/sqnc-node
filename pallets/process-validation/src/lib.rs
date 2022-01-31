@@ -46,6 +46,7 @@ pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
+    use sp_runtime::traits::AtLeast32Bit;
 
     /// The pallet's configuration trait.
     #[pallet::config]
@@ -55,6 +56,7 @@ pub mod pallet {
 
         // The primary identifier for a process (i.e. it's name)
         type ProcessIdentifier: Parameter;
+        type ProcessVersion: Parameter + AtLeast32Bit;
 
         // Origins for calling these extrinsics. For now these are expected to be root
         type CreateProcessOrigin: EnsureOrigin<Self::Origin>;
@@ -83,7 +85,7 @@ pub mod pallet {
         Blake2_128Concat,
         T::ProcessIdentifier,
         Blake2_128Concat,
-        u32,
+        T::ProcessVersion,
         Process,
         ValueQuery
     >;
@@ -130,11 +132,12 @@ pub mod pallet {
 
 impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue> for Pallet<T> {
     type ProcessIdentifier = T::ProcessIdentifier;
+    type ProcessVersion = T::ProcessVersion;
 
     // TODO: implement lookup of process and checking of restrictions
     fn validate_process(
         _id: T::ProcessIdentifier,
-        _version: u32,
+        _version: T::ProcessVersion,
         _sender: T::AccountId,
         _inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         _outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>) -> bool {

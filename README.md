@@ -136,6 +136,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "_enum": ["Owner", "Customer", "AdditiveManufacturer", "Laboratory", "Buyer", "Supplier", "Reviewer"]
   },
   "ProcessIdentifier": "[u8; 32]",
+  "ProcessVersion": "u32",
   "Process": {
     "status": "ProcessStatus",
     "restrictions": "Vec<Restriction>"

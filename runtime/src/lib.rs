@@ -320,13 +320,19 @@ impl<T> Default for MetadataValue<T> {
     }
 }
 
+type TokenId = u128;
+type TokenMetadataKey = [u8; 32];
+type TokenMetadataValue = MetadataValue<TokenId>;
+type ProcessIdentifier = [u8; 32];
+type ProcessVersion = u32;
+
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
     type Event = Event;
-    type TokenId = u128;
+    type TokenId = TokenId;
     type RoleKey = Role;
-    type TokenMetadataKey = [u8; 32];
-    type TokenMetadataValue = MetadataValue<Self::TokenId>;
+    type TokenMetadataKey = TokenMetadataKey;
+    type TokenMetadataValue = TokenMetadataValue;
     type ProcessValidator = ProcessValidation;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = MaxMetadataCount;
@@ -334,13 +340,14 @@ impl pallet_simple_nft::Config for Runtime {
 
 impl pallet_process_validation::Config for Runtime {
     type Event = Event;
-    type ProcessIdentifier = [u8; 32];
+    type ProcessIdentifier = ProcessIdentifier;
+    type ProcessVersion = ProcessVersion;
     type CreateProcessOrigin = EnsureRoot<AccountId>;
     type DisableProcessOrigin = EnsureRoot<AccountId>;
     type WeightInfo = pallet_process_validation::weights::SubstrateWeight<Runtime>;
     type RoleKey = Role;
-    type TokenMetadataKey = [u8; 32];
-    type TokenMetadataValue = MetadataValue<u128>;
+    type TokenMetadataKey = TokenMetadataKey;
+    type TokenMetadataValue = TokenMetadataValue;
 }
 
 pub struct DummyChangeMembers;
