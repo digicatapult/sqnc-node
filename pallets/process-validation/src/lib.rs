@@ -4,7 +4,7 @@ use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_std::prelude::*;
 
-use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
+use vitalam_pallet_traits::{ProcessIO, ProcessFullyQualifiedId, ProcessValidator};
 
 #[cfg(test)]
 mod tests;
@@ -14,7 +14,7 @@ mod benchmarking;
 
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
-use restrictions::{Restriction};
+use restrictions::Restriction;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -136,9 +136,8 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
 
     // TODO: implement lookup of process and checking of restrictions
     fn validate_process(
-        _id: T::ProcessIdentifier,
-        _version: T::ProcessVersion,
-        _sender: T::AccountId,
+        _id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        _sender: &T::AccountId,
         _inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         _outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>) -> bool {
         true

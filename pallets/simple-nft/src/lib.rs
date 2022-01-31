@@ -6,7 +6,7 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::collections::btree_set::BTreeSet;
-use vitalam_pallet_traits::{ProcessValidator};
+use vitalam_pallet_traits::{ProcessIO, ProcessFullyQualifiedId, ProcessValidator};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -32,14 +32,6 @@ pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord
     metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
     parents: Vec<TokenId>,
     children: Option<Vec<TokenId>>, // children is the only mutable component of the token
-}
-
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
-pub struct Output<AccountId, RoleKey, TokenMetadataKey: Ord, TokenMetadataValue> {
-    roles: BTreeMap<RoleKey, AccountId>,
-    metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
-    parent_index: Option<u32>,
 }
 
 pub mod weights;
@@ -108,6 +100,12 @@ pub mod pallet {
         Burnt(T::TokenId, T::AccountId, Vec<T::TokenId>),
     }
 
+    // This is an ugly type
+    type ProcessId<T> = ProcessFullyQualifiedId<
+        <<T as Config>::ProcessValidator as ProcessValidator<<T as frame_system::Config>::AccountId, <T as Config>::RoleKey, <T as Config>::TokenMetadataKey, <T as Config>::TokenMetadataValue>>::ProcessIdentifier,
+        <<T as Config>::ProcessValidator as ProcessValidator<<T as frame_system::Config>::AccountId, <T as Config>::RoleKey, <T as Config>::TokenMetadataKey, <T as Config>::TokenMetadataValue>>::ProcessVersion,
+    >;
+
     #[pallet::error]
     pub enum Error<T> {
         /// Mutation was attempted on token not owned by origin
@@ -122,6 +120,8 @@ pub mod pallet {
         OutOfBoundsParent,
         /// Attempted to set the same parent on multiple tokens to mint
         DuplicateParents,
+        /// Process failed validation checks
+        ProcessInvalid
     }
 
     // The pallet's dispatchable functions.
@@ -130,8 +130,9 @@ pub mod pallet {
         #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
         pub(super) fn run_process(
             origin: OriginFor<T>,
+            process: Option<ProcessId<T>>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+            outputs: Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -140,35 +141,49 @@ pub mod pallet {
             // Helper closures function
             let _next_token = |id: T::TokenId| -> T::TokenId { id + One::one() };
 
-            // check multiple tokens are not trying to have the same parent
-            let mut parent_indices = BTreeSet::new();
+            if let Some(process) = process {
+                let inputs = inputs.iter().map(|i| {
+                    let token = Self::tokens_by_id(i);
+                    ProcessIO {
+                        roles: token.roles,
+                        metadata: token.metadata,
+                        parent_index: None
+                    }
+                }).collect();
 
-            for output in outputs.iter() {
-                // check at least a default role has been set
-                ensure!(
-                    output.roles.contains_key(&T::RoleKey::default()),
-                    Error::<T>::NoDefaultRole
-                );
+                let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &inputs, &outputs);
+                ensure!(process_is_valid, Error::<T>::ProcessInvalid);
+            } else {
+                // check multiple tokens are not trying to have the same parent
+                let mut parent_indices = BTreeSet::new();
 
-                // check metadata count
-                ensure!(
-                    output.metadata.len() <= T::MaxMetadataCount::get() as usize,
-                    Error::<T>::TooManyMetadataItems
-                );
+                for output in outputs.iter() {
+                    // check at least a default role has been set
+                    ensure!(
+                        output.roles.contains_key(&T::RoleKey::default()),
+                        Error::<T>::NoDefaultRole
+                    );
 
-                // check parent index
-                if output.parent_index.is_some() {
-                    let index = output.parent_index.unwrap() as usize;
-                    ensure!(inputs.get(index).is_some(), Error::<T>::OutOfBoundsParent);
-                    ensure!(parent_indices.insert(index), Error::<T>::DuplicateParents);
+                    // check metadata count
+                    ensure!(
+                        output.metadata.len() <= T::MaxMetadataCount::get() as usize,
+                        Error::<T>::TooManyMetadataItems
+                    );
+
+                    // check parent index
+                    if output.parent_index.is_some() {
+                        let index = output.parent_index.unwrap() as usize;
+                        ensure!(inputs.get(index).is_some(), Error::<T>::OutOfBoundsParent);
+                        ensure!(parent_indices.insert(index), Error::<T>::DuplicateParents);
+                    }
                 }
-            }
 
-            // check origin owns inputs and that inputs have not been burnt
-            for id in inputs.iter() {
-                let token = <TokensById<T>>::get(id);
-                ensure!(token.roles[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
-                ensure!(token.children == None, Error::<T>::AlreadyBurnt);
+                // check origin owns inputs and that inputs have not been burnt
+                for id in inputs.iter() {
+                    let token = <TokensById<T>>::get(id);
+                    ensure!(token.roles[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
+                    ensure!(token.children == None, Error::<T>::AlreadyBurnt);
+                }
             }
 
             // STORAGE MUTATIONS
