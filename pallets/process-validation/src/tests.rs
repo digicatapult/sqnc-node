@@ -1,7 +1,6 @@
 // Creating mock runtime here
 
-use crate as pallet_simple_nft;
-use codec::{Decode, Encode};
+use crate as pallet_process_validation;
 use frame_support::parameter_types;
 use frame_system as system;
 use sp_core::H256;
@@ -10,11 +9,11 @@ use sp_runtime::{
     traits::{BlakeTwo256, IdentityLookup},
 };
 
+mod create_process;
+mod disable_process;
+
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
 
 // For testing the pallet, we construct most of a mock runtime. This means
 // first constructing a configuration type (`Test`) which `impl`s each of the
@@ -28,7 +27,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
+        ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},
     }
 );
 parameter_types! {
@@ -61,48 +60,17 @@ impl system::Config for Test {
     type SS58Prefix = SS58Prefix;
 }
 
-parameter_types! {
-    pub const MaxMetadataCount: u32 = 4;
-}
-
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
-pub enum Role {
-    Owner,
-    NotOwner,
-}
-
-impl Default for Role {
-    fn default() -> Self {
-        Role::Owner
-    }
-}
-
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
-pub enum MetadataValue<TokenId> {
-    File(Hash),
-    Literal([u8; 1]),
-    TokenId(TokenId),
-    None,
-}
-
-impl<T> Default for MetadataValue<T> {
-    fn default() -> Self {
-        MetadataValue::None
-    }
-}
-
-impl pallet_simple_nft::Config for Test {
+impl pallet_process_validation::Config for Test {
     type Event = Event;
-
-    type TokenId = u64;
-    type RoleKey = Role;
-    type TokenMetadataKey = u64;
-    type TokenMetadataValue = MetadataValue<Self::TokenId>;
-
-    type ProcessValidator = ();
+    type ProcessIdentifier = [u8;32];
+    type ProcessVersion = u32;
+    type CreateProcessOrigin = system::EnsureRoot<u64>;
+    type DisableProcessOrigin = system::EnsureRoot<u64>;
     type WeightInfo = ();
 
-    type MaxMetadataCount = MaxMetadataCount;
+    type RoleKey = u32;
+    type TokenMetadataKey = u32;
+    type TokenMetadataValue = u128;
 }
 
 // This function basically just builds a genesis storage key/value store according to

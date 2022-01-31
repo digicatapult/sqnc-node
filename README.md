@@ -110,6 +110,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "TokenMetadataValue": "MetadataValue",
   "Token": {
     "id": "TokenId",
+    "original_id": "TokenId",
     "roles": "BTreeMap<RoleKey, AccountId>",
     "creator": "AccountId",
     "created_at": "BlockNumber",
@@ -133,6 +134,18 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   },
   "Role": {
     "_enum": ["Owner", "Customer", "AdditiveManufacturer", "Laboratory", "Buyer", "Supplier", "Reviewer"]
+  },
+  "ProcessIdentifier": "[u8; 32]",
+  "ProcessVersion": "u32",
+  "Process": {
+    "status": "ProcessStatus",
+    "restrictions": "Vec<Restriction>"
+  },
+  "ProcessStatus": {
+    "_enum": ["Disabled", "Enabled"]
+  },
+  "Restriction": {
+    "_enum": ["None"]
   }
 }
 ```

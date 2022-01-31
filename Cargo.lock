@@ -3837,6 +3837,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-process-validation"
+version = "1.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "vitalam-pallet-traits",
+]
+
+[[package]]
 name = "pallet-randomness-collective-flip"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3889,7 +3905,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-simple-nft"
-version = "2.1.0"
+version = "2.1.1"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -3900,6 +3916,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "vitalam-pallet-traits",
 ]
 
 [[package]]
@@ -7939,7 +7956,7 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 
 [[package]]
 name = "vitalam-node"
-version = "2.7.1"
+version = "2.8.0"
 dependencies = [
  "bs58",
  "frame-benchmarking",
@@ -7991,6 +8008,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-membership",
  "pallet-node-authorization",
+ "pallet-process-validation",
  "pallet-randomness-collective-flip",
  "pallet-scheduler",
  "pallet-simple-nft",
@@ -8013,6 +8031,15 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder",
+]
+
+[[package]]
+name = "vitalam-pallet-traits"
+version = "1.0.0"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "sp-std",
 ]
 
 [[package]]
