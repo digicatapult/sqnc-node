@@ -6,7 +6,7 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::collections::btree_set::BTreeSet;
-use vitalam_pallet_traits::{ProcessValidator};
+use vitalam_pallet_traits::ProcessValidator;
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -53,7 +53,6 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
-
     /// The pallet's configuration trait.
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -68,7 +67,12 @@ pub mod pallet {
 
         type WeightInfo: WeightInfo;
 
-        type ProcessValidator: ProcessValidator<Self::AccountId, Self::RoleKey, Self::TokenMetadataKey, Self::TokenMetadataValue>;
+        type ProcessValidator: ProcessValidator<
+            Self::AccountId,
+            Self::RoleKey,
+            Self::TokenMetadataKey,
+            Self::TokenMetadataValue,
+        >;
 
         // Maximum number of metadata items allowed per token
         #[pallet::constant]
