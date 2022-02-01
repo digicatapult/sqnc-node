@@ -5,16 +5,16 @@ use frame_support::{assert_err, assert_ok};
 use sp_core::H256;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::iter::FromIterator;
-use vitalam_pallet_traits::{ProcessIO, ProcessFullyQualifiedId};
+use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO};
 
 const NONE_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = None;
 const SUCCEED_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,
-    version: 0u32
+    version: 0u32,
 });
 const FAIL_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldFail,
-    version: 0u32
+    version: 0u32,
 });
 
 #[test]
@@ -423,7 +423,12 @@ fn it_works_for_destroying_single_token() {
         )
         .unwrap();
         // create a token with no parents
-        assert_ok!(SimpleNFTModule::run_process(Origin::signed(1), NONE_PROCESS, vec![1], Vec::new()));
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            NONE_PROCESS,
+            vec![1],
+            Vec::new()
+        ));
         // assert no more tokens were created
         assert_eq!(SimpleNFTModule::last_token(), 1);
         // get the old token
@@ -1096,12 +1101,7 @@ fn it_works_for_running_success_process() {
 fn it_fails_for_running_success_process() {
     new_test_ext().execute_with(|| {
         assert_err!(
-            SimpleNFTModule::run_process(
-                Origin::signed(1),
-                FAIL_PROCESS,
-                Vec::new(),
-                Vec::new()
-            ),
+            SimpleNFTModule::run_process(Origin::signed(1), FAIL_PROCESS, Vec::new(), Vec::new()),
             Error::<Test>::ProcessInvalid
         );
     });

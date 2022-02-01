@@ -4,7 +4,7 @@ use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_std::prelude::*;
 
-use vitalam_pallet_traits::{ProcessIO, ProcessFullyQualifiedId, ProcessValidator};
+use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 #[cfg(test)]
 mod tests;
@@ -14,13 +14,13 @@ mod benchmarking;
 
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
-use restrictions::Restriction;
+use restrictions::{validate_restriction, Restriction};
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum ProcessStatus {
     Disabled,
-    Enabled
+    Enabled,
 }
 
 impl Default for ProcessStatus {
@@ -33,7 +33,7 @@ impl Default for ProcessStatus {
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Process {
     status: ProcessStatus,
-    restrictions: Vec<Restriction>
+    restrictions: Vec<Restriction>,
 }
 
 pub mod weights;
@@ -87,7 +87,7 @@ pub mod pallet {
         Blake2_128Concat,
         T::ProcessVersion,
         Process,
-        ValueQuery
+        ValueQuery,
     >;
 
     #[pallet::event]
@@ -95,7 +95,7 @@ pub mod pallet {
     pub enum Event<T: Config> {
         // TODO: implement correct events for extrinsics including params
         ProcessCreated,
-        ProcessDisabled
+        ProcessDisabled,
     }
 
     #[pallet::error]
@@ -108,9 +108,7 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         // TODO: implement create_process with correct parameters and impl
         #[pallet::weight(T::WeightInfo::create_process())]
-        pub(super) fn create_process(
-            origin: OriginFor<T>
-        ) -> DispatchResultWithPostInfo {
+        pub(super) fn create_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
@@ -120,9 +118,7 @@ pub mod pallet {
 
         // TODO: implement disable_process with correct parameters and impl
         #[pallet::weight(T::WeightInfo::disable_process())]
-        pub(super) fn disable_process(
-            origin: OriginFor<T>
-        ) -> DispatchResultWithPostInfo {
+        pub(super) fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
             Self::deposit_event(Event::ProcessDisabled);
             Ok(().into())
@@ -134,12 +130,35 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
     type ProcessIdentifier = T::ProcessIdentifier;
     type ProcessVersion = T::ProcessVersion;
 
-    // TODO: implement lookup of process and checking of restrictions
     fn validate_process(
-        _id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
-        _sender: &T::AccountId,
-        _inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        _outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>) -> bool {
-        true
+        id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        sender: &T::AccountId,
+        inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+    ) -> bool {
+        let maybe_process = <ProcessesByIdAndVersion<T>>::try_get(id.id, id.version);
+
+        match maybe_process {
+            Ok(process) => {
+                if process.status == ProcessStatus::Disabled {
+                    return false;
+                }
+
+                for restriction in process.restrictions {
+                    let is_valid = validate_restriction::<
+                        T::AccountId,
+                        T::RoleKey,
+                        T::TokenMetadataKey,
+                        T::TokenMetadataValue,
+                    >(&restriction, &sender, &inputs, &outputs);
+
+                    if !is_valid {
+                        return false;
+                    }
+                }
+                true
+            }
+            Err(_) => false,
+        }
     }
 }

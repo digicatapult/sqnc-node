@@ -95,7 +95,7 @@ impl<T> Default for MetadataValue<T> {
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
 pub enum ProcessIdentifier {
     ShouldSucceed,
-    ShouldFail
+    ShouldFail,
 }
 
 impl Default for ProcessIdentifier {
@@ -110,7 +110,12 @@ impl ProcessValidator<u64, Role, u64, MetadataValue<u64>> for MockProcessValidat
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = u32;
 
-    fn validate_process(id: ProcessFullyQualifiedId<ProcessIdentifier, u32>, _sender: &u64, _inputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>, _outputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>) -> bool {
+    fn validate_process(
+        id: ProcessFullyQualifiedId<ProcessIdentifier, u32>,
+        _sender: &u64,
+        _inputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
+        _outputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
+    ) -> bool {
         id.id == ProcessIdentifier::ShouldSucceed
     }
 }

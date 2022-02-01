@@ -101,7 +101,7 @@ jobs:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
-          command: fmt
+          command: fmt --check
       - name: Cargo check
         uses: actions-rs/cargo@v1
         env:

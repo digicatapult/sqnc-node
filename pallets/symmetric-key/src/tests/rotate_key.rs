@@ -7,8 +7,7 @@ fn rotate_key_as_root() {
     new_test_ext().execute_with(|| {
         let init_key = (0..32).collect::<Vec<u8>>();
         let new_key = vec![
-            83, 89, 77, 77, 69, 84, 82, 73, 67, 95, 75, 69, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0
+            83, 89, 77, 77, 69, 84, 82, 73, 67, 95, 75, 69, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
         SymmetricKey::update_key(Origin::root(), init_key.clone()).unwrap();
         System::set_block_number(1);

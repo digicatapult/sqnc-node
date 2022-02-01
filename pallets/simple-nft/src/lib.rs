@@ -6,7 +6,7 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::collections::btree_set::BTreeSet;
-use vitalam_pallet_traits::{ProcessIO, ProcessFullyQualifiedId, ProcessValidator};
+use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -45,7 +45,6 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
-
     /// The pallet's configuration trait.
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -60,7 +59,12 @@ pub mod pallet {
 
         type WeightInfo: WeightInfo;
 
-        type ProcessValidator: ProcessValidator<Self::AccountId, Self::RoleKey, Self::TokenMetadataKey, Self::TokenMetadataValue>;
+        type ProcessValidator: ProcessValidator<
+            Self::AccountId,
+            Self::RoleKey,
+            Self::TokenMetadataKey,
+            Self::TokenMetadataValue,
+        >;
 
         // Maximum number of metadata items allowed per token
         #[pallet::constant]
@@ -102,8 +106,18 @@ pub mod pallet {
 
     // This is an ugly type
     type ProcessId<T> = ProcessFullyQualifiedId<
-        <<T as Config>::ProcessValidator as ProcessValidator<<T as frame_system::Config>::AccountId, <T as Config>::RoleKey, <T as Config>::TokenMetadataKey, <T as Config>::TokenMetadataValue>>::ProcessIdentifier,
-        <<T as Config>::ProcessValidator as ProcessValidator<<T as frame_system::Config>::AccountId, <T as Config>::RoleKey, <T as Config>::TokenMetadataKey, <T as Config>::TokenMetadataValue>>::ProcessVersion,
+        <<T as Config>::ProcessValidator as ProcessValidator<
+            <T as frame_system::Config>::AccountId,
+            <T as Config>::RoleKey,
+            <T as Config>::TokenMetadataKey,
+            <T as Config>::TokenMetadataValue,
+        >>::ProcessIdentifier,
+        <<T as Config>::ProcessValidator as ProcessValidator<
+            <T as frame_system::Config>::AccountId,
+            <T as Config>::RoleKey,
+            <T as Config>::TokenMetadataKey,
+            <T as Config>::TokenMetadataValue,
+        >>::ProcessVersion,
     >;
 
     #[pallet::error]
@@ -121,7 +135,7 @@ pub mod pallet {
         /// Attempted to set the same parent on multiple tokens to mint
         DuplicateParents,
         /// Process failed validation checks
-        ProcessInvalid
+        ProcessInvalid,
     }
 
     // The pallet's dispatchable functions.
@@ -142,14 +156,17 @@ pub mod pallet {
             let _next_token = |id: T::TokenId| -> T::TokenId { id + One::one() };
 
             if let Some(process) = process {
-                let inputs = inputs.iter().map(|i| {
-                    let token = Self::tokens_by_id(i);
-                    ProcessIO {
-                        roles: token.roles,
-                        metadata: token.metadata,
-                        parent_index: None
-                    }
-                }).collect();
+                let inputs = inputs
+                    .iter()
+                    .map(|i| {
+                        let token = Self::tokens_by_id(i);
+                        ProcessIO {
+                            roles: token.roles,
+                            metadata: token.metadata,
+                            parent_index: None,
+                        }
+                    })
+                    .collect();
 
                 let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &inputs, &outputs);
                 ensure!(process_is_valid, Error::<T>::ProcessInvalid);
