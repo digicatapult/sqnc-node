@@ -119,7 +119,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "parents": "Vec<TokenId>",
     "children": "Option<Vec<TokenId>>"
   },
-  "Output": {
+  "ProcessIO": {
     "roles": "BTreeMap<RoleKey, AccountId>",
     "metadata": "BTreeMap<TokenMetadataKey, TokenMetadataValue>",
     "parent_index": "Option<u32>"
@@ -133,10 +133,22 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     }
   },
   "Role": {
-    "_enum": ["Owner", "Customer", "AdditiveManufacturer", "Laboratory", "Buyer", "Supplier", "Reviewer"]
+    "_enum": [
+      "Owner",
+      "Customer",
+      "AdditiveManufacturer",
+      "Laboratory",
+      "Buyer",
+      "Supplier",
+      "Reviewer"
+    ]
   },
   "ProcessIdentifier": "[u8; 32]",
   "ProcessVersion": "u32",
+  "ProcessId": {
+    "id": "ProcessIdentifier",
+    "version": "ProcessVersion"
+  },
   "Process": {
     "status": "ProcessStatus",
     "restrictions": "Vec<Restriction>"
@@ -168,6 +180,7 @@ Tokens can be minted/burnt by calling the following extrinsic under `SimpleNFT`:
 ```rust
 pub fn run_process(
             origin: OriginFor<T>,
+            process: Option<ProcessId<T>>
             inputs: Vec<T::TokenId>,
             outputs: Vec<
               Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>
@@ -182,6 +195,33 @@ Pallet tests can be run with:
 ```bash
 cargo test -p pallet-simple-nft
 ```
+
+### ProcessValidation pallet
+
+Pallet for defining process restrictions. Intended for use with `pallet-simple-nft`. Processes can be defined using the extrinsic `create_process`:
+
+<!-- TODO update with actual signature -->
+
+```rust
+pub fn create_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
+```
+
+And disabled using `disable_process`:
+
+<!-- TODO update with actual signature -->
+
+```rust
+pub fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
+```
+
+#### Restrictions
+
+The pallet defines various type of process restrictions that can be applied to a process. These include:
+
+| Restriction           |                                              description                                               |
+| :-------------------- | :----------------------------------------------------------------------------------------------------: |
+| `None`                |                            Default `Restriction` value that always succeeds                            |
+| `SenderOwnsAllInputs` | Restriction that requires that the process `sender` is assigned the `default` role on all input tokens |
 
 ### IPFSKey pallet
 

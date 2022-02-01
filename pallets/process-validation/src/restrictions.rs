@@ -92,7 +92,7 @@ mod tests {
     }
 
     #[test]
-    fn sender_owns_inputs_restriction_owns_no_inputs_succeeds() {
+    fn sender_owns_inputs_restriction_owns_no_inputs_fails() {
         let mut is_not_owner: BTreeMap<u32, u64> = BTreeMap::new();
         is_not_owner.insert(Default::default(), 2u64);
         let inputs = vec![
@@ -113,11 +113,34 @@ mod tests {
     }
 
     #[test]
-    fn sender_owns_inputs_restriction_owns_some_inputs_succeeds() {
+    fn sender_owns_inputs_restriction_owns_some_inputs_fails() {
         let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
         is_owner.insert(Default::default(), 1u64);
         let mut is_not_owner: BTreeMap<u32, u64> = BTreeMap::new();
         is_not_owner.insert(Default::default(), 2u64);
+        let inputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_not_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result =
+            validate_restriction::<u64, u32, u32, u64>(&Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_owns_inputs_restriction_incorrect_role_fails() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let mut is_not_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_not_owner.insert(1u32, 1u64);
         let inputs = vec![
             ProcessIO {
                 roles: is_owner.clone(),
