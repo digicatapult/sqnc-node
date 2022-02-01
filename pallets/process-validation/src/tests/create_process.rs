@@ -1,6 +1,6 @@
 use super::*;
 
-use frame_support::{assert_ok};
+use frame_support::assert_ok;
 
 #[test]
 fn create_process_simple() {
