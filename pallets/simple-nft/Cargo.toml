@@ -5,7 +5,7 @@ edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/vitalam-node/'
 name = 'pallet-simple-nft'
-version = "2.1.1"
+version = "2.2.0"
 
 
 [package.metadata.docs.rs]
@@ -21,7 +21,7 @@ version = '2.0.0'
 
 
 [dependencies]
-vitalam-pallet-traits = { version = '1.0.0', default-features = false, path = '../traits' }
+vitalam-pallet-traits = { version = '1.1.0', default-features = false, path = '../traits' }
 frame-support = { default-features = false, version = '3.0.0' }
 frame-system = { default-features = false, version = '3.0.0' }
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
