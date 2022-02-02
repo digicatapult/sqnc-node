@@ -157,7 +157,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "_enum": ["Disabled", "Enabled"]
   },
   "Restriction": {
-    "_enum": ["None"]
+    "_enum": ["None", "SenderOwnsAllInputs"]
   }
 }
 ```
