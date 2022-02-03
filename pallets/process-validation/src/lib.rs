@@ -168,9 +168,9 @@ pub mod pallet {
 
             <ProcessesByIdAndVersion<T>>::insert(
                 id.clone(),
-                version, 
+                new_version, 
                 Process {
-                    version: version,
+                    version: new_version,
                     status: ProcessStatus::Disabled,
                     restrictions: restrictions,
                 }
@@ -187,6 +187,16 @@ pub mod pallet {
         }
 
         // TODO: implement disable_process with correct parameters and impl
+        /*
+            - create another storage method storageMap (single)
+            - take another argument <ProcessIdentifier> should be encoded in [u8; 32] 
+            - call the method right after the origing validation
+            - should set ProcessStatus::Disabled
+            - unit tests
+                - if ensure_origing fails
+                - if process does not exist
+                - happy path
+         */
         #[pallet::weight(T::WeightInfo::disable_process())]
         pub(super) fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
