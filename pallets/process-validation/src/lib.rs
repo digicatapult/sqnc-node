@@ -3,6 +3,7 @@
 use codec::{Decode, Encode};
 pub use pallet::*;
 use sp_std::prelude::*;
+use frame_support::dispatch::EncodeLike;
 
 use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
 
@@ -14,13 +15,13 @@ mod benchmarking;
 
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
-use restrictions::{Restriction};
+use restrictions::Restriction;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum ProcessStatus {
     Disabled,
-    Enabled
+    Enabled,
 }
 
 impl Default for ProcessStatus {
@@ -29,16 +30,42 @@ impl Default for ProcessStatus {
     }
 }
 
+/*
+- process
+- version
+
+1. look up a version storage map
+2. increment
+3. update verion in storage
+4. create a process in storage
+
+also for the process
+*/
+
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct Version {
+    version: i32,
+}
+impl EncodeLike<i32> for Version {}
+
+impl Default for Version {
+    fn default() -> Self {
+        Version { version: 1 }
+    }
+}
+
+
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Process {
     status: ProcessStatus,
     restrictions: Vec<Restriction>,
-    version: u32
+    version: i32,
 }
 
 impl Default for Process {
-    fn default() -> Self {    
+    fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
             restrictions: vec![{ Restriction::None }],
@@ -55,9 +82,9 @@ pub use weights::WeightInfo;
 pub mod pallet {
 
     use super::*;
-    use frame_support::{pallet_prelude::*, traits::GetDefault, dispatch::PostDispatchInfo};
+    use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use sp_runtime::{traits::AtLeast32Bit, DispatchErrorWithPostInfo};
+    use sp_runtime::traits::AtLeast32Bit;
 
     /// The pallet's configuration trait.
     #[pallet::config]
@@ -96,9 +123,9 @@ pub mod pallet {
         Blake2_128Concat,
         T::ProcessIdentifier,
         Blake2_128Concat,
-        T::ProcessVersion,
+        i32,
         Process,
-        ValueQuery
+        ValueQuery,
     >;
 
     #[pallet::storage]
@@ -107,8 +134,8 @@ pub mod pallet {
         _,
         Blake2_128Concat,
         T::ProcessIdentifier,
-        T::ProcessIdentifier,
-        OptionQuery,
+        i32,
+        ValueQuery
     >;
 
     #[pallet::event]
@@ -116,7 +143,7 @@ pub mod pallet {
     pub enum Event<T: Config> {
         // TODO: implement correct events for extrinsics including params
         ProcessCreated,
-        ProcessDisabled
+        ProcessDisabled,
     }
 
     #[pallet::error]
@@ -132,20 +159,36 @@ pub mod pallet {
         pub(super) fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: Vec<Restriction>
+            restrictions: Vec<Restriction>,
         ) -> DispatchResultWithPostInfo {
-            
             T::CreateProcessOrigin::ensure_origin(origin)?;
-            let latest_version = <LatestProcessVersion<T>>::try_get(id);
+            let version = <LatestProcessVersion<T>>::get(id.clone());
+            let process = <ProcessesByIdAndVersion<T>>::get(id.clone(), version);
+            let new_version= if process.version == 0 { version } else { version + 1 };
+
+            <ProcessesByIdAndVersion<T>>::insert(
+                id.clone(),
+                version, 
+                Process {
+                    version: version,
+                    status: ProcessStatus::Disabled,
+                    restrictions: restrictions,
+                }
+            );
+            <LatestProcessVersion<T>>::insert(
+                id.clone(),
+                Version {
+                    version: new_version,
+                }
+            );
+
             Self::deposit_event(Event::ProcessCreated);
             Ok(().into())
         }
 
         // TODO: implement disable_process with correct parameters and impl
         #[pallet::weight(T::WeightInfo::disable_process())]
-        pub(super) fn disable_process(
-            origin: OriginFor<T>
-        ) -> DispatchResultWithPostInfo {
+        pub(super) fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
             Self::deposit_event(Event::ProcessDisabled);
             Ok(().into())
@@ -163,7 +206,8 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
         _version: T::ProcessVersion,
         _sender: T::AccountId,
         _inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        _outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>) -> bool {
+        _outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+    ) -> bool {
         true
     }
 }
