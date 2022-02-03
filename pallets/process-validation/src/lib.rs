@@ -188,12 +188,14 @@ pub mod pallet {
 
         // TODO: implement disable_process with correct parameters and impl
         /*
-            - create another storage method storageMap (single)
-            - take another argument <ProcessIdentifier> should be encoded in [u8; 32] 
+            - use an existing method -> ProcessesByIdAndVersion to query storage
             - call the method right after the origing validation
-            - should set ProcessStatus::Disabled
+            - a handler of psuedo code for already disabled process
+                - if disabled - return ok()
+                - if not - updated process with the Disabled status
             - unit tests
                 - if ensure_origing fails
+                - if process is already disabled
                 - if process does not exist
                 - happy path
          */
