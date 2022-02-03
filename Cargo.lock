@@ -3844,6 +3844,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "parity-scale-codec",
+ "rand 0.8.4",
  "serde",
  "sp-core",
  "sp-io",

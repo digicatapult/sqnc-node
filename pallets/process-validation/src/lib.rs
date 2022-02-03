@@ -29,11 +29,22 @@ impl Default for ProcessStatus {
     }
 }
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Process {
     status: ProcessStatus,
-    restrictions: Vec<Restriction>
+    restrictions: Vec<Restriction>,
+    version: u32
+}
+
+impl Default for Process {
+    fn default() -> Self {    
+        Process {
+            status: ProcessStatus::Disabled,
+            restrictions: vec![{ Restriction::None }],
+            version: 0,
+        }
+    }
 }
 
 pub mod weights;
@@ -44,9 +55,9 @@ pub use weights::WeightInfo;
 pub mod pallet {
 
     use super::*;
-    use frame_support::pallet_prelude::*;
+    use frame_support::{pallet_prelude::*, traits::GetDefault, dispatch::PostDispatchInfo};
     use frame_system::pallet_prelude::*;
-    use sp_runtime::traits::AtLeast32Bit;
+    use sp_runtime::{traits::AtLeast32Bit, DispatchErrorWithPostInfo};
 
     /// The pallet's configuration trait.
     #[pallet::config]
@@ -90,6 +101,16 @@ pub mod pallet {
         ValueQuery
     >;
 
+    #[pallet::storage]
+    #[pallet::getter(fn latest_process_version)]
+    pub(super) type LatestProcessVersion<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::ProcessIdentifier,
+        T::ProcessIdentifier,
+        OptionQuery,
+    >;
+
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
@@ -109,11 +130,13 @@ pub mod pallet {
         // TODO: implement create_process with correct parameters and impl
         #[pallet::weight(T::WeightInfo::create_process())]
         pub(super) fn create_process(
-            origin: OriginFor<T>
+            origin: OriginFor<T>,
+            id: T::ProcessIdentifier,
+            restrictions: Vec<Restriction>
         ) -> DispatchResultWithPostInfo {
-            // Check it was signed and get the signer
+            
             T::CreateProcessOrigin::ensure_origin(origin)?;
-
+            let latest_version = <LatestProcessVersion<T>>::try_get(id);
             Self::deposit_event(Event::ProcessCreated);
             Ok(().into())
         }
