@@ -21,7 +21,6 @@ impl Default for Restriction {
 pub fn validate_restriction(restriction: &Restriction) -> bool {
   match *restriction {
     Restriction::None => true
-    // TODO implement some actual restrictions
   }
 }
 

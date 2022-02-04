@@ -30,30 +30,13 @@ impl Default for ProcessStatus {
     }
 }
 
-/*
-- process
-- version
-
-1. look up a version storage map
-2. increment
-3. update verion in storage
-4. create a process in storage
-
-also for the process
-*/
-
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Version {
-    version: i32,
+    version: i32, // TODO: sort this type, should be included from trait
 }
-impl EncodeLike<i32> for Version {}
 
-impl Default for Version {
-    fn default() -> Self {
-        Version { version: 1 }
-    }
-}
+impl EncodeLike<i32> for Version {}
 
 
 #[derive(Encode, Decode, Clone, PartialEq)]
@@ -61,15 +44,13 @@ impl Default for Version {
 pub struct Process {
     status: ProcessStatus,
     restrictions: Vec<Restriction>,
-    version: i32,
 }
 
 impl Default for Process {
-    fn default() -> Self {
+    fn default() -> Process {
         Process {
             status: ProcessStatus::Disabled,
             restrictions: vec![{ Restriction::None }],
-            version: 0,
         }
     }
 }
@@ -117,8 +98,8 @@ pub mod pallet {
 
     /// Storage map definition
     #[pallet::storage]
-    #[pallet::getter(fn processes_by_id_and_version)]
-    pub(super) type ProcessesByIdAndVersion<T: Config> = StorageDoubleMap<
+    #[pallet::getter(fn get_process)]
+    pub(super) type GetProcess<T: Config> = StorageDoubleMap<
         _,
         Blake2_128Concat,
         T::ProcessIdentifier,
@@ -129,8 +110,8 @@ pub mod pallet {
     >;
 
     #[pallet::storage]
-    #[pallet::getter(fn latest_process_version)]
-    pub(super) type LatestProcessVersion<T: Config> = StorageMap<
+    #[pallet::getter(fn get_version)]
+    pub(super) type GetVersion<T: Config> = StorageMap<
         _,
         Blake2_128Concat,
         T::ProcessIdentifier,
@@ -141,8 +122,8 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        // TODO: implement correct events for extrinsics including params
-        ProcessCreated,
+        // id, version, restrictions, is_new
+        ProcessCreated(T::ProcessIdentifier, i32, Vec<Restriction>, bool),
         ProcessDisabled,
     }
 
@@ -151,48 +132,67 @@ pub mod pallet {
         // TODO: implement errors for extrinsics
     }
 
+    // helper functions
+    fn get_version<T: Config>(id: T::ProcessIdentifier) -> i32 {
+        return <GetVersion<T>>::get(&id);
+    }
+
+    fn uopdate_version<T: Config>(id: T::ProcessIdentifier) -> i32 {
+        let version: i32 = get_version::<T>(id.clone());
+        let exists: Result<Process, ()> = <GetProcess<T>>::try_get(id.clone(),version);
+        let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 };
+        <GetVersion<T>>::insert(
+            &id,
+            Version {
+                version: new_version,
+            }
+        );
+
+        return new_version;
+    } 
+
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        // TODO: implement create_process with correct parameters and impl
+
         #[pallet::weight(T::WeightInfo::create_process())]
         pub(super) fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: Vec<Restriction>,
+            restrictions: Vec<Restriction>
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
-            let version = <LatestProcessVersion<T>>::get(id.clone());
-            let process = <ProcessesByIdAndVersion<T>>::get(id.clone(), version);
-            let new_version= if process.version == 0 { version } else { version + 1 };
-
-            <ProcessesByIdAndVersion<T>>::insert(
-                id.clone(),
-                new_version, 
+            let new_version: i32 = uopdate_version::<T>(id.clone());
+            <GetProcess<T>>::insert(
+                &id,
+                &new_version,
                 Process {
-                    version: new_version,
-                    status: ProcessStatus::Disabled,
-                    restrictions: restrictions,
-                }
-            );
-            <LatestProcessVersion<T>>::insert(
-                id.clone(),
-                Version {
-                    version: new_version,
-                }
+                    restrictions: restrictions.clone(),
+                    ..Default::default()
+                },
             );
 
-            Self::deposit_event(Event::ProcessCreated);
-            Ok(().into())
+            Self::deposit_event(Event::ProcessCreated(
+                id,
+                new_version,
+                restrictions,
+                new_version == 1
+            ));
+
+            return Ok(().into());
         }
 
         // TODO: implement disable_process with correct parameters and impl
+        // For Danniel! 
         /*
-            - use an existing method -> ProcessesByIdAndVersion to query storage
+            - use an existing method -> GetProcess to query storage
             - call the method right after the origing validation
             - a handler of psuedo code for already disabled process
-                - if disabled - return ok()
-                - if not - updated process with the Disabled status
+                - if disabled
+                    - return ok()
+                - if not
+                    - updated process with the Disabled status
+            - create an event return args Line 124
             - unit tests
                 - if ensure_origing fails
                 - if process is already disabled

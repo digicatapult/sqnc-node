@@ -28,6 +28,7 @@ frame_support::construct_runtime!(
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
         ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},
+
     }
 );
 parameter_types! {
@@ -78,3 +79,4 @@ impl pallet_process_validation::Config for Test {
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 }
+
