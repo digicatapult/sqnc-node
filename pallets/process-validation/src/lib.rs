@@ -35,7 +35,7 @@ impl Default for ProcessStatus {
 pub struct Version {
     version: i32, // TODO: sort this type, should be included from trait
 }
-
+// TODO remove once type has been soprted <version>
 impl EncodeLike<i32> for Version {}
 
 
@@ -67,13 +67,15 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::AtLeast32Bit;
 
+    type Restrictions = Vec<Restriction>;
+
     /// The pallet's configuration trait.
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        // The primary identifier for a process (i.e. it's name)
+        // The primary identifier for a process (i.e. it's name, and version)
         type ProcessIdentifier: Parameter;
         type ProcessVersion: Parameter + AtLeast32Bit;
 
@@ -150,6 +152,16 @@ pub mod pallet {
 
         return new_version;
     } 
+    fn persist_process<T: Config>(id: &T::ProcessIdentifier, version: &i32, restrictions: Restrictions) {
+        <GetProcess<T>>::insert(
+            id,
+            version,
+            Process {
+                restrictions: restrictions.clone(),
+                ..Default::default()
+            },
+        );
+    }
 
     // The pallet's dispatchable functions.
     #[pallet::call]
@@ -163,14 +175,8 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let new_version: i32 = uopdate_version::<T>(id.clone());
-            <GetProcess<T>>::insert(
-                &id,
-                &new_version,
-                Process {
-                    restrictions: restrictions.clone(),
-                    ..Default::default()
-                },
-            );
+            persist_process::<T>(&id, &new_version, restrictions.clone());
+
 
             Self::deposit_event(Event::ProcessCreated(
                 id,
@@ -183,7 +189,7 @@ pub mod pallet {
         }
 
         // TODO: implement disable_process with correct parameters and impl
-        // For Danniel! 
+        // For Danniel! - Good Morning:)
         /*
             - use an existing method -> GetProcess to query storage
             - call the method right after the origing validation

@@ -19,6 +19,7 @@ use crate::{Restriction::None, ProcessStatus, Process, GetProcess, GetVersion};
 #[test]
 fn process_validation() {
     // -- fixtures --
+    #[allow(dead_code)]
     const PROCESS_ID: [u8; 32] = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
     fn mock_process() -> Process {
         return Process {
@@ -27,6 +28,7 @@ fn process_validation() {
         };
     }
 
+    #[allow(dead_code)]
     fn updates_version_for_existing() {
         new_test_ext().execute_with(|| {
             assert_eq!(1, 1);
@@ -44,101 +46,3 @@ fn process_validation() {
         });
     }
 }
-/*
-fn creates_a_new_process() {
-    new_test_ext().execute_with(|| {
-        assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
-            PROCESS_ID0.clone(),
-            vec![{ None }]
-        ));
-        let process: Process = ProcessValidation::processes_by_id_and_version(PROCESS_ID0.clone(), 1);
-        assert_eq!(
-            process,
-            Process {
-                status: ProcessStatus::Disabled,
-                restrictions: [None].to_vec(),
-                version: 0,
-            }
-        )
-    });
-}
-
-#[test]
-fn updates_a_version_and_creates_a_process() {
-    new_test_ext().execute_with(|| {
-        let _a = <LatestProcessVersion<Test>>::get(PROCESS_ID0);
-        println!("events:: {:?}", System::events());
-        println!("id4554: {}", _a);
-    });
-
-    new_test_ext().execute_with(|| {
-
-
-        // create a process
-        <ProcessesByIdAndVersion<Test>>::insert(
-            PROCESS_ID0,
-            1,
-            mock_process,
-        );
-        ProcessValidation::
-
-        ProcessValidation::::insert(
-            PROCESS_ID0,
-            1,
-            mock_process,
-        );
-
-        let _a = <LatestProcessVersion<Test>>::get(PROCESS_ID0);
-        println!("id: {}", _a);
-        assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
-            PROCESS_ID0.clone(),
-            vec![{ None }],
-        ));
-        println!("events:: 1{:?}", System::events());
-
-        assert_eq!(<LatestProcessVersion<Test>>::get(PROCESS_ID0), 0);
-        //assert_eq!(ProcessValidation::latest_process_version(PROCESS_ID0.clone()), 10);
-        println!("events:: 2{:?}", System::events())
-    });
-}
-
-
-#[test]
-fn create_process_simple() {
-    new_test_ext().execute_with(|| {
-        assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
-            PROCESS_ID0,
-            vec![{ None }],
-        ));
-            
-        println!("events:: 1{:?}", System::events());
-
-        let _a = <LatestProcessVersion<Test>>::get(PROCESS_ID0);
-        println!("id: {}", _a);
-        assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
-            PROCESS_ID0.clone(),
-            vec![{ None }],
-        ));
-
-        assert_eq!(<LatestProcessVersion<Test>>::get(PROCESS_ID0), 0);
-        //assert_eq!(ProcessValidation::latest_process_version(PROCESS_ID0.clone()), 10);
-        println!("events:: 2{:?}", System::events());
-    });
-}
-
-
-#[test]
-fn create_process_simple() {
-    new_test_ext().execute_with(|| {
-        assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
-            PROCESS_ID0,
-            vec![{ None }],
-        ));
-    });
-}
-*/
