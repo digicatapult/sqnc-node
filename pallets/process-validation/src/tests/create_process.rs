@@ -1,6 +1,6 @@
 use super::*;
-use frame_support::{assert_ok};
-use crate::{Restriction::None, ProcessStatus, Process, GetProcess, GetVersion};
+use crate::{GetProcess, GetVersion, Process, ProcessStatus, Restriction::None};
+use frame_support::assert_ok;
 
 /*
     // best todo of all is to finish a todo list
@@ -10,17 +10,18 @@ use crate::{Restriction::None, ProcessStatus, Process, GetProcess, GetVersion};
         [ ] - pallet methods should be able to store data to mock storage and query as well
         [ ] - better block management
         [ ] - include fixtures, ideally to load dynamicaly into <Test> instance
-        -- some EXAMPLES -> 
+        -- some EXAMPLES ->
             - https://github.com/paritytech/substrate/blob/master/frame/contracts/src/tests.rs
             - https://github.com/paritytech/substrate/blob/master/frame/contracts/src/tests.rs
 */
-
 
 #[test]
 fn process_validation() {
     // -- fixtures --
     #[allow(dead_code)]
-    const PROCESS_ID: [u8; 32] = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+    const PROCESS_ID: [u8; 32] = [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ];
     fn mock_process() -> Process {
         return Process {
             status: ProcessStatus::Enabled,

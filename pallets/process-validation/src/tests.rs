@@ -63,7 +63,7 @@ impl system::Config for Test {
 
 impl pallet_process_validation::Config for Test {
     type Event = Event;
-    type ProcessIdentifier = [u8;32];
+    type ProcessIdentifier = [u8; 32];
     type ProcessVersion = u32;
     type CreateProcessOrigin = system::EnsureRoot<u64>;
     type DisableProcessOrigin = system::EnsureRoot<u64>;
