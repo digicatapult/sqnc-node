@@ -24,8 +24,7 @@ fn schedule_after_schedule_period() {
 
         let init_key = (0..32).collect::<Vec<u8>>();
         let new_key = vec![
-            83, 89, 77, 77, 69, 84, 82, 73, 67, 95, 75, 69, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0
+            83, 89, 77, 77, 69, 84, 82, 73, 67, 95, 75, 69, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
         SymmetricKey::update_key(Origin::root(), init_key.clone()).unwrap();
 

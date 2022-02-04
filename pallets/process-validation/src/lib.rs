@@ -1,9 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
+use frame_support::dispatch::EncodeLike;
 pub use pallet::*;
 use sp_std::prelude::*;
-use frame_support::dispatch::EncodeLike;
 
 use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
 
@@ -37,7 +37,6 @@ pub struct Version {
 }
 // TODO remove once type has been soprted <version>
 impl EncodeLike<i32> for Version {}
-
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -107,32 +106,20 @@ pub mod pallet {
     /// Storage map definition
     #[pallet::storage]
     #[pallet::getter(fn get_process)]
-    pub(super) type GetProcess<T: Config> = StorageDoubleMap<
-        _,
-        Blake2_128Concat,
-        T::ProcessIdentifier,
-        Blake2_128Concat,
-        i32,
-        Process,
-        ValueQuery,
-    >;
+    pub(super) type GetProcess<T: Config> =
+        StorageDoubleMap<_, Blake2_128Concat, T::ProcessIdentifier, Blake2_128Concat, i32, Process, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn get_version)]
-    pub(super) type GetVersion<T: Config> = StorageMap<
-        _,
-        Blake2_128Concat,
-        T::ProcessIdentifier,
-        i32,
-        ValueQuery
-    >;
+    pub(super) type GetVersion<T: Config> = StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, i32, ValueQuery>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
         ProcessCreated(T::ProcessIdentifier, i32, Vec<Restriction>, bool),
-        ProcessDisabled,
+        //id, version, updated
+        ProcessDisabled(T::ProcessIdentifier, i32, bool),
     }
 
     #[pallet::error]
@@ -147,17 +134,12 @@ pub mod pallet {
 
     fn uopdate_version<T: Config>(id: T::ProcessIdentifier) -> i32 {
         let version: i32 = get_version::<T>(id.clone());
-        let exists: Result<Process, ()> = <GetProcess<T>>::try_get(id.clone(),version);
-        let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 }; // TODO tunary operator?
-        <GetVersion<T>>::insert(
-            &id,
-            Version {
-                version: new_version,
-            }
-        );
+        let exists: Result<Process, ()> = <GetProcess<T>>::try_get(id.clone(), version);
+        let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 };
+        <GetVersion<T>>::insert(&id, Version { version: new_version });
 
         return new_version;
-    } 
+    }
     fn persist_process<T: Config>(id: &T::ProcessIdentifier, version: &i32, restrictions: Restrictions) {
         <GetProcess<T>>::insert(
             id,
@@ -172,24 +154,17 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-
         #[pallet::weight(T::WeightInfo::create_process())]
         pub(super) fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: Vec<Restriction>
+            restrictions: Vec<Restriction>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let new_version: i32 = uopdate_version::<T>(id.clone());
             persist_process::<T>(&id, &new_version, restrictions.clone());
 
-
-            Self::deposit_event(Event::ProcessCreated(
-                id,
-                new_version,
-                restrictions,
-                new_version == 1
-            ));
+            Self::deposit_event(Event::ProcessCreated(id, new_version, restrictions, new_version == 1));
 
             return Ok(().into());
         }
@@ -197,24 +172,41 @@ pub mod pallet {
         // TODO: implement disable_process with correct parameters and impl
         // For Danniel! - Good Morning:)
         /*
-            - use an existing method -> GetProcess to query storage
-            - call the method right after the origing validation
-            - a handler of psuedo code for already disabled process
-                - if disabled
-                    - return ok()
-                - if not
-                    - updated process with the Disabled status
-            - create an event return args Line 124
-            - unit tests
-                - if ensure_origing fails
-                - if process is already disabled
-                - if process does not exist
-                - happy path
-         */
+           - use an existing method -> GetProcess to query storage
+           - call the method right after the origing validation
+           - a handler of psuedo code for already disabled process
+               - if disabled
+                   - return ok()
+               - if not
+                   - updated process with the Disabled status
+           - create an event return args Line 124
+           - unit tests
+               - if ensure_origing fails
+               - if process is already disabled
+               - if process does not exist
+               - happy path
+        */
         #[pallet::weight(T::WeightInfo::disable_process())]
-        pub(super) fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+        pub(super) fn disable_process(
+            origin: OriginFor<T>,
+            id: T::ProcessIdentifier,
+            version: i32,
+        ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
-            Self::deposit_event(Event::ProcessDisabled);
+
+            if !<GetProcess<T>>::contains_key(id.clone(), version) {
+                Self::deposit_event(Event::ProcessDisabled(id, version, false));
+                return Ok(().into());
+            }
+
+            let mut updated = false;
+
+            <GetProcess<T>>::mutate(id.clone(), version, |process| {
+                updated = process.status == ProcessStatus::Disabled;
+                (*process).status = ProcessStatus::Disabled;
+            });
+
+            Self::deposit_event(Event::ProcessDisabled(id, version, updated));
             Ok(().into())
         }
     }
