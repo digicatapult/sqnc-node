@@ -58,7 +58,13 @@ impl Default for Process {
 pub mod weights;
 
 pub use weights::WeightInfo;
+/*
+    TODO 
 
+    [ ] - implement vertsion trait for this pallet scope
+    [ ] - error handling 
+    [ ] - expand on unit testing for create process and helper functions
+ */
 #[frame_support::pallet]
 pub mod pallet {
 
@@ -142,7 +148,7 @@ pub mod pallet {
     fn uopdate_version<T: Config>(id: T::ProcessIdentifier) -> i32 {
         let version: i32 = get_version::<T>(id.clone());
         let exists: Result<Process, ()> = <GetProcess<T>>::try_get(id.clone(),version);
-        let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 };
+        let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 }; // TODO tunary operator?
         <GetVersion<T>>::insert(
             &id,
             Version {
