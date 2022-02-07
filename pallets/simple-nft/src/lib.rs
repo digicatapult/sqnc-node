@@ -184,7 +184,8 @@ pub mod pallet {
             let (last, children) = outputs.iter().fold((last, Vec::new()), |(last, children), output| {
                 let next = _next_token(last);
                 let original_id = if output.parent_index.is_some() {
-                    inputs.get(output.parent_index.unwrap() as usize).unwrap().clone()
+                    let parent_id = inputs.get(output.parent_index.unwrap() as usize).unwrap();
+                    <TokensById<T>>::get(parent_id).original_id.clone()
                 } else {
                     next
                 };

@@ -5,7 +5,7 @@ edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/vitalam-node/'
 name = 'pallet-simple-nft'
-version = "2.1.1"
+version = "2.1.2"
 
 
 [package.metadata.docs.rs]
@@ -45,6 +45,6 @@ std = [
     'frame-system/std',
     'frame-benchmarking/std',
     'sp-std/std',
-    'vitalam-pallet-traits/std'
+    'vitalam-pallet-traits/std',
 ]
 runtime-benchmarks = ['frame-benchmarking']
