@@ -149,10 +149,7 @@ pub mod pallet {
             );
 
             // TODO check if there is any version for this process
-            ensure!(
-                <VersionModel<T>>::contains_key(&id),
-                Error::<T>::InvalidVersion,
-            );
+            ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion,);
 
             // Question for Matt, whether status is already disable should be an error or not
             // also for the above ensure! macros

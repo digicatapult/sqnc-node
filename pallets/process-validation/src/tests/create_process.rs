@@ -1,7 +1,7 @@
 use super::*;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, Version, VersionModel};
-use frame_support::{assert_ok, assert_noop, dispatch::DispatchError};
+use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 use sp_std::prelude::*;
 
 // -- fixtures --
@@ -44,12 +44,7 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
             vec![{ None }],
         ));
 
-        let expected = Event::pallet_process_validation(ProcessCreated(
-            PROCESS_ID1,
-            1,
-            vec![{ None }],
-            true
-        ));
+        let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 1, vec![{ None }], true));
         println!("My Event: {:?}", System::events()[0].event);
         assert_eq!(System::events()[0].event, expected);
     });
