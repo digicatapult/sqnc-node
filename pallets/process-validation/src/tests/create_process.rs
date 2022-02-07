@@ -65,7 +65,7 @@ fn for_existing_process_it_mutates_an_existing_version() {
 }
 
 #[test]
-fn updates_correctly_versions_for_multiple_processes() {
+fn updates_versions_correctly_for_multiple_processes() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         let mut ids: Vec<[u8; 32]> = [PROCESS_ID2; 10].to_vec();

@@ -142,7 +142,7 @@ pub mod pallet {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
             // TODO implement errors
-            // TODO if no process for this version return latest
+            // TODO if no process for this version return latest along with the error message
             if !<ProcessModel<T>>::contains_key(id.clone(), version) {
                 Self::deposit_event(Event::ProcessDisabled(id, version, false));
                 return Ok(().into());
@@ -156,7 +156,7 @@ pub mod pallet {
             });
 
             Self::deposit_event(Event::ProcessDisabled(id, version, updated));
-            Ok(().into())
+            return Ok(().into());
         }
     }
 
