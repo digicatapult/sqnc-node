@@ -99,7 +99,11 @@ pub mod pallet {
 
     #[pallet::event]
     // looking by the type, same type for multiple things - bnad idea
-    #[pallet::metadata(ProcessIdentifier = "Process Id", ProcessVersion = "Process Version", bool = "Is New")]
+    #[pallet::metadata(
+        ProcessIdentifier = "Process Id",
+        ProcessVersion = "Process Version",
+        bool = "Is New"
+    )]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
@@ -149,9 +153,8 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
-
             Pallet::<T>::validate_version_and_id(&id, &version)?;
-            Pallet::<T>::disable_process(&id, &version)?;
+            Pallet::<T>::set_disabled(&id, &version)?;
 
             Self::deposit_event(Event::ProcessDisabled(id, version));
             return Ok(().into());
@@ -193,7 +196,7 @@ pub mod pallet {
             );
         }
 
-        pub fn disable_process(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
+        pub fn set_disabled(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
             let process: Process = <ProcessModel<T>>::get(&id, &version);
             if process.status == ProcessStatus::Disabled {
                 return Err(Error::<T>::AlreadyDisabled);
@@ -205,8 +208,11 @@ pub mod pallet {
 
             return Ok(true);
         }
-        
-        pub fn validate_version_and_id(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
+
+        pub fn validate_version_and_id(
+            id: &T::ProcessIdentifier,
+            version: &T::ProcessVersion,
+        ) -> Result<bool, Error<T>> {
             ensure!(
                 <ProcessModel<T>>::contains_key(&id, version.clone()),
                 Error::<T>::NonExistingProcess,

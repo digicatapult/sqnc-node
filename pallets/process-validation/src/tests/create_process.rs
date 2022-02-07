@@ -53,9 +53,9 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
 fn for_existing_process_it_mutates_an_existing_version() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
-        assert_ok!(ProcessValidation::_update_version(PROCESS_ID1));
-        assert_ok!(ProcessValidation::_update_version(PROCESS_ID1));
-        assert_ok!(ProcessValidation::_update_version(PROCESS_ID1));
+        assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
+        assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
+        assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
 
         let items: Vec<u32> = <VersionModel<Test>>::iter()
             .map(|item: ([u8; 32], u32)| item.1.clone())
@@ -74,7 +74,7 @@ fn updates_versions_correctly_for_multiple_processes() {
         let mut ids: Vec<[u8; 32]> = [PROCESS_ID2; 10].to_vec();
         ids.extend([PROCESS_ID1; 15].to_vec());
         ids.iter().for_each(|id: &[u8; 32]| -> () {
-            assert_ok!(ProcessValidation::_update_version(*id));
+            assert_ok!(ProcessValidation::update_version(*id));
         });
 
         let id1_expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 16u32, vec![{ None }], false));
