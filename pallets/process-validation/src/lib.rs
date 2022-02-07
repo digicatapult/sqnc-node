@@ -1,9 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{dispatch::EncodeLike, Parameter};
+use frame_support::Parameter;
 pub use pallet::*;
-use sp_runtime::traits::AtLeast32Bit;
+use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::prelude::*;
 
 use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
@@ -30,14 +30,6 @@ impl Default for ProcessStatus {
         ProcessStatus::Disabled
     }
 }
-
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
-struct Version {
-    version: i32,
-}
-
-impl EncodeLike<i32> for Version {}
 
 #[derive(Encode, Default, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -66,7 +58,7 @@ pub mod pallet {
 
         // The primary identifier for a process (i.e. it's name, and version)
         type ProcessIdentifier: Parameter;
-        type ProcessVersion: Parameter + AtLeast32Bit;
+        type ProcessVersion: Parameter + AtLeast32Bit + Default;
 
         // Origins for calling these extrinsics. For now these are expected to be root
         type CreateProcessOrigin: EnsureOrigin<Self::Origin>;
@@ -90,20 +82,30 @@ pub mod pallet {
     /// Storage map definition
     #[pallet::storage]
     #[pallet::getter(fn process_model)] // not sure about name, store?, map?
-    pub(super) type ProcessModel<T: Config> =
-        StorageDoubleMap<_, Blake2_128Concat, T::ProcessIdentifier, Blake2_128Concat, i32, Process, ValueQuery>;
+    pub(super) type ProcessModel<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        T::ProcessIdentifier,
+        Blake2_128Concat,
+        T::ProcessVersion,
+        Process,
+        ValueQuery,
+    >;
 
     #[pallet::storage]
     #[pallet::getter(fn version_model)]
-    pub(super) type VersionModel<T: Config> = StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, i32, ValueQuery>;
+    pub(super) type VersionModel<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, T::ProcessVersion, ValueQuery>;
 
     #[pallet::event]
+    // looking by the type, same type for multiple things - bnad idea
+    // #[pallet::metadata(Vec<u8> = "a", Vec<u16> = "b")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
-        ProcessCreated(T::ProcessIdentifier, i32, Vec<Restriction>, bool),
-        //id, version, updated
-        ProcessDisabled(T::ProcessIdentifier, i32),
+        ProcessCreated(T::ProcessIdentifier, T::ProcessVersion, Vec<Restriction>, bool),
+        //id, version
+        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
     }
 
     #[pallet::error]
@@ -126,11 +128,15 @@ pub mod pallet {
             restrictions: Vec<Restriction>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
-            let new_version: i32 = Pallet::<T>::_update_version(id.clone()).unwrap();
-            Pallet::<T>::_persist_process(&id, &new_version, restrictions.clone());
+            let new_version: T::ProcessVersion = Pallet::<T>::_update_version(id.clone()).unwrap();
+            Pallet::<T>::persist_process(&id, &new_version, restrictions.clone());
 
-            // wrap event data into a struct or some other data structure?
-            Self::deposit_event(Event::ProcessCreated(id, new_version, restrictions, new_version == 1));
+            Self::deposit_event(Event::ProcessCreated(
+                id,
+                new_version.clone(),
+                restrictions,
+                new_version == One::one(),
+            ));
 
             return Ok(().into());
         }
@@ -139,22 +145,20 @@ pub mod pallet {
         pub(super) fn disable_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            version: i32,
+            version: T::ProcessVersion,
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
             ensure!(
-                <ProcessModel<T>>::contains_key(&id, version),
+                <ProcessModel<T>>::contains_key(&id, version.clone()),
                 Error::<T>::NonExistingProcess,
             );
 
             // TODO check if there is any version for this process
-            ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion,);
-
-            // Question for Matt, whether status is already disable should be an error or not
-            // also for the above ensure! macros
+            ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
             Pallet::<T>::_disable_process(&id, &version)?;
 
+            // small and well defined (typed)
             Self::deposit_event(Event::ProcessDisabled(id, version));
             return Ok(().into());
         }
@@ -162,26 +166,29 @@ pub mod pallet {
 
     // helper methods
     impl<T: Config> Pallet<T> {
-        pub fn _get_version(id: T::ProcessIdentifier) -> i32 {
-            return <VersionModel<T>>::get(&id);
+        pub fn _get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
+            let version: T::ProcessVersion = <VersionModel<T>>::get(&id);
+            return version;
         }
 
-        pub fn _update_version(id: T::ProcessIdentifier) -> Result<i32, ()> {
-            let version: i32 = Pallet::<T>::_get_version(id.clone());
-            let exists: bool = <ProcessModel<T>>::contains_key(id.clone(), version);
-            let new_version: i32 = match exists {
+        // rebase with master
+        pub fn _update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, ()> {
+            let version: T::ProcessVersion = Pallet::<T>::_get_version(&id);
+            let exists: bool = <ProcessModel<T>>::contains_key(&id, version.clone());
+            let new_version: T::ProcessVersion = match exists {
                 true => version,
-                false => version + 1,
+                false => version + One::one(),
             };
-            match new_version == 1 {
-                true => <VersionModel<T>>::insert(&id, Version { version: new_version }),
-                false => <VersionModel<T>>::mutate(&id, |v| *v = new_version),
+            match &new_version == &One::one() {
+                true => <VersionModel<T>>::insert(&id, new_version.clone()),
+                false => <VersionModel<T>>::mutate(&id, |v| *v = new_version.clone()),
             };
 
             return Ok(new_version);
         }
 
-        pub fn _persist_process(id: &T::ProcessIdentifier, version: &i32, restrictions: Restrictions) {
+        // remove underscores from helper methods
+        pub fn persist_process(id: &T::ProcessIdentifier, version: &T::ProcessVersion, restrictions: Restrictions) {
             <ProcessModel<T>>::insert(
                 id,
                 version,
@@ -192,7 +199,7 @@ pub mod pallet {
             );
         }
 
-        pub fn _disable_process(id: &T::ProcessIdentifier, version: &i32) -> Result<bool, Error<T>> {
+        pub fn _disable_process(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
             let process: Process = <ProcessModel<T>>::get(&id, &version);
             if process.status == ProcessStatus::Disabled {
                 return Err(Error::<T>::AlreadyDisabled);
