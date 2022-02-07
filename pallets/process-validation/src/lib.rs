@@ -144,21 +144,19 @@ pub mod pallet {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
             ensure!(
-                <ProcessModel<T>>::contains_key(id.clone(), version),
+                <ProcessModel<T>>::contains_key(&id, version),
                 Error::<T>::NonExistingProcess,
             );
 
             // TODO check if there is any version for this process
             ensure!(
-                <VersionModel<T>>::contains_key(id.clone()),
+                <VersionModel<T>>::contains_key(&id),
                 Error::<T>::InvalidVersion,
             );
 
             // Question for Matt, whether status is already disable should be an error or not
             // also for the above ensure! macros
-            <ProcessModel<T>>::mutate(id.clone(), version, |process| {
-                (*process).status = ProcessStatus::Disabled;
-            });
+            Pallet::<T>::_disable_process(&id, &version)?;
 
             Self::deposit_event(Event::ProcessDisabled(id, version));
             return Ok(().into());
@@ -195,6 +193,19 @@ pub mod pallet {
                     ..Default::default()
                 },
             );
+        }
+
+        pub fn _disable_process(id: &T::ProcessIdentifier, version: &i32) -> Result<bool, Error<T>> {
+            let process: Process = <ProcessModel<T>>::get(&id, &version);
+            if process.status == ProcessStatus::Disabled {
+                return Err(Error::<T>::AlreadyDisabled);
+            };
+
+            <ProcessModel<T>>::mutate(id.clone(), version, |process| {
+                (*process).status = ProcessStatus::Disabled;
+            });
+
+            return Ok(true);
         }
     }
 }
