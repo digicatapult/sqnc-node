@@ -1,9 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::dispatch::EncodeLike;
+use frame_support::{dispatch::EncodeLike, Parameter};
 pub use pallet::*;
 use sp_std::prelude::*;
+use sp_runtime::traits::AtLeast32Bit;
 
 use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
 
@@ -32,10 +33,10 @@ impl Default for ProcessStatus {
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Version {
-    version: i32, // TODO: sort this type, should be included from trait
+struct Version {
+    version: i32,
 }
-// TODO remove once type has been soprted <version>
+
 impl EncodeLike<i32> for Version {}
 
 #[derive(Encode, Default, Decode, Clone, PartialEq)]
@@ -54,7 +55,7 @@ pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use sp_runtime::traits::AtLeast32Bit;
+
 
     type Restrictions = Vec<Restriction>;
 
@@ -108,8 +109,9 @@ pub mod pallet {
 
     #[pallet::error]
     pub enum Error<T> {
-        A,
-        // TODO: implement errors for extrinsics
+        NonExistingProcess,
+        AlreadyDisabled,
+        InvalidVersion,
     }
 
     // The pallet's dispatchable functions.
@@ -131,23 +133,6 @@ pub mod pallet {
             return Ok(().into());
         }
 
-        // TODO: implement disable_process with correct parameters and impl
-        // For Danniel! - Good Morning:)
-        /*
-           - use an existing method -> ProcessModel to query storage
-           - call the method right after the origing validation
-           - a handler of psuedo code for already disabled process
-               - if disabled
-                   - return ok()
-               - if not
-                   - updated process with the Disabled status
-           - create an event return args Line 124
-           - unit tests
-               - if ensure_origing fails
-               - if process is already disabled
-               - if process does not exist
-               - happy path
-        */
         #[pallet::weight(T::WeightInfo::disable_process())]
         pub(super) fn disable_process(
             origin: OriginFor<T>,
@@ -156,6 +141,8 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
+            // TODO implement errors
+            // TODO if no process for this version return latest
             if !<ProcessModel<T>>::contains_key(id.clone(), version) {
                 Self::deposit_event(Event::ProcessDisabled(id, version, false));
                 return Ok(().into());

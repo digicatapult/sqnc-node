@@ -93,7 +93,7 @@ fn updates_correctly_versions_for_multiple_processes() {
 }
 
 #[test]
-fn updates_version_correctly_for_existing_process() {
+fn updates_version_correctly_for_existing_proces_and_dispatches_event() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         <VersionModel<Test>>::insert(
@@ -108,12 +108,13 @@ fn updates_version_correctly_for_existing_process() {
             PROCESS_ID1,
             vec![{ None }],
         ));
+        assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 11);
         assert_eq!(System::events()[0].event, expected);
     });
 }
 
 #[test]
-fn updates_version_correctly_for_new_process() {
+fn updates_version_correctly_for_new_process_and_dispatches_even() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_ok!(ProcessValidation::create_process(
@@ -128,6 +129,14 @@ fn updates_version_correctly_for_new_process() {
             true
         ));
         // sets version to 1 and returns true to identify that this is a new event
+        assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1);
         assert_eq!(System::events()[0].event, expected);
+    });
+}
+
+#[test]
+fn creates_new_process_and_dispatches_event() {
+    new_test_ext().execute_with(|| {
+        System::set_block_number(1);
     });
 }
