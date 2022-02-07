@@ -154,6 +154,8 @@ pub mod pallet {
                 Error::<T>::InvalidVersion,
             );
 
+            // Question for Matt, whether status is already disable should be an error or not
+            // also for the above ensure! macros
             <ProcessModel<T>>::mutate(id.clone(), version, |process| {
                 (*process).status = ProcessStatus::Disabled;
             });
