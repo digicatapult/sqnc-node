@@ -99,7 +99,7 @@ pub mod pallet {
 
     #[pallet::event]
     // looking by the type, same type for multiple things - bnad idea
-    // #[pallet::metadata(Vec<u8> = "a", Vec<u16> = "b")]
+    #[pallet::metadata(ProcessIdentifier = "Process Id", ProcessVersion = "Process Version", bool = "Is New")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
@@ -128,7 +128,7 @@ pub mod pallet {
             restrictions: Vec<Restriction>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
-            let new_version: T::ProcessVersion = Pallet::<T>::_update_version(id.clone()).unwrap();
+            let new_version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
             Pallet::<T>::persist_process(&id, &new_version, restrictions.clone());
 
             Self::deposit_event(Event::ProcessCreated(
@@ -149,16 +149,10 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
-            ensure!(
-                <ProcessModel<T>>::contains_key(&id, version.clone()),
-                Error::<T>::NonExistingProcess,
-            );
 
-            // TODO check if there is any version for this process
-            ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
-            Pallet::<T>::_disable_process(&id, &version)?;
+            Pallet::<T>::validate_version_and_id(&id, &version)?;
+            Pallet::<T>::disable_process(&id, &version)?;
 
-            // small and well defined (typed)
             Self::deposit_event(Event::ProcessDisabled(id, version));
             return Ok(().into());
         }
@@ -166,14 +160,14 @@ pub mod pallet {
 
     // helper methods
     impl<T: Config> Pallet<T> {
-        pub fn _get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
+        pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
             let version: T::ProcessVersion = <VersionModel<T>>::get(&id);
             return version;
         }
 
         // rebase with master
-        pub fn _update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, ()> {
-            let version: T::ProcessVersion = Pallet::<T>::_get_version(&id);
+        pub fn update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, ()> {
+            let version: T::ProcessVersion = Pallet::<T>::get_version(&id);
             let exists: bool = <ProcessModel<T>>::contains_key(&id, version.clone());
             let new_version: T::ProcessVersion = match exists {
                 true => version,
@@ -199,7 +193,7 @@ pub mod pallet {
             );
         }
 
-        pub fn _disable_process(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
+        pub fn disable_process(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
             let process: Process = <ProcessModel<T>>::get(&id, &version);
             if process.status == ProcessStatus::Disabled {
                 return Err(Error::<T>::AlreadyDisabled);
@@ -208,6 +202,22 @@ pub mod pallet {
             <ProcessModel<T>>::mutate(id.clone(), version, |process| {
                 (*process).status = ProcessStatus::Disabled;
             });
+
+            return Ok(true);
+        }
+        
+        pub fn validate_version_and_id(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
+            ensure!(
+                <ProcessModel<T>>::contains_key(&id, version.clone()),
+                Error::<T>::NonExistingProcess,
+            );
+            ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
+            let version_found: T::ProcessVersion = <VersionModel<T>>::get(&id);
+
+            if *version != version_found {
+                // TODO should return version_found if any
+                return Err(Error::<T>::InvalidVersion);
+            }
 
             return Ok(true);
         }
