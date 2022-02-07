@@ -38,32 +38,16 @@ pub struct Version {
 // TODO remove once type has been soprted <version>
 impl EncodeLike<i32> for Version {}
 
-#[derive(Encode, Decode, Clone, PartialEq)]
+#[derive(Encode, Default, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Process {
     status: ProcessStatus,
     restrictions: Vec<Restriction>,
 }
 
-impl Default for Process {
-    fn default() -> Process {
-        Process {
-            status: ProcessStatus::Disabled,
-            restrictions: vec![{ Restriction::None }],
-        }
-    }
-}
-
 pub mod weights;
-
 pub use weights::WeightInfo;
-/*
-    TODO 
 
-    [ ] - implement vertsion trait for this pallet scope
-    [ ] - error handling 
-    [ ] - expand on unit testing for create process and helper functions
- */
 #[frame_support::pallet]
 pub mod pallet {
 
@@ -105,13 +89,13 @@ pub mod pallet {
 
     /// Storage map definition
     #[pallet::storage]
-    #[pallet::getter(fn get_process)]
-    pub(super) type GetProcess<T: Config> =
+    #[pallet::getter(fn process_model)] // not sure about name, store?, map?
+    pub(super) type ProcessModel<T: Config> =
         StorageDoubleMap<_, Blake2_128Concat, T::ProcessIdentifier, Blake2_128Concat, i32, Process, ValueQuery>;
 
     #[pallet::storage]
-    #[pallet::getter(fn get_version)]
-    pub(super) type GetVersion<T: Config> = StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, i32, ValueQuery>;
+    #[pallet::getter(fn version_model)]
+    pub(super) type VersionModel<T: Config> = StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, i32, ValueQuery>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -124,31 +108,8 @@ pub mod pallet {
 
     #[pallet::error]
     pub enum Error<T> {
+        A,
         // TODO: implement errors for extrinsics
-    }
-
-    // helper functions
-    fn get_version<T: Config>(id: T::ProcessIdentifier) -> i32 {
-        return <GetVersion<T>>::get(&id);
-    }
-
-    fn uopdate_version<T: Config>(id: T::ProcessIdentifier) -> i32 {
-        let version: i32 = get_version::<T>(id.clone());
-        let exists: Result<Process, ()> = <GetProcess<T>>::try_get(id.clone(), version);
-        let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 };
-        <GetVersion<T>>::insert(&id, Version { version: new_version });
-
-        return new_version;
-    }
-    fn persist_process<T: Config>(id: &T::ProcessIdentifier, version: &i32, restrictions: Restrictions) {
-        <GetProcess<T>>::insert(
-            id,
-            version,
-            Process {
-                restrictions: restrictions.clone(),
-                ..Default::default()
-            },
-        );
     }
 
     // The pallet's dispatchable functions.
@@ -161,9 +122,10 @@ pub mod pallet {
             restrictions: Vec<Restriction>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
-            let new_version: i32 = uopdate_version::<T>(id.clone());
-            persist_process::<T>(&id, &new_version, restrictions.clone());
+            let new_version: i32 = Pallet::<T>::_update_version(id.clone()).unwrap();
+            Pallet::<T>::_persist_process(&id, &new_version, restrictions.clone());
 
+            // wrap event data into a struct?
             Self::deposit_event(Event::ProcessCreated(id, new_version, restrictions, new_version == 1));
 
             return Ok(().into());
@@ -172,7 +134,7 @@ pub mod pallet {
         // TODO: implement disable_process with correct parameters and impl
         // For Danniel! - Good Morning:)
         /*
-           - use an existing method -> GetProcess to query storage
+           - use an existing method -> ProcessModel to query storage
            - call the method right after the origing validation
            - a handler of psuedo code for already disabled process
                - if disabled
@@ -194,14 +156,14 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
 
-            if !<GetProcess<T>>::contains_key(id.clone(), version) {
+            if !<ProcessModel<T>>::contains_key(id.clone(), version) {
                 Self::deposit_event(Event::ProcessDisabled(id, version, false));
                 return Ok(().into());
             }
 
             let mut updated = false;
 
-            <GetProcess<T>>::mutate(id.clone(), version, |process| {
+            <ProcessModel<T>>::mutate(id.clone(), version, |process| {
                 updated = process.status == ProcessStatus::Disabled;
                 (*process).status = ProcessStatus::Disabled;
             });
@@ -210,7 +172,40 @@ pub mod pallet {
             Ok(().into())
         }
     }
+
+    // helper methods
+    impl<T: Config> Pallet<T> {
+        pub fn _get_version(id: T::ProcessIdentifier) -> i32 {
+             return <VersionModel<T>>::get(&id);
+         }
+     
+        pub fn _update_version(id: T::ProcessIdentifier) -> Result<i32, ()> {
+            let version: i32 = Pallet::<T>::_get_version(id.clone());
+            let exists: Result<Process, ()> = <ProcessModel<T>>::try_get(id.clone(), version);
+            // TODO change logic
+            let new_version: i32 = version + if exists.is_ok() { 0 } else { 1 };
+            if new_version == 1 {
+                <VersionModel<T>>::insert(&id, Version { version: new_version });
+            } else {
+                <VersionModel<T>>::mutate(&id, |v| *v = new_version);
+            }
+     
+            return Ok(new_version);
+         }
+         
+         pub fn _persist_process(id: &T::ProcessIdentifier, version: &i32, restrictions: Restrictions) {
+            <ProcessModel<T>>::insert(
+                id,
+                version,
+                Process {
+                    restrictions: restrictions.clone(),
+                    ..Default::default()
+                },
+            );
+        }
+     }
 }
+
 
 impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue> for Pallet<T> {
     type ProcessIdentifier = T::ProcessIdentifier;

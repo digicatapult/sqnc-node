@@ -79,4 +79,3 @@ impl pallet_process_validation::Config for Test {
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 }
-
