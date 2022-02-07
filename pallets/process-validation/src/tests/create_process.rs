@@ -1,7 +1,7 @@
 use super::*;
-use crate::{Process, Version, ProcessStatus, Restriction::None, ProcessModel, VersionModel};
 use crate::Event::*;
-use frame_support::{assert_ok};
+use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, Version, VersionModel};
+use frame_support::assert_ok;
 use sp_std::prelude::*;
 
 // -- fixtures --
@@ -17,17 +17,16 @@ const PROCESS_ID2: [u8; 32] = [
 fn returns_error_if_origin_validation_fails_and_no_data_added() {
     new_test_ext().execute_with(|| {
         // update to check for error type
-        assert!(ProcessValidation::create_process(
-            Origin::none(),
-            PROCESS_ID1,
-            vec![{ None }]
-        ).is_err());
+        assert!(ProcessValidation::create_process(Origin::none(), PROCESS_ID1, vec![{ None }]).is_err());
 
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0);
-        assert_eq!(<ProcessModel<Test>>::get(PROCESS_ID1, 1), Process {
-            status: ProcessStatus::Disabled, 
-            restrictions: [].to_vec(),
-        });
+        assert_eq!(
+            <ProcessModel<Test>>::get(PROCESS_ID1, 1),
+            Process {
+                status: ProcessStatus::Disabled,
+                restrictions: [].to_vec(),
+            }
+        );
     });
 }
 
@@ -41,8 +40,9 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
             PROCESS_ID1,
             vec![{ None }],
         ));
-        assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1);
-        
+
+        let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 1, vec![{ None }], true));
+        assert_eq!(System::events()[0].event, expected);
     });
 }
 
@@ -96,12 +96,7 @@ fn updates_versions_correctly_for_multiple_processes() {
 fn updates_version_correctly_for_existing_proces_and_dispatches_event() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
-        <VersionModel<Test>>::insert(
-            PROCESS_ID1,
-            Version {
-                version: 10,
-            }
-        );
+        <VersionModel<Test>>::insert(PROCESS_ID1, Version { version: 10 });
         let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 11, vec![{ None }], false));
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
@@ -122,12 +117,7 @@ fn updates_version_correctly_for_new_process_and_dispatches_even() {
             PROCESS_ID1,
             vec![{ None }],
         ));
-        let expected = Event::pallet_process_validation(ProcessCreated(
-            PROCESS_ID1,
-            1,
-            vec![{ None }],
-            true
-        ));
+        let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 1, vec![{ None }], true));
         // sets version to 1 and returns true to identify that this is a new event
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1);
         assert_eq!(System::events()[0].event, expected);
