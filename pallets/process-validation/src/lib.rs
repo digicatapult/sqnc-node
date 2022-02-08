@@ -90,7 +90,7 @@ pub mod pallet {
 
     /// Storage map definition
     #[pallet::storage]
-    #[pallet::getter(fn process_model)] // not sure about name, store?, map?
+    #[pallet::getter(fn process_model)]
     pub(super) type ProcessModel<T: Config> = StorageDoubleMap<
         _,
         Blake2_128Concat,
@@ -110,6 +110,7 @@ pub mod pallet {
     #[pallet::metadata(
         ProcessIdentifier = "ProcessIdentifier",
         ProcessVersion = "ProcessVersion",
+        Vec<Restriction> = "Restrictions",
         bool = "IsNew"
     )]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -193,7 +194,7 @@ pub mod pallet {
             id: &T::ProcessIdentifier,
             v: &T::ProcessVersion,
             r: &Restrictions,
-        ) -> Result<bool, Error<T>> {
+        ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
                 false => {
@@ -205,7 +206,7 @@ pub mod pallet {
                             ..Default::default()
                         },
                     );
-                    return Ok(true);
+                    return Ok(());
                 }
             };
         }
