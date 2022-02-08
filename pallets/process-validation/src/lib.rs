@@ -211,7 +211,7 @@ pub mod pallet {
             };
         }
 
-        pub fn set_disabled(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
+        pub fn set_disabled(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<(), Error<T>> {
             let process: Process = <ProcessModel<T>>::get(&id, &version);
             return match process.status == ProcessStatus::Disabled {
                 true => Err(Error::<T>::AlreadyDisabled),
@@ -219,7 +219,7 @@ pub mod pallet {
                     <ProcessModel<T>>::mutate(id.clone(), version, |process| {
                         (*process).status = ProcessStatus::Disabled;
                     });
-                    return Ok(true);
+                    return Ok(());
                 }
             };
         }
@@ -227,7 +227,7 @@ pub mod pallet {
         pub fn validate_version_and_process(
             id: &T::ProcessIdentifier,
             version: &T::ProcessVersion,
-        ) -> Result<bool, Error<T>> {
+        ) -> Result<(), Error<T>> {
             ensure!(
                 <ProcessModel<T>>::contains_key(&id, version.clone()),
                 Error::<T>::NonExistingProcess,
@@ -235,7 +235,7 @@ pub mod pallet {
             ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
             return match *version != <VersionModel<T>>::get(&id) {
                 true => Err(Error::<T>::InvalidVersion),
-                false => Ok(true),
+                false => Ok(()),
             };
         }
     }
