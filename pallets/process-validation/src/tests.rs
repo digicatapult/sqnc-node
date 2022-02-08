@@ -28,6 +28,7 @@ frame_support::construct_runtime!(
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
         ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},
+
     }
 );
 parameter_types! {
