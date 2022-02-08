@@ -65,7 +65,6 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-        type One: One;
         // The primary identifier for a process (i.e. it's name, and version)
         type ProcessIdentifier: Parameter;
         type ProcessVersion: Parameter + AtLeast32Bit + Default;
