@@ -108,7 +108,11 @@ pub mod pallet {
         StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, T::ProcessVersion, ValueQuery>;
 
     #[pallet::event]
-    #[pallet::metadata(ProcessIdentifier = "ProcessId", ProcessVersion = "ProcessVersion", bool = "IsNew")]
+    #[pallet::metadata(
+        ProcessIdentifier = "ProcessIdentifier",
+        ProcessVersion = "ProcessVersion",
+        bool = "IsNew"
+    )]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
@@ -186,14 +190,22 @@ pub mod pallet {
             return Ok(version);
         }
 
-        pub fn persist_process(id: &T::ProcessIdentifier, v: &T::ProcessVersion, r: &Restrictions) -> Result<bool, Error<T>> {
+        pub fn persist_process(
+            id: &T::ProcessIdentifier,
+            v: &T::ProcessVersion,
+            r: &Restrictions,
+        ) -> Result<bool, Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
                 false => {
-                    <ProcessModel<T>>::insert(id,v,Process {
-                        restrictions: r.clone(),
-                        ..Default::default()
-                    });
+                    <ProcessModel<T>>::insert(
+                        id,
+                        v,
+                        Process {
+                            restrictions: r.clone(),
+                            ..Default::default()
+                        },
+                    );
                     return Ok(true);
                 }
             };
