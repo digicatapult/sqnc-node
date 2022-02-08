@@ -23,6 +23,7 @@ use restrictions::Restriction;
 pub enum ProcessStatus {
     Disabled,
     Enabled,
+    None,
 }
 
 impl Default for ProcessStatus {
@@ -31,11 +32,20 @@ impl Default for ProcessStatus {
     }
 }
 
-#[derive(Encode, Default, Decode, Clone, PartialEq)]
+#[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Process {
     status: ProcessStatus,
     restrictions: Vec<Restriction>,
+}
+
+impl Default for Process {
+    fn default() -> Self {
+        Process {
+            status: ProcessStatus::None,
+            restrictions: vec![],
+        }
+    }
 }
 
 pub mod weights;
@@ -55,7 +65,7 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-
+        type One: One;
         // The primary identifier for a process (i.e. it's name, and version)
         type ProcessIdentifier: Parameter;
         type ProcessVersion: Parameter + AtLeast32Bit + Default;
@@ -98,12 +108,7 @@ pub mod pallet {
         StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, T::ProcessVersion, ValueQuery>;
 
     #[pallet::event]
-    // looking by the type, same type for multiple things - bnad idea
-    #[pallet::metadata(
-        ProcessIdentifier = "Process Id",
-        ProcessVersion = "Process Version",
-        bool = "Is New"
-    )]
+    #[pallet::metadata(ProcessIdentifier = "ProcessId", ProcessVersion = "ProcessVersion", bool = "IsNew")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
@@ -114,6 +119,8 @@ pub mod pallet {
 
     #[pallet::error]
     pub enum Error<T> {
+        // process already exists, investigate
+        AlreadyExists,
         // attempting to disable non-existing process
         NonExistingProcess,
         // process is already disabled
@@ -132,14 +139,14 @@ pub mod pallet {
             restrictions: Vec<Restriction>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
-            let new_version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
-            Pallet::<T>::persist_process(&id, &new_version, restrictions.clone());
+            let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
+            Pallet::<T>::persist_process(&id, &version, &restrictions)?;
 
             Self::deposit_event(Event::ProcessCreated(
                 id,
-                new_version.clone(),
+                version.clone(),
                 restrictions,
-                new_version == One::one(),
+                version == One::one(),
             ));
 
             return Ok(().into());
@@ -152,8 +159,7 @@ pub mod pallet {
             version: T::ProcessVersion,
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
-
-            Pallet::<T>::validate_version_and_id(&id, &version)?;
+            Pallet::<T>::validate_version_and_process(&id, &version)?;
             Pallet::<T>::set_disabled(&id, &version)?;
 
             Self::deposit_event(Event::ProcessDisabled(id, version));
@@ -164,52 +170,49 @@ pub mod pallet {
     // helper methods
     impl<T: Config> Pallet<T> {
         pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
-            let version: T::ProcessVersion = <VersionModel<T>>::get(&id);
-            return version;
+            return match <VersionModel<T>>::contains_key(&id) {
+                true => <VersionModel<T>>::get(&id) + One::one(),
+                false => One::one(),
+            };
         }
 
-        // rebase with master
-        pub fn update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, ()> {
+        pub fn update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, Error<T>> {
             let version: T::ProcessVersion = Pallet::<T>::get_version(&id);
-            let exists: bool = <ProcessModel<T>>::contains_key(&id, version.clone());
-            let new_version: T::ProcessVersion = match exists {
-                true => version,
-                false => version + One::one(),
-            };
-            match &new_version == &One::one() {
-                true => <VersionModel<T>>::insert(&id, new_version.clone()),
-                false => <VersionModel<T>>::mutate(&id, |v| *v = new_version.clone()),
+            match version == One::one() {
+                true => <VersionModel<T>>::insert(&id, version.clone()),
+                false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone()),
             };
 
-            return Ok(new_version);
+            return Ok(version);
         }
 
-        // remove underscores from helper methods
-        pub fn persist_process(id: &T::ProcessIdentifier, version: &T::ProcessVersion, restrictions: Restrictions) {
-            <ProcessModel<T>>::insert(
-                id,
-                version,
-                Process {
-                    restrictions: restrictions.clone(),
-                    ..Default::default()
-                },
-            );
+        pub fn persist_process(id: &T::ProcessIdentifier, v: &T::ProcessVersion, r: &Restrictions) -> Result<bool, Error<T>> {
+            return match <ProcessModel<T>>::contains_key(&id, &v) {
+                true => Err(Error::<T>::AlreadyExists),
+                false => {
+                    <ProcessModel<T>>::insert(id,v,Process {
+                        restrictions: r.clone(),
+                        ..Default::default()
+                    });
+                    return Ok(true);
+                }
+            };
         }
 
         pub fn set_disabled(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<bool, Error<T>> {
             let process: Process = <ProcessModel<T>>::get(&id, &version);
-            if process.status == ProcessStatus::Disabled {
-                return Err(Error::<T>::AlreadyDisabled);
+            return match process.status == ProcessStatus::Disabled {
+                true => Err(Error::<T>::AlreadyDisabled),
+                false => {
+                    <ProcessModel<T>>::mutate(id.clone(), version, |process| {
+                        (*process).status = ProcessStatus::Disabled;
+                    });
+                    return Ok(true);
+                }
             };
-
-            <ProcessModel<T>>::mutate(id.clone(), version, |process| {
-                (*process).status = ProcessStatus::Disabled;
-            });
-
-            return Ok(true);
         }
 
-        pub fn validate_version_and_id(
+        pub fn validate_version_and_process(
             id: &T::ProcessIdentifier,
             version: &T::ProcessVersion,
         ) -> Result<bool, Error<T>> {
@@ -218,14 +221,10 @@ pub mod pallet {
                 Error::<T>::NonExistingProcess,
             );
             ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
-            let version_found: T::ProcessVersion = <VersionModel<T>>::get(&id);
-
-            if *version != version_found {
-                // TODO should return version_found if any
-                return Err(Error::<T>::InvalidVersion);
-            }
-
-            return Ok(true);
+            return match *version != <VersionModel<T>>::get(&id) {
+                true => Err(Error::<T>::InvalidVersion),
+                false => Ok(true),
+            };
         }
     }
 }

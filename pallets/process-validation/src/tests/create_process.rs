@@ -1,8 +1,8 @@
 use super::*;
+use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
-use sp_std::prelude::*;
 
 // -- fixtures --
 #[allow(dead_code)]
@@ -16,20 +16,36 @@ const PROCESS_ID2: [u8; 32] = [
 #[test]
 fn returns_error_if_origin_validation_fails_and_no_data_added() {
     new_test_ext().execute_with(|| {
-        // update to check for error type
+        System::set_block_number(1);
         assert_noop!(
             ProcessValidation::create_process(Origin::none(), PROCESS_ID1, vec![{ None }]),
             DispatchError::BadOrigin,
         );
-
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0u32);
         assert_eq!(
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
-                status: ProcessStatus::Disabled,
+                status: ProcessStatus::None,
                 restrictions: [].to_vec(),
             }
         );
+        assert_eq!(System::events().len(), 0);
+    });
+}
+
+#[test]
+fn handles_if_process_exists_for_the_new_version() {
+    new_test_ext().execute_with(|| {
+        <ProcessModel<Test>>::insert(
+            PROCESS_ID1,
+            1,
+            Process {
+                status: ProcessStatus::Disabled,
+                restrictions: vec![{ None }],
+            },
+        );
+        let result = ProcessValidation::create_process(Origin::root(), PROCESS_ID1, vec![{ None }]);
+        assert_noop!(result, Error::<Test>::AlreadyExists);
     });
 }
 
@@ -68,7 +84,7 @@ fn for_existing_process_it_mutates_an_existing_version() {
 }
 
 #[test]
-fn updates_versions_correctly_for_multiple_processes() {
+fn sets_versions_correctly_for_multiple_processes() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         let mut ids: Vec<[u8; 32]> = [PROCESS_ID2; 10].to_vec();
@@ -112,7 +128,7 @@ fn updates_version_correctly_for_existing_proces_and_dispatches_event() {
 }
 
 #[test]
-fn updates_version_correctly_for_new_process_and_dispatches_even() {
+fn updates_version_correctly_for_new_process_and_dispatches_event() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_ok!(ProcessValidation::create_process(
