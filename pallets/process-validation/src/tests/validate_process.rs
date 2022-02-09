@@ -4,12 +4,12 @@ use sp_std::collections::btree_map::BTreeMap;
 use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 use crate::restrictions::Restriction;
-use crate::{Process, ProcessStatus, ProcessesByIdAndVersion};
+use crate::{Process, ProcessStatus, ProcessModel};
 
 #[test]
 fn it_succeeds_when_process_exists() {
     new_test_ext().execute_with(|| {
-        ProcessesByIdAndVersion::<Test>::insert(
+        ProcessModel::<Test>::insert(
             ProcessIdentifier::A,
             1u32,
             Process {
@@ -33,7 +33,7 @@ fn it_succeeds_when_process_exists() {
 #[test]
 fn it_fails_when_process_id_doesnt_exist() {
     new_test_ext().execute_with(|| {
-        ProcessesByIdAndVersion::<Test>::insert(
+        ProcessModel::<Test>::insert(
             ProcessIdentifier::A,
             1u32,
             Process {
@@ -57,7 +57,7 @@ fn it_fails_when_process_id_doesnt_exist() {
 #[test]
 fn it_fails_when_process_version_doesnt_exist() {
     new_test_ext().execute_with(|| {
-        ProcessesByIdAndVersion::<Test>::insert(
+        ProcessModel::<Test>::insert(
             ProcessIdentifier::A,
             1u32,
             Process {
@@ -81,7 +81,7 @@ fn it_fails_when_process_version_doesnt_exist() {
 #[test]
 fn it_fails_when_process_disabled() {
     new_test_ext().execute_with(|| {
-        ProcessesByIdAndVersion::<Test>::insert(
+        ProcessModel::<Test>::insert(
             ProcessIdentifier::A,
             1u32,
             Process {
@@ -105,7 +105,7 @@ fn it_fails_when_process_disabled() {
 #[test]
 fn it_succeeds_when_all_restrictions_succeed() {
     new_test_ext().execute_with(|| {
-        ProcessesByIdAndVersion::<Test>::insert(
+        ProcessModel::<Test>::insert(
             ProcessIdentifier::A,
             1u32,
             Process {
@@ -136,7 +136,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
 #[test]
 fn it_fails_when_one_restrictions_fails() {
     new_test_ext().execute_with(|| {
-        ProcessesByIdAndVersion::<Test>::insert(
+        ProcessModel::<Test>::insert(
             ProcessIdentifier::A,
             1u32,
             Process {

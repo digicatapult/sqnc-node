@@ -3,10 +3,9 @@ use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
+use crate::tests::ProcessIdentifier;
 
-const PROCESS_ID: [u8; 32] = [
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-];
+const PROCESS_ID: ProcessIdentifier = ProcessIdentifier::A;
 
 #[test]
 fn returns_error_if_origin_validation_fails_and_no_data_added() {

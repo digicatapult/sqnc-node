@@ -251,7 +251,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
         inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
     ) -> bool {
-        let maybe_process = <ProcessesByIdAndVersion<T>>::try_get(id.id, id.version);
+        let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
 
         match maybe_process {
             Ok(process) => {

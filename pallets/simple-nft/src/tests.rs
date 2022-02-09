@@ -723,8 +723,9 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
         // initial token
         SimpleNFTModule::run_process(
             Origin::signed(1),
+            NONE_PROCESS,
             Vec::new(),
-            vec![Output {
+            vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None,
@@ -734,8 +735,9 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
         // token with previous token as parent
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
+            NONE_PROCESS,
             vec![1],
-            vec![Output {
+            vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: Some(0)
@@ -744,8 +746,9 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
         // token with previous token as parent again
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
+            NONE_PROCESS,
             vec![2],
-            vec![Output {
+            vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: Some(0)
