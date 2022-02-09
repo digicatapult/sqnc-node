@@ -15,27 +15,44 @@ pub struct ProcessIO<AccountId, RoleKey, TokenMetadataKey, TokenMetadataValue> {
     pub parent_index: Option<u32>,
 }
 
-pub trait ProcessValidator<A, R, T, V> {
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct ProcessFullyQualifiedId<ProcessIdentifier: Parameter, ProcessVersion: Parameter + AtLeast32Bit> {
+    pub id: ProcessIdentifier,
+    pub version: ProcessVersion,
+}
+
+pub trait ProcessValidator<A, R, T, V>
+where
+    A: Parameter + Default,
+    R: Parameter + Default + Ord,
+    T: Parameter + Default + Ord,
+    V: Parameter + Default,
+{
     type ProcessIdentifier: Parameter;
     type ProcessVersion: Parameter + AtLeast32Bit;
 
     fn validate_process(
-        id: Self::ProcessIdentifier,
-        version: Self::ProcessVersion,
-        sender: A,
+        id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        sender: &A,
         inputs: &Vec<ProcessIO<A, R, T, V>>,
         outputs: &Vec<ProcessIO<A, R, T, V>>,
     ) -> bool;
 }
 
-impl<A, R, T, V> ProcessValidator<A, R, T, V> for () {
+impl<A, R, T, V> ProcessValidator<A, R, T, V> for ()
+where
+    A: Parameter + Default,
+    R: Parameter + Default + Ord,
+    T: Parameter + Default + Ord,
+    V: Parameter + Default,
+{
     type ProcessIdentifier = ();
     type ProcessVersion = u32;
 
     fn validate_process(
-        _id: Self::ProcessIdentifier,
-        _version: Self::ProcessVersion,
-        _sender: A,
+        _id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        _sender: &A,
         _inputs: &Vec<ProcessIO<A, R, T, V>>,
         _outputs: &Vec<ProcessIO<A, R, T, V>>,
     ) -> bool {

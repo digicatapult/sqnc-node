@@ -1,6 +1,7 @@
 // Creating mock runtime here
 
 use crate as pallet_process_validation;
+use codec::{Decode, Encode};
 use frame_support::parameter_types;
 use frame_system as system;
 use sp_core::H256;
@@ -11,6 +12,7 @@ use sp_runtime::{
 
 mod create_process;
 mod disable_process;
+mod validate_process;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -61,9 +63,21 @@ impl system::Config for Test {
     type SS58Prefix = SS58Prefix;
 }
 
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+pub enum ProcessIdentifier {
+    A,
+    B,
+}
+
+impl Default for ProcessIdentifier {
+    fn default() -> Self {
+        ProcessIdentifier::A
+    }
+}
+
 impl pallet_process_validation::Config for Test {
     type Event = Event;
-    type ProcessIdentifier = [u8; 32];
+    type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = u32;
     type CreateProcessOrigin = system::EnsureRoot<u64>;
     type DisableProcessOrigin = system::EnsureRoot<u64>;

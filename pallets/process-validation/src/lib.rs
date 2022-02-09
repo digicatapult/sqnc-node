@@ -6,7 +6,7 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::prelude::*;
 
-use vitalam_pallet_traits::{ProcessIO, ProcessValidator};
+use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 #[cfg(test)]
 mod tests;
@@ -16,7 +16,7 @@ mod benchmarking;
 
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
-use restrictions::Restriction;
+use restrictions::{validate_restriction, Restriction};
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -245,14 +245,35 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
     type ProcessIdentifier = T::ProcessIdentifier;
     type ProcessVersion = T::ProcessVersion;
 
-    // TODO: implement lookup of process and checking of restrictions
     fn validate_process(
-        _id: T::ProcessIdentifier,
-        _version: T::ProcessVersion,
-        _sender: T::AccountId,
-        _inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        _outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+        id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        sender: &T::AccountId,
+        inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
     ) -> bool {
-        true
+        let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
+
+        match maybe_process {
+            Ok(process) => {
+                if process.status == ProcessStatus::Disabled {
+                    return false;
+                }
+
+                for restriction in process.restrictions {
+                    let is_valid = validate_restriction::<
+                        T::AccountId,
+                        T::RoleKey,
+                        T::TokenMetadataKey,
+                        T::TokenMetadataValue,
+                    >(&restriction, &sender, &inputs, &outputs);
+
+                    if !is_valid {
+                        return false;
+                    }
+                }
+                true
+            }
+            Err(_) => false,
+        }
     }
 }

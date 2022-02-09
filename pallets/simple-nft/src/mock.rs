@@ -12,6 +12,7 @@ use sp_runtime::{
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
+use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
@@ -91,6 +92,34 @@ impl<T> Default for MetadataValue<T> {
     }
 }
 
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+pub enum ProcessIdentifier {
+    ShouldSucceed,
+    ShouldFail,
+}
+
+impl Default for ProcessIdentifier {
+    fn default() -> Self {
+        ProcessIdentifier::ShouldSucceed
+    }
+}
+
+pub struct MockProcessValidator {}
+
+impl ProcessValidator<u64, Role, u64, MetadataValue<u64>> for MockProcessValidator {
+    type ProcessIdentifier = ProcessIdentifier;
+    type ProcessVersion = u32;
+
+    fn validate_process(
+        id: ProcessFullyQualifiedId<ProcessIdentifier, u32>,
+        _sender: &u64,
+        _inputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
+        _outputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
+    ) -> bool {
+        id.id == ProcessIdentifier::ShouldSucceed
+    }
+}
+
 impl pallet_simple_nft::Config for Test {
     type Event = Event;
 
@@ -99,7 +128,7 @@ impl pallet_simple_nft::Config for Test {
     type TokenMetadataKey = u64;
     type TokenMetadataValue = MetadataValue<Self::TokenId>;
 
-    type ProcessValidator = ();
+    type ProcessValidator = MockProcessValidator;
     type WeightInfo = ();
 
     type MaxMetadataCount = MaxMetadataCount;

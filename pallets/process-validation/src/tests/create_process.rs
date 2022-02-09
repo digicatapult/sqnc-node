@@ -1,4 +1,5 @@
 use super::*;
+use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
@@ -6,12 +7,8 @@ use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 
 // -- fixtures --
 #[allow(dead_code)]
-const PROCESS_ID1: [u8; 32] = [
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-];
-const PROCESS_ID2: [u8; 32] = [
-    1, 2, 3, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-];
+const PROCESS_ID1: ProcessIdentifier = ProcessIdentifier::A;
+const PROCESS_ID2: ProcessIdentifier = ProcessIdentifier::B;
 
 #[test]
 fn returns_error_if_origin_validation_fails_and_no_data_added() {
@@ -73,9 +70,7 @@ fn for_existing_process_it_mutates_an_existing_version() {
         assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
         assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
 
-        let items: Vec<u32> = <VersionModel<Test>>::iter()
-            .map(|item: ([u8; 32], u32)| item.1.clone())
-            .collect();
+        let items: Vec<u32> = <VersionModel<Test>>::iter().map(|item| item.1.clone()).collect();
 
         assert_eq!(items.len(), 1);
         assert_eq!(items[0], 3);
@@ -87,10 +82,10 @@ fn for_existing_process_it_mutates_an_existing_version() {
 fn sets_versions_correctly_for_multiple_processes() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
-        let mut ids: Vec<[u8; 32]> = [PROCESS_ID2; 10].to_vec();
+        let mut ids = [PROCESS_ID2; 10].to_vec();
         ids.extend([PROCESS_ID1; 15].to_vec());
-        ids.iter().for_each(|id: &[u8; 32]| -> () {
-            assert_ok!(ProcessValidation::update_version(*id));
+        ids.iter().for_each(|id| -> () {
+            assert_ok!(ProcessValidation::update_version(id.clone()));
         });
 
         let id1_expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 16u32, vec![{ None }], false));
