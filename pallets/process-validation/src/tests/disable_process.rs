@@ -1,9 +1,9 @@
 use super::*;
+use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
-use crate::tests::ProcessIdentifier;
 
 const PROCESS_ID: ProcessIdentifier = ProcessIdentifier::A;
 

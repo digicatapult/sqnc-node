@@ -1,9 +1,9 @@
 use super::*;
+use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
-use crate::tests::ProcessIdentifier;
 
 // -- fixtures --
 #[allow(dead_code)]
@@ -70,9 +70,7 @@ fn for_existing_process_it_mutates_an_existing_version() {
         assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
         assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
 
-        let items: Vec<u32> = <VersionModel<Test>>::iter()
-            .map(|item| item.1.clone())
-            .collect();
+        let items: Vec<u32> = <VersionModel<Test>>::iter().map(|item| item.1.clone()).collect();
 
         assert_eq!(items.len(), 1);
         assert_eq!(items[0], 3);

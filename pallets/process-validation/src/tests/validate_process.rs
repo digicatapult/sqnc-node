@@ -4,7 +4,7 @@ use sp_std::collections::btree_map::BTreeMap;
 use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 use crate::restrictions::Restriction;
-use crate::{Process, ProcessStatus, ProcessModel};
+use crate::{Process, ProcessModel, ProcessStatus};
 
 #[test]
 fn it_succeeds_when_process_exists() {
