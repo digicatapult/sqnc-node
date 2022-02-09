@@ -107,7 +107,7 @@ node:
     createP2pNodePortService: true
     setPublicAddressToExternalIp:
       enabled: false
-      ipRetrievalServiceUrl: https://ifconfig.io
+      ipRetrievalServiceUrl: https://ifconfig.io/ip
   # podManagementPolicy: Parallel
 
   # Enables Jaeger Agent as a sidecar

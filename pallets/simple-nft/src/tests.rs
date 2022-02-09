@@ -716,6 +716,91 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 }
 
 #[test]
+fn it_works_for_maintaining_original_id_through_multiple_children() {
+    new_test_ext().execute_with(|| {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::None)]);
+        // initial token
+        SimpleNFTModule::run_process(
+            Origin::signed(1),
+            Vec::new(),
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: None,
+            }],
+        )
+        .unwrap();
+        // token with previous token as parent
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            vec![1],
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: Some(0)
+            },]
+        ));
+        // token with previous token as parent again
+        assert_ok!(SimpleNFTModule::run_process(
+            Origin::signed(1),
+            vec![2],
+            vec![Output {
+                roles: roles.clone(),
+                metadata: metadata.clone(),
+                parent_index: Some(0)
+            },]
+        ));
+        // check all tokens have the same original_id
+        let token = SimpleNFTModule::tokens_by_id(1);
+        assert_eq!(
+            token,
+            Token {
+                id: 1,
+                original_id: 1,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: Some(0),
+                metadata: metadata.clone(),
+                parents: Vec::new(),
+                children: Some(vec![2])
+            }
+        );
+        let token = SimpleNFTModule::tokens_by_id(2);
+        assert_eq!(
+            token,
+            Token {
+                id: 2,
+                original_id: 1,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: Some(0),
+                metadata: metadata.clone(),
+                parents: vec![1],
+                children: Some(vec![3])
+            }
+        );
+        let token = SimpleNFTModule::tokens_by_id(3);
+        assert_eq!(
+            token,
+            Token {
+                id: 3,
+                original_id: 1,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: None,
+                metadata: metadata.clone(),
+                parents: vec![2],
+                children: None
+            }
+        );
+    });
+}
+
+#[test]
 fn it_fails_for_destroying_single_token_as_incorrect_role() {
     new_test_ext().execute_with(|| {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (Role::NotOwner, 2)]);
