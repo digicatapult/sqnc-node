@@ -92,6 +92,10 @@ pub fn vitalam_config() -> Result<ChainSpec, String> {
     ChainSpec::from_json_bytes(&include_bytes!("../res/vitalam.json")[..])
 }
 
+pub fn inteli_stage_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/inteli-stage.json")[..])
+}
+
 pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
     use hex_literal::hex;
     use sp_core::crypto::UncheckedInto;
