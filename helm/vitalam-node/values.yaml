@@ -69,14 +69,14 @@ node:
   # chainDataGcsBucketUrl: ""
   collator:
     isParachain: false
-  #  relayChain: polkadot
+     # relayChain: polkadot
   #  relayChainCustomChainspecUrl: ""
   #  relayChainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
   #  relayChainDataSnapshotFormat: 7z
   #  relayChainPath: ""
   #  relayChainDataKubernetesVolumeSnapshot: ""
   #  relayChainDataGcsBucketUrl: ""
-  #  relayChainFlags: "--prometheus-external"
+  #  relayChainFlags: 
   enableStartupProbe: true
   enableReadinessProbe: true
   flags:
@@ -105,7 +105,7 @@ node:
   perNodeServices:
     createApiService: true
     createP2pService: true
-    p2pServiceType: ClusterIP #Must be type ClusterIP, NodePort or LoadBalancer, If using type LoadBalancer then you must set NodeSelecter accordingly.
+    p2pServiceType: ClusterIP #Must be type ClusterIP, NodePort or LoadBalancer, If using type NodePort or LoadBalancer then you must set NodeSelecter accordingly.
     setPublicAddressToExternal:
       enabled: true
       ipRetrievalServiceUrl: https://ifconfig.io/ip
