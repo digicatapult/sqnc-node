@@ -205,26 +205,44 @@ spec:
             - mountPath: /data
               name: chain-data
         {{- end }}
-        {{- if .Values.node.perNodeServices.createP2pNodePortService }}
-        - name: retrieve-node-port
+        {{- if .Values.node.perNodeServices.createP2pService }}
+        - name: setup-services
           image: {{ .Values.kubectl.image.repository }}:{{ .Values.kubectl.image.tag }}
           command: [ "/bin/sh" ]
           args:
             - -c
             - |
               POD_INDEX="${HOSTNAME##*-}"
+              {{- if eq .Values.node.perNodeServices.p2pServiceType "NodePort" }}
               RELAY_CHAIN_P2P_PORT="$(kubectl --namespace {{ .Release.Namespace }} get service {{ $fullname }}-${POD_INDEX}-rc-p2p -o jsonpath='{.spec.ports[*].nodePort}')"
-              echo "${RELAY_CHAIN_P2P_PORT}" > /data/relay_chain_p2p_port
+              echo -n "${RELAY_CHAIN_P2P_PORT}" > /data/relay_chain_p2p_port
               echo "Retrieved Kubernetes service node port from {{ $fullname }}-${POD_INDEX}-rc-p2p, saved ${RELAY_CHAIN_P2P_PORT} to /data/relay_chain_p2p_port"
-              {{- if .Values.node.collator.isParachain }}
-              PARA_CHAIN_P2P_PORT="$(kubectl --namespace {{ .Release.Namespace }} get service {{ $fullname }}-${POD_INDEX}-pc-p2p -o jsonpath='{.spec.ports[*].nodePort}')"
-              echo "${PARA_CHAIN_P2P_PORT}" > /data/para_chain_p2p_port
-              echo "Retrieved Kubernetes service node port from {{ $fullname }}-${POD_INDEX}-pc-p2p, saved ${PARA_CHAIN_P2P_PORT} to /data/para_chain_p2p_port"
+              {{- else if or (eq .Values.node.perNodeServices.p2pServiceType "LoadBalancer") (eq .Values.node.perNodeServices.p2pServiceType "ClusterIP") }}
+              RELAY_CHAIN_P2P_PORT=30333
+              echo -n "${RELAY_CHAIN_P2P_PORT}" > /data/relay_chain_p2p_port
+              echo "Kubernetes service {{ $fullname }}-${POD_INDEX}-rc-p2p is ${RELAY_CHAIN_P2P_PORT}"
               {{- end }}
-              {{- if .Values.node.perNodeServices.setPublicAddressToExternalIp.enabled }}
-              EXTERNAL_IP=$(curl {{ .Values.node.perNodeServices.setPublicAddressToExternalIp.ipRetrievalServiceUrl }})
-              echo "${EXTERNAL_IP}" > /data/node_external_ip
-              echo "Retrieved external IP from {{ .Values.node.perNodeServices.ipRetrievalServiceUrl }}, saved ${EXTERNAL_IP} to /data/node_external_ip"
+              {{- if and .Values.node.collator.isParachain (eq .Values.node.perNodeServices.p2pServiceType "Nodeport") }}
+              PARA_CHAIN_P2P_PORT="$(kubectl --namespace {{ .Release.Namespace }} get service {{ $fullname }}-${POD_INDEX}-pc-p2p -o jsonpath='{.spec.ports[*].nodePort}')"
+              echo -n "${PARA_CHAIN_P2P_PORT}" > /data/para_chain_p2p_port
+              echo "Retrieved Kubernetes service node port from {{ $fullname }}-${POD_INDEX}-pc-p2p, saved ${PARA_CHAIN_P2P_PORT} to /data/para_chain_p2p_port"
+              {{- else if and .Values.node.collator.isParachain (or (eq .Values.node.perNodeServices.p2pServiceType "LoadBalancer") (eq .Values.node.perNodeServices.p2pServiceType "ClusterIP")) }}
+              PARA_CHAIN_P2P_PORT=30334
+              echo -n "${PARA_CHAIN_P2P_PORT}" > /data/para_chain_p2p_port
+              echo "Kubernetes service {{ $fullname }}-${POD_INDEX}-rc-p2p is ${PARA_CHAIN_P2P_PORT}"
+              {{- end }}
+              {{- if and .Values.node.perNodeServices.setPublicAddressToExternal.enabled (eq .Values.node.perNodeServices.p2pServiceType "NodePort") }}
+              EXTERNAL_ADDRESS=$(curl -sS {{ .Values.node.perNodeServices.setPublicAddressToExternal.ipRetrievalServiceUrl }})
+              echo -n "${EXTERNAL_ADDRESS}" > /data/node_external_address
+              echo "Retrieved external IP from {{ .Values.node.perNodeServices.setPublicAddressToExternal.ipRetrievalServiceUrl }}, saved $(cat /data/node_external_address) to /data/node_external_address"
+              {{- else if and .Values.node.perNodeServices.setPublicAddressToExternal.enabled (eq .Values.node.perNodeServices.p2pServiceType "LoadBalancer") }}
+              EXTERNAL_ADDRESS=$(kubectl --namespace {{ .Release.Namespace }} get service {{ $fullname }}-${POD_INDEX}-rc-p2p -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo -n "${EXTERNAL_ADDRESS}" > /data/node_external_address
+              echo "External hostname is ${EXTERNAL_ADDRESS}, saved to /data/node_external_address"
+              {{- else if eq .Values.node.perNodeServices.p2pServiceType "ClusterIP" }}
+              EXTERNAL_ADDRESS={{ $fullname }}-${POD_INDEX}-rc-p2p.{{ .Release.Namespace }}.svc.cluster.local
+              echo -n "${EXTERNAL_ADDRESS}" > /data/node_external_address
+              echo "External hostname is ${EXTERNAL_ADDRESS}, saved to /data/node_external_address"
               {{- end }}
           volumeMounts:
             - mountPath: /data
@@ -238,11 +256,10 @@ spec:
           args:
             - -c
             - |
-              {{- if .Values.node.perNodeServices.createP2pNodePortService }}
-              {{- if .Values.node.perNodeServices.setPublicAddressToExternalIp.enabled }}
-              EXTERNAL_IP="$(cat /data/node_external_ip)"
-              echo "EXTERNAL_IP=${EXTERNAL_IP}"
-              {{- end }}
+              {{- if .Values.node.perNodeServices.createP2pService }}
+              if [ ! -s /data/node_external_address ]; then echo "EXTERNAL_ADDRESS is empty" && exit 1 ; fi
+              EXTERNAL_ADDRESS="$(cat /data/node_external_address)"
+              echo "EXTERNAL_ADDRESS=${EXTERNAL_ADDRESS}"
               RELAY_CHAIN_P2P_PORT="$(cat /data/relay_chain_p2p_port)"
               echo "RELAY_CHAIN_P2P_PORT=${RELAY_CHAIN_P2P_PORT}"
               {{- if .Values.node.collator.isParachain }}
@@ -264,9 +281,15 @@ spec:
                 --light \
                 {{- end }}
                 {{- if .Values.node.collator.isParachain }}
-                {{- if .Values.node.perNodeServices.createP2pNodePortService }}
-                {{- if .Values.node.perNodeServices.setPublicAddressToExternalIp.enabled }}
-                --public-addr=/ip4/${EXTERNAL_IP}/tcp/${PARA_CHAIN_P2P_PORT} \
+                {{- if .Values.node.perNodeServices.createP2pService }}
+                {{- if .Values.node.perNodeServices.setPublicAddressToExternal.enabled }}
+                {{- if eq .Values.node.perNodeServices.p2pServiceType "NodePort" }}
+                --public-addr=/ip4/${EXTERNAL_ADDRESS}/tcp/${PARA_CHAIN_P2P_PORT} \
+                {{- else if eq .Values.node.perNodeServices.p2pServiceType "LoadBalancer" }}
+                --public-addr=/dns4/${EXTERNAL_ADDRESS}/tcp/${PARA_CHAIN_P2P_PORT} \
+                {{- end }}
+                {{- else if and (not .Values.node.perNodeServices.setPublicAddressToExternal.enabled) (eq .Values.node.perNodeServices.p2pServiceType "ClusterIP") }}
+                --public-addr=/dns4/${EXTERNAL_ADDRESS}/tcp/${PARA_CHAIN_P2P_PORT} \
                 {{- end }}
                 --listen-addr=/ip4/0.0.0.0/tcp/${PARA_CHAIN_P2P_PORT} \
                 {{- end }}
@@ -280,17 +303,23 @@ spec:
                 {{- if .Values.node.tracing.enabled }}
                 --jaeger-agent=127.0.0.1:{{ .Values.jaegerAgent.ports.compactPort }} \
                 {{- end }}
-                {{- join " " .Values.node.flags | nindent 16 }}
-                {{- if .Values.node.collator.isParachain }} \
+                {{- join " " .Values.node.flags | nindent 16 }} \
+                {{- if .Values.node.collator.isParachain }}
                 -- \
                 --base-path=/data/relay/ \
                 {{- end }}
                 {{- if .Values.node.collator.relayChainCustomChainspecUrl }}
                 --chain=/data/relay_chain_chainspec.json \
                 {{- end }}
-                {{- if .Values.node.perNodeServices.createP2pNodePortService }}
-                {{- if .Values.node.perNodeServices.setPublicAddressToExternalIp.enabled }}
-                --public-addr=/ip4/${EXTERNAL_IP}/tcp/${RELAY_CHAIN_P2P_PORT} \
+                {{- if .Values.node.perNodeServices.createP2pService }}
+                {{- if .Values.node.perNodeServices.setPublicAddressToExternal.enabled }}
+                {{- if eq .Values.node.perNodeServices.p2pServiceType "NodePort" }}
+                --public-addr=/ip4/${EXTERNAL_ADDRESS}/tcp/${RELAY_CHAIN_P2P_PORT} \
+                {{- else if eq .Values.node.perNodeServices.p2pServiceType "LoadBalancer" }}
+                --public-addr=/dns4/${EXTERNAL_ADDRESS}/tcp/${RELAY_CHAIN_P2P_PORT} \
+                {{- end }}
+                {{- else if and (not .Values.node.perNodeServices.setPublicAddressToExternal.enabled) (eq .Values.node.perNodeServices.p2pServiceType "ClusterIP") }}
+                --public-addr=/dns4/${EXTERNAL_ADDRESS}/tcp/${RELAY_CHAIN_P2P_PORT} \
                 {{- end }}
                 --listen-addr=/ip4/0.0.0.0/tcp/${RELAY_CHAIN_P2P_PORT} \
                 {{- end }}
@@ -319,6 +348,11 @@ spec:
             - containerPort: 30333
               name: p2p
               protocol: TCP
+          {{- if .Values.node.collator.isParachain }}
+            - containerPort: 30334
+              name: pc-p2p
+              protocol: TCP
+          {{- end }}
           {{- if .Values.node.enableStartupProbe }}
           # On startup, retry the connection to the /health endpoint every 10s for 5 min before killing the container
           startupProbe:
