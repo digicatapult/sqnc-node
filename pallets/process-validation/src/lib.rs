@@ -23,7 +23,6 @@ use restrictions::{validate_restriction, Restriction};
 pub enum ProcessStatus {
     Disabled,
     Enabled,
-    None,
 }
 
 impl Default for ProcessStatus {
@@ -42,7 +41,7 @@ pub struct Process {
 impl Default for Process {
     fn default() -> Self {
         Process {
-            status: ProcessStatus::None,
+            status: ProcessStatus::Disabled,
             restrictions: vec![],
         }
     }
@@ -203,7 +202,7 @@ pub mod pallet {
                         v,
                         Process {
                             restrictions: r.clone(),
-                            ..Default::default()
+                            status: ProcessStatus::Enabled,
                         },
                     );
                     return Ok(());
