@@ -6,5 +6,5 @@ maintainers:
     url: www.digicatapult.org.uk
 description: A Helm chart to deploy vitalam nodes
 type: application
-version: 0.24.0
+version: 0.24.1
 appVersion: "0.0.1"
