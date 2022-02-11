@@ -76,7 +76,7 @@ node:
   #  relayChainPath: ""
   #  relayChainDataKubernetesVolumeSnapshot: ""
   #  relayChainDataGcsBucketUrl: ""
-  #  relayChainFlags: 
+  #  relayChainFlags:
   enableStartupProbe: true
   enableReadinessProbe: true
   flags:
