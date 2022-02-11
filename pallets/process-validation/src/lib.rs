@@ -202,7 +202,7 @@ pub mod pallet {
                         v,
                         Process {
                             restrictions: r.clone(),
-                            status: ProcessStatus::Enabled
+                            status: ProcessStatus::Enabled,
                         },
                     );
                     return Ok(());
