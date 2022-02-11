@@ -206,7 +206,7 @@ spec:
               name: chain-data
         {{- end }}
         {{- if .Values.node.perNodeServices.createP2pService }}
-        - name: setup-services
+        - name: query-services
           image: {{ .Values.kubectl.image.repository }}:{{ .Values.kubectl.image.tag }}
           command: [ "/bin/sh" ]
           args:
