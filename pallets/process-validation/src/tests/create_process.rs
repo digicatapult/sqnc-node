@@ -22,7 +22,7 @@ fn returns_error_if_origin_validation_fails_and_no_data_added() {
         assert_eq!(
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
-                status: ProcessStatus::None,
+                status: ProcessStatus::Disabled,
                 restrictions: [].to_vec(),
             }
         );
@@ -59,6 +59,13 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
 
         let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 1u32, vec![{ None }], true));
         assert_eq!(System::events()[0].event, expected);
+        assert_eq!(
+            <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
+            Process {
+                status: ProcessStatus::Enabled,
+                restrictions: vec![{ None }],
+            }
+        );
     });
 }
 
