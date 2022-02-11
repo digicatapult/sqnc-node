@@ -75,3 +75,19 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name | lower }}
 {{- end }}
 {{- end }}
+
+{{/*
+Template the logic for serviceType
+*/}}
+{{- define "vitalam-node.serviceType" -}}
+{{- if eq $.Values.node.perNodeServices.p2pServiceType "NodePort" }}
+type: NodePort
+externalTrafficPolicy: Local
+{{- else if eq $.Values.node.perNodeServices.p2pServiceType "LoadBalancer" }}
+type: LoadBalancer
+{{- else if eq $.Values.node.perNodeServices.p2pServiceType "ClusterIP" }}
+type: ClusterIP
+{{- else }}
+{{- fail "node.perNodeServices.p2pServiceType must one of type ClusterIP, LoadBalancer or NodePort" }}
+{{- end }}
+{{- end }}

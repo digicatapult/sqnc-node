@@ -103,10 +103,11 @@ node:
     # interval: 10s
     # scrapeTimeout: 10s
   perNodeServices:
-    createClusterIPService: true
-    createP2pNodePortService: true
-    setPublicAddressToExternalIp:
-      enabled: false
+    createApiService: true
+    createP2pService: true
+    p2pServiceType: ClusterIP  # Must be type ClusterIP, NodePort or LoadBalancer, If using type NodePort or LoadBalancer then you must set NodeSelecter accordingly.
+    setPublicAddressToExternal:
+      enabled: true
       ipRetrievalServiceUrl: https://ifconfig.io/ip
   # podManagementPolicy: Parallel
 
