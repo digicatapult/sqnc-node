@@ -55,6 +55,8 @@ jobs:
             architecture: x86_64-unknown-linux-gnu
           - name: arm64
             architecture: aarch64-unknown-linux-gnu
+          - name: wasm32
+            architecture: wasm32-unknown-unknown
 
     steps:
       - uses: actions/checkout@master
@@ -62,7 +64,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
-          target: wasm32-unknown-unknown
+          target: ${{ matrix.arch.architecture }}
       - name: Install sccache
         env:
           TEMP: ${{ runner.temp }}
