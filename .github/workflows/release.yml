@@ -48,6 +48,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version]
     if: ${{ needs.get-version.outputs.is_new_version == 'true' ||  needs.get-version.outputs.is_prerelease == 'true'}}
+    strategy:
+      matrix:
+        arch:
+          - name: x86_64
+            architecture: x86_64-unknown-linux-gnu
+          - name: arm64
+            architecture: aarch64-unknown-linux-gnu
 
     steps:
       - uses: actions/checkout@master
@@ -99,7 +106,7 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: build
-          args: --release
+          args: --release --target ${{ matrix.arch.architecture }}
       - name: Prepare artefacts
         env:
           BUILD_VERSION: ${{ needs.get-version.outputs.version }}
@@ -112,7 +119,7 @@ jobs:
           shasum -a 256 $TEMP/artefacts/vitalam-node | cut -d ' ' -f 1 | tee $TEMP/artefacts/vitalam-node.sha256
           shasum -a 256 $TEMP/artefacts/vitalam_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee $TEMP/artefacts/vitalam_node_runtime.compact.wasm.sha256
           pushd $TEMP/artefacts/
-          tar -czvf vitalam-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./vitalam-node ./vitalam-node.sha256
+          tar -czvf vitalam-node-${BUILD_VERSION}-${{ matrix.arch.architecture }}.tar.gz ./VERSION.txt ./vitalam-node ./vitalam-node.sha256
           tar -czvf vitalam-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./vitalam_node_runtime.compact.wasm ./vitalam_node_runtime.compact.wasm.sha256
           popd;
 
@@ -125,7 +132,7 @@ jobs:
           prerelease: ${{ needs.get-version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
           files: |
-            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-${{ matrix.arch.architecture }}.tar.gz
             ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
       - name: Delete release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
@@ -150,74 +157,74 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-${{ matrix.arch.architecture }}.tar.gz
             ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
 
   # Docker build  are always performed but are only version tagged on new version
-  build-docker:
-    name: Build Docker
-    runs-on: ubuntu-latest
-    needs: [get-version, build-release]
-    steps:
-    - uses: actions/checkout@master
-    - name: Setup QEMU
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: linux/amd64
-    - name: Setup Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v1
-      with:
-        buildkitd-flags: --debug
-    - name: Generate tags
-      id: generate-tags
-      env:
-        VERSION: ${{ needs.get-version.outputs.version }}
-        IS_NEW_VERSION: ${{ needs.get-version.outputs.is_new_version }}
-        IS_PRERELEASE: ${{ needs.get-version.outputs.is_prerelease }}
-      # if it's a new non prerelease version tag with hash, version latest-dev and latest
-      # if it's a new prerelease version tag with hash, version and latest-dev
-      # if it's a non new version tag with hash and latest-dev
-      run: |
-        if [ "$IS_NEW_VERSION" == "true" ]; then
-          echo "##[set-output name=VERSION_TAG;]ghcr.io/digicatapult/vitalam-node:$VERSION";
-          if [ "$IS_PRERELEASE" == "false" ]; then
-            echo "##[set-output name=LATEST_TAG;]ghcr.io/digicatapult/vitalam-node:latest";
-          else
-            echo "##[set-output name=LATEST_TAG;]";
-          fi;
-        else
-          echo "##[set-output name=VERSION_TAG;]";
-          echo "##[set-output name=LATEST_TAG;]";
-        fi;
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build image
-      uses: docker/build-push-action@v2
-      with:
-        load: true
-        builder: ${{ steps.buildx.outputs.name }}
-        context: .
-        build-args: |
-          RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
-          VITALAM_VERSION=${{ needs.get-version.outputs.version }}
-        file: ./Dockerfile
-        platforms: linux/amd64
-        tags: |
-          ghcr.io/digicatapult/vitalam-node:${{ github.sha }}
-          ${{ steps.generate-tags.outputs.VERSION_TAG }}
-          ${{ steps.generate-tags.outputs.LATEST_TAG }}
-        labels: |
-          org.opencontainers.image.title=vitalam-node
-          org.opencontainers.image.description=${{ github.event.repository.description }}
-          org.opencontainers.image.source=${{ github.event.repository.html_url }}
-          org.opencontainers.image.url=${{ github.event.repository.html_url }}
-          org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.version=${{ needs.get-version.outputs.version }}
-          org.opencontainers.image.created=${{ needs.get-version.outputs.build_date }}
-    - name: Publish image
-      run: docker push --all-tags ghcr.io/digicatapult/vitalam-node
+  # build-docker:
+  #   name: Build Docker
+  #   runs-on: ubuntu-latest
+  #   needs: [get-version, build-release]
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - name: Setup QEMU
+  #     uses: docker/setup-qemu-action@v1
+  #     with:
+  #       platforms: linux/amd64
+  #   - name: Setup Docker Buildx
+  #     id: buildx
+  #     uses: docker/setup-buildx-action@v1
+  #     with:
+  #       buildkitd-flags: --debug
+  #   - name: Generate tags
+  #     id: generate-tags
+  #     env:
+  #       VERSION: ${{ needs.get-version.outputs.version }}
+  #       IS_NEW_VERSION: ${{ needs.get-version.outputs.is_new_version }}
+  #       IS_PRERELEASE: ${{ needs.get-version.outputs.is_prerelease }}
+  #     # if it's a new non prerelease version tag with hash, version latest-dev and latest
+  #     # if it's a new prerelease version tag with hash, version and latest-dev
+  #     # if it's a non new version tag with hash and latest-dev
+  #     run: |
+  #       if [ "$IS_NEW_VERSION" == "true" ]; then
+  #         echo "##[set-output name=VERSION_TAG;]ghcr.io/digicatapult/vitalam-node:$VERSION";
+  #         if [ "$IS_PRERELEASE" == "false" ]; then
+  #           echo "##[set-output name=LATEST_TAG;]ghcr.io/digicatapult/vitalam-node:latest";
+  #         else
+  #           echo "##[set-output name=LATEST_TAG;]";
+  #         fi;
+  #       else
+  #         echo "##[set-output name=VERSION_TAG;]";
+  #         echo "##[set-output name=LATEST_TAG;]";
+  #       fi;
+  #   - name: Login to GitHub Container Registry
+  #     uses: docker/login-action@v1
+  #     with:
+  #       registry: ghcr.io
+  #       username: ${{ github.repository_owner }}
+  #       password: ${{ secrets.GITHUB_TOKEN }}
+  #   - name: Build image
+  #     uses: docker/build-push-action@v2
+  #     with:
+  #       load: true
+  #       builder: ${{ steps.buildx.outputs.name }}
+  #       context: .
+  #       build-args: |
+  #         RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
+  #         VITALAM_VERSION=${{ needs.get-version.outputs.version }}
+  #       file: ./Dockerfile
+  #       platforms: linux/amd64
+  #       tags: |
+  #         ghcr.io/digicatapult/vitalam-node:${{ github.sha }}
+  #         ${{ steps.generate-tags.outputs.VERSION_TAG }}
+  #         ${{ steps.generate-tags.outputs.LATEST_TAG }}
+  #       labels: |
+  #         org.opencontainers.image.title=vitalam-node
+  #         org.opencontainers.image.description=${{ github.event.repository.description }}
+  #         org.opencontainers.image.source=${{ github.event.repository.html_url }}
+  #         org.opencontainers.image.url=${{ github.event.repository.html_url }}
+  #         org.opencontainers.image.revision=${{ github.sha }}
+  #         org.opencontainers.image.version=${{ needs.get-version.outputs.version }}
+  #         org.opencontainers.image.created=${{ needs.get-version.outputs.build_date }}
+  #   - name: Publish image
+  #     run: docker push --all-tags ghcr.io/digicatapult/vitalam-node
