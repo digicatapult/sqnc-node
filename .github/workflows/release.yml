@@ -111,6 +111,7 @@ jobs:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
+          use-cross: true
           command: build
           args: --release --target ${{ matrix.arch.architecture }}
       - name: Prepare artefacts
