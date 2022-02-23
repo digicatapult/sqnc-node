@@ -12,7 +12,6 @@ use sp_runtime::{
 
 mod create_process;
 mod disable_process;
-mod restriction_process;
 mod validate_process;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
