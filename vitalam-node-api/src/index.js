@@ -1,10 +1,6 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api')
 
-const {
-  METADATA_KEY_LENGTH,
-  METADATA_VALUE_LITERAL_LENGTH,
-  PROCESS_IDENTIFIER_LENGTH,
-} = require('./env')
+const { METADATA_KEY_LENGTH, METADATA_VALUE_LITERAL_LENGTH, PROCESS_IDENTIFIER_LENGTH } = require('./env')
 
 const rolesEnum = ['Owner', 'Customer', 'AdditiveManufacturer', 'Laboratory', 'Buyer', 'Supplier', 'Reviewer']
 
@@ -64,7 +60,7 @@ const types = {
   Restrictions: 'Vec<Restriction>',
 }
 
-const getApi = ({host, port, logger}) => {
+const getApi = ({ host, port, logger }) => {
   const apiOptions = {
     provider: new WsProvider(`ws://${host}:${port}`),
     types,
