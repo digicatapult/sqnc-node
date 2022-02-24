@@ -1,9 +1,6 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api')
 
-const logger = require('./logger')
 const {
-  API_HOST,
-  API_PORT,
   METADATA_KEY_LENGTH,
   METADATA_VALUE_LITERAL_LENGTH,
   PROCESS_IDENTIFIER_LENGTH,
@@ -67,20 +64,20 @@ const types = {
   Restrictions: 'Vec<Restriction>',
 }
 
-const getApi = () => {
+const getApi = ({host, port, logger}) => {
   const apiOptions = {
-    provider: new WsProvider(`ws://${API_HOST}:${API_PORT}`),
+    provider: new WsProvider(`ws://${host}:${port}`),
     types,
   }
 
   const api = new ApiPromise(apiOptions)
 
   api.on('disconnected', () => {
-    logger.warn(`Disconnected from substrate node at ${API_HOST}:${API_PORT}`)
+    logger.warn(`Disconnected from substrate node at ${host}:${port}`)
   })
 
   api.on('connected', () => {
-    logger.info(`Connected to substrate node at ${API_HOST}:${API_PORT}`)
+    logger.info(`Connected to substrate node at ${host}:${port}`)
   })
 
   api.on('error', (err) => {
