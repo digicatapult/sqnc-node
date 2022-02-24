@@ -12,6 +12,7 @@ pub enum Restriction {
     None,
     SenderOwnsAllInputs,
     FixedNumberOfInputs { num_inputs: u32 },
+    FixedNumberOfOutputs { num_outputs: u32 },
 }
 
 impl Default for Restriction {
@@ -35,6 +36,7 @@ where
     match *restriction {
         Restriction::None => true, // TODO implement some actual restrictions
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
+        Restriction::FixedNumberOfOutputs { num_outputs } => return _outputs.len() == num_outputs as usize,
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
                 let is_owned = match input.roles.get(&Default::default()) {
@@ -215,6 +217,56 @@ mod tests {
             &Restriction::FixedNumberOfInputs { num_inputs: 1 },
             &1u64,
             &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn fixed_number_of_output_restriction_matches_fixed_output_total() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let _outputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedNumberOfOutputs { num_outputs: 2 },
+            &1u64,
+            &_outputs,
+            &Vec::new(),
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn fixed_number_of_output_restriction_matches_fixed_output_total_fail() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let _outputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedNumberOfOutputs { num_outputs: 1 },
+            &1u64,
+            &_outputs,
             &Vec::new(),
         );
         assert!(!result);
