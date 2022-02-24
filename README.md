@@ -158,10 +158,13 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   },
   "Restriction": {
     "_enum": {
-      "None": null,
-      "SenderOwnsAllInputs": null,
-      "FixedNumberOfInputs": "num_inputs<u32>"
+      "None": "()",
+      "SenderOwnsAllInputs": "()",
+      "FixedNumberOfInputs": "FixedNumberOfInputsRestriction"
     }
+  },
+  "FixedNumberOfInputsRestriction": {
+    "num_inputs": "u32"
   },
   "IsNew": "bool",
   "Restrictions": "Vec<Restriction>"
