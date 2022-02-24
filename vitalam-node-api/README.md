@@ -6,7 +6,7 @@ A `Node.js` API to support communication to the [Substrate-based](https://www.su
 
 ## Configuration
 
-The following environment variables are used by `vitalam-api` and can be configured. Entries marked as `required` are needed when running `vitalam-api` in production mode.
+The following environment variables are used by `vitalam-node-api` and can be configured. Entries marked as `required` are needed when running `vitalam-node-api` in production mode.
 
 | variable                      | required |                       default                       | description                                                                                                  |
 | :---------------------------- | :------: | :-------------------------------------------------: | :----------------------------------------------------------------------------------------------------------- |
