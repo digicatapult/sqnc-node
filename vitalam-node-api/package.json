@@ -1,0 +1,35 @@
+{
+  "name": "vitalam-node-api",
+  "version": "0.0.1",
+  "description": "VITALam Node API",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digicatapult/vitalam-node.git"
+  },
+  "author": "Digital Catapult",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/digicatapult/vitalam-node/issues"
+  },
+  "homepage": "https://github.com/digicatapult/vitalam-node#readme",
+  "engines": {
+    "node": "16.x.x",
+    "npm": "8.x.x"
+  },
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@polkadot/api": "^5.9.1",
+    "dotenv": "^16.0.0",
+    "envalid": "^7.2.2",
+    "pino": "^7.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.1"
+  }
+}
