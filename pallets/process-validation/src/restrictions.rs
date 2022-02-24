@@ -267,7 +267,7 @@ mod tests {
             &Restriction::FixedNumberOfOutputs { num_outputs: 1 },
             &1u64,
             &Vec::new(),
-            &_outputs, 
+            &_outputs,
         );
         assert!(!result);
     }
