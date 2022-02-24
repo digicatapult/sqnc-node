@@ -223,7 +223,7 @@ mod tests {
     }
 
     #[test]
-    fn fixed_number_of_output_restriction_matches_fixed_output_total() {
+    fn fixed_number_of_outputs_restriction_matches_fixed_output_total() {
         let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
         is_owner.insert(Default::default(), 1u64);
         let _outputs = vec![
@@ -241,8 +241,8 @@ mod tests {
         let result = validate_restriction::<u64, u32, u32, u64>(
             &Restriction::FixedNumberOfOutputs { num_outputs: 2 },
             &1u64,
-            &_outputs,
             &Vec::new(),
+            &_outputs,
         );
         assert!(result);
     }
@@ -266,8 +266,8 @@ mod tests {
         let result = validate_restriction::<u64, u32, u32, u64>(
             &Restriction::FixedNumberOfOutputs { num_outputs: 1 },
             &1u64,
-            &_outputs,
             &Vec::new(),
+            &_outputs, 
         );
         assert!(!result);
     }
