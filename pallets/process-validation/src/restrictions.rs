@@ -25,7 +25,7 @@ pub fn validate_restriction<A, R, T, V>(
     restriction: &Restriction,
     sender: &A,
     inputs: &Vec<ProcessIO<A, R, T, V>>,
-    _outputs: &Vec<ProcessIO<A, R, T, V>>,
+    outputs: &Vec<ProcessIO<A, R, T, V>>,
 ) -> bool
 where
     A: Parameter + Default,
@@ -36,7 +36,7 @@ where
     match *restriction {
         Restriction::None => true, // TODO implement some actual restrictions
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
-        Restriction::FixedNumberOfOutputs { num_outputs } => return _outputs.len() == num_outputs as usize,
+        Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
                 let is_owned = match input.roles.get(&Default::default()) {
@@ -226,7 +226,7 @@ mod tests {
     fn fixed_number_of_outputs_restriction_matches_fixed_output_total() {
         let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
         is_owner.insert(Default::default(), 1u64);
-        let _outputs = vec![
+        let outputs = vec![
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
@@ -242,7 +242,7 @@ mod tests {
             &Restriction::FixedNumberOfOutputs { num_outputs: 2 },
             &1u64,
             &Vec::new(),
-            &_outputs,
+            &outputs,
         );
         assert!(result);
     }
@@ -251,7 +251,7 @@ mod tests {
     fn fixed_number_of_output_restriction_matches_fixed_output_total_fail() {
         let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
         is_owner.insert(Default::default(), 1u64);
-        let _outputs = vec![
+        let outputs = vec![
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
@@ -267,7 +267,7 @@ mod tests {
             &Restriction::FixedNumberOfOutputs { num_outputs: 1 },
             &1u64,
             &Vec::new(),
-            &_outputs,
+            &outputs,
         );
         assert!(!result);
     }
