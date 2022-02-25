@@ -6,6 +6,8 @@ use frame_support::Parameter;
 use sp_std::vec::Vec;
 use vitalam_pallet_traits::ProcessIO;
 
+struct GenericMeta<T>(T);
+
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum Restriction {
@@ -13,7 +15,7 @@ pub enum Restriction {
     SenderOwnsAllInputs,
     FixedNumberOfInputs { num_inputs: u32 },
     FixedNumberOfOutputs { num_outputs: u32 },
-    FixedMetadataValue { input_index: u32, metadata_key: u32, metadata_value: u32 }
+    FixedMetadataValue { input_index: u32, metadata_key: GenericMeta(T), metadata_value: u32 }
 }
 
 impl Default for Restriction {
@@ -39,6 +41,15 @@ where
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedMetadataValue { input_index, metadata_key, metadata_value} => {
+            let selectedInput = &inputs[input_index as usize];
+            for input in inputs{
+                let matchesFixedValue = match input.metadata.get(&metadata_key) {
+                    Some(metaData) => metaData == &metadata_value as V,
+                    None => false,
+                };
+            }
+            let contains = selectedInput.metadata.contains_key(metadata_key);
+            let meta_value = selectedInput.metadata.get(metadata_key);
             return false;
         }
         Restriction::SenderOwnsAllInputs => {
