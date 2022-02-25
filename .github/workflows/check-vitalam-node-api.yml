@@ -1,0 +1,54 @@
+name: Run Lint and Depcheck
+
+on: [push]
+
+jobs:
+  lint:
+    name: Run lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Use npm v8
+        run: npm install -g npm@8
+      - name: Cache Node.js modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+
+      - name: Install Packages
+        working-directory: vitalam-node-api
+        run: npm ci
+      - name: Lint
+        working-directory: vitalam-node-api
+        run: npm run lint
+  dependency-check:
+    name: Run dependency check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Use npm v8
+        run: npm install -g npm@8
+      - name: Cache Node.js modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      - name: Install Packages
+        working-directory: vitalam-node-api
+        run: npm ci
+      - name: Dependency Check
+        working-directory: vitalam-node-api
+        run: npm run depcheck
