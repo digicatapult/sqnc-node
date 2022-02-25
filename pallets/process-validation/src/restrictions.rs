@@ -13,6 +13,7 @@ pub enum Restriction {
     SenderOwnsAllInputs,
     FixedNumberOfInputs { num_inputs: u32 },
     FixedNumberOfOutputs { num_outputs: u32 },
+    FixedMetadataValue { input_index: u32, metadata_key: u32, metadata_value: u32 }
 }
 
 impl Default for Restriction {
@@ -37,6 +38,9 @@ where
         Restriction::None => true, // TODO implement some actual restrictions
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
+        Restriction::FixedMetadataValue { input_index, metadata_key, metadata_value} => {
+            return false;
+        }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
                 let is_owned = match input.roles.get(&Default::default()) {
