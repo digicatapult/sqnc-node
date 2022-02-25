@@ -4,7 +4,7 @@ edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/vitalam-node/'
 name = 'vitalam-node-runtime'
-version = '2.3.1'
+version = '2.5.0'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -26,7 +26,7 @@ serde = { features = ['derive'], optional = true, version = '1.0.101' }
 
 # local dependencies
 pallet-simple-nft = { version = '2.2.0', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
-pallet-process-validation = { version = '1.1.1', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
+pallet-process-validation = { version = '1.3.0', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
 pallet-symmetric-key = { version = '1.0.1', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
 frame-executive = { default-features = false, version = '3.0.0' }
