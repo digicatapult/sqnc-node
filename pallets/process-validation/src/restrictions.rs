@@ -15,7 +15,7 @@ pub enum Restriction {
     SenderOwnsAllInputs,
     FixedNumberOfInputs { num_inputs: u32 },
     FixedNumberOfOutputs { num_outputs: u32 },
-    FixedMetadataValue { input_index: u32, metadata_key: GenericMeta(T), metadata_value: u32 }
+    FixedMetadataValue { input_index: u32, metadata_key: GenericMeta(u32), metadata_value: u32 }
 }
 
 impl Default for Restriction {
@@ -42,7 +42,9 @@ where
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedMetadataValue { input_index, metadata_key, metadata_value} => {
             let selectedInput = &inputs[input_index as usize];
-            for input in inputs{
+            let meta = selectedInput.metadata.get(&metadata_key);
+            return meta == metadata_value;
+            /* for input in inputs{
                 let matchesFixedValue = match input.metadata.get(&metadata_key) {
                     Some(metaData) => metaData == &metadata_value as V,
                     None => false,
@@ -50,7 +52,7 @@ where
             }
             let contains = selectedInput.metadata.contains_key(metadata_key);
             let meta_value = selectedInput.metadata.get(metadata_key);
-            return false;
+            return false; */
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
