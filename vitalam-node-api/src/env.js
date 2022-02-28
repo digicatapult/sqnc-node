@@ -8,7 +8,6 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 const vars = envalid.cleanEnv(process.env, {
-  LEGACY_METADATA_KEY: envalid.str({ default: '' }),
   METADATA_KEY_LENGTH: envalid.num({ default: 32 }),
   METADATA_VALUE_LITERAL_LENGTH: envalid.num({ default: 32 }),
   PROCESS_IDENTIFIER_LENGTH: envalid.num({ default: 32 }),
