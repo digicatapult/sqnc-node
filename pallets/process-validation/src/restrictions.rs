@@ -65,7 +65,7 @@ where
                 return meta == Some(&metadata_value);
             } else {
                 return false;
-            } 
+            }
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
