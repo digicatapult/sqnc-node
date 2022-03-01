@@ -17,7 +17,6 @@ mod benchmarking;
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
 use restrictions::*;
-use Restriction::*;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -36,16 +35,17 @@ impl Default for ProcessStatus {
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct Process<TokenMetadataKey, TokenMetadataValue>
 where
-TokenMetadataKey: Parameter + Default + Ord,
-TokenMetadataValue: Parameter + Default, {
+    TokenMetadataKey: Parameter + Default + Ord,
+    TokenMetadataValue: Parameter + Default,
+{
     status: ProcessStatus,
     restrictions: Vec<Restriction<TokenMetadataKey, TokenMetadataValue>>,
 }
 
-impl<TokenMetadataKey, TokenMetadataValue> Default for Process<TokenMetadataKey, TokenMetadataValue> 
+impl<TokenMetadataKey, TokenMetadataValue> Default for Process<TokenMetadataKey, TokenMetadataValue>
 where
     TokenMetadataKey: Parameter + Default + Ord,
-    TokenMetadataValue: Parameter + Default, 
+    TokenMetadataValue: Parameter + Default,
 {
     fn default() -> Self {
         Process {
@@ -121,7 +121,12 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
-        ProcessCreated(T::ProcessIdentifier, T::ProcessVersion, Vec<Restriction<T::TokenMetadataKey, T::TokenMetadataValue>>, bool),
+        ProcessCreated(
+            T::ProcessIdentifier,
+            T::ProcessVersion,
+            Vec<Restriction<T::TokenMetadataKey, T::TokenMetadataValue>>,
+            bool,
+        ),
         //id, version
         ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
     }

@@ -50,8 +50,8 @@ where
     T: Parameter + Default + Ord,
     V: Parameter + Default,
 {
-    match restriction {
-        Restriction::<T, V>::None => true, // TODO implement some actual restrictions
+    match &*restriction {
+        Restriction::<T, V>::None => true,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == *num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == *num_outputs as usize,
         Restriction::FixedMetadataValue {
@@ -59,14 +59,26 @@ where
             metadata_key,
             metadata_value,
         } => {
-            /* let selectedInput = &inputs[input_index as usize];
-            let meta = selectedInput.metadata.get(&metadata_key);
+            let selected_input = &inputs[*input_index as usize];
+            let meta = selected_input.metadata.get(&metadata_key);
             if meta != None {
-                return meta == metadata_value;
+                return meta == Some(&metadata_value);
             } else {
                 return false;
+            }
+
+            /*             for input in inputs {
+                let index_item = match &inputs[*input_index as usize] {
+                    Some(index) => index.metadata.get(&metadata_key) == &metadata_value,
+                    None => false,
+                };
+
+                if index_item != None {
+                    return true;
+                } else {
+                    false
+                }
             } */
-            true
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
@@ -88,7 +100,7 @@ mod tests {
     use super::*;
     use sp_std::collections::btree_map::BTreeMap;
 
-    /*#[test]
+    #[test]
     fn no_restriction_succeeds() {
         let result = validate_restriction::<u64, u32, u32, u64>(&Restriction::None, &1u64, &Vec::new(), &Vec::new());
         assert!(result);
@@ -301,10 +313,77 @@ mod tests {
             &outputs,
         );
         assert!(!result);
-    }*/
+    }
 
     #[test]
-    fn fake_test() {
-        assert(1 == 1)
+    fn fixed_metadata_value_outputs_total() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let mut real_metadata = BTreeMap::new();
+        real_metadata.insert(2, 110);
+        let inputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: real_metadata,
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedMetadataValue {
+                input_index: 2,
+                metadata_key: 2,
+                metadata_value: 110,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn fixed_metadata_value_outputs_total_fail() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let mut real_metadata = BTreeMap::new();
+        real_metadata.insert(2, 110);
+        let inputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: real_metadata,
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedMetadataValue {
+                input_index: 1,
+                metadata_key: 2,
+                metadata_value: 110,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
     }
 }
