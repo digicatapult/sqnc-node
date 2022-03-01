@@ -2,8 +2,10 @@
 
 ## Description
 
-This is exists within the `./vitalam-node` directory as an NPM module to provide the following api exports:
-- api for connecting to the substrate-node via polkadot
+This is exists within the `./vitalam-node` directory as an NPM module to provide the following api related exports:
+- `api` for connecting to the substrate-node via `@polkadot/api` npm dependency
+- `rolesEnum` requirement for the substrate-node initialisation
+- `Keyring` from the `@polkadot/api` 
 
 A `Node.js` API to support communication to the [Substrate-based](https://www.substrate.io/) [`vitalam-node`](https://github.com/digicatapult/vitalam-node) (via [`polkadot-js/api`](https://www.npmjs.com/package/@polkadot/api)).
 
