@@ -31,18 +31,18 @@ impl Default for ProcessStatus {
     }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
+#[derive( Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Process {
+pub struct  Process<T> {
     status: ProcessStatus,
-    restrictions: Vec<Restriction>,
+    restrictions: Restriction<T>,
 }
 
-impl Default for Process {
+impl Default for Process<T> {
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
-            restrictions: vec![],
+            restrictions: Restriction::T,
         }
     }
 }
@@ -57,7 +57,7 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
-    type Restrictions = Vec<Restriction>;
+    type Restrictions = Restriction<T>;
 
     /// The pallet's configuration trait.
     #[pallet::config]
@@ -96,7 +96,7 @@ pub mod pallet {
         T::ProcessIdentifier,
         Blake2_128Concat,
         T::ProcessVersion,
-        Process,
+        Process<T>,
         ValueQuery,
     >;
 
@@ -109,13 +109,13 @@ pub mod pallet {
     #[pallet::metadata(
         ProcessIdentifier = "ProcessIdentifier",
         ProcessVersion = "ProcessVersion",
-        Vec<Restriction> = "Restrictions",
+        Restrictions = "Restrictions",
         bool = "IsNew"
     )]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
-        ProcessCreated(T::ProcessIdentifier, T::ProcessVersion, Vec<Restriction>, bool),
+        ProcessCreated(T::ProcessIdentifier, T::ProcessVersion, Restrictions, bool),
         //id, version
         ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
     }
@@ -139,7 +139,7 @@ pub mod pallet {
         pub(super) fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: Vec<Restriction>,
+            restrictions: Restrictions,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();

@@ -7,6 +7,7 @@ use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 
 const PROCESS_ID: ProcessIdentifier = ProcessIdentifier::A;
 
+/*
 #[test]
 fn returns_error_if_origin_validation_fails_and_no_data_added() {
     new_test_ext().execute_with(|| {
@@ -70,3 +71,4 @@ fn disables_process_and_dispatches_event() {
         assert_eq!(System::events()[0].event, expected);
     });
 }
+*/

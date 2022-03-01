@@ -5,6 +5,7 @@ use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 
+/*
 // -- fixtures --
 #[allow(dead_code)]
 const PROCESS_ID1: ProcessIdentifier = ProcessIdentifier::A;
@@ -144,3 +145,4 @@ fn updates_version_correctly_for_new_process_and_dispatches_event() {
         assert_eq!(System::events()[0].event, expected);
     });
 }
+*/
