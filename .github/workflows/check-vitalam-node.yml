@@ -64,7 +64,7 @@ jobs:
         run: sudo snap install yq
       - name: Check Build Version
         id: get_version
-        run: ./scripts/check-version.sh
+        run: ./scripts/check-vitalam-node-version.sh
         shell: bash
       - name: Error if version is not increased
         shell: bash

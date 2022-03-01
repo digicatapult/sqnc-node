@@ -20,7 +20,7 @@ jobs:
       - run: pip3 install yq==2.13.0
       - name: Get Build Version
         id: get_version
-        run: ./scripts/check-vitalam-node-version.sh
+        run: ./scripts/check-version.sh
         shell: bash
       - name: Get Toolchain Version
         id: get_toolchain
