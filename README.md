@@ -175,10 +175,10 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "input_index": "u32",
     "metadata_key": "TokenMetadataKey",
     "metadata_value": "TokenMetadataValue"
-},
+  },
   "IsNew": "bool",
   "Restrictions": "Vec<Restriction>"
-},
+}
 ```
 
 ### SimpleNFT pallet
