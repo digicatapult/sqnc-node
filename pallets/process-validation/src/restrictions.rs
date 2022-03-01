@@ -65,20 +65,7 @@ where
                 return meta == Some(&metadata_value);
             } else {
                 return false;
-            }
-
-            /*             for input in inputs {
-                let index_item = match &inputs[*input_index as usize] {
-                    Some(index) => index.metadata.get(&metadata_key) == &metadata_value,
-                    None => false,
-                };
-
-                if index_item != None {
-                    return true;
-                } else {
-                    false
-                }
-            } */
+            } 
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
