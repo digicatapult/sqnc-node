@@ -369,4 +369,116 @@ mod tests {
         );
         assert!(!result);
     }
+
+    #[test]
+    fn fixed_metadata_value_wrong_value_under_right_key_fail() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let mut real_metadata = BTreeMap::new();
+        real_metadata.insert(2, 110);
+        let inputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: real_metadata,
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedMetadataValue {
+                input_index: 2,
+                metadata_key: 2,
+                metadata_value: 45,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn fixed_metadata_value_correct_value_under_incorrect_key_fail() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let mut real_metadata = BTreeMap::new();
+        real_metadata.insert(1, 200);
+        real_metadata.insert(2, 110);
+        real_metadata.insert(3, 300);
+        let inputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: real_metadata,
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedMetadataValue {
+                input_index: 2,
+                metadata_key: 3,
+                metadata_value: 110,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn fixed_metadata_value_correct_value_under_correct_key_on_wrong_input_fail() {
+        let mut is_owner: BTreeMap<u32, u64> = BTreeMap::new();
+        is_owner.insert(Default::default(), 1u64);
+        let mut real_metadata = BTreeMap::new();
+        real_metadata.insert(1, 200);
+        real_metadata.insert(2, 110);
+        real_metadata.insert(3, 300);
+        let inputs = vec![
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: is_owner.clone(),
+                metadata: real_metadata,
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            &Restriction::FixedMetadataValue {
+                input_index: 1,
+                metadata_key: 2,
+                metadata_value: 110,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
 }
