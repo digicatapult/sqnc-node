@@ -61,11 +61,7 @@ where
         } => {
             let selected_input = &inputs[*input_index as usize];
             let meta = selected_input.metadata.get(&metadata_key);
-            if meta != None {
-                return meta == Some(&metadata_value);
-            } else {
-                return false;
-            }
+            meta == Some(&metadata_value)
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
