@@ -58,7 +58,7 @@ fn it_works_for_creating_token_with_file() {
 fn it_works_for_creating_token_with_literal() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
-        let roles = (vec![(Default::default(), 1)]);
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let metadata = BTreeMap::from_iter(vec![(0, MetadataValue::Literal([0]))]);
         assert_ok!(SimpleNFTModule::run_process(
             Origin::signed(1),
