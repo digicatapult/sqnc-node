@@ -6,7 +6,7 @@ set -e
 function check_versions_consistent () {
   local PACKAGE_VERSION=$(yq eval '.version' ./vitalam-node/package.json)
   local PACKAGE_LOCK_VERSION=$(yq eval '.version' ./vitalam-node/package-lock.json)
-  local APP_VERSION=$(tomlq eval '.package.version' ./runtime/Cargo.toml)
+  local APP_VERSION=$(tomlq .package.version ./runtime/Cargo.toml | sed 's/"//g')
 
   if [ "$PACKAGE_VERSION" != "$PACKAGE_LOCK_VERSION" ] ||
     [ "$PACKAGE_VERSION" != "$APP_VERSION" ]; then
