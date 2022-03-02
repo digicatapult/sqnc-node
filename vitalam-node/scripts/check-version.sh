@@ -3,6 +3,23 @@
 # exit when any command fails
 set -e
 
+function check_versions_consistent () {
+  local PACKAGE_VERSION=$(yq eval '.version' ./package.json)
+  local PACKAGE_LOCK_VERSION=$(yq eval '.version' ./package-lock.json)
+  local APP_VERSION=$(yq eval '.package.version' ../node/runtime/Cargo.toml)
+
+  if [ "$PACKAGE_VERSION" != "$PACKAGE_LOCK_VERSION" ] ||
+    [ "$PACKAGE_VERSION" != "$APP_VERSION" ]; then
+    echo "Inconsistent versions detected"
+    echo "PACKAGE_VERSION: $PACKAGE_VERSION"
+    echo "PACKAGE_LOCK_VERSION: $PACKAGE_LOCK_VERSION"
+    echo "APP_VERSION: $APP_VERSION"
+    exit 1
+  fi
+}
+
+check_versions_consistent
+
 function check_version_greater () {
   local current=$1
   local git_versions="${2:-0.0.0}"
@@ -23,74 +40,22 @@ function check_version_greater () {
   fi
 }
 
-function assert_tomlq() {
-  printf "Checking for presense of tomlq..."
-  local path_to_executable=$(command -v tomlq)
-
-  if [ -z "$path_to_executable" ] ; then
-    echo -e "Cannot find tomlq executable. Is it on your \$PATH?"
-    exit 1
-  fi
-
-  if $path_to_executable --version | head -n 1 | grep -E "2.13.0" &> /dev/null ; then
-  printf "OK\n"
-  else
-    echo -e "Incorrect version of tomlq detected, make sure you are using tomlq from the yq package found on pip (i.e. pip3 install yq)"
-    $path_to_executable --version |head -n 1
-    exit 1
-  fi
-}
-
-function get_working_copy_version() {
-  assert_tomlq
-  CURRENT_VERSION=$(tomlq .package.version ./node/Cargo.toml | sed 's/"//g')
-
-  printf "This version found to be %s\n" "$CURRENT_VERSION"
-
-  branch_name="$(git symbolic-ref HEAD 2>/dev/null)" ||
-  branch_name="(unnamed branch)"     # detached HEAD (or possibly github workflow?)
-  branch_name=${branch_name##refs/heads/}
-
-  if [ "$GITHUB_HEAD_REF" != "" ]; then
-    branch_name=$GITHUB_HEAD_REF
-  fi
-
-  if [[ "$branch_name" != "main" ]]; then
-    IS_PRERELEASE=true;
-    CURRENT_VERSION=$(printf '%s-%s' "$CURRENT_VERSION" "$branch_name")
-  elif ! [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-    IS_PRERELEASE=true;
-  fi
-
-  release_type="release"
-  if [ $IS_PRERELEASE ]; then
-    release_type="prerelease"
-  fi
-
-  SANE_BRANCH_NAME_KEY=$(echo $branch_name | sed -e 's#/#_#g')
-  CURRENT_VERSION=$(echo $CURRENT_VERSION | sed -e 's#/#_#g')
-  
-  printf "This %s found to be %s\n" "$release_type" "$CURRENT_VERSION"
-}
-
-# Get published git tags that match semver regex with a "v" prefixbash then remove the "v" character
+# Get published git tags that match semver regex with a "v" prefix then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from node Cargo.toml
-
-get_working_copy_version
-
-echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
-echo "##[set-output name=SANE_BRANCH_NAME_KEY;]$SANE_BRANCH_NAME_KEY"
-echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+CURRENT_VERSION=$(yq eval '.version' ./package.json)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
+  echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
+  echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   echo "##[set-output name=IS_NEW_VERSION;]true"
+  if [[ $CURRENT_VERSION =~ [-] ]]; then
+    echo "##[set-output name=IS_PRERELEASE;]true"
+    echo "##[set-output name=NPM_RELEASE_TAG;]next"
+  else
+    echo "##[set-output name=IS_PRERELEASE;]false"
+    echo "##[set-output name=NPM_RELEASE_TAG;]latest"
+  fi
 else
   echo "##[set-output name=IS_NEW_VERSION;]false"
-fi
-
-if [ $IS_PRERELEASE ]; then
-  echo "##[set-output name=IS_PRERELEASE;]true"
-else
-  echo "##[set-output name=IS_PRERELEASE;]false"
 fi
