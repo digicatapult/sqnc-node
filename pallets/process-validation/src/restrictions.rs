@@ -39,7 +39,7 @@ where
 }
 
 pub fn validate_restriction<A, R, T, V>(
-    restriction: &Restriction<T, V>,
+    restriction: Restriction<T, V>,
     sender: &A,
     inputs: &Vec<ProcessIO<A, R, T, V>>,
     outputs: &Vec<ProcessIO<A, R, T, V>>,
@@ -50,16 +50,16 @@ where
     T: Parameter + Default + Ord,
     V: Parameter + Default,
 {
-    match &*restriction {
+    match restriction {
         Restriction::<T, V>::None => true,
-        Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == *num_inputs as usize,
-        Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == *num_outputs as usize,
+        Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
+        Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedMetadataValue {
             input_index,
             metadata_key,
             metadata_value,
         } => {
-            let selected_input = &inputs[*input_index as usize];
+            let selected_input = &inputs[input_index as usize];
             let meta = selected_input.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
         }
@@ -85,14 +85,14 @@ mod tests {
 
     #[test]
     fn no_restriction_succeeds() {
-        let result = validate_restriction::<u64, u32, u32, u64>(&Restriction::None, &1u64, &Vec::new(), &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
         assert!(result);
     }
 
     #[test]
     fn sender_owns_inputs_restriction_no_inputs_succeeds() {
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::SenderOwnsAllInputs,
+            Restriction::SenderOwnsAllInputs,
             &1u64,
             &Vec::new(),
             &Vec::new(),
@@ -117,7 +117,7 @@ mod tests {
             },
         ];
         let result =
-            validate_restriction::<u64, u32, u32, u64>(&Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
         assert!(result);
     }
 
@@ -138,7 +138,7 @@ mod tests {
             },
         ];
         let result =
-            validate_restriction::<u64, u32, u32, u64>(&Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
         assert!(!result);
     }
 
@@ -161,7 +161,7 @@ mod tests {
             },
         ];
         let result =
-            validate_restriction::<u64, u32, u32, u64>(&Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
         assert!(!result);
     }
 
@@ -184,7 +184,7 @@ mod tests {
             },
         ];
         let result =
-            validate_restriction::<u64, u32, u32, u64>(&Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
         assert!(!result);
     }
 
@@ -215,7 +215,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedNumberOfInputs { num_inputs: 4 },
+            Restriction::FixedNumberOfInputs { num_inputs: 4 },
             &1u64,
             &inputs,
             &Vec::new(),
@@ -240,7 +240,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedNumberOfInputs { num_inputs: 1 },
+            Restriction::FixedNumberOfInputs { num_inputs: 1 },
             &1u64,
             &inputs,
             &Vec::new(),
@@ -265,7 +265,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedNumberOfOutputs { num_outputs: 2 },
+            Restriction::FixedNumberOfOutputs { num_outputs: 2 },
             &1u64,
             &Vec::new(),
             &outputs,
@@ -290,7 +290,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedNumberOfOutputs { num_outputs: 1 },
+            Restriction::FixedNumberOfOutputs { num_outputs: 1 },
             &1u64,
             &Vec::new(),
             &outputs,
@@ -322,7 +322,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedMetadataValue {
+            Restriction::FixedMetadataValue {
                 input_index: 2,
                 metadata_key: 2,
                 metadata_value: 110,
@@ -358,7 +358,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedMetadataValue {
+            Restriction::FixedMetadataValue {
                 input_index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
@@ -394,7 +394,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedMetadataValue {
+            Restriction::FixedMetadataValue {
                 input_index: 2,
                 metadata_key: 2,
                 metadata_value: 45,
@@ -432,7 +432,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedMetadataValue {
+            Restriction::FixedMetadataValue {
                 input_index: 2,
                 metadata_key: 3,
                 metadata_value: 110,
@@ -470,7 +470,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            &Restriction::FixedMetadataValue {
+            Restriction::FixedMetadataValue {
                 input_index: 1,
                 metadata_key: 2,
                 metadata_value: 110,

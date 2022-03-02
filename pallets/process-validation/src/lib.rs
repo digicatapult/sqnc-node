@@ -275,7 +275,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                         T::RoleKey,
                         T::TokenMetadataKey,
                         T::TokenMetadataValue,
-                    >(&restriction, &sender, &inputs, &outputs);
+                    >(restriction, &sender, &inputs, &outputs);
 
                     if !is_valid {
                         return false;
