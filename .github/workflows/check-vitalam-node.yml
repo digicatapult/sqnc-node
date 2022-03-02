@@ -3,7 +3,6 @@ name: Run Lint and Depcheck
 on: [push]
 
 jobs:
-  # install yq...
   lint:
     name: Run lint
     runs-on: ubuntu-latest
