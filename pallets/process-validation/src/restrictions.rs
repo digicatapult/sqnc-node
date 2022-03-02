@@ -21,8 +21,8 @@ where
     FixedNumberOfOutputs {
         num_outputs: u32,
     },
-    FixedMetadataValue {
-        input_index: u32,
+    FixedInputMetadataValue {
+        index: u32,
         metadata_key: TokenMetadataKey,
         metadata_value: TokenMetadataValue,
     },
@@ -54,12 +54,12 @@ where
         Restriction::<T, V>::None => true,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
-        Restriction::FixedMetadataValue {
-            input_index,
+        Restriction::FixedInputMetadataValue {
+            index,
             metadata_key,
             metadata_value,
         } => {
-            let selected_input = &inputs[input_index as usize];
+            let selected_input = &inputs[index as usize];
             let meta = selected_input.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
         }
@@ -322,8 +322,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 2,
+            Restriction::FixedInputMetadataValue {
+                index: 2,
                 metadata_key: 2,
                 metadata_value: 110,
             },
@@ -358,8 +358,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 1,
+            Restriction::FixedInputMetadataValue {
+                index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
             },
@@ -394,8 +394,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 2,
+            Restriction::FixedInputMetadataValue {
+                index: 2,
                 metadata_key: 2,
                 metadata_value: 45,
             },
@@ -432,8 +432,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 2,
+            Restriction::FixedInputMetadataValue {
+                index: 2,
                 metadata_key: 3,
                 metadata_value: 110,
             },
@@ -470,8 +470,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 1,
+            Restriction::FixedInputMetadataValue {
+                index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
             },
