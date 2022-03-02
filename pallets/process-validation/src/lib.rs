@@ -16,7 +16,7 @@ mod benchmarking;
 
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
-use restrictions::{validate_restriction, Restriction};
+use restrictions::*;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -33,12 +33,20 @@ impl Default for ProcessStatus {
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct Process {
+pub struct Process<TokenMetadataKey, TokenMetadataValue>
+where
+    TokenMetadataKey: Parameter + Default + Ord,
+    TokenMetadataValue: Parameter + Default,
+{
     status: ProcessStatus,
-    restrictions: Vec<Restriction>,
+    restrictions: Vec<Restriction<TokenMetadataKey, TokenMetadataValue>>,
 }
 
-impl Default for Process {
+impl<TokenMetadataKey, TokenMetadataValue> Default for Process<TokenMetadataKey, TokenMetadataValue>
+where
+    TokenMetadataKey: Parameter + Default + Ord,
+    TokenMetadataValue: Parameter + Default,
+{
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
@@ -56,8 +64,6 @@ pub mod pallet {
     use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-
-    type Restrictions = Vec<Restriction>;
 
     /// The pallet's configuration trait.
     #[pallet::config]
@@ -96,7 +102,7 @@ pub mod pallet {
         T::ProcessIdentifier,
         Blake2_128Concat,
         T::ProcessVersion,
-        Process,
+        Process<T::TokenMetadataKey, T::TokenMetadataValue>,
         ValueQuery,
     >;
 
@@ -115,7 +121,12 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // id, version, restrictions, is_new
-        ProcessCreated(T::ProcessIdentifier, T::ProcessVersion, Vec<Restriction>, bool),
+        ProcessCreated(
+            T::ProcessIdentifier,
+            T::ProcessVersion,
+            Vec<Restriction<T::TokenMetadataKey, T::TokenMetadataValue>>,
+            bool,
+        ),
         //id, version
         ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
     }
@@ -139,7 +150,7 @@ pub mod pallet {
         pub(super) fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: Vec<Restriction>,
+            restrictions: Vec<Restriction<T::TokenMetadataKey, T::TokenMetadataValue>>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
@@ -192,7 +203,7 @@ pub mod pallet {
         pub fn persist_process(
             id: &T::ProcessIdentifier,
             v: &T::ProcessVersion,
-            r: &Restrictions,
+            r: &Vec<Restriction<T::TokenMetadataKey, T::TokenMetadataValue>>,
         ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
@@ -211,7 +222,7 @@ pub mod pallet {
         }
 
         pub fn set_disabled(id: &T::ProcessIdentifier, version: &T::ProcessVersion) -> Result<(), Error<T>> {
-            let process: Process = <ProcessModel<T>>::get(&id, &version);
+            let process = <ProcessModel<T>>::get(&id, &version);
             return match process.status == ProcessStatus::Disabled {
                 true => Err(Error::<T>::AlreadyDisabled),
                 false => {
@@ -264,7 +275,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                         T::RoleKey,
                         T::TokenMetadataKey,
                         T::TokenMetadataValue,
-                    >(&restriction, &sender, &inputs, &outputs);
+                    >(restriction, &sender, &inputs, &outputs);
 
                     if !is_valid {
                         return false;
