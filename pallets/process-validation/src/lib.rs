@@ -243,7 +243,7 @@ pub mod pallet {
                 Error::<T>::NonExistingProcess,
             );
             ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
-            return match *version != <VersionModel<T>>::get(&id) {
+            return match *version > <VersionModel<T>>::get(&id) {
                 true => Err(Error::<T>::InvalidVersion),
                 false => Ok(()),
             };

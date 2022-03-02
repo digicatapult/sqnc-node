@@ -70,3 +70,30 @@ fn disables_process_and_dispatches_event() {
         assert_eq!(System::events()[0].event, expected);
     });
 }
+
+#[test]
+fn disables_process_and_dispatches_event_previous_version() {
+    new_test_ext().execute_with(|| {
+        System::set_block_number(1);
+        <VersionModel<Test>>::insert(PROCESS_ID, 2u32);
+        <ProcessModel<Test>>::insert(
+            PROCESS_ID,
+            1u32,
+            Process {
+                status: ProcessStatus::Enabled,
+                restrictions: [{ None }].to_vec(),
+            },
+        );
+        <ProcessModel<Test>>::insert(
+            PROCESS_ID,
+            2u32,
+            Process {
+                status: ProcessStatus::Enabled,
+                restrictions: [{ None }].to_vec(),
+            },
+        );
+        assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
+        let expected = Event::pallet_process_validation(ProcessDisabled(PROCESS_ID, 1));
+        assert_eq!(System::events()[0].event, expected);
+    });
+}
