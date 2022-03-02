@@ -4,13 +4,16 @@
 set -e
 
 function check_versions_consistent () {
-  local PACKAGE_VERSION=$(yq eval '.version' ./package.json)
-  local PACKAGE_LOCK_VERSION=$(yq eval '.version' ./package-lock.json)
+  local PACKAGE_VERSION=$(yq eval '.version' ./vitalam-node/package.json)
+  local PACKAGE_LOCK_VERSION=$(yq eval '.version' ./vitalam-node/package-lock.json)
+  local APP_VERSION=$(tomlq eval '.package.version' ./runtime/Cargo.toml)
 
-  if [ "$PACKAGE_VERSION" != "$PACKAGE_LOCK_VERSION" ]; then
+  if [ "$PACKAGE_VERSION" != "$PACKAGE_LOCK_VERSION" ] ||
+    [ "$PACKAGE_VERSION" != "$APP_VERSION" ]; then
     echo "Inconsistent versions detected"
     echo "PACKAGE_VERSION: $PACKAGE_VERSION"
     echo "PACKAGE_LOCK_VERSION: $PACKAGE_LOCK_VERSION"
+    echo "APP_VERSION: $APP_VERSION"
     exit 1
   fi
 }

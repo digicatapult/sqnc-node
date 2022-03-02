@@ -93,7 +93,7 @@ jobs:
         run: sudo snap install yq
       - name: Check Build Version
         id: get_version
-        run: ./vitalam-node/scripts/check-version.sh
+        run: ./scripts/check-vitalam-node-version.sh
         shell: bash
       - name: Skipping release as version has not increased
         if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
