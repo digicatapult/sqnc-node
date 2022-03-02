@@ -51,10 +51,27 @@ const types = {
     restrictions: 'Vec<Restriction>',
   },
   ProcessStatus: {
-    _enum: ['Disabled', 'Enabled', 'None'],
+    _enum: ['Disabled', 'Enabled'],
   },
-  Restriction: {
-    _enum: ['None', 'SenderOwnsAllInputs'],
+  "Restriction": {
+    "_enum": {
+      "None": "()",
+      "SenderOwnsAllInputs": "()",
+      "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
+      "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
+      "FixedMetadataValue": "FixedMetadataValueRestriction"
+    }
+  },
+  "FixedNumberOfInputsRestriction": {
+    "num_inputs": "u32"
+  },
+  "FixedNumberOfOutputsRestriction": {
+    "num_outputs": "u32"
+  },
+  "FixedMetadataValueRestriction": {
+    "input_index": "u32",
+    "metadata_key": "TokenMetadataKey",
+    "metadata_value": "TokenMetadataValue"
   },
   IsNew: 'bool',
   Restrictions: 'Vec<Restriction>',
