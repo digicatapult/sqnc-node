@@ -21,8 +21,13 @@ where
     FixedNumberOfOutputs {
         num_outputs: u32,
     },
-    FixedMetadataValue {
-        input_index: u32,
+    FixedInputMetadataValue {
+        index: u32,
+        metadata_key: TokenMetadataKey,
+        metadata_value: TokenMetadataValue,
+    },
+    FixedOutputMetadataValue {
+        index: u32,
         metadata_key: TokenMetadataKey,
         metadata_value: TokenMetadataValue,
     },
@@ -54,13 +59,22 @@ where
         Restriction::<T, V>::None => true,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
-        Restriction::FixedMetadataValue {
-            input_index,
+        Restriction::FixedInputMetadataValue {
+            index,
             metadata_key,
             metadata_value,
         } => {
-            let selected_input = &inputs[input_index as usize];
+            let selected_input = &inputs[index as usize];
             let meta = selected_input.metadata.get(&metadata_key);
+            meta == Some(&metadata_value)
+        }
+        Restriction::FixedOutputMetadataValue {
+            index,
+            metadata_key,
+            metadata_value,
+        } => {
+            let selected_output = &outputs[index as usize];
+            let meta = selected_output.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
         }
         Restriction::SenderOwnsAllInputs => {
@@ -82,6 +96,7 @@ where
 mod tests {
     use super::*;
     use sp_std::collections::btree_map::BTreeMap;
+    use sp_std::iter::FromIterator;
 
     #[test]
     fn no_restriction_succeeds() {
@@ -322,8 +337,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 2,
+            Restriction::FixedInputMetadataValue {
+                index: 2,
                 metadata_key: 2,
                 metadata_value: 110,
             },
@@ -358,8 +373,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 1,
+            Restriction::FixedInputMetadataValue {
+                index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
             },
@@ -394,8 +409,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 2,
+            Restriction::FixedInputMetadataValue {
+                index: 2,
                 metadata_key: 2,
                 metadata_value: 45,
             },
@@ -432,8 +447,8 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 2,
+            Restriction::FixedInputMetadataValue {
+                index: 2,
                 metadata_key: 3,
                 metadata_value: 110,
             },
@@ -470,14 +485,126 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::FixedMetadataValue {
-                input_index: 1,
+            Restriction::FixedInputMetadataValue {
+                index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
             },
             &1u64,
             &inputs,
             &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_fixed_metadata_value_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, 100)]),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::FixedOutputMetadataValue {
+                index: 1,
+                metadata_key: 1,
+                metadata_value: 100,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn output_fixed_metadata_value_incorrect_index_correct_key_correct_value_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, 100)]),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::FixedOutputMetadataValue {
+                index: 1,
+                metadata_key: 1,
+                metadata_value: 100,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_fixed_metadata_value_correct_index_correct_key_incorrect_value_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, 100)]),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::FixedOutputMetadataValue {
+                index: 0,
+                metadata_key: 1,
+                metadata_value: 99,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_fixed_metadata_value_correct_index_incorrect_key_correct_value_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, 100)]),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::FixedOutputMetadataValue {
+                index: 0,
+                metadata_key: 0,
+                metadata_value: 100,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
         );
         assert!(!result);
     }
