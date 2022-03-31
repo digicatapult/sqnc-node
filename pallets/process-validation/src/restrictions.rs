@@ -10,7 +10,7 @@ use vitalam_pallet_traits::ProcessIO;
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
 where
-    RoleKey: Parameter + Default + Ord, 
+    RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
 {
@@ -38,7 +38,8 @@ where
     },
 }
 
-impl<RoleKey, TokenMetadataKey, TokenMetadataValue> Default for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
+impl<RoleKey, TokenMetadataKey, TokenMetadataValue> Default
+    for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
 where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
@@ -629,13 +630,11 @@ mod tests {
     #[test]
     fn sender_has_input_role_succeeds() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
-        let inputs = vec![
-            ProcessIO {
-                roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None,
-            },
-        ];
+        let inputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::SenderHasInputRole {
                 index: 0,
@@ -651,13 +650,11 @@ mod tests {
     #[test]
     fn sender_has_input_role_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 2)]);
-        let inputs = vec![
-            ProcessIO {
-                roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None,
-            },
-        ];
+        let inputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::SenderHasInputRole {
                 index: 0,
