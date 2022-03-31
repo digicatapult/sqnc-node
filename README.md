@@ -169,7 +169,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   },
   "SenderHasInputRoleRestriction": {
     "index": "u32",
-    "role_key": "RoleKey",
+    "role_key": "RoleKey"
   },
   "FixedNumberOfInputsRestriction": {
     "num_inputs": "u32"
