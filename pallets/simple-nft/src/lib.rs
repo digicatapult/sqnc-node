@@ -189,7 +189,7 @@ pub mod pallet {
 
                     // check parent index
                     if output.parent_index.is_some() {
-                        let index = output.parent_index.unwrap();
+                        let index = output.parent_index.unwrap() as usize;
                         ensure!(inputs.get(index).is_some(), Error::<T>::OutOfBoundsParent);
                         ensure!(parent_indices.insert(index), Error::<T>::DuplicateParents);
                     }
