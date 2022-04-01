@@ -8,13 +8,18 @@ use vitalam_pallet_traits::ProcessIO;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub enum Restriction<TokenMetadataKey, TokenMetadataValue>
+pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
 where
+    RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
 {
     None,
     SenderOwnsAllInputs,
+    SenderHasInputRole {
+        index: u32,
+        role_key: RoleKey,
+    },
     FixedNumberOfInputs {
         num_inputs: u32,
     },
@@ -33,8 +38,10 @@ where
     },
 }
 
-impl<TokenMetadataKey, TokenMetadataValue> Default for Restriction<TokenMetadataKey, TokenMetadataValue>
+impl<RoleKey, TokenMetadataKey, TokenMetadataValue> Default
+    for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
 where
+    RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
 {
@@ -44,7 +51,7 @@ where
 }
 
 pub fn validate_restriction<A, R, T, V>(
-    restriction: Restriction<T, V>,
+    restriction: Restriction<R, T, V>,
     sender: &A,
     inputs: &Vec<ProcessIO<A, R, T, V>>,
     outputs: &Vec<ProcessIO<A, R, T, V>>,
@@ -56,7 +63,7 @@ where
     V: Parameter + Default,
 {
     match restriction {
-        Restriction::<T, V>::None => true,
+        Restriction::<R, T, V>::None => true,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedInputMetadataValue {
@@ -76,6 +83,13 @@ where
             let selected_output = &outputs[index as usize];
             let meta = selected_output.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
+        }
+        Restriction::SenderHasInputRole { index, role_key } => {
+            let selected_input = &inputs[index as usize];
+            match selected_input.roles.get(&role_key) {
+                Some(account) => sender == account,
+                None => false,
+            }
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
@@ -605,6 +619,91 @@ mod tests {
             &1u64,
             &Vec::new(),
             &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_input_role_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasInputRole {
+                index: 0,
+                role_key: Default::default(),
+            },
+            &1,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn sender_has_input_role_incorrect_account_id_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let inputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasInputRole {
+                index: 0,
+                role_key: Default::default(),
+            },
+            &1,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_input_role_incorrect_index_fails() {
+        let roles0 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let inputs = vec![
+            ProcessIO {
+                roles: roles0.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles1.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasInputRole {
+                index: 1,
+                role_key: Default::default(),
+            },
+            &1,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_input_role_incorrect_role_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (0, 1), (1, 2)]);
+        let inputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasInputRole { index: 0, role_key: 1 },
+            &1,
+            &inputs,
+            &Vec::new(),
         );
         assert!(!result);
     }
