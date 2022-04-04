@@ -49,7 +49,7 @@ impl SubstrateCli for Cli {
     fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()?),
-            "" | "dscp-stage" => Box::new(chain_spec::dscp_stage_config()?),
+            "" | "inteli-stage" => Box::new(chain_spec::inteli_stage_config()?),
             "dscp" => Box::new(chain_spec::dscp_config()?),
             "dscp-staging" => Box::new(chain_spec::dscp_staging_testnet_config()?),
             "local" => Box::new(chain_spec::local_testnet_config()?),

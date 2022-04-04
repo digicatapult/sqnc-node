@@ -92,8 +92,8 @@ pub fn dscp_config() -> Result<ChainSpec, String> {
     ChainSpec::from_json_bytes(&include_bytes!("../res/dscp.json")[..])
 }
 
-pub fn dscp_stage_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/dscp-stage.json")[..])
+pub fn inteli_stage_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/inteli-stage.json")[..])
 }
 
 pub fn dscp_staging_testnet_config() -> Result<ChainSpec, String> {
