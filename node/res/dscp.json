@@ -1,6 +1,6 @@
 {
-  "name": "VITALam",
-  "id": "vitalam",
+  "name": "DSCP",
+  "id": "dscp",
   "chainType": "Live",
   "bootNodes": [],
   "telemetryEndpoints": null,

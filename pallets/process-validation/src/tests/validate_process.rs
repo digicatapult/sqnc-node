@@ -1,7 +1,7 @@
 use super::*;
 
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 use sp_std::collections::btree_map::BTreeMap;
-use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 use crate::restrictions::Restriction;
 use crate::{Process, ProcessModel, ProcessStatus};

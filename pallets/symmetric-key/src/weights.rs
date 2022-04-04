@@ -5,7 +5,7 @@
 //! EXECUTION: None, WASM-EXECUTION: Interpreted, CHAIN: None, DB CACHE: 128
 
 // Executed Command:
-// ./target/release/vitalam-node
+// ./target/release/dscp-node
 // benchmark
 // --pallet
 // pallet_simple_nft

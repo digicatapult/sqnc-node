@@ -90,8 +90,8 @@ pub mod opaque {
 }
 
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("vitalam-node"),
-    impl_name: create_runtime_str!("vitalam-node"),
+    spec_name: create_runtime_str!("dscp-node"),
+    impl_name: create_runtime_str!("dscp-node"),
     authoring_version: 1,
     spec_version: 270,
     impl_version: 1,

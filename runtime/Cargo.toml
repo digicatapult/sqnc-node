@@ -2,8 +2,8 @@
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 edition = '2018'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/vitalam-node/'
-name = 'vitalam-node-runtime'
+repository = 'https://github.com/digicatapult/dscp-node/'
+name = 'dscp-node-runtime'
 version = '2.8.0'
 
 [package.metadata.docs.rs]

@@ -1,5 +1,5 @@
-# VITALam Docker Compose file
-# This is designed to help compile and run the vital-am node.
+# DSCP Docker Compose file
+# This is designed to help compile and run the DSCP node.
 # It only works in --dev more but if you want to setup a multi-nodes, read
 # docker/Dockerfile
 # You can connect the frontend on port 9944
@@ -9,7 +9,7 @@
 # KNOCKDOWN:
 # docker-compose down
 # ATTACH:
-# docker-compose exec vitalam_node_dev bash
+# docker-compose exec dscp_node_dev bash
 # ENVIRONMENTOPTIONS:
 # IDENTITY (optional): custom/null/alice/bob/charlie/dave/eve/ferdie
 # VALIDATOR (optional): null/true
@@ -24,8 +24,8 @@ version: '3'
 services:
 
     dev:
-        image: vitalam-substrate-node:latest
-        container_name: vitalam_node_dev
+        image: dscp-substrate-node:latest
+        container_name: dscp_node_dev
         build:
             dockerfile: ./Dockerfile
             context: .

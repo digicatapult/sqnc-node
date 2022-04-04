@@ -2,9 +2,9 @@
 // a call to `validate_process`
 
 use codec::{Decode, Encode};
+use dscp_pallet_traits::ProcessIO;
 use frame_support::Parameter;
 use sp_std::vec::Vec;
-use vitalam_pallet_traits::ProcessIO;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]

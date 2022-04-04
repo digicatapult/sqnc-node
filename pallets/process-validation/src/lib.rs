@@ -6,7 +6,7 @@ pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::prelude::*;
 
-use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 #[cfg(test)]
 mod tests;

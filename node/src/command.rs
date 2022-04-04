@@ -17,13 +17,13 @@
 
 use crate::cli::{Cli, Subcommand};
 use crate::{chain_spec, service};
+use dscp_node_runtime::Block;
 use sc_cli::{ChainSpec, Role, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
-use vitalam_node_runtime::Block;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
-        "VITALam Node".into()
+        "DSCP Node".into()
     }
 
     fn impl_version() -> String {
@@ -49,16 +49,16 @@ impl SubstrateCli for Cli {
     fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()?),
-            "" | "inteli-stage" => Box::new(chain_spec::inteli_stage_config()?),
-            "vitalam" => Box::new(chain_spec::vitalam_config()?),
-            "vitalam-staging" => Box::new(chain_spec::vitalam_staging_testnet_config()?),
+            "" | "dscp-stage" => Box::new(chain_spec::dscp_stage_config()?),
+            "dscp" => Box::new(chain_spec::dscp_config()?),
+            "dscp-staging" => Box::new(chain_spec::dscp_staging_testnet_config()?),
             "local" => Box::new(chain_spec::local_testnet_config()?),
             path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
         })
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        &vitalam_node_runtime::VERSION
+        &dscp_node_runtime::VERSION
     }
 }
 

@@ -1,12 +1,12 @@
-{{ $fullname :=  include "vitalam-node.fullname" . }}
-{{ $selectorLabels :=  include "vitalam-node.selectorLabels" .  }}
-{{ $serviceLabels :=  include "vitalam-node.serviceLabels" .  }}
+{{ $fullname :=  include "dscp-node.fullname" . }}
+{{ $selectorLabels :=  include "dscp-node.selectorLabels" .  }}
+{{ $serviceLabels :=  include "dscp-node.serviceLabels" .  }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $fullname }}
   labels:
-    {{- include "vitalam-node.labels" . | nindent 4 }}
+    {{- include "dscp-node.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None
@@ -51,7 +51,7 @@ kind: Service
 metadata:
   name: {{ $fullname }}-{{ $i }}-rc-p2p
 spec:
-  {{ include "vitalam-node.serviceType" $ | nindent 2 }}
+  {{ include "dscp-node.serviceType" $ | nindent 2 }}
   selector:
     {{- $selectorLabels | nindent 4 }}
     statefulset.kubernetes.io/pod-name: {{ $fullname }}-{{ $i }}
@@ -72,7 +72,7 @@ kind: Service
 metadata:
   name: {{ $fullname }}-{{ $i }}-pc-p2p
 spec:
-  {{ include "vitalam-node.serviceType" $ | nindent 2 }}
+  {{ include "dscp-node.serviceType" $ | nindent 2 }}
   selector:
     {{- $selectorLabels | nindent 4 }}
     statefulset.kubernetes.io/pod-name: {{ $fullname }}-{{ $i }}

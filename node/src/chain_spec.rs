@@ -1,13 +1,13 @@
+use dscp_node_runtime::{
+    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
+    Signature, SudoConfig, SystemConfig, WASM_BINARY,
+};
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::OpaquePeerId; // A struct wraps Vec<u8>, represents as our `PeerId`.
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use vitalam_node_runtime::{
-    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
-    Signature, SudoConfig, SystemConfig, WASM_BINARY,
-};
 const DEFAULT_PROTOCOL_ID: &str = "vam";
 
 // The URL for the telemetry server.
@@ -88,19 +88,19 @@ pub fn development_config() -> Result<ChainSpec, String> {
     ))
 }
 
-pub fn vitalam_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/vitalam.json")[..])
+pub fn dscp_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/dscp.json")[..])
 }
 
-pub fn inteli_stage_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/inteli-stage.json")[..])
+pub fn dscp_stage_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/dscp-stage.json")[..])
 }
 
-pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
+pub fn dscp_staging_testnet_config() -> Result<ChainSpec, String> {
     use hex_literal::hex;
     use sp_core::crypto::UncheckedInto;
 
-    let wasm_binary = WASM_BINARY.ok_or_else(|| "VITALam development wasm binary not available".to_string())?;
+    let wasm_binary = WASM_BINARY.ok_or_else(|| "DSCP development wasm binary not available".to_string())?;
 
     let boot_nodes = vec![];
 
@@ -174,9 +174,9 @@ pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
 
     Ok(ChainSpec::from_genesis(
         // Name
-        "VITALam Staging Testnet",
+        "DSCP Staging Testnet",
         // ID
-        "vitalam_staging_testnet",
+        "dscp_staging_testnet",
         ChainType::Live,
         move || {
             testnet_genesis(

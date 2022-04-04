@@ -12,7 +12,7 @@ use sp_runtime::{
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
-use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;

@@ -1,13 +1,13 @@
-{{ $fullname :=  include "vitalam-node.fullname" . }}
-{{ $selectorLabels :=  include "vitalam-node.selectorLabels" .  }}
-{{ $serviceLabels :=  include "vitalam-node.serviceLabels" .  }}
-{{ $serviceAccountName :=  include "vitalam-node.serviceAccountName" . }}
+{{ $fullname :=  include "dscp-node.fullname" . }}
+{{ $selectorLabels :=  include "dscp-node.selectorLabels" .  }}
+{{ $serviceLabels :=  include "dscp-node.serviceLabels" .  }}
+{{ $serviceAccountName :=  include "dscp-node.serviceAccountName" . }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $fullname }}
   labels:
-    {{- include "vitalam-node.labels" . | nindent 4 }}
+    {{- include "dscp-node.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -22,7 +22,7 @@ spec:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-      {{- include "vitalam-node.labels" . | nindent 8 }}
+      {{- include "dscp-node.labels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

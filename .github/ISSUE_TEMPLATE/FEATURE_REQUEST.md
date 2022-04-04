@@ -5,7 +5,7 @@ about: Suggest an idea for this project
 
 <!--
 
-Have you read VITALam's Code of Conduct? By filing an Issue, you are expected to comply with it, including treating everyone with respect: https://github.com/digicatapult/vitalam-node/.github/blob/main/CODE_OF_CONDUCT.md
+Have you read DSCP's Code of Conduct? By filing an Issue, you are expected to comply with it, including treating everyone with respect: https://github.com/digicatapult/dscp-node/.github/blob/main/CODE_OF_CONDUCT.md
 
 ---
 Also note that the Digital Catapult team has finite resources so it's unlikely that we'll work on feature requests. If we're interested in a particular feature however, we'll follow up and ask you to submit an RFC to talk about it in more detail.
@@ -22,7 +22,7 @@ Also note that the Digital Catapult team has finite resources so it's unlikely t
 
 ## Describe alternatives you've considered
 
-<!-- A clear and concise description of the alternative solutions you've considered. Be sure to explain why VITALam's existing customisability isn't suitable for this feature. -->
+<!-- A clear and concise description of the alternative solutions you've considered. Be sure to explain why DSCP's existing customisability isn't suitable for this feature. -->
 
 ## Additional context
 
