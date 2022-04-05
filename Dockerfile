@@ -10,7 +10,7 @@ ARG VITALAM_VERSION=latest
 
 RUN ./fetch --repo="https://github.com/digicatapult/vitalam-node" --tag="${VITALAM_VERSION}" --release-asset="vitalam-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./ \
   && mkdir ./vitalam-node \
-  && tar -xzf ./vitalam-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./vitalam-node
+  && ls *.gz |xargs -n1 tar -xzf 
 
 FROM bitnami/minideb:bullseye AS runtime
 
