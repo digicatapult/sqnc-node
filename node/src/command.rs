@@ -50,8 +50,8 @@ impl SubstrateCli for Cli {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()?),
             "" | "inteli-stage" => Box::new(chain_spec::inteli_stage_config()?),
-            "dscp" => Box::new(chain_spec::dscp_config()?),
-            "dscp-staging" => Box::new(chain_spec::dscp_staging_testnet_config()?),
+            "vitalam" => Box::new(chain_spec::vitalam_config()?),
+            "vitalam-staging" => Box::new(chain_spec::vitalam_staging_testnet_config()?),
             "local" => Box::new(chain_spec::local_testnet_config()?),
             path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
         })

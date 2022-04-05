@@ -88,19 +88,19 @@ pub fn development_config() -> Result<ChainSpec, String> {
     ))
 }
 
-pub fn dscp_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/dscp.json")[..])
+pub fn vitalam_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/vitalam.json")[..])
 }
 
 pub fn inteli_stage_config() -> Result<ChainSpec, String> {
     ChainSpec::from_json_bytes(&include_bytes!("../res/inteli-stage.json")[..])
 }
 
-pub fn dscp_staging_testnet_config() -> Result<ChainSpec, String> {
+pub fn vitalam_staging_testnet_config() -> Result<ChainSpec, String> {
     use hex_literal::hex;
     use sp_core::crypto::UncheckedInto;
 
-    let wasm_binary = WASM_BINARY.ok_or_else(|| "DSCP development wasm binary not available".to_string())?;
+    let wasm_binary = WASM_BINARY.ok_or_else(|| "VITALam development wasm binary not available".to_string())?;
 
     let boot_nodes = vec![];
 
@@ -174,9 +174,9 @@ pub fn dscp_staging_testnet_config() -> Result<ChainSpec, String> {
 
     Ok(ChainSpec::from_genesis(
         // Name
-        "DSCP Staging Testnet",
+        "VITALam Staging Testnet",
         // ID
-        "dscp_staging_testnet",
+        "vitalam_staging_testnet",
         ChainType::Live,
         move || {
             testnet_genesis(
