@@ -1,8 +1,8 @@
-name: Release
+name: Release (types package)
 
 on:
   push:
-    branches: ['main']
+    branches: ['feature/npm-api-package']
 
 jobs:
   preconditions:
@@ -110,32 +110,19 @@ jobs:
       - check-version
     runs-on: ubuntu-latest
     if: ${{ needs.check-version.outputs.is_new_version == 'true' }}
-      # Build github release
-      - name: Build release version
-        uses: softprops/action-gh-release@v1
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          tag_name: ${{ needs.check-version.outputs.version }}
-          prerelease: false
-          name: ${{ needs.check-version.outputs.version }}
-          generate_release_notes: true
-      - name: Delete release latest
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const { owner, repo } = context.repo
-            try {
-              await github.rest.git.deleteRef({ owner, repo, ref: 'tags/latest' })
-            }
-            catch (err) {
-              if (err.status !== 422) throw err
-            }
-      - name: Build release latest
-        uses: softprops/action-gh-release@v1
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          tag_name: latest
-          prerelease: false
-          name: Latest ${{ needs.check-version.outputs.version }}
-          generate_release_notes: true
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@digicatapult'
+      - name: Install packages
+        working-directory: vitalam-node
+        run: npm ci
+      - name: Publish to github packages
+        working-directory: vitalam-node
+        run: npm publish --access public --tag ${{ needs.check-version.outputs.npm_release_tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

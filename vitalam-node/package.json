@@ -1,7 +1,7 @@
 {
-  "name": "vitalam-node",
+  "name": "@digicatapult/vitalam-node",
   "version": "2.8.0",
-  "description": "VITALam Node API",
+  "description": "VITALam Node API types",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/digicatapult/vitalam-node.git"
