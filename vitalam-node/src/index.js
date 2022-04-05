@@ -34,11 +34,11 @@ const types = {
       File: 'Hash',
       Literal: `[u8; ${METADATA_VALUE_LITERAL_LENGTH}]`,
       TokenId: 'TokenId',
-      None: null,
+      None: 'null',
     },
   },
   Role: {
-    _enum: rolesEnum,
+    _enum: ['Owner', 'Customer', 'AdditiveManufacturer', 'Laboratory', 'Buyer', 'Supplier', 'Reviewer'],
   },
   ProcessIdentifier: `[u8; ${PROCESS_IDENTIFIER_LENGTH}]`,
   ProcessVersion: 'u32',
@@ -57,10 +57,16 @@ const types = {
     _enum: {
       None: '()',
       SenderOwnsAllInputs: '()',
+      SenderHasInputRole: 'SenderHasInputRoleRestriction',
       FixedNumberOfInputs: 'FixedNumberOfInputsRestriction',
       FixedNumberOfOutputs: 'FixedNumberOfOutputsRestriction',
-      FixedMetadataValue: 'FixedMetadataValueRestriction',
+      FixedInputMetadataValue: 'FixedMetadataValueRestriction',
+      FixedOutputMetadataValue: 'FixedMetadataValueRestriction',
     },
+  },
+  SenderHasInputRoleRestriction: {
+    index: 'u32',
+    role_key: 'RoleKey',
   },
   FixedNumberOfInputsRestriction: {
     num_inputs: 'u32',
@@ -69,7 +75,7 @@ const types = {
     num_outputs: 'u32',
   },
   FixedMetadataValueRestriction: {
-    input_index: 'u32',
+    index: 'u32',
     metadata_key: 'TokenMetadataKey',
     metadata_value: 'TokenMetadataValue',
   },
