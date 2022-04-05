@@ -11,8 +11,8 @@ describe('types', function () {
 
     test('types check', async function () {
       const lastTokenId = await api.query.simpleNftModule.lastToken()
-      console.log(lastTokenId)
-      expect(lastTokenId).to.deep.equal(0)
+      const id = lastTokenId ? parseInt(lastTokenId, 10) : -1
+      expect(id).to.equal(0)
     })
   })
 })
