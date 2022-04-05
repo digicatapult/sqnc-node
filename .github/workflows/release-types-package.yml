@@ -47,6 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
+
       - name: Install Packages
         working-directory: vitalam-node
         run: npm ci
@@ -124,6 +125,6 @@ jobs:
         run: npm ci
       - name: Publish to github packages
         working-directory: vitalam-node
-        run: npm publish --access public --tag ${{ needs.check-version.outputs.npm_release_tag }}
+        run: npm publish --access public 
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
