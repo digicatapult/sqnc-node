@@ -160,10 +160,16 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "_enum": {
       "None": "()",
       "SenderOwnsAllInputs": "()",
+      "SenderHasInputRole": "SenderHasInputRoleRestriction",
       "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
-      "FixedMetadataValue": "FixedMetadataValueRestriction"
+      "FixedInputMetadataValue": "FixedMetadataValueRestriction",
+      "FixedOutputMetadataValue": "FixedMetadataValueRestriction"
     }
+  },
+  "SenderHasInputRoleRestriction": {
+    "index": "u32",
+    "role_key": "RoleKey"
   },
   "FixedNumberOfInputsRestriction": {
     "num_inputs": "u32"
@@ -172,7 +178,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "num_outputs": "u32"
   },
   "FixedMetadataValueRestriction": {
-    "input_index": "u32",
+    "index": "u32",
     "metadata_key": "TokenMetadataKey",
     "metadata_value": "TokenMetadataValue"
   },
