@@ -106,14 +106,14 @@ jobs:
           TEMP: ${{ runner.temp }}
         run: |
           mkdir $TEMP/artefacts
-          cp ./target/release/vitalam-node $TEMP/artefacts/vitalam-node
-          cp ./target/release/wbuild/vitalam-node-runtime/vitalam_node_runtime.compact.wasm $TEMP/artefacts/vitalam_node_runtime.compact.wasm
+          cp ./target/release/dscp-node $TEMP/artefacts/dscp-node
+          cp ./target/release/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm $TEMP/artefacts/dscp_node_runtime.compact.wasm
           echo $BUILD_VERSION | tee $TEMP/artefacts/VERSION.txt
-          shasum -a 256 $TEMP/artefacts/vitalam-node | cut -d ' ' -f 1 | tee $TEMP/artefacts/vitalam-node.sha256
-          shasum -a 256 $TEMP/artefacts/vitalam_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee $TEMP/artefacts/vitalam_node_runtime.compact.wasm.sha256
+          shasum -a 256 $TEMP/artefacts/dscp-node | cut -d ' ' -f 1 | tee $TEMP/artefacts/dscp-node.sha256
+          shasum -a 256 $TEMP/artefacts/dscp_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee $TEMP/artefacts/dscp_node_runtime.compact.wasm.sha256
           pushd $TEMP/artefacts/
-          tar -czvf vitalam-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./vitalam-node ./vitalam-node.sha256
-          tar -czvf vitalam-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./vitalam_node_runtime.compact.wasm ./vitalam_node_runtime.compact.wasm.sha256
+          tar -czvf dscp-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
+          tar -czvf dscp-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm.sha256
           popd;
 
       - name: Build release version
@@ -125,8 +125,8 @@ jobs:
           prerelease: ${{ needs.get-version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
           files: |
-            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
-            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
+            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
       - name: Delete release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
         uses: actions/github-script@v5
@@ -150,8 +150,8 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
-            ${{ runner.temp }}/artefacts/vitalam-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
+            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
 
   # Docker build  are always performed but are only version tagged on new version
   build-docker:
@@ -180,9 +180,9 @@ jobs:
       # if it's a non new version tag with hash and latest-dev
       run: |
         if [ "$IS_NEW_VERSION" == "true" ]; then
-          echo "##[set-output name=VERSION_TAG;]ghcr.io/digicatapult/vitalam-node:$VERSION";
+          echo "##[set-output name=VERSION_TAG;]ghcr.io/digicatapult/dscp-node:$VERSION";
           if [ "$IS_PRERELEASE" == "false" ]; then
-            echo "##[set-output name=LATEST_TAG;]ghcr.io/digicatapult/vitalam-node:latest";
+            echo "##[set-output name=LATEST_TAG;]ghcr.io/digicatapult/dscp-node:latest";
           else
             echo "##[set-output name=LATEST_TAG;]";
           fi;
@@ -204,15 +204,15 @@ jobs:
         context: .
         build-args: |
           RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
-          VITALAM_VERSION=${{ needs.get-version.outputs.version }}
+          DSCP_VERSION=${{ needs.get-version.outputs.version }}
         file: ./Dockerfile
         platforms: linux/amd64
         tags: |
-          ghcr.io/digicatapult/vitalam-node:${{ github.sha }}
+          ghcr.io/digicatapult/dscp-node:${{ github.sha }}
           ${{ steps.generate-tags.outputs.VERSION_TAG }}
           ${{ steps.generate-tags.outputs.LATEST_TAG }}
         labels: |
-          org.opencontainers.image.title=vitalam-node
+          org.opencontainers.image.title=dscp-node
           org.opencontainers.image.description=${{ github.event.repository.description }}
           org.opencontainers.image.source=${{ github.event.repository.html_url }}
           org.opencontainers.image.url=${{ github.event.repository.html_url }}
@@ -220,4 +220,4 @@ jobs:
           org.opencontainers.image.version=${{ needs.get-version.outputs.version }}
           org.opencontainers.image.created=${{ needs.get-version.outputs.build_date }}
     - name: Publish image
-      run: docker push --all-tags ghcr.io/digicatapult/vitalam-node
+      run: docker push --all-tags ghcr.io/digicatapult/dscp-node

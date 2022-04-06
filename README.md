@@ -1,6 +1,6 @@
-# VITALam node
+# DSCP node
 
-This repository contains the source code for the blockchain nodes used in the VITALam project. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
+This repository contains the source code for the blockchain nodes used in the DSCP project. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
 
 ## Getting started
 
@@ -30,13 +30,13 @@ The build will generate a `target` directory.
 Running the release build:
 
 ```bash
-./target/release/vitalam-node --dev
+./target/release/dscp-node --dev
 ```
 
 Note that if you want to reset the state of your chain (for example because you've changed a storage format) you can call:
 
 ```bash
-./target/release/vitalam-node purge-chain --dev
+./target/release/dscp-node purge-chain --dev
 ```
 
 This will delete your dev chain so that it can be started from scratch again.
@@ -46,7 +46,7 @@ This will delete your dev chain so that it can be started from scratch again.
 The node uses the [node-authorization](https://docs.rs/pallet-node-authorization/3.0.0/pallet_node_authorization/index.html) pallet to manage a configurable set of nodes for a permissioned network. The pre-configured well-known network for `local` chain contains `Alice`, `Bob`, `Charlie` and `Eve`. A node will not peer with the rest of the network unless the owner (account) starts the node with a `node-key` that corresponds to their `PeerId` and `AccountId` saved in `wellKnownNodes` storage. The set of `PeerId`s is initially configured in [`GenesisConfig`](node/src/chain_spec.rs). For example, to run and peer `Alice` and `Bob`, call the following two commands:
 
 ```bash
-./target/release/vitalam-node \
+./target/release/dscp-node \
 --chain=local \
 --base-path /tmp/validator1 \
 --alice \
@@ -56,7 +56,7 @@ The node uses the [node-authorization](https://docs.rs/pallet-node-authorization
 ```
 
 ```bash
-./target/release/vitalam-node \
+./target/release/dscp-node \
 --chain=local \
 --base-path /tmp/validator2 \
 --bob \
@@ -78,7 +78,7 @@ cargo build --release --features runtime-benchmarks
 Then you can run the benchmark tool with for example
 
 ```bash
-./target/release/vitalam-node benchmark \
+./target/release/dscp-node benchmark \
     --pallet 'pallet_simple_nft' \
     --extrinsic '*' \
     --repeat 1000 \

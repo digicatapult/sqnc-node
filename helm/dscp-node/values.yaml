@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/digicatapult/vitalam-node
+  repository: ghcr.io/digicatapult/dscp-node
   tag: latest
   pullPolicy: Always
 
@@ -57,7 +57,7 @@ ingress:
 
 node:
   chain: "local"
-  command: "./vitalam-node"
+  command: "./dscp-node"
   dataVolumeSize: 10Gi
   replicas: 1
   role: full

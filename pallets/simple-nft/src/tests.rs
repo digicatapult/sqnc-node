@@ -1,11 +1,11 @@
 // Tests to be written here
 
 use crate::{mock::*, Error, Token};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO};
 use frame_support::{assert_err, assert_ok};
 use sp_core::H256;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::iter::FromIterator;
-use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO};
 
 const NONE_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = None;
 const SUCCEED_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {

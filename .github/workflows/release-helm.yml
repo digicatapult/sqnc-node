@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'helm/vitalam-node/**'
+      - 'helm/dscp-node/**'
 
 jobs:
 
@@ -95,7 +95,7 @@ jobs:
   #         context: .
   #         build-args: |
   #           RUST_TOOLCHAIN=${{ needs.check-version.outputs.toolchain }}
-  #           VITALAM_VERSION=${{ needs.check-version.outputs.app-version }}
+  #           DSCP_VERSION=${{ needs.check-version.outputs.app-version }}
   #         load: true
   #         file: ./Dockerfile
   #         tags: |

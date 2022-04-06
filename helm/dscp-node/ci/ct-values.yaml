@@ -1,5 +1,5 @@
 image:
-  repository: vitalam-node
+  repository: dscp-node
   tag: latest
   PullPolicy: Never
 node:

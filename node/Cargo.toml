@@ -1,15 +1,15 @@
 [package]
 build = 'build.rs'
-description = 'Substrate node for VITALam Project'
+description = 'Substrate node for DSCP Project'
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 edition = '2018'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/vitalam-node/'
-name = 'vitalam-node'
-version = '2.14.1'
+repository = 'https://github.com/digicatapult/dscp-node/'
+name = 'dscp-node'
+version = '3.0.0'
 
 [[bin]]
-name = 'vitalam-node'
+name = 'dscp-node'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -25,7 +25,7 @@ structopt = '0.3.8'
 hex-literal = "0.3.1"
 bs58 = "0.4.0"
 
-vitalam-node-runtime = { path = '../runtime', version = '2.7.0' }
+dscp-node-runtime = { path = '../runtime', version = '3.0.0' }
 
 # Substrate dependencies
 frame-benchmarking = '3.0.0'
@@ -59,4 +59,4 @@ substrate-frame-rpc-system = '3.0.0'
 
 [features]
 default = []
-runtime-benchmarks = ['vitalam-node-runtime/runtime-benchmarks']
+runtime-benchmarks = ['dscp-node-runtime/runtime-benchmarks']
