@@ -1,11 +1,11 @@
-# VitalAM-node helm chart
+# dscp-node helm chart
 
 Forked from https://paritytech.github.io/helm-charts/
 ## Installing the chart
 
 ```console
-helm repo add vitalam-node https://digicatapult.github.io/vitalam-node/
-helm install vitalam-node vitalam-node/vitalam-node
+helm repo add dscp-node https://digicatapult.github.io/dscp-node/
+helm install dscp-node dscp-node/dscp-node
 ```
 
 This will deploy a single Polkadot node with the default configuration.

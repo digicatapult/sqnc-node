@@ -2,11 +2,11 @@
 
 use codec::Codec;
 use codec::{Decode, Encode};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::collections::btree_set::BTreeSet;
-use vitalam_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;

@@ -17,13 +17,13 @@
 
 use crate::cli::{Cli, Subcommand};
 use crate::{chain_spec, service};
+use dscp_node_runtime::Block;
 use sc_cli::{ChainSpec, Role, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
-use vitalam_node_runtime::Block;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
-        "VITALam Node".into()
+        "DSCP Node".into()
     }
 
     fn impl_version() -> String {
@@ -58,7 +58,7 @@ impl SubstrateCli for Cli {
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        &vitalam_node_runtime::VERSION
+        &dscp_node_runtime::VERSION
     }
 }
 

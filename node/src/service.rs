@@ -1,5 +1,6 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
+use dscp_node_runtime::{self, opaque::Block, RuntimeApi};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
@@ -10,13 +11,12 @@ use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_inherents::InherentDataProviders;
 use std::sync::Arc;
 use std::time::Duration;
-use vitalam_node_runtime::{self, opaque::Block, RuntimeApi};
 
 // Our native executor instance.
 native_executor_instance!(
     pub Executor,
-    vitalam_node_runtime::api::dispatch,
-    vitalam_node_runtime::native_version,
+    dscp_node_runtime::api::dispatch,
+    dscp_node_runtime::native_version,
     frame_benchmarking::benchmarking::HostFunctions,
 );
 

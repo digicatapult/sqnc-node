@@ -28,7 +28,7 @@ export REPOSITORY_NAME=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
 PUBLISHED_VERSIONS=$(curl -s https://$GITHUB_REPOSITORY_OWNER.github.io/$REPOSITORY_NAME/index.yaml | \
 yq eval '.entries.[env(REPOSITORY_NAME)] | .[0].version' -)
 # Get the current version from helm chart
-CURRENT_VERSION=$(yq eval '.version' ./helm/vitalam-node/Chart.yaml)
+CURRENT_VERSION=$(yq eval '.version' ./helm/dscp-node/Chart.yaml)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
   echo "##[set-output name=VERSION;]$CURRENT_VERSION"

@@ -3,9 +3,9 @@ authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 description = 'A FRAME pallet for handling non-fungible tokens'
 edition = '2018'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/vitalam-node/'
+repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'pallet-simple-nft'
-version = "2.2.0"
+version = "3.0.0"
 
 
 [package.metadata.docs.rs]
@@ -21,7 +21,7 @@ version = '2.0.0'
 
 
 [dependencies]
-vitalam-pallet-traits = { version = '1.1.0', default-features = false, path = '../traits' }
+dscp-pallet-traits = { version = '2.0.0', default-features = false, path = '../traits' }
 frame-support = { default-features = false, version = '3.0.0' }
 frame-system = { default-features = false, version = '3.0.0' }
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
@@ -45,6 +45,6 @@ std = [
     'frame-system/std',
     'frame-benchmarking/std',
     'sp-std/std',
-    'vitalam-pallet-traits/std',
+    'dscp-pallet-traits/std',
 ]
 runtime-benchmarks = ['frame-benchmarking']

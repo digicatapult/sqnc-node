@@ -44,7 +44,7 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.0.1
       - name: Run chart-testing (lint)
-        run: ct lint --validate-maintainers false --charts helm/vitalam-node/
+        run: ct lint --validate-maintainers false --charts helm/dscp-node/
 
   check:
     name: Check and test
