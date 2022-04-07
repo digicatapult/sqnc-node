@@ -23,10 +23,10 @@ jobs:
             ${{ runner.OS }}-
 
       - name: Install Packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm ci
       - name: Lint
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm run lint
 
   dependency-check:
@@ -48,10 +48,10 @@ jobs:
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
       - name: Install Packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm ci
       - name: Dependency Check
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm run depcheck
 
   check-version:
@@ -64,7 +64,7 @@ jobs:
         run: pip3 install yq==2.13.0
       - name: Check Build Version
         id: get_version
-        run: ./scripts/check-vitalam-node-version.sh
+        run: ./scripts/check-dscp-node-version.sh
         shell: bash
       - name: Error if version is not increased
         shell: bash
@@ -126,6 +126,8 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: build
+      - name: Start dev chain
+        run:  ./target/debug/dscp-node --dev
       - name: Setup node 
         uses: actions/setup-node@master
         with:
@@ -142,8 +144,8 @@ jobs:
             ${{ runner.OS }}-
 
       - name: Install Packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm ci
       - name: Test
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm run test

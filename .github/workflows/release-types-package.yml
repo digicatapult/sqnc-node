@@ -49,10 +49,10 @@ jobs:
             ${{ runner.OS }}-
 
       - name: Install Packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm ci
       - name: Lint
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm run lint
 
   dependency-check:
@@ -74,10 +74,10 @@ jobs:
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
       - name: Install Packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm ci
       - name: Dependency Check
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm run depcheck
 
   check-version:
@@ -95,7 +95,7 @@ jobs:
         run: pip3 install yq==2.13.0
       - name: Check Build Version
         id: get_version
-        run: ./scripts/check-vitalam-node-version.sh
+        run: ./scripts/check-dscp-node-version.sh
         shell: bash
       - name: Skipping release as version has not increased
         if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
@@ -121,10 +121,10 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@digicatapult'
       - name: Install packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm ci
       - name: Publish to github packages
-        working-directory: vitalam-node
+        working-directory: dscp-node
         run: npm publish --access public 
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

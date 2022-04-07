@@ -1,17 +1,17 @@
 {
-  "name": "@digicatapult/vitalam-node",
-  "version": "2.8.0",
+  "name": "@digicatapult/dscp-node",
+  "version": "3.0.0",
   "description": "VITALam Node API types",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digicatapult/vitalam-node.git"
+    "url": "git+https://github.com/digicatapult/dscp-node.git"
   },
   "author": "Digital Catapult",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/digicatapult/vitalam-node/issues"
+    "url": "https://github.com/digicatapult/dscp-node/issues"
   },
-  "homepage": "https://github.com/digicatapult/vitalam-node#readme",
+  "homepage": "https://github.com/digicatapult/dscp-node#readme",
   "engines": {
     "node": "16.x.x",
     "npm": "8.x.x"

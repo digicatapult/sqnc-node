@@ -4,8 +4,8 @@
 set -e
 
 function check_versions_consistent () {
-  local PACKAGE_VERSION=$(yq '.version' ./vitalam-node/package.json | sed s/\"//g)
-  local PACKAGE_LOCK_VERSION=$(yq '.version' ./vitalam-node/package-lock.json | sed s/\"//g)
+  local PACKAGE_VERSION=$(yq '.version' ./dscp-node/package.json | sed s/\"//g)
+  local PACKAGE_LOCK_VERSION=$(yq '.version' ./dscp-node/package-lock.json | sed s/\"//g)
   local APP_VERSION=$(tomlq .package.version ./runtime/Cargo.toml | sed s/\"//g)
 
   if [ "$PACKAGE_VERSION" != "$PACKAGE_LOCK_VERSION" ] ||
@@ -43,7 +43,7 @@ function check_version_greater () {
 # Get published git tags that match semver regex with a "v" prefix then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
 # Get the current version from node Cargo.toml
-CURRENT_VERSION=$(yq '.version' ./vitalam-node/package.json)
+CURRENT_VERSION=$(yq '.version' ./dscp-node/package.json)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
   echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
