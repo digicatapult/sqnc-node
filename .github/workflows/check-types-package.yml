@@ -70,3 +70,80 @@ jobs:
         shell: bash
         run: |
           exit $([[ "${{steps.get_version.outputs.IS_NEW_VERSION}}" = "true" ]] && echo 0 || echo 1)
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    # if rust code has changed
+
+    steps:
+      - uses: actions/checkout@master
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ needs.get-version.outputs.toolchain }}
+          target: wasm32-unknown-unknown
+      - name: Install sccache
+        env:
+          TEMP: ${{ runner.temp }}
+        run: |
+          curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.3.7/fetch_linux_amd64 --output $TEMP/fetch
+          chmod +x $TEMP/fetch
+          $TEMP/fetch --repo="https://github.com/mozilla/sccache" --tag="~>0.2.15" --release-asset="^sccache-v[0-9.]*-x86_64-unknown-linux-musl.tar.gz$" $TEMP
+          tar -xvf $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz -C $TEMP
+          mv $TEMP/sccache-v*-x86_64-unknown-linux-musl/sccache $TEMP/sccache
+          rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
+          chmod +x $TEMP/sccache
+      - name: Cache cargo registry
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-registry-
+      - name: Cache cargo index
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo-index-
+      - name: Cache sccache
+        uses: actions/cache@v2
+        with:
+          path: ${{ runner.temp }}/cache
+          key: ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}
+            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-
+            ${{ runner.os }}-cargo-build-cache-release-
+      - name: Cargo build
+        uses: actions-rs/cargo@v1
+        env:
+          RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+          SCCACHE_DIR: ${{ runner.temp }}/cache
+        with:
+          command: build
+      - name: Setup node 
+        uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Use npm v8
+        run: npm install -g npm@8
+      - name: Cache Node.js modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+
+      - name: Install Packages
+        working-directory: vitalam-node
+        run: npm ci
+      - name: Test
+        working-directory: vitalam-node
+        run: npm run test
