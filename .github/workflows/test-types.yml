@@ -3,7 +3,7 @@ name: Test types
 on:
   push:
     paths: 
-      - 'runtime/*.rs'
+      - 'runtime/**'
       - 'dscp-node/test/**'
 
 env:
