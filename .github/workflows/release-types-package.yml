@@ -95,7 +95,7 @@ jobs:
         run: pip3 install yq==2.13.0
       - name: Check Build Version
         id: get_version
-        run: ./scripts/check-dscp-node-version.sh
+        run: ./scripts/check-package-version.sh
         shell: bash
       - name: Skipping release as version has not increased
         if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
