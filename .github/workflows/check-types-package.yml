@@ -127,7 +127,7 @@ jobs:
         with:
           command: build
       - name: Start dev chain
-        run:  ./target/debug/dscp-node --dev
+        run:  ./target/debug/dscp-node --dev &
       - name: Setup node 
         uses: actions/setup-node@master
         with:
