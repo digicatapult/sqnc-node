@@ -3,7 +3,12 @@ name: Test types
 on:
   push:
     paths: 
-      - 'runtime/**.rs'
+      - 'runtime/*.rs'
+      - 'dscp-node/test/**'
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-D warnings -C debuginfo=0"
 
 jobs:
   build-and-test:
