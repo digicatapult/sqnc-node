@@ -1,6 +1,6 @@
 {
   "name": "@digicatapult/dscp-node",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "VITALam Node API types",
   "repository": {
     "type": "git",
