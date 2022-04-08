@@ -1,5 +1,3 @@
-// const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api')
-
 const { METADATA_KEY_LENGTH, METADATA_VALUE_LITERAL_LENGTH, PROCESS_IDENTIFIER_LENGTH } = require('./env')
 
 const types = {
@@ -81,29 +79,4 @@ const types = {
   Restrictions: 'Vec<Restriction>',
 }
 
-// const getApi = ({ host, port, logger }) => {
-//   const apiOptions = {
-//     provider: new WsProvider(`ws://${host}:${port}`),
-//     types,
-//   }
-
-//   const api = new ApiPromise(apiOptions)
-
-//   api.on('disconnected', () => {
-//     logger.warn(`Disconnected from substrate node at ${host}:${port}`)
-//   })
-
-//   api.on('connected', () => {
-//     logger.info(`Connected to substrate node at ${host}:${port}`)
-//   })
-
-//   api.on('error', (err) => {
-//     logger.error(`Error from substrate node connection. Error was ${err.message || JSON.stringify(err)}`)
-//   })
-
-//   return api
-// }
-
-module.exports = {
-  types,
-}
+module.exports = types

@@ -1,7 +1,7 @@
 const { describe, test, before } = require('mocha')
 const { expect } = require('chai')
 
-const { api } = require('../helper/api')
+const api = require('../helper/api')
 
 describe('types', function () {
   describe('health check', function () {

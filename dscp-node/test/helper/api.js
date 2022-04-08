@@ -1,7 +1,7 @@
 const { ApiPromise, WsProvider } = require('@polkadot/api')
 const { API_HOST, API_PORT } = require('../../src/env')
 const logger = require('./logger')
-const { types } = require('../../src/index')
+const types = require('../../src/index')
 
 const provider = new WsProvider(`ws://${API_HOST}:${API_PORT}`)
 const apiOptions = {
@@ -23,6 +23,4 @@ api.on('error', (err) => {
   logger.error(`Error from substrate node connection. Error was ${err.message || JSON.stringify(err)}`)
 })
 
-module.exports = {
-  api,
-}
+module.exports = api
