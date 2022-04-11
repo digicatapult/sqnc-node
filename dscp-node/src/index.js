@@ -30,7 +30,7 @@ const types = {
       File: 'Hash',
       Literal: `[u8; ${METADATA_VALUE_LITERAL_LENGTH}]`,
       TokenId: 'TokenId',
-      None: 'null',
+      None: null,
     },
   },
   Role: {
