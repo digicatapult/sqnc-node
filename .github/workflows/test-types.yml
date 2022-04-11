@@ -65,8 +65,9 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: build
+          args: --release
       - name: Start dev chain
-        run:  ./target/debug/dscp-node --dev &
+        run:  ./target/release/dscp-node --dev &
       - name: Setup node 
         uses: actions/setup-node@master
         with:
