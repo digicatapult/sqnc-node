@@ -1,7 +1,9 @@
 const { ApiPromise, WsProvider } = require('@polkadot/api')
-const { API_HOST, API_PORT } = require('../../src/env')
 const logger = require('./logger')
 const types = require('../../src/index')
+
+const API_HOST = 'localhost'
+const API_PORT = '9944'
 
 const provider = new WsProvider(`ws://${API_HOST}:${API_PORT}`)
 const apiOptions = {

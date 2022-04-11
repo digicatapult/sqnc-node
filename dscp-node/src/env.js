@@ -9,9 +9,6 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 const vars = envalid.cleanEnv(process.env, {
-  LOG_LEVEL: envalid.str({ default: 'info' }),
-  API_HOST: envalid.str({ default: 'localhost' }),
-  API_PORT: envalid.num({ default: 9944 }),
   METADATA_KEY_LENGTH: envalid.num({ default: 32 }),
   METADATA_VALUE_LITERAL_LENGTH: envalid.num({ default: 32 }),
   PROCESS_IDENTIFIER_LENGTH: envalid.num({ default: 32 }),
