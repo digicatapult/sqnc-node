@@ -2,7 +2,7 @@ name: Release (types package)
 
 on:
   push:
-    branches: ['main']
+    branches: ['feature/npm-api-package']
 
 jobs:
   preconditions:
