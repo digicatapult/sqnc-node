@@ -1,5 +1,4 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api')
-const mkLogger = require('./logger')
 
 const api = async ({ options }) => {
   const {
@@ -8,8 +7,7 @@ const api = async ({ options }) => {
     metadataKeyLength = 32,
     metadataValueLiteralLength = 32,
     processorIdentifierLength = 32,
-    logLevel = 'fatal',
-    keyringType = 'sr25519',
+    logger = { warn: () => {}, info: () => {}, error: () => {} },
   } = options
 
   const provider = new WsProvider(`ws://${apiHost}:${apiPort}`)
@@ -99,7 +97,6 @@ const api = async ({ options }) => {
   }
 
   const api = new ApiPromise(apiOptions)
-  const logger = mkLogger(logLevel)
 
   api.on('disconnected', () => {
     logger.warn(`Disconnected from substrate node at ${options.apiHost}:${options.apiPort}`)
@@ -114,7 +111,7 @@ const api = async ({ options }) => {
   })
 
   await api.isReady
-  const keyring = new Keyring({ type: keyringType })
+  const keyring = new Keyring({ type: 'sr25519' })
 
   return {
     api,

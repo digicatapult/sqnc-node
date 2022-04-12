@@ -49,10 +49,10 @@ jobs:
             ${{ runner.OS }}-
 
       - name: Install Packages
-        working-directory: dscp-node
+        working-directory: api
         run: npm ci
       - name: Lint
-        working-directory: dscp-node
+        working-directory: api
         run: npm run lint
 
   dependency-check:
@@ -74,10 +74,10 @@ jobs:
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
       - name: Install Packages
-        working-directory: dscp-node
+        working-directory: api
         run: npm ci
       - name: Dependency Check
-        working-directory: dscp-node
+        working-directory: api
         run: npm run depcheck
 
   check-version:
@@ -121,10 +121,10 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@digicatapult'
       - name: Install packages
-        working-directory: dscp-node
+        working-directory: api
         run: npm ci
       - name: Publish to github packages
-        working-directory: dscp-node
+        working-directory: api
         run: npm publish --access public 
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

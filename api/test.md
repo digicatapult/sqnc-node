@@ -9,6 +9,6 @@ Follow instructions in the README at root of this repo to build a node. Start a 
 Then run tests with
 
 ```
-cd dscp-node/
+cd api/
 npm run test
 ```

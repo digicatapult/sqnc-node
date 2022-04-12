@@ -4,15 +4,7 @@ const setupApi = async (context) => {
   Object.assign(
     context,
     await buildApi({
-      options: {
-        apiHost: 'localhost',
-        apiPort: 9944,
-        metadataKeyLength: 32,
-        metadataValueLiteralLength: 32,
-        processorIdentifierLength: 32,
-        logLevel: 'warn',
-        keyringType: 'sr25519',
-      },
+      options: {},
     })
   )
 }
