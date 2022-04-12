@@ -1,6 +1,21 @@
-const { Keyring } = require('@polkadot/api')
+const { buildApi } = require('../../lib')
 
-const api = require('./api')
+const setupApi = async (context) => {
+  Object.assign(
+    context,
+    await buildApi({
+      options: {
+        apiHost: 'localhost',
+        apiPort: 9944,
+        metadataKeyLength: 32,
+        metadataValueLiteralLength: 32,
+        processorIdentifierLength: 32,
+        logLevel: 'warn',
+        keyringType: 'sr25519',
+      },
+    })
+  )
+}
 
 const utf8ToUint8Array = (str, len) => {
   const arr = new Uint8Array(len)
@@ -14,26 +29,25 @@ const utf8ToUint8Array = (str, len) => {
   return arr
 }
 
-const getLastTokenId = async () => {
-  await api.isReady
-  const lastTokenId = await api.query.simpleNftModule.lastToken()
+const getLastTokenId = async (context) => {
+  await context.api.isReady
+  const lastTokenId = await context.api.query.simpleNftModule.lastToken()
   return lastTokenId ? parseInt(lastTokenId, 10) : -1
 }
 
-const getToken = async (tokenId) => {
-  await api.isReady
-  const token = await api.query.simpleNftModule.tokensById(tokenId)
+const getToken = async (context, tokenId) => {
+  await context.api.isReady
+  const token = await context.api.query.simpleNftModule.tokensById(tokenId)
   return token.toJSON()
 }
 
-const runProcess = async (process, inputs, outputs) => {
-  await api.isReady
-  const keyring = new Keyring({ type: 'sr25519' })
-  const alice = keyring.addFromUri('//Alice')
+const runProcess = async (context, process, inputs, outputs) => {
+  await context.api.isReady
+  const alice = context.keyring.addFromUri('//Alice')
 
   return new Promise((resolve, reject) => {
     let unsub = null
-    api.tx.simpleNftModule
+    context.api.tx.simpleNftModule
       .runProcess(process, inputs, outputs)
       .signAndSend(alice, (result) => {
         if (result.status.isInBlock) {
@@ -62,4 +76,4 @@ const runProcess = async (process, inputs, outputs) => {
   })
 }
 
-module.exports = { getLastTokenId, getToken, runProcess, utf8ToUint8Array }
+module.exports = { setupApi, getLastTokenId, getToken, runProcess, utf8ToUint8Array }

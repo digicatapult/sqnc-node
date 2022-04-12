@@ -1,11 +1,23 @@
 # @digicatapult/dscp-node
 
-A package that exports the additional types of `dscp-node` to be used when interacting with the node via `polkadot.js` For an example, see [`dscp-api`](https://github.com/digicatapult/dscp-api/blob/main/app/util/substrateApi.js).
+A package for building a thin `polkadot.js` API that includes the additional types of `dscp-node`, to be used when interacting with the node.
 
-The following environment variables are used by `@digicatapult/dscp-node` and can be configured.
+Building an API with `@digicatapult/dscp-node`:
 
-| variable                      | required | default | description                                        |
-| :---------------------------- | :------: | :-----: | :------------------------------------------------- |
-| METADATA_KEY_LENGTH           |    N     |  `32`   | Fixed length of metadata keys                      |
-| METADATA_VALUE_LITERAL_LENGTH |    N     |  `32`   | Fixed length of metadata LITERAL values            |
-| MAX_METADATA_COUNT            |    N     |  `16`   | Maximum number of metadata items allowed per token |
+```js
+const { buildApi } = require('@digicatapult/dscp-node')
+
+const { api, types, keyring } = await buildApi({
+  options: {
+    apiHost: 'localhost',
+    apiPort: 9944,
+    metadataKeyLength: 32,
+    metadataValueLiteralLength: 32,
+    processorIdentifierLength: 32,
+    logLevel: 'warn',
+    keyringType: 'sr25519',
+  },
+})
+```
+
+The above example shows the default value for each option.
