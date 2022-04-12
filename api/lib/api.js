@@ -1,6 +1,6 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api')
 
-const api = async ({ options }) => {
+const api = ({ options }) => {
   const {
     apiHost = 'localhost',
     apiPort = 9944,
@@ -110,7 +110,6 @@ const api = async ({ options }) => {
     logger.error(`Error from substrate node connection. Error was ${err.message || JSON.stringify(err)}`)
   })
 
-  await api.isReady
   const keyring = new Keyring({ type: 'sr25519' })
 
   return {

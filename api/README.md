@@ -7,7 +7,7 @@ Building an API with `@digicatapult/dscp-node`:
 ```js
 const { buildApi } = require('@digicatapult/dscp-node')
 
-const { api, types, keyring } = await buildApi({
+const { api, types, keyring } = buildApi({
   options: {
     apiHost: 'localhost',
     apiPort: 9944,

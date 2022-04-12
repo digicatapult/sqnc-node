@@ -1,9 +1,9 @@
 const { buildApi } = require('../../lib')
 
-const setupApi = async (context) => {
+const setupApi = (context) => {
   Object.assign(
     context,
-    await buildApi({
+    buildApi({
       options: {},
     })
   )
