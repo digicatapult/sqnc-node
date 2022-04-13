@@ -129,7 +129,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "File": "Hash",
       "Literal": "[u8; 32]",
       "TokenId": "TokenId",
-      "None": "null"
+      "None": null
     }
   },
   "Role": {

@@ -1,0 +1,130 @@
+name: Release (types package)
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  preconditions:
+    runs-on: ubuntu-latest
+    outputs:
+      repo_name: ${{ steps.repo_ids.outputs.REPO_NAME }}
+      org_name: ${{ steps.repo_ids.outputs.ORG_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Check token
+        run: |
+          if [ -z "${{ secrets.GITHUB_TOKEN }}"]; then
+            echo "Must provide a GITHUB_TOKEN secret in order to run release workflow"
+            exit 1
+          fi
+      - name: Get repository identifiers
+        id: repo_ids
+        run: |
+          REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          ORG_NAME=$(echo "${{ github.event.repository.owner.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "::set-output name=REPO_NAME::$REPO_NAME"
+          echo "::set-output name=ORG_NAME::$ORG_NAME"
+
+  lint:
+    name: Run lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Use npm v8
+        run: npm install -g npm@8
+      - name: Cache Node.js modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+
+      - name: Install Packages
+        working-directory: api
+        run: npm ci
+      - name: Lint
+        working-directory: api
+        run: npm run lint
+
+  dependency-check:
+    name: Run dependency check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Use npm v8
+        run: npm install -g npm@8
+      - name: Cache Node.js modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      - name: Install Packages
+        working-directory: api
+        run: npm ci
+      - name: Dependency Check
+        working-directory: api
+        run: npm run depcheck
+
+  check-version:
+    name: 'Check version'
+    runs-on: ubuntu-latest
+    outputs:
+      is_new_version: ${{ steps.get_version.outputs.IS_NEW_VERSION }}
+      version: ${{ steps.get_version.outputs.VERSION }}
+      build_date: ${{ steps.get_version.outputs.BUILD_DATE }}
+      is_prerelease: ${{ steps.get_version.outputs.IS_PRERELEASE }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --depth=1 --tags origin
+      - name: Install yq
+        run: pip3 install yq==2.13.0
+      - name: Check Build Version
+        id: get_version
+        run: ./scripts/check-package-version.sh
+        shell: bash
+      - name: Skipping release as version has not increased
+        if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
+        shell: bash
+        run: |
+          echo "Skipping release as current version has already been published"
+
+  publish:
+    name: 'Publish package'
+    needs:
+      - preconditions
+      - lint
+      - dependency-check
+      - check-version
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-version.outputs.is_new_version == 'true' }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@digicatapult'
+      - name: Install packages
+        working-directory: api
+        run: npm ci
+      - name: Publish to github packages
+        working-directory: api
+        run: npm publish --access public 
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

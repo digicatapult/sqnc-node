@@ -1,0 +1,37 @@
+{
+  "name": "@digicatapult/dscp-node",
+  "version": "3.0.1",
+  "description": "DSCP node types",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digicatapult/dscp-node.git"
+  },
+  "author": "Digital Catapult",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/digicatapult/dscp-node/issues"
+  },
+  "homepage": "https://github.com/digicatapult/dscp-node#readme",
+  "engines": {
+    "node": "16.x.x",
+    "npm": "8.x.x"
+  },
+  "main": "./lib/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js .",
+    "depcheck": "depcheck",
+    "test": "NODE_ENV=test mocha --config ./test/mocharc.js ./test"
+  },
+  "dependencies": {
+    "@polkadot/api": "^5.9.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "depcheck": "^1.4.3",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "mocha": "^9.2.2",
+    "prettier": "^2.3.1"
+  }
+}

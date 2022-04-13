@@ -8,7 +8,7 @@ RUN curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch
 
 ARG DSCP_VERSION=latest
 
-RUN ./fetch --repo="https://github.com/digicatapult/vitalam-node" --tag="${DSCP_VERSION}" --release-asset="dscp-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./ \
+RUN ./fetch --repo="https://github.com/digicatapult/dscp-node" --tag="${DSCP_VERSION}" --release-asset="dscp-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./ \
   && mkdir ./dscp-node \
   && tar -xzf ./dscp-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./dscp-node
 

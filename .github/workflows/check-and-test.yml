@@ -1,4 +1,4 @@
-name: Check and Test
+name: Cargo check and test
 
 on: [pull_request]
 
