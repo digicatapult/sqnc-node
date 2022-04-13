@@ -4,7 +4,7 @@ on:
   push:
     paths: 
       - 'runtime/**'
-      - 'dscp-node/test/**'
+      - 'api/test/**'
 
 jobs:
   build-and-test:

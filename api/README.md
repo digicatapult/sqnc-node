@@ -14,7 +14,6 @@ const { api, types, keyring } = buildApi({
     metadataKeyLength: 32,
     metadataValueLiteralLength: 32,
     processorIdentifierLength: 32,
-    logger = { warn: () => {}, info: () => {}, error: () => {} },
   },
 })
 ```
@@ -27,4 +26,3 @@ The following `options` can be configured:
 | metadataKeyLength          |    N     |                         `32`                          | Fixed length of `dscp-node` metadata key type                         |
 | metadataValueLiteralLength |    N     |                         `32`                          | Fixed length of `dscp-node` metadata `LITERAL` value type             |
 | processorIdentifierLength  |    N     |                         `32`                          | Fixed length of `dscp-node` process identifier type                   |
-| logger                     |    N     | `{ warn: () => {}, info: () => {}, error: () => {} }` | An optional logger (such as `pino`) for logging API connection status |

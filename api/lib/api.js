@@ -7,7 +7,6 @@ const api = ({ options }) => {
     metadataKeyLength = 32,
     metadataValueLiteralLength = 32,
     processorIdentifierLength = 32,
-    logger = { warn: () => {}, info: () => {}, error: () => {} },
   } = options
 
   const provider = new WsProvider(`ws://${apiHost}:${apiPort}`)
@@ -97,18 +96,7 @@ const api = ({ options }) => {
   }
 
   const api = new ApiPromise(apiOptions)
-
-  api.on('disconnected', () => {
-    logger.warn(`Disconnected from substrate node at ${options.apiHost}:${options.apiPort}`)
-  })
-
-  api.on('connected', () => {
-    logger.info(`Connected to substrate node at ${options.apiHost}:${options.apiPort}`)
-  })
-
-  api.on('error', (err) => {
-    logger.error(`Error from substrate node connection. Error was ${err.message || JSON.stringify(err)}`)
-  })
+  api.isReadyOrError.catch(() => {})
 
   const keyring = new Keyring({ type: 'sr25519' })
 
