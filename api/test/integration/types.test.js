@@ -11,7 +11,7 @@ describe('types', function () {
   const context = {}
 
   before(async function () {
-    await setupApi(context)
+    setupApi(context)
   })
 
   describe('health check', function () {
