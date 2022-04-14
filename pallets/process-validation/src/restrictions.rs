@@ -20,6 +20,12 @@ where
         index: u32,
         role_key: RoleKey,
     },
+    InputOutputRoleMatch {
+        input_index: u32,
+        input_role_key: RoleKey,
+        output_index: u32,
+        output_role_key: RoleKey
+    },
     FixedNumberOfInputs {
         num_inputs: u32,
     },
@@ -89,6 +95,14 @@ where
             match selected_input.roles.get(&role_key) {
                 Some(account) => sender == account,
                 None => false,
+            }
+        }
+        Restriction::InputOutputRoleMatch { input_index, input_role_key, output_index, output_role_key } => {
+            let selected_input = &inputs[input_index as usize];
+            let selected_output = &outputs[output_index as usize];
+            match (selected_input.roles.get(&input_role_key), selected_output.roles.get(&output_role_key)) {
+                (Some(input_account), Some(output_account)) => input_account == output_account,
+                _ => false,
             }
         }
         Restriction::SenderOwnsAllInputs => {
@@ -706,5 +720,33 @@ mod tests {
             &Vec::new(),
         );
         assert!(!result);
+    }
+
+    #[test]
+    fn input_output_role_match_same_role_keys_succeeds() {
+        let input_roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let output_roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![ProcessIO {
+            roles: input_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let outputs = vec![ProcessIO {
+            roles: output_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::InputOutputRoleMatch {
+                input_index: 0,
+                input_role_key: Default::default(),
+                output_index: 0,
+                output_role_key: Default::default(),
+            },
+            &1,
+            &inputs,
+            &outputs,
+        );
+        assert!(result);
     }
 }
