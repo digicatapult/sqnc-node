@@ -20,7 +20,7 @@ where
         index: u32,
         role_key: RoleKey,
     },
-    InputOutputRoleMatch {
+    MatchInputOutputRole {
         input_index: u32,
         input_role_key: RoleKey,
         output_index: u32,
@@ -97,7 +97,7 @@ where
                 None => false,
             }
         }
-        Restriction::InputOutputRoleMatch {
+        Restriction::MatchInputOutputRole {
             input_index,
             input_role_key,
             output_index,
@@ -745,7 +745,7 @@ mod tests {
             parent_index: None,
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::InputOutputRoleMatch {
+            Restriction::MatchInputOutputRole {
                 input_index: 0,
                 input_role_key: Default::default(),
                 output_index: 0,

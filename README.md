@@ -162,7 +162,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "SenderOwnsAllInputs": "()",
       "SenderHasInputRole": "SenderHasInputRoleRestriction",
       "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
-      "InputOutputRoleMatch": "InputOutputRoleMatchRestriction",
+      "MatchInputOutputRole": "MatchInputOutputRoleRestriction",
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
       "FixedInputMetadataValue": "FixedMetadataValueRestriction",
       "FixedOutputMetadataValue": "FixedMetadataValueRestriction"
@@ -172,7 +172,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "index": "u32",
     "role_key": "RoleKey"
   },
-  "InputOutputRoleMatchRestriction": {
+  "MatchInputOutputRoleRestriction": {
     "input_index": "u32",
     "input_role_key": "RoleKey",
     "output_index": "u32",
@@ -254,7 +254,7 @@ The pallet defines various type of process restrictions that can be applied to a
 | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------: |
 | `None`                 |                                                   Default `Restriction` value that always succeeds                                                    |
 | `SenderOwnsAllInputs`  |                        Restriction that requires that the process `sender` is assigned the `default` role on all input tokens                         |
-| `InputOutputRoleMatch` | Requires that a specified role on specified (by index) output token has the same AccountId as a specified role on a specified (by index) output token |
+| `MatchInputOutputRole` | Requires that a specified role on specified (by index) output token has the same AccountId as a specified role on a specified (by index) output token |
 
 ### IPFSKey pallet
 
