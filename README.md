@@ -161,6 +161,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "None": "()",
       "SenderOwnsAllInputs": "()",
       "SenderHasInputRole": "SenderHasInputRoleRestriction",
+      "OutputHasRole": "OutputHasRoleRestriction",
       "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
       "FixedInputMetadataValue": "FixedMetadataValueRestriction",
@@ -168,6 +169,10 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     }
   },
   "SenderHasInputRoleRestriction": {
+    "index": "u32",
+    "role_key": "RoleKey"
+  },
+  "OutputHasRoleRestriction": {
     "index": "u32",
     "role_key": "RoleKey"
   },
@@ -247,6 +252,7 @@ The pallet defines various type of process restrictions that can be applied to a
 | :-------------------- | :----------------------------------------------------------------------------------------------------: |
 | `None`                |                            Default `Restriction` value that always succeeds                            |
 | `SenderOwnsAllInputs` | Restriction that requires that the process `sender` is assigned the `default` role on all input tokens |
+| `OutputHasRole`       |                      Requires that a specified (by index) output token has a role                      |
 
 ### IPFSKey pallet
 
