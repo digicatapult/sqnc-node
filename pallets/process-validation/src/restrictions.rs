@@ -24,7 +24,7 @@ where
         input_index: u32,
         input_role_key: RoleKey,
         output_index: u32,
-        output_role_key: RoleKey
+        output_role_key: RoleKey,
     },
     FixedNumberOfInputs {
         num_inputs: u32,
@@ -97,10 +97,18 @@ where
                 None => false,
             }
         }
-        Restriction::InputOutputRoleMatch { input_index, input_role_key, output_index, output_role_key } => {
+        Restriction::InputOutputRoleMatch {
+            input_index,
+            input_role_key,
+            output_index,
+            output_role_key,
+        } => {
             let selected_input = &inputs[input_index as usize];
             let selected_output = &outputs[output_index as usize];
-            match (selected_input.roles.get(&input_role_key), selected_output.roles.get(&output_role_key)) {
+            match (
+                selected_input.roles.get(&input_role_key),
+                selected_output.roles.get(&output_role_key),
+            ) {
                 (Some(input_account), Some(output_account)) => input_account == output_account,
                 _ => false,
             }
