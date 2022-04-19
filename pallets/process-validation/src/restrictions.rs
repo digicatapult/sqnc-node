@@ -36,6 +36,11 @@ where
         metadata_key: TokenMetadataKey,
         metadata_value: TokenMetadataValue,
     },
+    FixedOutputMetadataType {
+        index: u32,
+        metadata_key: TokenMetadataKey,
+        metadata_type: TokenMetadataValue,
+    },
 }
 
 impl<RoleKey, TokenMetadataKey, TokenMetadataValue> Default
@@ -83,6 +88,17 @@ where
             let selected_output = &outputs[index as usize];
             let meta = selected_output.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
+        }
+        Restriction::FixedOutputMetadataType {
+            index,
+            metadata_key,
+            metadata_type,
+        } => {
+            let selected_output = &outputs[index as usize];
+            match selected_output.metadata.get(&metadata_key){
+                Some(meta) => matches!(meta, metadata_type::),
+                None => false,
+            }       
         }
         Restriction::SenderHasInputRole { index, role_key } => {
             let selected_input = &inputs[index as usize];
