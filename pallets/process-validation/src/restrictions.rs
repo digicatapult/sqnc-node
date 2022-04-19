@@ -20,6 +20,10 @@ where
         index: u32,
         role_key: RoleKey,
     },
+    SenderHasOutputRole {
+        index: u32,
+        role_key: RoleKey,
+    },
     OutputHasRole {
         index: u32,
         role_key: RoleKey,
@@ -91,6 +95,13 @@ where
         Restriction::SenderHasInputRole { index, role_key } => {
             let selected_input = &inputs[index as usize];
             match selected_input.roles.get(&role_key) {
+                Some(account) => sender == account,
+                None => false,
+            }
+        }
+        Restriction::SenderHasOutputRole { index, role_key } => {
+            let selected_output = &outputs[index as usize];
+            match selected_output.roles.get(&role_key) {
                 Some(account) => sender == account,
                 None => false,
             }
@@ -712,6 +723,91 @@ mod tests {
             &1,
             &inputs,
             &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_output_role_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasOutputRole {
+                index: 0,
+                role_key: Default::default(),
+            },
+            &1,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn sender_has_output_role_incorrect_account_id_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasOutputRole {
+                index: 0,
+                role_key: Default::default(),
+            },
+            &1,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_output_role_incorrect_index_fails() {
+        let roles0 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles0.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles1.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasOutputRole {
+                index: 1,
+                role_key: Default::default(),
+            },
+            &1,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_output_role_incorrect_role_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (0, 1), (1, 2)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None,
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64>(
+            Restriction::SenderHasOutputRole { index: 0, role_key: 1 },
+            &1,
+            &Vec::new(),
+            &outputs,
         );
         assert!(!result);
     }
