@@ -250,11 +250,11 @@ pub fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
 
 The pallet defines various type of process restrictions that can be applied to a process. These include:
 
-| Restriction            |                                                                      description                                                                      |
-| :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------: |
-| `None`                 |                                                   Default `Restriction` value that always succeeds                                                    |
-| `SenderOwnsAllInputs`  |                        Restriction that requires that the process `sender` is assigned the `default` role on all input tokens                         |
-| `MatchInputOutputRole` | Requires that a specified role on specified (by index) output token has the same AccountId as a specified role on a specified (by index) output token |
+| Restriction            |                                                                      description                                                                       |
+| :--------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------: |
+| `None`                 |                                                    Default `Restriction` value that always succeeds                                                    |
+| `SenderOwnsAllInputs`  |                         Restriction that requires that the process `sender` is assigned the `default` role on all input tokens                         |
+| `MatchInputOutputRole` | Requires that a specified role on a specified (by index) output token has the same AccountId as a specified role on a specified (by index) input token |
 
 ### IPFSKey pallet
 
