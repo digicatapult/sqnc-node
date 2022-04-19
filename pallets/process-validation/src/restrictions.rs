@@ -152,7 +152,8 @@ mod tests {
 
     #[test]
     fn no_restriction_succeeds() {
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
+        let result =
+            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
         assert!(result);
     }
 
@@ -183,8 +184,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(result);
     }
 
@@ -204,8 +209,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(!result);
     }
 
@@ -227,8 +236,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(!result);
     }
 
@@ -250,8 +263,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(!result);
     }
 
@@ -664,19 +681,23 @@ mod tests {
     #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
     pub enum MetadataValue {
         A,
-        B
+        B,
     }
     impl Default for MetadataValue {
-        fn default() -> Self { return MetadataValue::A; }
+        fn default() -> Self {
+            return MetadataValue::A;
+        }
     }
 
     #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
     pub enum MetadataValueDisc {
         AA,
-        BB
+        BB,
     }
     impl Default for MetadataValueDisc {
-        fn default() -> Self { return MetadataValueDisc::AA; }
+        fn default() -> Self {
+            return MetadataValueDisc::AA;
+        }
     }
 
     impl From<MetadataValue> for MetadataValueDisc {
@@ -707,7 +728,7 @@ mod tests {
             Restriction::FixedOutputMetadataValueType {
                 index: 1,
                 metadata_key: 1,
-                metadata_value_type: MetadataValueDisc::AA
+                metadata_value_type: MetadataValueDisc::AA,
             },
             &1u64,
             &Vec::new(),
@@ -735,7 +756,7 @@ mod tests {
             Restriction::FixedOutputMetadataValueType {
                 index: 1,
                 metadata_key: 1,
-                metadata_value_type: MetadataValueDisc::BB
+                metadata_value_type: MetadataValueDisc::BB,
             },
             &1u64,
             &Vec::new(),
@@ -763,7 +784,7 @@ mod tests {
             Restriction::FixedOutputMetadataValueType {
                 index: 0,
                 metadata_key: 1,
-                metadata_value_type: MetadataValueDisc::AA
+                metadata_value_type: MetadataValueDisc::AA,
             },
             &1u64,
             &Vec::new(),
@@ -791,7 +812,7 @@ mod tests {
             Restriction::FixedOutputMetadataValueType {
                 index: 1,
                 metadata_key: 0,
-                metadata_value_type: MetadataValueDisc::AA
+                metadata_value_type: MetadataValueDisc::AA,
             },
             &1u64,
             &Vec::new(),

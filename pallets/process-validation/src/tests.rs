@@ -77,13 +77,11 @@ impl Default for ProcessIdentifier {
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Default)]
 pub struct TokenMetadataValueDiscriminator {
-    value: u8
+    value: u8,
 }
 impl From<u128> for TokenMetadataValueDiscriminator {
     fn from(a: u128) -> TokenMetadataValueDiscriminator {
-        return TokenMetadataValueDiscriminator {
-          value: (a % 128) as u8
-        }
+        return TokenMetadataValueDiscriminator { value: (a % 128) as u8 };
     }
 }
 

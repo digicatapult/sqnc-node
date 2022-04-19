@@ -23,7 +23,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use strum_macros::{EnumDiscriminants};
+use strum_macros::EnumDiscriminants;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
