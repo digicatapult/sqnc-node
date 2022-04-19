@@ -44,6 +44,9 @@ const api = ({ options }) => {
         None: null,
       },
     },
+    MetadataValueType: {
+      _enum: ['File', 'Literal', 'TokenId', 'None'],
+    },
     Role: {
       _enum: ['Owner', 'Customer', 'AdditiveManufacturer', 'Laboratory', 'Buyer', 'Supplier', 'Reviewer'],
     },
@@ -70,6 +73,7 @@ const api = ({ options }) => {
         FixedNumberOfOutputs: 'FixedNumberOfOutputsRestriction',
         FixedInputMetadataValue: 'FixedMetadataValueRestriction',
         FixedOutputMetadataValue: 'FixedMetadataValueRestriction',
+        FixedOutputMetadataValueType: 'FixedOutputMetadataValueType',
       },
     },
     SenderHasInputRoleRestriction: {
@@ -90,6 +94,11 @@ const api = ({ options }) => {
       index: 'u32',
       metadata_key: 'TokenMetadataKey',
       metadata_value: 'TokenMetadataValue',
+    },
+    FixedOutputMetadataValueType: {
+      index: 'u32',
+      metadata_key: 'TokenMetadataKey',
+      metadata_value_type: 'MetadataValueType',
     },
     IsNew: 'bool',
     Restrictions: 'Vec<Restriction>',

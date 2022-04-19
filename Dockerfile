@@ -7,8 +7,9 @@ WORKDIR /tmp/
 RUN curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_amd64 --output ./fetch && chmod +x ./fetch
 
 ARG DSCP_VERSION=latest
+ARG DSCP_REPO=https://github.com/digicatapult/dscp-node
 
-RUN ./fetch --repo="https://github.com/digicatapult/dscp-node" --tag="${DSCP_VERSION}" --release-asset="dscp-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./ \
+RUN ./fetch --repo="${DSCP_REPO}" --tag="${DSCP_VERSION}" --release-asset="dscp-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./ \
   && mkdir ./dscp-node \
   && tar -xzf ./dscp-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./dscp-node
 
