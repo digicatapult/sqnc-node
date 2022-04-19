@@ -161,6 +161,8 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "None": "()",
       "SenderOwnsAllInputs": "()",
       "SenderHasInputRole": "SenderHasInputRoleRestriction",
+      "SenderHasOutputRole": "SenderHasOutputRoleRestriction",
+      "OutputHasRole": "OutputHasRoleRestriction",
       "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
       "MatchInputOutputRole": "MatchInputOutputRoleRestriction",
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
@@ -172,11 +174,19 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "index": "u32",
     "role_key": "RoleKey"
   },
+  "SenderHasOutputRoleRestriction": {
+    "index": "u32",
+    "role_key": "RoleKey"
+  },
   "MatchInputOutputRoleRestriction": {
     "input_index": "u32",
     "input_role_key": "RoleKey",
     "output_index": "u32",
     "output_role_key": "RoleKey"
+  },
+  "OutputHasRoleRestriction": {
+    "index": "u32",
+    "role_key": "RoleKey"
   },
   "FixedNumberOfInputsRestriction": {
     "num_inputs": "u32"
@@ -250,11 +260,17 @@ pub fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
 
 The pallet defines various type of process restrictions that can be applied to a process. These include:
 
-| Restriction            |                                                                      description                                                                       |
-| :--------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------: |
-| `None`                 |                                                    Default `Restriction` value that always succeeds                                                    |
-| `SenderOwnsAllInputs`  |                         Restriction that requires that the process `sender` is assigned the `default` role on all input tokens                         |
-| `MatchInputOutputRole` | Requires that a specified role on a specified (by index) output token has the same AccountId as a specified role on a specified (by index) input token |
+| Restriction                |                                                     description                                                      |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------: |
+| `None`                     |                                   Default `Restriction` value that always succeeds                                   |
+| `SenderOwnsAllInputs`      |                Requires that the process `sender` is assigned the `default` role on all input tokens                 |
+| `SenderHasInputRole`       |       Requires that the process `sender` is assigned to a specified role on a specified (by index) input token       |
+| `SenderHasOutputRole`      |      Requires that the process `sender` is assigned to a specified role on a specified (by index) output token       |
+| `OutputHasRole`            |                             Requires that a specified (by index) output token has a role                             |
+| `FixedNumberOfInputs`      |                            Requires that the number of inputs must be a specified integer                            |
+| `FixedNumberOfOutputs`     |                           Requires that the number of outputs must be a specified integer                            |
+| `FixedInputMetadataValue`  | Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token  |
+| `FixedOutputMetadataValue` | Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token |
 
 ### IPFSKey pallet
 

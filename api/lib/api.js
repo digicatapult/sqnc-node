@@ -65,6 +65,8 @@ const api = ({ options }) => {
         None: '()',
         SenderOwnsAllInputs: '()',
         SenderHasInputRole: 'SenderHasInputRoleRestriction',
+        SenderHasOutputRole: 'SenderHasOutputRoleRestriction',
+        OutputHasRole: 'OutputHasRoleRestriction',
         FixedNumberOfInputs: 'FixedNumberOfInputsRestriction',
         FixedNumberOfOutputs: 'FixedNumberOfOutputsRestriction',
         FixedInputMetadataValue: 'FixedMetadataValueRestriction',
@@ -72,6 +74,14 @@ const api = ({ options }) => {
       },
     },
     SenderHasInputRoleRestriction: {
+      index: 'u32',
+      role_key: 'RoleKey',
+    },
+    SenderHasOutputRoleRestriction: {
+      index: 'u32',
+      role_key: 'RoleKey',
+    },
+    OutputHasRoleRestriction: {
       index: 'u32',
       role_key: 'RoleKey',
     },
