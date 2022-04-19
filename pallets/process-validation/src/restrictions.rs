@@ -1085,7 +1085,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
                 input_index: 0,
                 input_role_key: 0,
@@ -1113,7 +1113,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
                 input_index: 0,
                 input_role_key: 0,
@@ -1141,7 +1141,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
                 input_index: 0,
                 input_role_key: 1,
@@ -1169,7 +1169,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
                 input_index: 0,
                 input_role_key: 1,
@@ -1205,7 +1205,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
                 input_index: 1,
                 input_role_key: 1,
