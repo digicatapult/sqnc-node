@@ -132,6 +132,9 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "None": null
     }
   },
+  "MetadataValueType": {
+      "_enum": ["File", "Literal", "TokenId", "None"],
+  },
   "Role": {
     "_enum": [
       "Owner",
@@ -167,7 +170,8 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "MatchInputOutputRole": "MatchInputOutputRoleRestriction",
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
       "FixedInputMetadataValue": "FixedMetadataValueRestriction",
-      "FixedOutputMetadataValue": "FixedMetadataValueRestriction"
+      "FixedOutputMetadataValue": "FixedMetadataValueRestriction",
+      "FixedOutputMetadataValueType": "FixedMetadataTypeRestriction"
     }
   },
   "SenderHasInputRoleRestriction": {
@@ -199,6 +203,11 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "metadata_key": "TokenMetadataKey",
     "metadata_value": "TokenMetadataValue"
   },
+  "FixedMetadataTypeRestriction": {
+      "index": "u32",
+      "metadata_key": "TokenMetadataKey",
+      "metadata_value_type": "MetadataValueType"
+   },
   "IsNew": "bool",
   "Restrictions": "Vec<Restriction>"
 }
@@ -271,6 +280,7 @@ The pallet defines various type of process restrictions that can be applied to a
 | `FixedNumberOfOutputs`     |                           Requires that the number of outputs must be a specified integer                            |
 | `FixedInputMetadataValue`  | Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token  |
 | `FixedOutputMetadataValue` | Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token |
+| `FixedOutputMetadataValueType` | Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) output token |
 
 ### IPFSKey pallet
 

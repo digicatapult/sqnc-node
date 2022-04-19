@@ -7,7 +7,7 @@
     "url": "git+https://github.com/digicatapult/dscp-node.git"
   },
   "author": "Digital Catapult",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/digicatapult/dscp-node/issues"
   },

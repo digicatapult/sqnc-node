@@ -56,6 +56,8 @@ sp-session = { default-features = false, version = '3.0.0' }
 sp-std = { default-features = false, version = '3.0.0' }
 sp-transaction-pool = { default-features = false, version = '3.0.0' }
 sp-version = { default-features = false, version = '3.0.0' }
+strum = { version = "0.24", features = [] }
+strum_macros = { version = "0.24", features = [] }
 
 [features]
 default = ['std']
