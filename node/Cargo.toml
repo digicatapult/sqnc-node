@@ -6,7 +6,7 @@ edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-node'
-version = '3.2.0'
+version = '3.3.0'
 
 [[bin]]
 name = 'dscp-node'
@@ -25,7 +25,7 @@ structopt = '0.3.8'
 hex-literal = "0.3.1"
 bs58 = "0.4.0"
 
-dscp-node-runtime = { path = '../runtime', version = '3.2.0' }
+dscp-node-runtime = { path = '../runtime', version = '3.3.0' }
 
 # Substrate dependencies
 frame-benchmarking = '3.0.0'

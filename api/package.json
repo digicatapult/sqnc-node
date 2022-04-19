@@ -1,13 +1,13 @@
 {
   "name": "@digicatapult/dscp-node",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "DSCP node types",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/digicatapult/dscp-node.git"
   },
   "author": "Digital Catapult",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/digicatapult/dscp-node/issues"
   },
