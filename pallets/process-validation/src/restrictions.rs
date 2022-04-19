@@ -8,11 +8,12 @@ use sp_std::vec::Vec;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
+pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
 where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>,
 {
     None,
     SenderOwnsAllInputs,
@@ -44,22 +45,28 @@ where
         metadata_key: TokenMetadataKey,
         metadata_value: TokenMetadataValue,
     },
+    FixedOutputMetadataValueType {
+        index: u32,
+        metadata_key: TokenMetadataKey,
+        metadata_value_type: TokenMetadataValueDiscriminator,
+    },
 }
 
-impl<RoleKey, TokenMetadataKey, TokenMetadataValue> Default
-    for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
+impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> Default
+    for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
 where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>,
 {
     fn default() -> Self {
         Restriction::None
     }
 }
 
-pub fn validate_restriction<A, R, T, V>(
-    restriction: Restriction<R, T, V>,
+pub fn validate_restriction<A, R, T, V, D>(
+    restriction: Restriction<R, T, V, D>,
     sender: &A,
     inputs: &Vec<ProcessIO<A, R, T, V>>,
     outputs: &Vec<ProcessIO<A, R, T, V>>,
@@ -69,9 +76,10 @@ where
     R: Parameter + Default + Ord,
     T: Parameter + Default + Ord,
     V: Parameter + Default,
+    D: Parameter + Default + From<V>,
 {
     match restriction {
-        Restriction::<R, T, V>::None => true,
+        Restriction::<R, T, V, D>::None => true,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedInputMetadataValue {
@@ -91,6 +99,17 @@ where
             let selected_output = &outputs[index as usize];
             let meta = selected_output.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
+        }
+        Restriction::FixedOutputMetadataValueType {
+            index,
+            metadata_key,
+            metadata_value_type,
+        } => {
+            let selected_output = &outputs[index as usize];
+            match selected_output.metadata.get(&metadata_key) {
+                Some(meta) => D::from(meta.clone()) == metadata_value_type,
+                None => false,
+            }
         }
         Restriction::SenderHasInputRole { index, role_key } => {
             let selected_input = &inputs[index as usize];
@@ -133,13 +152,14 @@ mod tests {
 
     #[test]
     fn no_restriction_succeeds() {
-        let result = validate_restriction::<u64, u32, u32, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
+        let result =
+            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
         assert!(result);
     }
 
     #[test]
     fn sender_owns_inputs_restriction_no_inputs_succeeds() {
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderOwnsAllInputs,
             &1u64,
             &Vec::new(),
@@ -164,8 +184,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(result);
     }
 
@@ -185,8 +209,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(!result);
     }
 
@@ -208,8 +236,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(!result);
     }
 
@@ -231,8 +263,12 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
         assert!(!result);
     }
 
@@ -262,7 +298,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfInputs { num_inputs: 4 },
             &1u64,
             &inputs,
@@ -287,7 +323,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfInputs { num_inputs: 1 },
             &1u64,
             &inputs,
@@ -312,7 +348,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfOutputs { num_outputs: 2 },
             &1u64,
             &Vec::new(),
@@ -337,7 +373,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfOutputs { num_outputs: 1 },
             &1u64,
             &Vec::new(),
@@ -369,7 +405,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 2,
                 metadata_key: 2,
@@ -405,7 +441,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 1,
                 metadata_key: 2,
@@ -441,7 +477,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 2,
                 metadata_key: 2,
@@ -479,7 +515,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 2,
                 metadata_key: 3,
@@ -517,7 +553,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 1,
                 metadata_key: 2,
@@ -545,7 +581,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 1,
                 metadata_key: 1,
@@ -573,7 +609,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 1,
                 metadata_key: 1,
@@ -601,7 +637,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 0,
                 metadata_key: 1,
@@ -629,11 +665,154 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 0,
                 metadata_key: 0,
                 metadata_value: 100,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    pub enum MetadataValue {
+        A,
+        B,
+    }
+    impl Default for MetadataValue {
+        fn default() -> Self {
+            return MetadataValue::A;
+        }
+    }
+
+    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    pub enum MetadataValueDisc {
+        AA,
+        BB,
+    }
+    impl Default for MetadataValueDisc {
+        fn default() -> Self {
+            return MetadataValueDisc::AA;
+        }
+    }
+
+    impl From<MetadataValue> for MetadataValueDisc {
+        fn from(v: MetadataValue) -> MetadataValueDisc {
+            match v {
+                MetadataValue::A => MetadataValueDisc::AA,
+                MetadataValue::B => MetadataValueDisc::BB,
+            }
+        }
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 1,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::AA,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_incorrect_type_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 1,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::BB,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_incorrect_index_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 0,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::AA,
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_incorrect_key_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None,
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None,
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 1,
+                metadata_key: 0,
+                metadata_value_type: MetadataValueDisc::AA,
             },
             &1u64,
             &Vec::new(),
@@ -650,7 +829,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
                 index: 0,
                 role_key: Default::default(),
@@ -670,7 +849,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
                 index: 0,
                 role_key: Default::default(),
@@ -698,7 +877,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
                 index: 1,
                 role_key: Default::default(),
@@ -718,7 +897,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole { index: 0, role_key: 1 },
             &1,
             &inputs,
@@ -735,7 +914,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole {
                 index: 0,
                 role_key: Default::default(),
@@ -755,7 +934,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole {
                 index: 0,
                 role_key: Default::default(),
@@ -783,7 +962,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole {
                 index: 1,
                 role_key: Default::default(),
@@ -803,7 +982,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole { index: 0, role_key: 1 },
             &1,
             &Vec::new(),
@@ -820,7 +999,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 0, role_key: 1 },
             &1,
             &Vec::new(),
@@ -837,7 +1016,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 0, role_key: 2 },
             &1,
             &Vec::new(),
@@ -862,7 +1041,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 1, role_key: 1 },
             &1,
             &Vec::new(),

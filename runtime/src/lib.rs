@@ -23,6 +23,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use strum_macros::EnumDiscriminants;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
@@ -306,7 +307,9 @@ impl Default for Role {
     }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, EnumDiscriminants)]
+#[strum_discriminants(derive(Encode, Decode))]
+#[strum_discriminants(name(MetadataValueType))]
 pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 32]),
@@ -317,6 +320,11 @@ pub enum MetadataValue<TokenId> {
 impl<T> Default for MetadataValue<T> {
     fn default() -> Self {
         MetadataValue::None
+    }
+}
+impl Default for MetadataValueType {
+    fn default() -> Self {
+        MetadataValueType::None
     }
 }
 
@@ -348,6 +356,7 @@ impl pallet_process_validation::Config for Runtime {
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
+    type TokenMetadataValueDiscriminator = MetadataValueType;
 }
 
 pub struct DummyChangeMembers;
