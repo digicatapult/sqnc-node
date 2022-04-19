@@ -999,7 +999,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 0, role_key: 1 },
             &1,
             &Vec::new(),
@@ -1016,7 +1016,7 @@ mod tests {
             metadata: BTreeMap::new(),
             parent_index: None,
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 0, role_key: 2 },
             &1,
             &Vec::new(),
@@ -1041,7 +1041,7 @@ mod tests {
                 parent_index: None,
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 1, role_key: 1 },
             &1,
             &Vec::new(),
