@@ -161,16 +161,16 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   },
   "Restriction": {
     "_enum": {
-        "None": "()",
-        "SenderOwnsAllInputs": "()",
-        "SenderHasInputRole": "SenderHasInputRoleRestriction",
-        "SenderHasOutputRole": "SenderHasOutputRoleRestriction",
-        "OutputHasRole": "OutputHasRoleRestriction",
-        "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
-        "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
-        "FixedInputMetadataValue": "FixedMetadataValueRestriction",
-        "FixedOutputMetadataValue": "FixedMetadataValueRestriction",
-        "FixedOutputMetadataValueType": "FixedOutputMetadataValueType"
+      "None": "()",
+      "SenderOwnsAllInputs": "()",
+      "SenderHasInputRole": "SenderHasInputRoleRestriction",
+      "SenderHasOutputRole": "SenderHasOutputRoleRestriction",
+      "OutputHasRole": "OutputHasRoleRestriction",
+      "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
+      "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
+      "FixedInputMetadataValue": "FixedMetadataValueRestriction",
+      "FixedOutputMetadataValue": "FixedMetadataValueRestriction",
+      "FixedOutputMetadataValueType": "FixedOutputMetadataValueType"
     }
   },
   "SenderHasInputRoleRestriction": {
