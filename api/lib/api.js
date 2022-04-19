@@ -74,7 +74,7 @@ const api = ({ options }) => {
         FixedNumberOfOutputs: 'FixedNumberOfOutputsRestriction',
         FixedInputMetadataValue: 'FixedMetadataValueRestriction',
         FixedOutputMetadataValue: 'FixedMetadataValueRestriction',
-        FixedOutputMetadataValueType: 'FixedOutputMetadataValueType',
+        FixedOutputMetadataValueType: 'FixedMetadataTypeRestriction',
       },
     },
     SenderHasInputRoleRestriction: {
@@ -100,7 +100,7 @@ const api = ({ options }) => {
       metadata_key: 'TokenMetadataKey',
       metadata_value: 'TokenMetadataValue',
     },
-    FixedOutputMetadataValueType: {
+    FixedMetadataTypeRestriction: {
       index: 'u32',
       metadata_key: 'TokenMetadataKey',
       metadata_value_type: 'MetadataValueType',

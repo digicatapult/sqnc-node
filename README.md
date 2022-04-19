@@ -170,7 +170,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
       "FixedInputMetadataValue": "FixedMetadataValueRestriction",
       "FixedOutputMetadataValue": "FixedMetadataValueRestriction",
-      "FixedOutputMetadataValueType": "FixedOutputMetadataValueType"
+      "FixedOutputMetadataValueType": "FixedMetadataTypeRestriction"
     }
   },
   "SenderHasInputRoleRestriction": {
@@ -196,7 +196,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "metadata_key": "TokenMetadataKey",
     "metadata_value": "TokenMetadataValue"
   },
-  "FixedOutputMetadataValueType": {
+  "FixedMetadataTypeRestriction": {
       "index": "u32",
       "metadata_key": "TokenMetadataKey",
       "metadata_value_type": "MetadataValueType"
