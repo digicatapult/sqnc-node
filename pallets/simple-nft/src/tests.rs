@@ -10,11 +10,11 @@ use sp_std::iter::FromIterator;
 const NONE_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = None;
 const SUCCEED_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,
-    version: 0u32,
+    version: 0u32
 });
 const FAIL_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldFail,
-    version: 0u32,
+    version: 0u32
 });
 
 #[test]
@@ -418,8 +418,8 @@ fn it_works_for_destroying_single_token() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // create a token with no parents
@@ -465,19 +465,19 @@ fn it_works_for_destroying_many_tokens() {
                 ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata0.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
                 ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
                 ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata2.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
-            ],
+            ]
         )
         .unwrap();
         // create a token with no parents
@@ -552,8 +552,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             vec![ProcessIO {
                 roles: roles0.clone(),
                 metadata: metadata0.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // create a token with a parent
@@ -620,14 +620,14 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                 ProcessIO {
                     roles: roles0.clone(),
                     metadata: metadata0.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
                 ProcessIO {
                     roles: roles0.clone(),
                     metadata: metadata1.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
-            ],
+            ]
         )
         .unwrap();
         // create 2 tokens with 2 parents
@@ -728,8 +728,8 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // token with previous token as parent
@@ -815,8 +815,8 @@ fn it_fails_for_destroying_single_token_as_incorrect_role() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -845,8 +845,8 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -876,8 +876,8 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         SimpleNFTModule::run_process(
@@ -887,8 +887,8 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata1.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -921,8 +921,8 @@ fn it_fails_for_destroying_single_burnt_token() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), NONE_PROCESS, vec![1], Vec::new()).unwrap();
@@ -964,14 +964,14 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
                 ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata0.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
                 ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },
-            ],
+            ]
         )
         .unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), NONE_PROCESS, vec![1], Vec::new()).unwrap();
@@ -988,7 +988,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
                 vec![ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata2.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },],
             ),
             Error::<Test>::AlreadyBurnt
@@ -1014,8 +1014,8 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -1029,7 +1029,7 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
                 vec![ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata.clone(),
-                    parent_index: Some(10),
+                    parent_index: Some(10)
                 },],
             ),
             Error::<Test>::OutOfBoundsParent
@@ -1053,8 +1053,8 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -1069,12 +1069,12 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
                     ProcessIO {
                         roles: roles.clone(),
                         metadata: metadata.clone(),
-                        parent_index: Some(0),
+                        parent_index: Some(0)
                     },
                     ProcessIO {
                         roles: roles.clone(),
                         metadata: metadata.clone(),
-                        parent_index: Some(0),
+                        parent_index: Some(0)
                     },
                 ],
             ),
@@ -1106,8 +1106,8 @@ fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -1121,7 +1121,7 @@ fn it_fails_for_creating_single_token_with_too_many_metadata_items() {
                 vec![ProcessIO {
                     roles: roles.clone(),
                     metadata: metadata_too_many.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },],
             ),
             Error::<Test>::TooManyMetadataItems
@@ -1146,8 +1146,8 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
             vec![ProcessIO {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
-                parent_index: None,
-            }],
+                parent_index: None
+            }]
         )
         .unwrap();
         // get old token
@@ -1161,7 +1161,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
                 vec![ProcessIO {
                     roles: roles_empty.clone(),
                     metadata: metadata.clone(),
-                    parent_index: None,
+                    parent_index: None
                 },],
             ),
             Error::<Test>::NoDefaultRole

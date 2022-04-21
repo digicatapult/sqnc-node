@@ -1263,7 +1263,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node"
-version = "3.3.0"
+version = "3.3.1"
 dependencies = [
  "bs58",
  "dscp-node-runtime",
@@ -1301,7 +1301,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "3.3.0"
+version = "3.3.1"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -1344,7 +1344,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-pallet-traits"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -3934,7 +3934,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-process-validation"
-version = "2.3.0"
+version = "2.3.1"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
@@ -4001,7 +4001,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-simple-nft"
-version = "3.0.0"
+version = "3.0.1"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
@@ -4032,7 +4032,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-symmetric-key"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",

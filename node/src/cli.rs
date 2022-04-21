@@ -7,7 +7,7 @@ pub struct Cli {
     pub subcommand: Option<Subcommand>,
 
     #[structopt(flatten)]
-    pub run: RunCmd,
+    pub run: RunCmd
 }
 
 #[derive(Debug, StructOpt)]
@@ -37,5 +37,5 @@ pub enum Subcommand {
 
     /// The custom benchmark subcommmand benchmarking runtime pallets.
     #[structopt(name = "benchmark", about = "Benchmark runtime pallets.")]
-    Benchmark(frame_benchmarking_cli::BenchmarkCmd),
+    Benchmark(frame_benchmarking_cli::BenchmarkCmd)
 }

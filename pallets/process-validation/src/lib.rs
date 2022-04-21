@@ -22,7 +22,7 @@ use restrictions::*;
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum ProcessStatus {
     Disabled,
-    Enabled,
+    Enabled
 }
 
 impl Default for ProcessStatus {
@@ -38,10 +38,10 @@ where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
-    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
 {
     status: ProcessStatus,
-    restrictions: Vec<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>,
+    restrictions: Vec<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>
 }
 
 impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> Default
@@ -50,12 +50,12 @@ where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
-    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
 {
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
-            restrictions: vec![],
+            restrictions: vec![]
         }
     }
 }
@@ -109,7 +109,7 @@ pub mod pallet {
         Blake2_128Concat,
         T::ProcessVersion,
         Process<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-        ValueQuery,
+        ValueQuery
     >;
 
     #[pallet::storage]
@@ -131,12 +131,12 @@ pub mod pallet {
             T::ProcessIdentifier,
             T::ProcessVersion,
             Vec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
+                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>
             >,
-            bool,
+            bool
         ),
         //id, version
-        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
+        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion)
     }
 
     #[pallet::error]
@@ -148,7 +148,7 @@ pub mod pallet {
         // process is already disabled
         AlreadyDisabled,
         // process not found for this versiion
-        InvalidVersion,
+        InvalidVersion
     }
 
     // The pallet's dispatchable functions.
@@ -159,8 +159,8 @@ pub mod pallet {
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
             restrictions: Vec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-            >,
+                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>
+            >
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
@@ -170,7 +170,7 @@ pub mod pallet {
                 id,
                 version.clone(),
                 restrictions,
-                version == One::one(),
+                version == One::one()
             ));
 
             return Ok(().into());
@@ -180,7 +180,7 @@ pub mod pallet {
         pub(super) fn disable_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            version: T::ProcessVersion,
+            version: T::ProcessVersion
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
             Pallet::<T>::validate_version_and_process(&id, &version)?;
@@ -196,7 +196,7 @@ pub mod pallet {
         pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
             return match <VersionModel<T>>::contains_key(&id) {
                 true => <VersionModel<T>>::get(&id) + One::one(),
-                false => One::one(),
+                false => One::one()
             };
         }
 
@@ -204,7 +204,7 @@ pub mod pallet {
             let version: T::ProcessVersion = Pallet::<T>::get_version(&id);
             match version == One::one() {
                 true => <VersionModel<T>>::insert(&id, version.clone()),
-                false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone()),
+                false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone())
             };
 
             return Ok(version);
@@ -214,8 +214,8 @@ pub mod pallet {
             id: &T::ProcessIdentifier,
             v: &T::ProcessVersion,
             r: &Vec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-            >,
+                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>
+            >
         ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
@@ -225,8 +225,8 @@ pub mod pallet {
                         v,
                         Process {
                             restrictions: r.clone(),
-                            status: ProcessStatus::Enabled,
-                        },
+                            status: ProcessStatus::Enabled
+                        }
                     );
                     return Ok(());
                 }
@@ -248,7 +248,7 @@ pub mod pallet {
 
         pub fn validate_version_and_process(
             id: &T::ProcessIdentifier,
-            version: &T::ProcessVersion,
+            version: &T::ProcessVersion
         ) -> Result<(), Error<T>> {
             ensure!(
                 <ProcessModel<T>>::contains_key(&id, version.clone()),
@@ -257,7 +257,7 @@ pub mod pallet {
             ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
             return match *version > <VersionModel<T>>::get(&id) {
                 true => Err(Error::<T>::InvalidVersion),
-                false => Ok(()),
+                false => Ok(())
             };
         }
     }
@@ -271,7 +271,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &T::AccountId,
         inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
     ) -> bool {
         let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
 
@@ -287,7 +287,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                         T::RoleKey,
                         T::TokenMetadataKey,
                         T::TokenMetadataValue,
-                        T::TokenMetadataValueDiscriminator,
+                        T::TokenMetadataValueDiscriminator
                     >(restriction, &sender, &inputs, &outputs);
 
                     if !is_valid {
@@ -296,7 +296,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                 }
                 true
             }
-            Err(_) => false,
+            Err(_) => false
         }
     }
 }

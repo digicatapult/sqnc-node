@@ -4,14 +4,14 @@ use crate as pallet_symmetric_key;
 use frame_support::{
     parameter_types,
     traits::{OnInitialize, TestRandomness},
-    weights::Weight,
+    weights::Weight
 };
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
-    Perbill,
+    Perbill
 };
 
 mod rotate_key;
