@@ -195,9 +195,9 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   },
   "MatchInputOutputMetadataValueRestriction": {
     "input_index": "u32",
-    "input_metadata_key": "RoleKey",
+    "input_metadata_key": "TokenMetadataValue",
     "output_index": "u32",
-    "output_metadata_key": "RoleKey"
+    "output_metadata_key": "TokenMetadataValue"
   },
   "FixedNumberOfInputsRestriction": {
     "num_inputs": "u32"
