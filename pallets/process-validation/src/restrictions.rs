@@ -1242,34 +1242,6 @@ mod tests {
     }
 
     #[test]
-    fn input_output_role_match_same_role_keys_succeeds() {
-        let input_roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
-        let output_roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
-        let inputs = vec![ProcessIO {
-            roles: input_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
-        }];
-        let outputs = vec![ProcessIO {
-            roles: output_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 0,
-                input_role_key: Default::default(),
-                output_index: 0,
-                output_role_key: Default::default()
-            },
-            &1,
-            &inputs,
-            &outputs
-        );
-        assert!(result);
-    }
-
-    #[test]
     fn match_input_output_metadata_value_same_metadata_keys_succeeds() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let input_metadata = BTreeMap::from_iter(vec![(0, 0)]);
@@ -1284,7 +1256,7 @@ mod tests {
             metadata: output_metadata.clone(),
             parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
@@ -1313,7 +1285,7 @@ mod tests {
             metadata: output_metadata.clone(),
             parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
@@ -1342,7 +1314,7 @@ mod tests {
             metadata: output_metadata.clone(),
             parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
@@ -1371,7 +1343,7 @@ mod tests {
             metadata: output_metadata.clone(),
             parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
@@ -1408,7 +1380,7 @@ mod tests {
             metadata: output_metadata.clone(),
             parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 1,
                 input_metadata_key: 0,
