@@ -2,6 +2,20 @@ apiVersion: v1
 entries:
   dscp-node:
   - apiVersion: v2
+    appVersion: 3.4.0
+    created: "2022-04-21T13:52:09.754003649Z"
+    description: A Helm chart to deploy DSCP nodes
+    digest: bef9da203dd511f7062025722ca518895c11f6a971dcaaec335c9d25bc02822f
+    maintainers:
+    - email: opensource@digicatapult.org.uk
+      name: digicatapult
+      url: www.digicatapult.org.uk
+    name: dscp-node
+    type: application
+    urls:
+    - https://digicatapult.github.io/dscp-node/dscp-node-3.4.0.tgz
+    version: 3.4.0
+  - apiVersion: v2
     appVersion: 3.3.1
     created: "2022-04-21T12:33:08.415045183Z"
     description: A Helm chart to deploy DSCP nodes
@@ -194,4 +208,4 @@ entries:
     urls:
     - https://digicatapult.github.io/vitalam-node/vitalam-node-0.0.1.tgz
     version: 0.0.1
-generated: "2022-04-21T12:33:08.413266959Z"
+generated: "2022-04-21T13:52:09.750827711Z"
