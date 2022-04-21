@@ -166,8 +166,8 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "SenderHasInputRole": "SenderHasInputRoleRestriction",
       "SenderHasOutputRole": "SenderHasOutputRoleRestriction",
       "OutputHasRole": "OutputHasRoleRestriction",
-      "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
       "MatchInputOutputRole": "MatchInputOutputRoleRestriction",
+      "FixedNumberOfInputs": "FixedNumberOfInputsRestriction",
       "FixedNumberOfOutputs": "FixedNumberOfOutputsRestriction",
       "FixedInputMetadataValue": "FixedMetadataValueRestriction",
       "FixedOutputMetadataValue": "FixedMetadataValueRestriction",
@@ -182,15 +182,15 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
     "index": "u32",
     "role_key": "RoleKey"
   },
+  "OutputHasRoleRestriction": {
+    "index": "u32",
+    "role_key": "RoleKey"
+  },
   "MatchInputOutputRoleRestriction": {
     "input_index": "u32",
     "input_role_key": "RoleKey",
     "output_index": "u32",
     "output_role_key": "RoleKey"
-  },
-  "OutputHasRoleRestriction": {
-    "index": "u32",
-    "role_key": "RoleKey"
   },
   "FixedNumberOfInputsRestriction": {
     "num_inputs": "u32"
