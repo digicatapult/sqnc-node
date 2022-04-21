@@ -17,12 +17,13 @@ use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, Identify
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult, MultiSignature
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use strum_macros::EnumDiscriminants;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
@@ -30,9 +31,9 @@ pub use frame_support::{
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        IdentityFee, Weight,
+        IdentityFee, Weight
     },
-    StorageValue,
+    StorageValue
 };
 use pallet_transaction_payment::CurrencyAdapter;
 #[cfg(any(feature = "std", test))]
@@ -93,10 +94,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 300,
+    spec_version: 310,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 1,
+    transaction_version: 1
 };
 
 /// This determines the average expected block time that we are targeting.
@@ -119,7 +120,7 @@ pub const DAYS: BlockNumber = HOURS * 24;
 pub fn native_version() -> NativeVersion {
     NativeVersion {
         runtime_version: VERSION,
-        can_author_with: Default::default(),
+        can_author_with: Default::default()
     }
 }
 
@@ -297,7 +298,7 @@ pub enum Role {
     Laboratory = 3,
     Buyer = 4,
     Supplier = 5,
-    Reviewer = 6,
+    Reviewer = 6
 }
 
 impl Default for Role {
@@ -306,17 +307,24 @@ impl Default for Role {
     }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, EnumDiscriminants)]
+#[strum_discriminants(derive(Encode, Decode))]
+#[strum_discriminants(name(MetadataValueType))]
 pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 32]),
     TokenId(TokenId),
-    None,
+    None
 }
 
 impl<T> Default for MetadataValue<T> {
     fn default() -> Self {
         MetadataValue::None
+    }
+}
+impl Default for MetadataValueType {
+    fn default() -> Self {
+        MetadataValueType::None
     }
 }
 
@@ -348,6 +356,7 @@ impl pallet_process_validation::Config for Runtime {
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
+    type TokenMetadataValueDiscriminator = MetadataValueType;
 }
 
 pub struct DummyChangeMembers;
@@ -431,7 +440,7 @@ pub type SignedExtra = (
     frame_system::CheckEra<Runtime>,
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+    pallet_transaction_payment::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;

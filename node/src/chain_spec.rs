@@ -1,6 +1,6 @@
 use dscp_node_runtime::{
     AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
-    Signature, SudoConfig, SystemConfig, WASM_BINARY,
+    Signature, SudoConfig, SystemConfig, WASM_BINARY
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -28,7 +28,7 @@ type AccountPublic = <Signature as Verify>::Signer;
 /// Generate an account ID from seed.
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
-    AccountPublic: From<<TPublic::Pair as Pair>::Public>,
+    AccountPublic: From<<TPublic::Pair as Pair>::Public>
 {
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
@@ -67,12 +67,12 @@ pub fn development_config() -> Result<ChainSpec, String> {
                         OpaquePeerId(
                             bs58::decode("12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp")
                                 .into_vec()
-                                .unwrap(),
+                                .unwrap()
                         ),
-                        get_account_id_from_seed::<sr25519::Public>("Alice"),
-                    )],
+                        get_account_id_from_seed::<sr25519::Public>("Alice")
+                    )]
                 }),
-                true,
+                true
             )
         },
         // Bootnodes
@@ -84,7 +84,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
         // Properties
         None,
         // Extensions
-        None,
+        None
     ))
 }
 
@@ -134,40 +134,40 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                             OpaquePeerId(
                                 bs58::decode("12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp")
                                     .into_vec()
-                                    .unwrap(),
+                                    .unwrap()
                             ),
-                            get_account_id_from_seed::<sr25519::Public>("Alice"),
+                            get_account_id_from_seed::<sr25519::Public>("Alice")
                         ),
                         (
                             // 0000000000000000000000000000000000000000000000000000000000000002
                             OpaquePeerId(
                                 bs58::decode("12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD")
                                     .into_vec()
-                                    .unwrap(),
+                                    .unwrap()
                             ),
-                            get_account_id_from_seed::<sr25519::Public>("Bob"),
+                            get_account_id_from_seed::<sr25519::Public>("Bob")
                         ),
                         (
                             // 0000000000000000000000000000000000000000000000000000000000000003
                             OpaquePeerId(
                                 bs58::decode("12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x")
                                     .into_vec()
-                                    .unwrap(),
+                                    .unwrap()
                             ),
-                            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+                            get_account_id_from_seed::<sr25519::Public>("Charlie")
                         ),
                         (
                             // 0000000000000000000000000000000000000000000000000000000000000004
                             OpaquePeerId(
                                 bs58::decode("12D3KooWSsChzF81YDUKpe9Uk5AHV5oqAaXAcWNSPYgoLauUk4st")
                                     .into_vec()
-                                    .unwrap(),
+                                    .unwrap()
                             ),
-                            get_account_id_from_seed::<sr25519::Public>("Eve"),
+                            get_account_id_from_seed::<sr25519::Public>("Eve")
                         ),
-                    ],
+                    ]
                 }),
-                true,
+                true
             )
         },
         // Bootnodes
@@ -179,7 +179,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
         // Properties
         None,
         // Extensions
-        None,
+        None
     ))
 }
 
@@ -190,32 +190,32 @@ fn testnet_genesis(
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
     node_authorization_config: Option<NodeAuthorizationConfig>,
-    _enable_println: bool,
+    _enable_println: bool
 ) -> GenesisConfig {
     GenesisConfig {
         frame_system: Some(SystemConfig {
             // Add Wasm runtime to storage.
             code: wasm_binary.to_vec(),
-            changes_trie_config: Default::default(),
+            changes_trie_config: Default::default()
         }),
         pallet_balances: Some(BalancesConfig {
             // Configure endowed accounts with initial balance of 1 << 60.
-            balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
+            balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect()
         }),
         pallet_aura: Some(AuraConfig {
-            authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+            authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect()
         }),
         pallet_grandpa: Some(GrandpaConfig {
-            authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
+            authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect()
         }),
         pallet_sudo: Some(SudoConfig {
             // Assign network admin rights.
-            key: root_key,
+            key: root_key
         }),
         pallet_node_authorization: node_authorization_config,
         pallet_membership: Some(MembershipConfig {
             members: endowed_accounts.iter().map(|k| k.clone()).collect(),
             ..Default::default()
-        }),
+        })
     }
 }

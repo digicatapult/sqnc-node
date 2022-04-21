@@ -7,7 +7,7 @@ use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup}
 };
 
 mod create_process;
@@ -66,12 +66,22 @@ impl system::Config for Test {
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
 pub enum ProcessIdentifier {
     A,
-    B,
+    B
 }
 
 impl Default for ProcessIdentifier {
     fn default() -> Self {
         ProcessIdentifier::A
+    }
+}
+
+#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Default)]
+pub struct TokenMetadataValueDiscriminator {
+    value: u8
+}
+impl From<u128> for TokenMetadataValueDiscriminator {
+    fn from(a: u128) -> TokenMetadataValueDiscriminator {
+        return TokenMetadataValueDiscriminator { value: (a % 128) as u8 };
     }
 }
 
@@ -86,6 +96,7 @@ impl pallet_process_validation::Config for Test {
     type RoleKey = u32;
     type TokenMetadataKey = u32;
     type TokenMetadataValue = u128;
+    type TokenMetadataValueDiscriminator = TokenMetadataValueDiscriminator;
 }
 
 // This function basically just builds a genesis storage key/value store according to

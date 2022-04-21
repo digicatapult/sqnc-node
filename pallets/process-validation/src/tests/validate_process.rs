@@ -14,8 +14,8 @@ fn it_succeeds_when_process_exists() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: Vec::new(),
-            },
+                restrictions: Vec::new()
+            }
         );
 
         assert!(ProcessValidation::validate_process(
@@ -38,8 +38,8 @@ fn it_fails_when_process_id_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: Vec::new(),
-            },
+                restrictions: Vec::new()
+            }
         );
 
         assert!(!ProcessValidation::validate_process(
@@ -62,8 +62,8 @@ fn it_fails_when_process_version_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: Vec::new(),
-            },
+                restrictions: Vec::new()
+            }
         );
 
         assert!(!ProcessValidation::validate_process(
@@ -86,8 +86,8 @@ fn it_fails_when_process_disabled() {
             1u32,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: Vec::new(),
-            },
+                restrictions: Vec::new()
+            }
         );
 
         assert!(!ProcessValidation::validate_process(
@@ -110,8 +110,8 @@ fn it_succeeds_when_all_restrictions_succeed() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: vec![Restriction::None, Restriction::SenderOwnsAllInputs],
-            },
+                restrictions: vec![Restriction::None, Restriction::SenderOwnsAllInputs]
+            }
         );
 
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
@@ -141,8 +141,8 @@ fn it_fails_when_one_restrictions_fails() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: vec![Restriction::None, Restriction::SenderOwnsAllInputs],
-            },
+                restrictions: vec![Restriction::None, Restriction::SenderOwnsAllInputs]
+            }
         );
 
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();

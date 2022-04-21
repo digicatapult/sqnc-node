@@ -25,7 +25,7 @@ type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 pub fn new_partial(
-    config: &Configuration,
+    config: &Configuration
 ) -> Result<
     sc_service::PartialComponents<
         FullClient,
@@ -38,12 +38,12 @@ pub fn new_partial(
                 Block,
                 FullClient,
                 sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
-                AuraPair,
+                AuraPair
             >,
-            sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-        ),
+            sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>
+        )
     >,
-    ServiceError,
+    ServiceError
 > {
     if config.keystore_remote.is_some() {
         return Err(ServiceError::Other(format!("Remote Keystores are not supported.")));
@@ -61,7 +61,7 @@ pub fn new_partial(
         config.role.is_authority().into(),
         config.prometheus_registry(),
         task_manager.spawn_handle(),
-        client.clone(),
+        client.clone()
     );
 
     let (grandpa_block_import, grandpa_link) =
@@ -78,7 +78,7 @@ pub fn new_partial(
         inherent_data_providers.clone(),
         &task_manager.spawn_handle(),
         config.prometheus_registry(),
-        sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
+        sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone())
     )?;
 
     Ok(sc_service::PartialComponents {
@@ -90,7 +90,7 @@ pub fn new_partial(
         select_chain,
         transaction_pool,
         inherent_data_providers,
-        other: (aura_block_import, grandpa_link),
+        other: (aura_block_import, grandpa_link)
     })
 }
 
@@ -112,7 +112,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         select_chain,
         transaction_pool,
         inherent_data_providers,
-        other: (block_import, grandpa_link),
+        other: (block_import, grandpa_link)
     } = new_partial(&config)?;
 
     if let Some(url) = &config.keystore_remote {
@@ -139,7 +139,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
             on_demand: None,
-            block_announce_validator_builder: None,
+            block_announce_validator_builder: None
         })?;
 
     if config.offchain_worker.enabled {
@@ -148,7 +148,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             backend.clone(),
             task_manager.spawn_handle(),
             client.clone(),
-            network.clone(),
+            network.clone()
         );
     }
 
@@ -167,7 +167,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             let deps = crate::rpc::FullDeps {
                 client: client.clone(),
                 pool: pool.clone(),
-                deny_unsafe,
+                deny_unsafe
             };
 
             crate::rpc::create_full(deps)
@@ -186,7 +186,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         backend,
         network_status_sinks,
         system_rpc_tx,
-        config,
+        config
     })?;
 
     if role.is_authority() {
@@ -194,7 +194,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             task_manager.spawn_handle(),
             client.clone(),
             transaction_pool,
-            prometheus_registry.as_ref(),
+            prometheus_registry.as_ref()
         );
 
         let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
@@ -210,7 +210,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             force_authoring,
             backoff_authoring_blocks,
             keystore_container.sync_keystore(),
-            can_author_with,
+            can_author_with
         )?;
 
         // the AURA authoring task is considered essential, i.e. if it
@@ -233,7 +233,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         name: Some(name),
         observer_enabled: false,
         keystore,
-        is_authority: role.is_network_authority(),
+        is_authority: role.is_network_authority()
     };
 
     if enable_grandpa {
@@ -250,7 +250,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             telemetry_on_connect: telemetry_connection_notifier.map(|x| x.on_connect_stream()),
             voting_rule: sc_finality_grandpa::VotingRulesBuilder::default().build(),
             prometheus_registry,
-            shared_voter_state: SharedVoterState::empty(),
+            shared_voter_state: SharedVoterState::empty()
         };
 
         // the GRANDPA voter task is considered infallible, i.e.
@@ -281,7 +281,7 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
         config.prometheus_registry(),
         task_manager.spawn_handle(),
         client.clone(),
-        on_demand.clone(),
+        on_demand.clone()
     ));
 
     let (grandpa_block_import, _) =
@@ -298,7 +298,7 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
         InherentDataProviders::new(),
         &task_manager.spawn_handle(),
         config.prometheus_registry(),
-        sp_consensus::NeverCanAuthor,
+        sp_consensus::NeverCanAuthor
     )?;
 
     let (network, network_status_sinks, system_rpc_tx, network_starter) =
@@ -309,7 +309,7 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
             on_demand: Some(on_demand.clone()),
-            block_announce_validator_builder: None,
+            block_announce_validator_builder: None
         })?;
 
     if config.offchain_worker.enabled {
@@ -318,7 +318,7 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
             backend.clone(),
             task_manager.spawn_handle(),
             client.clone(),
-            network.clone(),
+            network.clone()
         );
     }
 
@@ -334,7 +334,7 @@ pub fn new_light(mut config: Configuration) -> Result<TaskManager, ServiceError>
         backend,
         network,
         network_status_sinks,
-        system_rpc_tx,
+        system_rpc_tx
     })?;
 
     network_starter.start_network();

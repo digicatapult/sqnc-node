@@ -51,7 +51,7 @@ impl SubstrateCli for Cli {
             "dev" => Box::new(chain_spec::development_config()?),
             "" | "inteli-stage" => Box::new(chain_spec::inteli_stage_config()?),
             "local" => Box::new(chain_spec::local_testnet_config()?),
-            path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+            path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?)
         })
     }
 
@@ -144,7 +144,7 @@ pub fn run() -> sc_cli::Result<()> {
             runner.run_node_until_exit(|config| async move {
                 match config.role {
                     Role::Light => service::new_light(config),
-                    _ => service::new_full(config),
+                    _ => service::new_full(config)
                 }
                 .map_err(sc_cli::Error::Service)
             })

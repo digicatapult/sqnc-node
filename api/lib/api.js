@@ -44,6 +44,9 @@ const api = ({ options }) => {
         None: null,
       },
     },
+    MetadataValueType: {
+      _enum: ['File', 'Literal', 'TokenId', 'None'],
+    },
     Role: {
       _enum: ['Owner', 'Customer', 'AdditiveManufacturer', 'Laboratory', 'Buyer', 'Supplier', 'Reviewer'],
     },
@@ -65,15 +68,33 @@ const api = ({ options }) => {
         None: '()',
         SenderOwnsAllInputs: '()',
         SenderHasInputRole: 'SenderHasInputRoleRestriction',
+        SenderHasOutputRole: 'SenderHasOutputRoleRestriction',
+        OutputHasRole: 'OutputHasRoleRestriction',
+        MatchInputOutputRole: 'MatchInputOutputRoleRestriction',
         FixedNumberOfInputs: 'FixedNumberOfInputsRestriction',
         FixedNumberOfOutputs: 'FixedNumberOfOutputsRestriction',
         FixedInputMetadataValue: 'FixedMetadataValueRestriction',
         FixedOutputMetadataValue: 'FixedMetadataValueRestriction',
+        FixedOutputMetadataValueType: 'FixedMetadataTypeRestriction',
       },
     },
     SenderHasInputRoleRestriction: {
       index: 'u32',
       role_key: 'RoleKey',
+    },
+    SenderHasOutputRoleRestriction: {
+      index: 'u32',
+      role_key: 'RoleKey',
+    },
+    OutputHasRoleRestriction: {
+      index: 'u32',
+      role_key: 'RoleKey',
+    },
+    MatchInputOutputRoleRestriction: {
+      input_index: 'u32',
+      input_role_key: 'RoleKey',
+      output_index: 'u32',
+      output_role_key: 'RoleKey',
     },
     FixedNumberOfInputsRestriction: {
       num_inputs: 'u32',
@@ -85,6 +106,11 @@ const api = ({ options }) => {
       index: 'u32',
       metadata_key: 'TokenMetadataKey',
       metadata_value: 'TokenMetadataValue',
+    },
+    FixedMetadataTypeRestriction: {
+      index: 'u32',
+      metadata_key: 'TokenMetadataKey',
+      metadata_value_type: 'MetadataValueType',
     },
     IsNew: 'bool',
     Restrictions: 'Vec<Restriction>',

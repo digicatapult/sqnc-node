@@ -8,23 +8,32 @@ use sp_std::vec::Vec;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
+pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
 where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
 {
     None,
     SenderOwnsAllInputs,
     SenderHasInputRole {
         index: u32,
-        role_key: RoleKey,
+        role_key: RoleKey
+    },
+    SenderHasOutputRole {
+        index: u32,
+        role_key: RoleKey
+    },
+    OutputHasRole {
+        index: u32,
+        role_key: RoleKey
     },
     MatchInputOutputRole {
         input_index: u32,
         input_role_key: RoleKey,
         output_index: u32,
-        output_role_key: RoleKey,
+        output_role_key: RoleKey
     },
     MatchInputOutputMetadataValue {
         input_index: u32,
@@ -33,55 +42,62 @@ where
         output_metadata_key: TokenMetadataKey,
     },
     FixedNumberOfInputs {
-        num_inputs: u32,
+        num_inputs: u32
     },
     FixedNumberOfOutputs {
-        num_outputs: u32,
+        num_outputs: u32
     },
     FixedInputMetadataValue {
         index: u32,
         metadata_key: TokenMetadataKey,
-        metadata_value: TokenMetadataValue,
+        metadata_value: TokenMetadataValue
     },
     FixedOutputMetadataValue {
         index: u32,
         metadata_key: TokenMetadataKey,
-        metadata_value: TokenMetadataValue,
+        metadata_value: TokenMetadataValue
     },
+    FixedOutputMetadataValueType {
+        index: u32,
+        metadata_key: TokenMetadataKey,
+        metadata_value_type: TokenMetadataValueDiscriminator
+    }
 }
 
-impl<RoleKey, TokenMetadataKey, TokenMetadataValue> Default
-    for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue>
+impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> Default
+    for Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
 where
     RoleKey: Parameter + Default + Ord,
     TokenMetadataKey: Parameter + Default + Ord,
     TokenMetadataValue: Parameter + Default,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
 {
     fn default() -> Self {
         Restriction::None
     }
 }
 
-pub fn validate_restriction<A, R, T, V>(
-    restriction: Restriction<R, T, V>,
+pub fn validate_restriction<A, R, T, V, D>(
+    restriction: Restriction<R, T, V, D>,
     sender: &A,
     inputs: &Vec<ProcessIO<A, R, T, V>>,
-    outputs: &Vec<ProcessIO<A, R, T, V>>,
+    outputs: &Vec<ProcessIO<A, R, T, V>>
 ) -> bool
 where
     A: Parameter + Default,
     R: Parameter + Default + Ord,
     T: Parameter + Default + Ord,
     V: Parameter + Default,
+    D: Parameter + Default + From<V>
 {
     match restriction {
-        Restriction::<R, T, V>::None => true,
+        Restriction::<R, T, V, D>::None => true,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedInputMetadataValue {
             index,
             metadata_key,
-            metadata_value,
+            metadata_value
         } => {
             let selected_input = &inputs[index as usize];
             let meta = selected_input.metadata.get(&metadata_key);
@@ -90,33 +106,51 @@ where
         Restriction::FixedOutputMetadataValue {
             index,
             metadata_key,
-            metadata_value,
+            metadata_value
         } => {
             let selected_output = &outputs[index as usize];
             let meta = selected_output.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
         }
+        Restriction::FixedOutputMetadataValueType {
+            index,
+            metadata_key,
+            metadata_value_type
+        } => {
+            let selected_output = &outputs[index as usize];
+            match selected_output.metadata.get(&metadata_key) {
+                Some(meta) => D::from(meta.clone()) == metadata_value_type,
+                None => false
+            }
+        }
         Restriction::SenderHasInputRole { index, role_key } => {
             let selected_input = &inputs[index as usize];
             match selected_input.roles.get(&role_key) {
                 Some(account) => sender == account,
-                None => false,
+                None => false
+            }
+        }
+        Restriction::SenderHasOutputRole { index, role_key } => {
+            let selected_output = &outputs[index as usize];
+            match selected_output.roles.get(&role_key) {
+                Some(account) => sender == account,
+                None => false
             }
         }
         Restriction::MatchInputOutputRole {
             input_index,
             input_role_key,
             output_index,
-            output_role_key,
+            output_role_key
         } => {
             let selected_input = &inputs[input_index as usize];
             let selected_output = &outputs[output_index as usize];
             match (
                 selected_input.roles.get(&input_role_key),
-                selected_output.roles.get(&output_role_key),
+                selected_output.roles.get(&output_role_key)
             ) {
                 (Some(input_account), Some(output_account)) => input_account == output_account,
-                _ => false,
+                _ => false
             }
         }
         Restriction::MatchInputOutputMetadataValue {
@@ -134,12 +168,15 @@ where
                 (Some(input_value), Some(output_value)) => input_value == output_value,
                 _ => false,
             }
+        Restriction::OutputHasRole { index, role_key } => {
+            let selected_output = &outputs[index as usize];
+            selected_output.roles.get(&role_key).is_some()
         }
         Restriction::SenderOwnsAllInputs => {
             for input in inputs {
                 let is_owned = match input.roles.get(&Default::default()) {
                     Some(account) => sender == account,
-                    None => false,
+                    None => false
                 };
                 if !is_owned {
                     return false;
@@ -158,17 +195,18 @@ mod tests {
 
     #[test]
     fn no_restriction_succeeds() {
-        let result = validate_restriction::<u64, u32, u32, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
+        let result =
+            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
         assert!(result);
     }
 
     #[test]
     fn sender_owns_inputs_restriction_no_inputs_succeeds() {
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderOwnsAllInputs,
             &1u64,
             &Vec::new(),
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(result);
     }
@@ -181,16 +219,20 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new()
+        );
         assert!(result);
     }
 
@@ -202,16 +244,20 @@ mod tests {
             ProcessIO {
                 roles: is_not_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_not_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new()
+        );
         assert!(!result);
     }
 
@@ -225,16 +271,20 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_not_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new()
+        );
         assert!(!result);
     }
 
@@ -248,16 +298,20 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_not_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result =
-            validate_restriction::<u64, u32, u32, u64>(Restriction::SenderOwnsAllInputs, &1u64, &inputs, &Vec::new());
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderOwnsAllInputs,
+            &1u64,
+            &inputs,
+            &Vec::new()
+        );
         assert!(!result);
     }
 
@@ -269,29 +323,29 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfInputs { num_inputs: 4 },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(result);
     }
@@ -304,19 +358,19 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfInputs { num_inputs: 1 },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -329,19 +383,19 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfOutputs { num_outputs: 2 },
             &1u64,
             &Vec::new(),
-            &outputs,
+            &outputs
         );
         assert!(result);
     }
@@ -354,19 +408,19 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedNumberOfOutputs { num_outputs: 1 },
             &1u64,
             &Vec::new(),
-            &outputs,
+            &outputs
         );
         assert!(!result);
     }
@@ -381,28 +435,28 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: real_metadata,
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 2,
                 metadata_key: 2,
-                metadata_value: 110,
+                metadata_value: 110
             },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(result);
     }
@@ -417,28 +471,28 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: real_metadata,
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 1,
                 metadata_key: 2,
-                metadata_value: 110,
+                metadata_value: 110
             },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -453,28 +507,28 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: real_metadata,
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 2,
                 metadata_key: 2,
-                metadata_value: 45,
+                metadata_value: 45
             },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -491,28 +545,28 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: real_metadata,
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 2,
                 metadata_key: 3,
-                metadata_value: 110,
+                metadata_value: 110
             },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -529,28 +583,28 @@ mod tests {
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: is_owner.clone(),
                 metadata: real_metadata,
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedInputMetadataValue {
                 index: 1,
                 metadata_key: 2,
-                metadata_value: 110,
+                metadata_value: 110
             },
             &1u64,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -562,23 +616,23 @@ mod tests {
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 1,
                 metadata_key: 1,
-                metadata_value: 100,
+                metadata_value: 100
             },
             &1u64,
             &Vec::new(),
-            &outputs,
+            &outputs
         );
         assert!(result);
     }
@@ -590,23 +644,23 @@ mod tests {
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 1,
                 metadata_key: 1,
-                metadata_value: 100,
+                metadata_value: 100
             },
             &1u64,
             &Vec::new(),
-            &outputs,
+            &outputs
         );
         assert!(!result);
     }
@@ -618,23 +672,23 @@ mod tests {
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 0,
                 metadata_key: 1,
-                metadata_value: 99,
+                metadata_value: 99
             },
             &1u64,
             &Vec::new(),
-            &outputs,
+            &outputs
         );
         assert!(!result);
     }
@@ -646,23 +700,166 @@ mod tests {
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: roles.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::FixedOutputMetadataValue {
                 index: 0,
                 metadata_key: 0,
-                metadata_value: 100,
+                metadata_value: 100
             },
             &1u64,
             &Vec::new(),
-            &outputs,
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    pub enum MetadataValue {
+        A,
+        B
+    }
+    impl Default for MetadataValue {
+        fn default() -> Self {
+            return MetadataValue::A;
+        }
+    }
+
+    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    pub enum MetadataValueDisc {
+        AA,
+        BB
+    }
+    impl Default for MetadataValueDisc {
+        fn default() -> Self {
+            return MetadataValueDisc::AA;
+        }
+    }
+
+    impl From<MetadataValue> for MetadataValueDisc {
+        fn from(v: MetadataValue) -> MetadataValueDisc {
+            match v {
+                MetadataValue::A => MetadataValueDisc::AA,
+                MetadataValue::B => MetadataValueDisc::BB
+            }
+        }
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 1,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::AA
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_incorrect_type_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 1,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::BB
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_incorrect_index_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 0,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::AA
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_restrict_metadata_type_incorrect_key_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+                parent_index: None
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedOutputMetadataValueType {
+                index: 1,
+                metadata_key: 0,
+                metadata_value_type: MetadataValueDisc::AA
+            },
+            &1u64,
+            &Vec::new(),
+            &outputs
         );
         assert!(!result);
     }
@@ -673,16 +870,16 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
-            parent_index: None,
+            parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
                 index: 0,
-                role_key: Default::default(),
+                role_key: Default::default()
             },
             &1,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(result);
     }
@@ -693,16 +890,16 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
-            parent_index: None,
+            parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
                 index: 0,
-                role_key: Default::default(),
+                role_key: Default::default()
             },
             &1,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -715,22 +912,22 @@ mod tests {
             ProcessIO {
                 roles: roles0.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: roles1.clone(),
                 metadata: BTreeMap::new(),
-                parent_index: None,
+                parent_index: None
             },
         ];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
                 index: 1,
-                role_key: Default::default(),
+                role_key: Default::default()
             },
             &1,
             &inputs,
-            &Vec::new(),
+            &Vec::new()
         );
         assert!(!result);
     }
@@ -741,13 +938,304 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
-            parent_index: None,
+            parent_index: None
         }];
-        let result = validate_restriction::<u64, u32, u32, u64>(
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole { index: 0, role_key: 1 },
             &1,
             &inputs,
+            &Vec::new()
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_output_role_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderHasOutputRole {
+                index: 0,
+                role_key: Default::default()
+            },
+            &1,
             &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn sender_has_output_role_incorrect_account_id_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderHasOutputRole {
+                index: 0,
+                role_key: Default::default()
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_output_role_incorrect_index_fails() {
+        let roles0 = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 2)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles0.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: roles1.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderHasOutputRole {
+                index: 1,
+                role_key: Default::default()
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_has_output_role_incorrect_role_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (0, 1), (1, 2)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::SenderHasOutputRole { index: 0, role_key: 1 },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_has_role_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (1, 1)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::OutputHasRole { index: 0, role_key: 1 },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn output_has_role_incorrect_role_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1), (1, 1)]);
+        let outputs = vec![ProcessIO {
+            roles: roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::OutputHasRole { index: 0, role_key: 2 },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn output_has_role_incorrect_index_fails() {
+        let roles0 = BTreeMap::from_iter(vec![(Default::default(), 1), (1, 1)]);
+        let roles1 = BTreeMap::from_iter(vec![(Default::default(), 1), (2, 1)]);
+        let outputs = vec![
+            ProcessIO {
+                roles: roles0.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: roles1.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+        ];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::OutputHasRole { index: 1, role_key: 1 },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+    #[test]
+    fn match_input_output_role_same_role_keys_succeeds() {
+        let input_roles = BTreeMap::from_iter(vec![(0, 1)]);
+        let output_roles = BTreeMap::from_iter(vec![(0, 1)]);
+        let inputs = vec![ProcessIO {
+            roles: input_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let outputs = vec![ProcessIO {
+            roles: output_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::MatchInputOutputRole {
+                input_index: 0,
+                input_role_key: 0,
+                output_index: 0,
+                output_role_key: 0
+            },
+            &1,
+            &inputs,
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn match_input_output_role_different_role_keys_succeeds() {
+        let input_roles = BTreeMap::from_iter(vec![(0, 2)]);
+        let output_roles = BTreeMap::from_iter(vec![(0, 1), (1, 2)]);
+        let inputs = vec![ProcessIO {
+            roles: input_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let outputs = vec![ProcessIO {
+            roles: output_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::MatchInputOutputRole {
+                input_index: 0,
+                input_role_key: 0,
+                output_index: 0,
+                output_role_key: 1
+            },
+            &1,
+            &inputs,
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn match_input_output_role_only_one_has_key_fails() {
+        let input_roles = BTreeMap::from_iter(vec![(0, 1)]);
+        let output_roles = BTreeMap::from_iter(vec![(0, 1), (1, 2)]);
+        let inputs = vec![ProcessIO {
+            roles: input_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let outputs = vec![ProcessIO {
+            roles: output_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::MatchInputOutputRole {
+                input_index: 0,
+                input_role_key: 1,
+                output_index: 0,
+                output_role_key: 1
+            },
+            &1,
+            &inputs,
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn match_input_output_role_neither_has_key_fails() {
+        let input_roles = BTreeMap::from_iter(vec![(0, 1)]);
+        let output_roles = BTreeMap::from_iter(vec![(0, 1)]);
+        let inputs = vec![ProcessIO {
+            roles: input_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let outputs = vec![ProcessIO {
+            roles: output_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::MatchInputOutputRole {
+                input_index: 0,
+                input_role_key: 1,
+                output_index: 0,
+                output_role_key: 1
+            },
+            &1,
+            &inputs,
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn match_input_output_role_wrong_index_fails() {
+        let input_roles0 = BTreeMap::from_iter(vec![(0, 1), (1, 2)]);
+        let input_roles1 = BTreeMap::from_iter(vec![(0, 1)]);
+        let output_roles = BTreeMap::from_iter(vec![(0, 1), (1, 2)]);
+        let inputs = vec![
+            ProcessIO {
+                roles: input_roles0.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+            ProcessIO {
+                roles: input_roles1.clone(),
+                metadata: BTreeMap::new(),
+                parent_index: None
+            },
+        ];
+        let outputs = vec![ProcessIO {
+            roles: output_roles.clone(),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::MatchInputOutputRole {
+                input_index: 1,
+                input_role_key: 1,
+                output_index: 0,
+                output_role_key: 1
+            },
+            &1,
+            &inputs,
+            &outputs
         );
         assert!(!result);
     }

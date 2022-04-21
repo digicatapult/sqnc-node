@@ -1263,7 +1263,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node"
-version = "3.3.0"
+version = "3.4.0"
 dependencies = [
  "bs58",
  "dscp-node-runtime",
@@ -1337,12 +1337,14 @@ dependencies = [
  "sp-std",
  "sp-transaction-pool",
  "sp-version",
+ "strum 0.24.0",
+ "strum_macros 0.24.0",
  "substrate-wasm-builder",
 ]
 
 [[package]]
 name = "dscp-pallet-traits"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -2186,6 +2188,12 @@ checksum = "6d621efb26863f0e9924c6ac577e8275e5e6b77455db64ffa6c65c904e9e132c"
 dependencies = [
  "unicode-segmentation",
 ]
+
+[[package]]
+name = "heck"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
 
 [[package]]
 name = "hermit-abi"
@@ -3993,7 +4001,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-simple-nft"
-version = "3.0.0"
+version = "3.0.1"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
@@ -4024,7 +4032,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-symmetric-key"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -4649,7 +4657,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32d3ebd75ac2679c2af3a92246639f9fcc8a442ee420719cc4fe195b98dd5fa3"
 dependencies = [
  "bytes 1.0.1",
- "heck",
+ "heck 0.3.3",
  "itertools",
  "log",
  "multimap",
@@ -5139,6 +5147,12 @@ dependencies = [
  "schannel",
  "security-framework",
 ]
+
+[[package]]
+name = "rustversion"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2cc38e8fa666e2de3c4aba7edeb5ffc5246c1c2ed0e3d17e560aeeba736b23f"
 
 [[package]]
 name = "rw-stream-sink"
@@ -6824,7 +6838,7 @@ dependencies = [
  "lazy_static",
  "sp-core",
  "sp-runtime",
- "strum",
+ "strum 0.20.0",
 ]
 
 [[package]]
@@ -7192,7 +7206,7 @@ version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5ba9cdfda491b814720b6b06e0cac513d922fc407582032e8706e9f137976f90"
 dependencies = [
- "heck",
+ "heck 0.3.3",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -7205,8 +7219,14 @@ version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7318c509b5ba57f18533982607f24070a55d353e90d4cae30c467cdb2ad5ac5c"
 dependencies = [
- "strum_macros",
+ "strum_macros 0.20.1",
 ]
+
+[[package]]
+name = "strum"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e96acfc1b70604b8b2f1ffa4c57e59176c7dbb05d556c71ecd2f5498a1dee7f8"
 
 [[package]]
 name = "strum_macros"
@@ -7214,9 +7234,22 @@ version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee8bc6b87a5112aeeab1f4a9f7ab634fe6cbefc4850006df31267f4cfb9e3149"
 dependencies = [
- "heck",
+ "heck 0.3.3",
  "proc-macro2",
  "quote",
+ "syn",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6878079b17446e4d3eba6192bb0a2950d5b14f0ed8424b852310e5a94345d0ef"
+dependencies = [
+ "heck 0.4.0",
+ "proc-macro2",
+ "quote",
+ "rustversion",
  "syn",
 ]
 
