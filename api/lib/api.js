@@ -99,9 +99,9 @@ const api = ({ options }) => {
     },
     MatchInputOutputMetadataValueRestriction: {
       input_index: 'u32',
-      input_metadata_key: 'RoleKey',
+      input_metadata_key: 'TokenMetadataKey',
       output_index: 'u32',
-      output_metadata_key: 'RoleKey',
+      output_metadata_key: 'TokenMetadataKey',
     },
     FixedNumberOfInputsRestriction: {
       num_inputs: 'u32',
