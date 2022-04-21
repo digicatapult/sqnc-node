@@ -39,7 +39,7 @@ where
         input_index: u32,
         input_metadata_key: TokenMetadataKey,
         output_index: u32,
-        output_metadata_key: TokenMetadataKey,
+        output_metadata_key: TokenMetadataKey
     },
     FixedNumberOfInputs {
         num_inputs: u32
@@ -157,17 +157,18 @@ where
             input_index,
             input_metadata_key,
             output_index,
-            output_metadata_key,
+            output_metadata_key
         } => {
             let selected_input = &inputs[input_index as usize];
             let selected_output = &outputs[output_index as usize];
             match (
                 selected_input.metadata.get(&input_metadata_key),
-                selected_output.metadata.get(&output_metadata_key),
+                selected_output.metadata.get(&output_metadata_key)
             ) {
                 (Some(input_value), Some(output_value)) => input_value == output_value,
-                _ => false,
+                _ => false
             }
+        }
         Restriction::OutputHasRole { index, role_key } => {
             let selected_output = &outputs[index as usize];
             selected_output.roles.get(&role_key).is_some()
@@ -1247,23 +1248,23 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: input_roles.clone(),
             metadata: BTreeMap::new(),
-            parent_index: None,
+            parent_index: None
         }];
         let outputs = vec![ProcessIO {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
-            parent_index: None,
+            parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::MatchInputOutputRole {
                 input_index: 0,
                 input_role_key: Default::default(),
                 output_index: 0,
-                output_role_key: Default::default(),
+                output_role_key: Default::default()
             },
             &1,
             &inputs,
-            &outputs,
+            &outputs
         );
         assert!(result);
     }
@@ -1276,23 +1277,23 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: input_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let outputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
                 output_index: 0,
-                output_metadata_key: 0,
+                output_metadata_key: 0
             },
             &1,
             &inputs,
-            &outputs,
+            &outputs
         );
         assert!(result);
     }
@@ -1305,23 +1306,23 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: input_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let outputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
                 output_index: 0,
-                output_metadata_key: 1,
+                output_metadata_key: 1
             },
             &1,
             &inputs,
-            &outputs,
+            &outputs
         );
         assert!(result);
     }
@@ -1334,23 +1335,23 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: input_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let outputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
                 output_index: 0,
-                output_metadata_key: 0,
+                output_metadata_key: 0
             },
             &1,
             &inputs,
-            &outputs,
+            &outputs
         );
         assert!(!result);
     }
@@ -1363,23 +1364,23 @@ mod tests {
         let inputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: input_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let outputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 0,
                 input_metadata_key: 0,
                 output_index: 0,
-                output_metadata_key: 0,
+                output_metadata_key: 0
             },
             &1,
             &inputs,
-            &outputs,
+            &outputs
         );
         assert!(!result);
     }
@@ -1394,29 +1395,29 @@ mod tests {
             ProcessIO {
                 roles: roles.clone(),
                 metadata: input_metadata0.clone(),
-                parent_index: None,
+                parent_index: None
             },
             ProcessIO {
                 roles: roles.clone(),
                 metadata: input_metadata1.clone(),
-                parent_index: None,
+                parent_index: None
             },
         ];
         let outputs = vec![ProcessIO {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
-            parent_index: None,
+            parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64>(
             Restriction::MatchInputOutputMetadataValue {
                 input_index: 1,
                 input_metadata_key: 0,
                 output_index: 0,
-                output_metadata_key: 0,
+                output_metadata_key: 0
             },
             &1,
             &inputs,
-            &outputs,
+            &outputs
         );
         assert!(!result);
     }
