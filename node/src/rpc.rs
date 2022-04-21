@@ -21,7 +21,7 @@ pub struct FullDeps<C, P> {
     /// Transaction pool instance.
     pub pool: Arc<P>,
     /// Whether to deny unsafe calls
-    pub deny_unsafe: DenyUnsafe,
+    pub deny_unsafe: DenyUnsafe
 }
 
 /// Instantiate all full RPC extensions.
@@ -33,7 +33,7 @@ where
     C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BlockBuilder<Block>,
-    P: TransactionPool + 'static,
+    P: TransactionPool + 'static
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
     use substrate_frame_rpc_system::{FullSystem, SystemApi};
@@ -42,17 +42,17 @@ where
     let FullDeps {
         client,
         pool,
-        deny_unsafe,
+        deny_unsafe
     } = deps;
 
     io.extend_with(SystemApi::to_delegate(FullSystem::new(
         client.clone(),
         pool,
-        deny_unsafe,
+        deny_unsafe
     )));
 
     io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
-        client.clone(),
+        client.clone()
     )));
 
     // Extend this RPC with a custom API by using the following syntax.

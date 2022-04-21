@@ -7,7 +7,7 @@ use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup}
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -69,7 +69,7 @@ parameter_types! {
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
     Owner,
-    NotOwner,
+    NotOwner
 }
 
 impl Default for Role {
@@ -83,7 +83,7 @@ pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 1]),
     TokenId(TokenId),
-    None,
+    None
 }
 
 impl<T> Default for MetadataValue<T> {
@@ -95,7 +95,7 @@ impl<T> Default for MetadataValue<T> {
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
 pub enum ProcessIdentifier {
     ShouldSucceed,
-    ShouldFail,
+    ShouldFail
 }
 
 impl Default for ProcessIdentifier {
@@ -114,7 +114,7 @@ impl ProcessValidator<u64, Role, u64, MetadataValue<u64>> for MockProcessValidat
         id: ProcessFullyQualifiedId<ProcessIdentifier, u32>,
         _sender: &u64,
         _inputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
-        _outputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
+        _outputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>
     ) -> bool {
         id.id == ProcessIdentifier::ShouldSucceed
     }
