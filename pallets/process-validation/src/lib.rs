@@ -160,7 +160,7 @@ pub mod pallet {
             id: T::ProcessIdentifier,
             restrictions: Vec<
                 Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-            >,
+            >
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
