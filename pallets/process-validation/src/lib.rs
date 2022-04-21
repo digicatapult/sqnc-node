@@ -130,9 +130,7 @@ pub mod pallet {
         ProcessCreated(
             T::ProcessIdentifier,
             T::ProcessVersion,
-            Vec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-            >,
+            Vec<Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>>,
             bool,
         ),
         //id, version
@@ -158,9 +156,7 @@ pub mod pallet {
         pub(super) fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: Vec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-            >
+            restrictions: Vec<Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>>,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
@@ -213,9 +209,7 @@ pub mod pallet {
         pub fn persist_process(
             id: &T::ProcessIdentifier,
             v: &T::ProcessVersion,
-            r: &Vec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-            >,
+            r: &Vec<Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>>,
         ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
