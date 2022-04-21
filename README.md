@@ -269,18 +269,19 @@ pub fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
 
 The pallet defines various type of process restrictions that can be applied to a process. These include:
 
-| Restriction                    |                                                          description                                                           |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------: |
-| `None`                         |                                        Default `Restriction` value that always succeeds                                        |
-| `SenderOwnsAllInputs`          |                     Requires that the process `sender` is assigned the `default` role on all input tokens                      |
-| `SenderHasInputRole`           |            Requires that the process `sender` is assigned to a specified role on a specified (by index) input token            |
-| `SenderHasOutputRole`          |           Requires that the process `sender` is assigned to a specified role on a specified (by index) output token            |
-| `OutputHasRole`                |                                  Requires that a specified (by index) output token has a role                                  |
-| `FixedNumberOfInputs`          |                                 Requires that the number of inputs must be a specified integer                                 |
-| `FixedNumberOfOutputs`         |                                Requires that the number of outputs must be a specified integer                                 |
-| `FixedInputMetadataValue`      |      Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token       |
-| `FixedOutputMetadataValue`     |      Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token      |
-| `FixedOutputMetadataValueType` | Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) output token |
+| Restriction                    |                                                                            description                                                                             |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| `None`                         |                                                          Default `Restriction` value that always succeeds                                                          |
+| `SenderOwnsAllInputs`          |                                       Requires that the process `sender` is assigned the `default` role on all input tokens                                        |
+| `SenderHasInputRole`           |                              Requires that the process `sender` is assigned to a specified role on a specified (by index) input token                              |
+| `SenderHasOutputRole`          |                             Requires that the process `sender` is assigned to a specified role on a specified (by index) output token                              |
+| `OutputHasRole`                |                                                    Requires that a specified (by index) output token has a role                                                    |
+| `MatchInputOutputRole`         | Requires that the account of a specified role on a specified (by index) output token matches the account of a specified role on a specified (by index) input token |
+| `FixedNumberOfInputs`          |                                                   Requires that the number of inputs must be a specified integer                                                   |
+| `FixedNumberOfOutputs`         |                                                  Requires that the number of outputs must be a specified integer                                                   |
+| `FixedInputMetadataValue`      |                        Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token                         |
+| `FixedOutputMetadataValue`     |                        Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token                        |
+| `FixedOutputMetadataValueType` |                   Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) output token                   |
 
 ### IPFSKey pallet
 
