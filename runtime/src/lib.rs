@@ -17,7 +17,7 @@ use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, Identify
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult, MultiSignature
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -31,9 +31,9 @@ pub use frame_support::{
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        IdentityFee, Weight,
+        IdentityFee, Weight
     },
-    StorageValue,
+    StorageValue
 };
 use pallet_transaction_payment::CurrencyAdapter;
 #[cfg(any(feature = "std", test))]
@@ -97,7 +97,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_version: 310,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 1,
+    transaction_version: 1
 };
 
 /// This determines the average expected block time that we are targeting.
@@ -120,7 +120,7 @@ pub const DAYS: BlockNumber = HOURS * 24;
 pub fn native_version() -> NativeVersion {
     NativeVersion {
         runtime_version: VERSION,
-        can_author_with: Default::default(),
+        can_author_with: Default::default()
     }
 }
 
@@ -298,7 +298,7 @@ pub enum Role {
     Laboratory = 3,
     Buyer = 4,
     Supplier = 5,
-    Reviewer = 6,
+    Reviewer = 6
 }
 
 impl Default for Role {
@@ -314,7 +314,7 @@ pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 32]),
     TokenId(TokenId),
-    None,
+    None
 }
 
 impl<T> Default for MetadataValue<T> {
@@ -440,7 +440,7 @@ pub type SignedExtra = (
     frame_system::CheckEra<Runtime>,
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+    pallet_transaction_payment::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;

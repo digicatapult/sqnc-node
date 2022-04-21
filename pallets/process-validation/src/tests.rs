@@ -7,7 +7,7 @@ use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup}
 };
 
 mod create_process;
@@ -66,7 +66,7 @@ impl system::Config for Test {
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
 pub enum ProcessIdentifier {
     A,
-    B,
+    B
 }
 
 impl Default for ProcessIdentifier {
@@ -77,7 +77,7 @@ impl Default for ProcessIdentifier {
 
 #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Default)]
 pub struct TokenMetadataValueDiscriminator {
-    value: u8,
+    value: u8
 }
 impl From<u128> for TokenMetadataValueDiscriminator {
     fn from(a: u128) -> TokenMetadataValueDiscriminator {

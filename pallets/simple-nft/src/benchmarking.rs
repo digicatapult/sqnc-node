@@ -25,7 +25,7 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
         .map(|_| Output {
             roles: roles.clone(),
             metadata: metadata.clone(),
-            parent_index: None,
+            parent_index: None
         })
         .collect();
     SimpleNFT::<T>::run_process(RawOrigin::Signed(account_id.clone()).into(), Vec::new(), outputs)?;
@@ -48,7 +48,7 @@ fn mk_inputs<T: Config>(i: u32) -> Result<Vec<T::TokenId>, &'static str> {
 
 fn mk_outputs<T: Config>(
     o: u32,
-    inputs_len: u32,
+    inputs_len: u32
 ) -> Result<Vec<Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>, &'static str> {
     let account_id: T::AccountId = account("owner", 0, SEED);
     let mut roles = BTreeMap::new();
@@ -59,7 +59,7 @@ fn mk_outputs<T: Config>(
         .map(|output_index| Output {
             roles: roles.clone(),
             metadata: metadata.clone(),
-            parent_index: valid_parent_index(inputs_len, output_index),
+            parent_index: valid_parent_index(inputs_len, output_index)
         })
         .collect::<Vec<_>>();
 

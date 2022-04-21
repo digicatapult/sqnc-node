@@ -23,7 +23,7 @@ fn returns_error_if_origin_validation_fails_and_no_data_added() {
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: [].to_vec(),
+                restrictions: [].to_vec()
             }
         );
         assert_eq!(System::events().len(), 0);
@@ -38,8 +38,8 @@ fn handles_if_process_exists_for_the_new_version() {
             1,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: vec![{ None }],
-            },
+                restrictions: vec![{ None }]
+            }
         );
         let result = ProcessValidation::create_process(Origin::root(), PROCESS_ID1, vec![{ None }]);
         assert_noop!(result, Error::<Test>::AlreadyExists);
@@ -63,7 +63,7 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: vec![{ None }],
+                restrictions: vec![{ None }]
             }
         );
     });

@@ -31,7 +31,7 @@ pub struct Token<AccountId, RoleKey, TokenId, BlockNumber, TokenMetadataKey: Ord
     destroyed_at: Option<BlockNumber>,
     metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
     parents: Vec<TokenId>,
-    children: Option<Vec<TokenId>>, // children is the only mutable component of the token
+    children: Option<Vec<TokenId>> // children is the only mutable component of the token
 }
 
 pub mod weights;
@@ -63,7 +63,7 @@ pub mod pallet {
             Self::AccountId,
             Self::RoleKey,
             Self::TokenMetadataKey,
-            Self::TokenMetadataValue,
+            Self::TokenMetadataValue
         >;
 
         // Maximum number of metadata items allowed per token
@@ -91,7 +91,7 @@ pub mod pallet {
         Blake2_128Concat,
         T::TokenId,
         Token<T::AccountId, T::RoleKey, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>,
-        ValueQuery, /*, DefaultForExampleStorage*/
+        ValueQuery /*, DefaultForExampleStorage*/
     >;
 
     #[pallet::event]
@@ -101,7 +101,7 @@ pub mod pallet {
         /// A token was issued.
         Minted(T::TokenId, T::AccountId, Vec<T::TokenId>),
         /// A token was burnt.
-        Burnt(T::TokenId, T::AccountId, Vec<T::TokenId>),
+        Burnt(T::TokenId, T::AccountId, Vec<T::TokenId>)
     }
 
     // This is an ugly type
@@ -110,14 +110,14 @@ pub mod pallet {
             <T as frame_system::Config>::AccountId,
             <T as Config>::RoleKey,
             <T as Config>::TokenMetadataKey,
-            <T as Config>::TokenMetadataValue,
+            <T as Config>::TokenMetadataValue
         >>::ProcessIdentifier,
         <<T as Config>::ProcessValidator as ProcessValidator<
             <T as frame_system::Config>::AccountId,
             <T as Config>::RoleKey,
             <T as Config>::TokenMetadataKey,
-            <T as Config>::TokenMetadataValue,
-        >>::ProcessVersion,
+            <T as Config>::TokenMetadataValue
+        >>::ProcessVersion
     >;
 
     #[pallet::error]
@@ -135,7 +135,7 @@ pub mod pallet {
         /// Attempted to set the same parent on multiple tokens to mint
         DuplicateParents,
         /// Process failed validation checks
-        ProcessInvalid,
+        ProcessInvalid
     }
 
     // The pallet's dispatchable functions.
@@ -146,7 +146,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             process: Option<ProcessId<T>>,
             inputs: Vec<T::TokenId>,
-            outputs: Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+            outputs: Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -163,7 +163,7 @@ pub mod pallet {
                         ProcessIO {
                             roles: token.roles,
                             metadata: token.metadata,
-                            parent_index: None,
+                            parent_index: None
                         }
                     })
                     .collect();
@@ -228,8 +228,8 @@ pub mod pallet {
                         destroyed_at: None,
                         metadata: output.metadata.clone(),
                         parents: inputs.clone(),
-                        children: None,
-                    },
+                        children: None
+                    }
                 );
                 let mut next_children = children.clone();
                 next_children.push(next);
