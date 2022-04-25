@@ -4,8 +4,8 @@
 use codec::{Decode, Encode};
 use dscp_pallet_traits::ProcessIO;
 use frame_support::Parameter;
-use sp_std::vec::Vec;
 use sp_std::boxed::Box;
+use sp_std::vec::Vec;
 
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -125,8 +125,8 @@ where
                         || validate_restriction(res_b, sender, inputs, outputs)
                 }
                 BinaryOperator::XOR => {
-                    validate_restriction(res_a, sender, inputs, outputs)
-                        ^ validate_restriction(res_b, sender, inputs, outputs)
+                    (validate_restriction(res_a, sender, inputs, outputs))
+                        ^ (validate_restriction(res_b, sender, inputs, outputs))
                 }
                 BinaryOperator::NAND => {
                     !(validate_restriction(res_a, sender, inputs, outputs)
@@ -1444,7 +1444,7 @@ mod tests {
     fn boolean_binary_and_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 100), (1, 200)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
@@ -1454,14 +1454,14 @@ mod tests {
                     Box::new(Restriction::FixedOutputMetadataValue {
                         index: 0,
                         metadata_key: 0,
-                        metadata_value: 100
+                        metadata_value: 0
                     })
                 },
                 restriction_b: {
                     Box::new(Restriction::FixedOutputMetadataValue {
                         index: 0,
                         metadata_key: 1,
-                        metadata_value: 200
+                        metadata_value: 1
                     })
                 }
             },
@@ -1470,5 +1470,261 @@ mod tests {
             &outputs
         );
         assert!(result);
+    }
+
+    #[test]
+    fn boolean_binary_and_fails() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::AND,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn boolean_binary_or_succeeds() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::OR,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn boolean_binary_xor_succeeds() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::XOR,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn boolean_binary_xor_fails() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::XOR,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn boolean_binary_nand_succeeds() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::NAND,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn boolean_binary_nand_fails() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::NAND,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn boolean_binary_nor_succeeds() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::new(),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::NOR,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn boolean_binary_nor_fails() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::BooleanBinary {
+                operator: BinaryOperator::NOR,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 0,
+                        metadata_value: 0
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
     }
 }
