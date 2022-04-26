@@ -165,7 +165,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
   "Restriction": {
     "_enum": {
       "None": "()",
-      "BooleanBinary": "BooleanBinaryRestriction",
+      "Combined": "CombinedRestriction",
       "SenderOwnsAllInputs": "()",
       "SenderHasInputRole": "SenderHasInputRoleRestriction",
       "SenderHasOutputRole": "SenderHasOutputRoleRestriction",
@@ -179,7 +179,7 @@ In order to use the API within `polkadot.js` you'll need to configure the follow
       "FixedOutputMetadataValueType": "FixedMetadataTypeRestriction"
     }
   },
-  "BooleanBinaryRestriction": {
+  "CombinedRestriction": {
     "operator": "BinaryOperator",
     "restriction_a": "Box<Restriction>",
     "restriction_b": "Box<Restriction>"
@@ -288,7 +288,7 @@ The pallet defines various type of process restrictions that can be applied to a
 | Restriction                     |                                                                                  description                                                                                   |
 | :------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | `None`                          |                                                                Default `Restriction` value that always succeeds                                                                |
-| `BooleanBinary`                 |                            Requires two specified restrictions combined via a specified operator [`AND`, `OR`, `XOR`, `NAND`, `NOR`] returns `true`                            |
+| `Combined`                      |                            Requires two specified restrictions combined via a specified operator [`AND`, `OR`, `XOR`, `NAND`, `NOR`] returns `true`                            |
 | `SenderOwnsAllInputs`           |                                             Requires that the process `sender` is assigned the `default` role on all input tokens                                              |
 | `SenderHasInputRole`            |                                    Requires that the process `sender` is assigned to a specified role on a specified (by index) input token                                    |
 | `SenderHasOutputRole`           |                                   Requires that the process `sender` is assigned to a specified role on a specified (by index) output token                                    |

@@ -69,7 +69,7 @@ const api = ({ options }) => {
     Restriction: {
       _enum: {
         None: '()',
-        BooleanBinary: 'BooleanBinaryRestriction',
+        Combined: 'CombinedRestriction',
         SenderOwnsAllInputs: '()',
         SenderHasInputRole: 'SenderHasInputRoleRestriction',
         SenderHasOutputRole: 'SenderHasOutputRoleRestriction',
@@ -83,7 +83,7 @@ const api = ({ options }) => {
         FixedOutputMetadataValueType: 'FixedMetadataTypeRestriction',
       },
     },
-    BooleanBinaryRestriction: {
+    CombinedRestriction: {
       operator: 'BinaryOperator',
       restriction_a: 'Box<Restriction>',
       restriction_b: 'Box<Restriction>',

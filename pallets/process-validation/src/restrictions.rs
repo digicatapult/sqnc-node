@@ -27,7 +27,7 @@ where
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
 {
     None,
-    BooleanBinary {
+    Combined {
         operator: BinaryOperator,
         restriction_a: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>,
         restriction_b: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>
@@ -108,7 +108,7 @@ where
 {
     match restriction {
         Restriction::<R, T, V, D>::None => true,
-        Restriction::BooleanBinary {
+        Restriction::Combined {
             operator,
             restriction_a,
             restriction_b
@@ -1448,7 +1448,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::AND,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1480,7 +1480,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::AND,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1512,7 +1512,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::OR,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1537,6 +1537,38 @@ mod tests {
     }
 
     #[test]
+    fn boolean_binary_or_fails() {
+        let outputs = vec![ProcessIO {
+            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+            metadata: BTreeMap::from_iter(vec![(0, 0)]),
+            parent_index: None
+        }];
+        let result = validate_restriction::<u64, u32, u32, u64, u64>(
+            Restriction::Combined {
+                operator: BinaryOperator::OR,
+                restriction_a: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 1,
+                        metadata_value: 1
+                    })
+                },
+                restriction_b: {
+                    Box::new(Restriction::FixedOutputMetadataValue {
+                        index: 0,
+                        metadata_key: 2,
+                        metadata_value: 2
+                    })
+                }
+            },
+            &1,
+            &Vec::new(),
+            &outputs
+        );
+        assert!(!result);
+    }
+
+    #[test]
     fn boolean_binary_xor_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
@@ -1544,7 +1576,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::XOR,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1576,7 +1608,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::XOR,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1608,7 +1640,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::NAND,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1640,7 +1672,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::NAND,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1672,7 +1704,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::NOR,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {
@@ -1704,7 +1736,7 @@ mod tests {
             parent_index: None
         }];
         let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::BooleanBinary {
+            Restriction::Combined {
                 operator: BinaryOperator::NOR,
                 restriction_a: {
                     Box::new(Restriction::FixedOutputMetadataValue {

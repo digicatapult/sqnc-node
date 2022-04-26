@@ -213,7 +213,7 @@ pub mod pallet {
                 T::TokenMetadataValue,
                 T::TokenMetadataValueDiscriminator
             >,
-            mut count: u8,
+            count: u8,
             max_depth: u8
         ) -> bool {
             if count > max_depth {
@@ -221,14 +221,14 @@ pub mod pallet {
             }
 
             match restriction {
-                Restriction::BooleanBinary {
+                Restriction::Combined {
                     operator: _,
                     restriction_a,
                     restriction_b
                 } => {
-                    count += 1;
-                    Pallet::<T>::restriction_over_max_depth(*restriction_a, count.clone(), max_depth)
-                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, count.clone(), max_depth)
+                    let incremented_count = count + 1;
+                    Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
+                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
                 }
                 _ => false
             }

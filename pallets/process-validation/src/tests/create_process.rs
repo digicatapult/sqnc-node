@@ -3,7 +3,7 @@ use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
 use crate::{
-    BinaryOperator, Process, ProcessModel, ProcessStatus, Restriction::BooleanBinary, Restriction::None, VersionModel
+    BinaryOperator, Process, ProcessModel, ProcessStatus, Restriction::Combined, Restriction::None, VersionModel
 };
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 
@@ -154,10 +154,10 @@ fn boolean_binary_with_depth_succeeds() {
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
-            vec![BooleanBinary {
+            vec![Combined {
                 operator: BinaryOperator::AND,
                 restriction_a: { Box::new(None) },
-                restriction_b: Box::new(BooleanBinary {
+                restriction_b: Box::new(Combined {
                     operator: BinaryOperator::AND,
                     restriction_a: { Box::new(None) },
                     restriction_b: { Box::new(None) }
@@ -167,10 +167,10 @@ fn boolean_binary_with_depth_succeeds() {
         let expected = Event::pallet_process_validation(ProcessCreated(
             PROCESS_ID1,
             1u32,
-            vec![BooleanBinary {
+            vec![Combined {
                 operator: BinaryOperator::AND,
                 restriction_a: { Box::new(None) },
-                restriction_b: Box::new(BooleanBinary {
+                restriction_b: Box::new(Combined {
                     operator: BinaryOperator::AND,
                     restriction_a: { Box::new(None) },
                     restriction_b: { Box::new(None) }
@@ -192,13 +192,13 @@ fn boolean_binary_over_max_depth_fails() {
             ProcessValidation::create_process(
                 Origin::root(),
                 PROCESS_ID1,
-                vec![BooleanBinary {
+                vec![Combined {
                     operator: BinaryOperator::AND,
                     restriction_a: { Box::new(None) },
-                    restriction_b: Box::new(BooleanBinary {
+                    restriction_b: Box::new(Combined {
                         operator: BinaryOperator::AND,
                         restriction_a: { Box::new(None) },
-                        restriction_b: Box::new(BooleanBinary {
+                        restriction_b: Box::new(Combined {
                             operator: BinaryOperator::AND,
                             restriction_a: { Box::new(None) },
                             restriction_b: { Box::new(None) }
