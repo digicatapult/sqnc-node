@@ -148,7 +148,7 @@ fn updates_version_correctly_for_new_process_and_dispatches_event() {
 }
 
 #[test]
-fn boolean_binary_with_depth_succeeds() {
+fn combined_with_depth_succeeds() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_ok!(ProcessValidation::create_process(
@@ -185,7 +185,7 @@ fn boolean_binary_with_depth_succeeds() {
 }
 
 #[test]
-fn boolean_binary_over_max_depth_fails() {
+fn combined_over_max_depth_fails() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_noop!(

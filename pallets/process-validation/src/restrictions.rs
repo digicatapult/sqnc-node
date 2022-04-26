@@ -1441,7 +1441,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_and_succeeds() {
+    fn combined_and_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
@@ -1473,7 +1473,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_and_fails() {
+    fn combined_and_fails() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0)]),
@@ -1505,7 +1505,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_or_succeeds() {
+    fn combined_or_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0)]),
@@ -1537,7 +1537,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_or_fails() {
+    fn combined_or_fails() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0)]),
@@ -1569,7 +1569,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_xor_succeeds() {
+    fn combined_xor_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0)]),
@@ -1601,7 +1601,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_xor_fails() {
+    fn combined_xor_fails() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
@@ -1633,7 +1633,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_nand_succeeds() {
+    fn combined_nand_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::new(),
@@ -1665,7 +1665,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_nand_fails() {
+    fn combined_nand_fails() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
@@ -1697,7 +1697,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_nor_succeeds() {
+    fn combined_nor_succeeds() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::new(),
@@ -1729,7 +1729,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_binary_nor_fails() {
+    fn combined_nor_fails() {
         let outputs = vec![ProcessIO {
             roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
             metadata: BTreeMap::from_iter(vec![(0, 0)]),
