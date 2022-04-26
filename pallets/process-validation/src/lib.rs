@@ -152,8 +152,8 @@ pub mod pallet {
         AlreadyDisabled,
         // process not found for this versiion
         InvalidVersion,
-        // restriction goes over maximum depth
-        MaxDepth
+        // restrictions go over maximum depth
+        RestrictionsTooDeep
     }
 
     // The pallet's dispatchable functions.
@@ -171,12 +171,8 @@ pub mod pallet {
 
             for restriction in restrictions.iter() {
                 ensure!(
-                    !Pallet::<T>::restriction_over_max_depth(
-                        restriction.clone(),
-                        &mut 0,
-                        T::MaxRestrictionDepth::get()
-                    ),
-                    Error::<T>::MaxDepth
+                    !Pallet::<T>::restriction_over_max_depth(restriction.clone(), 0, T::MaxRestrictionDepth::get()),
+                    Error::<T>::RestrictionsTooDeep
                 );
             }
 
@@ -217,10 +213,10 @@ pub mod pallet {
                 T::TokenMetadataValue,
                 T::TokenMetadataValueDiscriminator
             >,
-            count: &mut u8,
+            mut count: u8,
             max_depth: u8
         ) -> bool {
-            if *count > max_depth {
+            if count > max_depth {
                 return true;
             }
 
@@ -230,9 +226,9 @@ pub mod pallet {
                     restriction_a,
                     restriction_b
                 } => {
-                    *count += 1;
-                    Pallet::<T>::restriction_over_max_depth(*restriction_a, count, max_depth)
-                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, count, max_depth)
+                    count += 1;
+                    Pallet::<T>::restriction_over_max_depth(*restriction_a, count.clone(), max_depth)
+                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, count.clone(), max_depth)
                 }
                 _ => false
             }

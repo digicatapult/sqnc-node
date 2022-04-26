@@ -70,10 +70,6 @@ pub enum ProcessIdentifier {
     B
 }
 
-// parameter_types! {
-//     pub const MaxRestrictionDepth: u8 = 2;
-// }
-
 impl Default for ProcessIdentifier {
     fn default() -> Self {
         ProcessIdentifier::A
