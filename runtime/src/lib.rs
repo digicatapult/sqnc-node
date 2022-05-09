@@ -346,6 +346,10 @@ impl pallet_simple_nft::Config for Runtime {
     type MaxMetadataCount = MaxMetadataCount;
 }
 
+parameter_types! {
+    pub const MaxRestrictionDepth: u8 = 3;
+}
+
 impl pallet_process_validation::Config for Runtime {
     type Event = Event;
     type ProcessIdentifier = ProcessIdentifier;
@@ -357,6 +361,7 @@ impl pallet_process_validation::Config for Runtime {
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type TokenMetadataValueDiscriminator = MetadataValueType;
+    type MaxRestrictionDepth = MaxRestrictionDepth;
 }
 
 pub struct DummyChangeMembers;

@@ -79,6 +79,9 @@ pub mod pallet {
         type ProcessIdentifier: Parameter;
         type ProcessVersion: Parameter + AtLeast32Bit + Default;
 
+        #[pallet::constant]
+        type MaxRestrictionDepth: Get<u8>;
+
         // Origins for calling these extrinsics. For now these are expected to be root
         type CreateProcessOrigin: EnsureOrigin<Self::Origin>;
         type DisableProcessOrigin: EnsureOrigin<Self::Origin>;
@@ -148,7 +151,9 @@ pub mod pallet {
         // process is already disabled
         AlreadyDisabled,
         // process not found for this versiion
-        InvalidVersion
+        InvalidVersion,
+        // restrictions go over maximum depth
+        RestrictionsTooDeep
     }
 
     // The pallet's dispatchable functions.
@@ -163,6 +168,14 @@ pub mod pallet {
             >
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
+
+            for restriction in restrictions.iter() {
+                ensure!(
+                    !Pallet::<T>::restriction_over_max_depth(restriction.clone(), 0, T::MaxRestrictionDepth::get()),
+                    Error::<T>::RestrictionsTooDeep
+                );
+            }
+
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
             Pallet::<T>::persist_process(&id, &version, &restrictions)?;
 
@@ -193,6 +206,34 @@ pub mod pallet {
 
     // helper methods
     impl<T: Config> Pallet<T> {
+        pub fn restriction_over_max_depth(
+            restriction: Restriction<
+                T::RoleKey,
+                T::TokenMetadataKey,
+                T::TokenMetadataValue,
+                T::TokenMetadataValueDiscriminator
+            >,
+            count: u8,
+            max_depth: u8
+        ) -> bool {
+            if count > max_depth {
+                return true;
+            }
+
+            match restriction {
+                Restriction::Combined {
+                    operator: _,
+                    restriction_a,
+                    restriction_b
+                } => {
+                    let incremented_count = count + 1;
+                    Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
+                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
+                }
+                _ => false
+            }
+        }
+
         pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
             return match <VersionModel<T>>::contains_key(&id) {
                 true => <VersionModel<T>>::get(&id) + One::one(),

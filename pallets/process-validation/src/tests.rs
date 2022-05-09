@@ -36,6 +36,7 @@ frame_support::construct_runtime!(
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
+    pub const MaxRestrictionDepth: u8 = 2;
 }
 
 impl system::Config for Test {
@@ -92,6 +93,7 @@ impl pallet_process_validation::Config for Test {
     type CreateProcessOrigin = system::EnsureRoot<u64>;
     type DisableProcessOrigin = system::EnsureRoot<u64>;
     type WeightInfo = ();
+    type MaxRestrictionDepth = MaxRestrictionDepth;
 
     type RoleKey = u32;
     type TokenMetadataKey = u32;

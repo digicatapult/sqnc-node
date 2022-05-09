@@ -2,7 +2,9 @@ use super::*;
 use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
-use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
+use crate::{
+    BinaryOperator, Process, ProcessModel, ProcessStatus, Restriction::Combined, Restriction::None, VersionModel
+};
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 
 // -- fixtures --
@@ -142,5 +144,82 @@ fn updates_version_correctly_for_new_process_and_dispatches_event() {
         // sets version to 1 and returns true to identify that this is a new event
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1u32);
         assert_eq!(System::events()[0].event, expected);
+    });
+}
+
+#[test]
+fn combined_with_depth_succeeds() {
+    new_test_ext().execute_with(|| {
+        System::set_block_number(1);
+        assert_ok!(ProcessValidation::create_process(
+            Origin::root(),
+            PROCESS_ID1,
+            vec![Combined {
+                operator: BinaryOperator::AND,
+                restriction_a: { Box::new(None) },
+                restriction_b: Box::new(Combined {
+                    operator: BinaryOperator::AND,
+                    restriction_a: { Box::new(None) },
+                    restriction_b: { Box::new(None) }
+                })
+            }]
+        ));
+        let expected = Event::pallet_process_validation(ProcessCreated(
+            PROCESS_ID1,
+            1u32,
+            vec![Combined {
+                operator: BinaryOperator::AND,
+                restriction_a: { Box::new(None) },
+                restriction_b: Box::new(Combined {
+                    operator: BinaryOperator::AND,
+                    restriction_a: { Box::new(None) },
+                    restriction_b: { Box::new(None) }
+                })
+            }],
+            true
+        ));
+        // sets version to 1 and returns true to identify that this is a new event
+        assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1u32);
+        assert_eq!(System::events()[0].event, expected);
+    });
+}
+
+#[test]
+fn combined_over_max_depth_fails() {
+    new_test_ext().execute_with(|| {
+        System::set_block_number(1);
+        assert_noop!(
+            ProcessValidation::create_process(
+                Origin::root(),
+                PROCESS_ID1,
+                vec![Combined {
+                    operator: BinaryOperator::AND,
+                    restriction_a: { Box::new(None) },
+                    restriction_b: Box::new(Combined {
+                        operator: BinaryOperator::AND,
+                        restriction_a: { Box::new(None) },
+                        restriction_b: Box::new(Combined {
+                            operator: BinaryOperator::AND,
+                            restriction_a: { Box::new(None) },
+                            restriction_b: { Box::new(None) }
+                        })
+                    })
+                }]
+            ),
+            DispatchError::Module {
+                index: 1,
+                error: 4,
+                message: Some("RestrictionsTooDeep")
+            },
+        );
+        assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0u32);
+        assert_eq!(
+            <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
+            Process {
+                status: ProcessStatus::Disabled,
+                restrictions: [].to_vec()
+            }
+        );
+        assert_eq!(System::events().len(), 0);
     });
 }

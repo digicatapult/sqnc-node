@@ -44,6 +44,9 @@ const api = ({ options }) => {
         None: null,
       },
     },
+    BinaryOperator: {
+      _enum: ['AND', 'OR', 'XOR', 'NAND', 'NOR'],
+    },
     MetadataValueType: {
       _enum: ['File', 'Literal', 'TokenId', 'None'],
     },
@@ -66,6 +69,7 @@ const api = ({ options }) => {
     Restriction: {
       _enum: {
         None: '()',
+        Combined: 'CombinedRestriction',
         SenderOwnsAllInputs: '()',
         SenderHasInputRole: 'SenderHasInputRoleRestriction',
         SenderHasOutputRole: 'SenderHasOutputRoleRestriction',
@@ -78,6 +82,11 @@ const api = ({ options }) => {
         FixedOutputMetadataValue: 'FixedMetadataValueRestriction',
         FixedOutputMetadataValueType: 'FixedMetadataTypeRestriction',
       },
+    },
+    CombinedRestriction: {
+      operator: 'BinaryOperator',
+      restriction_a: 'Box<Restriction>',
+      restriction_b: 'Box<Restriction>',
     },
     SenderHasInputRoleRestriction: {
       index: 'u32',
