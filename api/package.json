@@ -1,6 +1,6 @@
 {
   "name": "@digicatapult/dscp-node",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "DSCP node types",
   "repository": {
     "type": "git",

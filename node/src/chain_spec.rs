@@ -1,5 +1,5 @@
 use dscp_node_runtime::{
-    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
+    AccountId, AuraConfig, BalancesConfig, MembershipConfig, GenesisConfig, GrandpaConfig, NodeAuthorizationConfig,
     Signature, SudoConfig, SystemConfig, WASM_BINARY
 };
 use sc_service::ChainType;
@@ -58,8 +58,12 @@ pub fn development_config() -> Result<ChainSpec, String> {
                 vec![
                     get_account_id_from_seed::<sr25519::Public>("Alice"),
                     get_account_id_from_seed::<sr25519::Public>("Bob"),
-                    get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-                    get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+                    get_account_id_from_seed::<sr25519::Public>("Charlie"),
+                ],
+                vec![
+                    get_account_id_from_seed::<sr25519::Public>("Alice"),
+                    get_account_id_from_seed::<sr25519::Public>("Bob"),
+                    get_account_id_from_seed::<sr25519::Public>("Charlie"),
                 ],
                 Some(NodeAuthorizationConfig {
                     nodes: vec![(
@@ -120,12 +124,11 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Dave"),
                     get_account_id_from_seed::<sr25519::Public>("Eve"),
                     get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-                    get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-                    get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-                    get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-                    get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-                    get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-                    get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+                ],
+                vec![
+                    get_account_id_from_seed::<sr25519::Public>("Alice"),
+                    get_account_id_from_seed::<sr25519::Public>("Bob"),
+                    get_account_id_from_seed::<sr25519::Public>("Charlie"),
                 ],
                 Some(NodeAuthorizationConfig {
                     nodes: vec![
@@ -189,6 +192,7 @@ fn testnet_genesis(
     initial_authorities: Vec<(AuraId, GrandpaId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
+    technical_committee_accounts: Vec<AccountId>,
     node_authorization_config: Option<NodeAuthorizationConfig>,
     _enable_println: bool
 ) -> GenesisConfig {
@@ -214,8 +218,9 @@ fn testnet_genesis(
         }),
         pallet_node_authorization: node_authorization_config,
         pallet_membership: Some(MembershipConfig {
-            members: endowed_accounts.iter().map(|k| k.clone()).collect(),
+            members: technical_committee_accounts.iter().cloned().collect(),
             ..Default::default()
-        })
+        }),
+        pallet_collective: Some(Default::default())
     }
 }
