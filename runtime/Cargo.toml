@@ -25,6 +25,7 @@ hex-literal = { optional = true, version = '0.3.1' }
 serde = { features = ['derive'], optional = true, version = '1.0.101' }
 
 # local dependencies
+pallet-doas = { version = '1.0.0', default-features = false, package = 'pallet-doas', path = '../pallets/doas' }
 pallet-simple-nft = { version = '3.0.1', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
 pallet-process-validation = { version = '2.6.0', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
 pallet-symmetric-key = { version = '1.0.2', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
@@ -85,6 +86,7 @@ std = [
     'pallet-aura/std',
     'pallet-balances/std',
     'pallet-collective/std',
+    'pallet-doas/std',
     'pallet-grandpa/std',
     'pallet-membership/std',
     'pallet-node-authorization/std',

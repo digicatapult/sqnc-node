@@ -129,7 +129,7 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 type MoreThanHalfMembers = EnsureOneOf<
     AccountId,
     EnsureRoot<AccountId>,
-    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId>,
+    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GovernanceCollective>,
 >;
 
 parameter_types! {
@@ -259,6 +259,12 @@ impl pallet_sudo::Config for Runtime {
     type Call = Call;
 }
 
+impl pallet_doas::Config for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type DoasOrigin = MoreThanHalfMembers;
+}
+
 parameter_types! {
     pub const MaxWellKnownNodes: u32 = 16;
     pub const MaxPeerIdLength: u32 = 128;
@@ -371,23 +377,25 @@ impl pallet_process_validation::Config for Runtime {
 }
 
 parameter_types! {
-    pub const TechnicalMotionDuration: BlockNumber = 7 * DAYS;
-    pub const TechnicalMaxProposals: u32 = 100;
-    pub const TechnicalMaxMembers: u32 = 100;
+    pub const GovernanceMotionDuration: BlockNumber = 7 * DAYS;
+    pub const GovernanceMaxProposals: u32 = 100;
+    pub const GovernanceMaxMembers: u32 = 100;
 }
 
-impl pallet_collective::Config for Runtime {
+type GovernanceCollective = pallet_collective::Instance1;
+impl pallet_collective::Config<GovernanceCollective> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
     type Event = Event;
-    type MotionDuration = TechnicalMotionDuration;
-    type MaxProposals = TechnicalMaxProposals;
-    type MaxMembers = TechnicalMaxMembers;
+    type MotionDuration = GovernanceMotionDuration;
+    type MaxProposals = GovernanceMaxProposals;
+    type MaxMembers = GovernanceMaxMembers;
     type DefaultVote = pallet_collective::PrimeDefaultVote;
     type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_membership::Config for Runtime {
+type GovernanceMembershipInstance = pallet_membership::Instance1;
+impl pallet_membership::Config<GovernanceMembershipInstance> for Runtime {
     type Event = Event;
     type AddOrigin = EnsureRoot<AccountId>;
     type RemoveOrigin = EnsureRoot<AccountId>;
@@ -436,8 +444,9 @@ construct_runtime!(
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         IpfsKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},
-        Membership: pallet_membership::{Module, Call, Storage, Event<T>, Config<T>},
-        TechnicalCommittee: pallet_collective::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>}
+        Membership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
+        TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        Doas: pallet_doas::{Module, Call, Event<T>}
     }
 );
 

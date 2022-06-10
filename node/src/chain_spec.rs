@@ -217,10 +217,10 @@ fn testnet_genesis(
             key: root_key
         }),
         pallet_node_authorization: node_authorization_config,
-        pallet_membership: Some(MembershipConfig {
+        pallet_membership_Instance1: Some(MembershipConfig {
             members: technical_committee_accounts.iter().cloned().collect(),
             ..Default::default()
         }),
-        pallet_collective: Some(Default::default())
+        pallet_collective_Instance1: Some(Default::default())
     }
 }
