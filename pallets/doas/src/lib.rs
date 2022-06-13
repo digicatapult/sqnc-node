@@ -44,9 +44,9 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// A doas_root just took place. \[result\]
-        DoasRootDone(DispatchResult),
+        DidAsRoot(DispatchResult),
         /// A doas just took place. \[result\]
-        DoasDone(DispatchResult),
+        DidAs(DispatchResult),
     }
 
     // The pallet's dispatchable functions.
@@ -71,7 +71,7 @@ pub mod pallet {
           T::DoasOrigin::ensure_origin(origin)?;
 
           let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
-          Self::deposit_event(Event::DoasRootDone(res.map(|_| ()).map_err(|e| e.error)));
+          Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
           // Sudo user does not pay a fee.
           Ok(Pays::No.into())
         }
@@ -92,7 +92,7 @@ pub mod pallet {
           T::DoasOrigin::ensure_origin(origin)?;
 
           let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
-          Self::deposit_event(Event::DoasRootDone(res.map(|_| ()).map_err(|e| e.error)));
+          Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
           // Sudo user does not pay a fee.
           Ok(Pays::No.into())
         }
@@ -129,7 +129,7 @@ pub mod pallet {
 
           let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Signed(who).into());
 
-          Self::deposit_event(Event::DoasDone(res.map(|_| ()).map_err(|e| e.error)));
+          Self::deposit_event(Event::DidAs(res.map(|_| ()).map_err(|e| e.error)));
           // Duas user does not pay a fee.
           Ok(Pays::No.into())
         }
