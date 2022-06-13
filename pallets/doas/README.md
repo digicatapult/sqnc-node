@@ -1,8 +1,8 @@
-# Duas Module
+# Doas Module
 
 ## Overview
 
-The Duas module allows for a configurable `Origin`
+The Doas module allows for a configurable `Origin`
 to execute dispatchable functions that require a `Root` call.
 This is seen as a more flexible of the [`sudo`](https://docs.rs/pallet-sudo/latest/pallet_sudo)
 pallet provided by ParityTech. This pallet may be used in conjunction with the
@@ -24,9 +24,9 @@ Only the sudo key can call the dispatchable functions from the Sudo module.
 
 ### Executing Privileged Functions
 
-The Duas module itself is not intended to be used within other modules.
+The Doas module itself is not intended to be used within other modules.
 Instead, you can build "privileged functions" (i.e. functions that require `Root` origin) in other modules.
-You can execute these privileged functions by dispatching `duas` form the configured `Origin`.
+You can execute these privileged functions by dispatching `doas` form the configured `Origin`.
 Privileged functions cannot be directly executed via an extrinsic.
 
 Learn more about privileged functions and `Root` origin in the [`Origin`] type documentation.

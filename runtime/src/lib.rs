@@ -132,6 +132,12 @@ type MoreThanHalfMembers = EnsureOneOf<
     pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GovernanceCollective>,
 >;
 
+type MoreThanTwoMembers = EnsureOneOf<
+    AccountId,
+    EnsureRoot<AccountId>,
+    pallet_collective::EnsureMembers<_2, AccountId, GovernanceCollective>,
+>;
+
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
     pub const BlockHashCount: BlockNumber = 2400;
@@ -366,8 +372,8 @@ impl pallet_process_validation::Config for Runtime {
     type Event = Event;
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = ProcessVersion;
-    type CreateProcessOrigin = MoreThanHalfMembers;
-    type DisableProcessOrigin = MoreThanHalfMembers;
+    type CreateProcessOrigin = MoreThanTwoMembers;
+    type DisableProcessOrigin = MoreThanTwoMembers;
     type WeightInfo = pallet_process_validation::weights::SubstrateWeight<Runtime>;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
@@ -417,7 +423,7 @@ impl pallet_symmetric_key::Config for Runtime {
     type RefreshPeriod = RefreshPeriod;
     type ScheduleCall = Call;
     type UpdateOrigin = MoreThanHalfMembers;
-    type RotateOrigin = MoreThanHalfMembers;
+    type RotateOrigin = MoreThanTwoMembers;
     type Randomness = RandomnessCollectiveFlip;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;

@@ -14,6 +14,11 @@ use frame_support::{
   dispatch::DispatchResultWithPostInfo,
 };
 
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod tests;
+
 #[frame_support::pallet]
 pub mod pallet {
 
@@ -66,7 +71,7 @@ pub mod pallet {
           let dispatch_info = call.get_dispatch_info();
           (dispatch_info.weight.saturating_add(10_000), dispatch_info.class)
         })]
-        fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
+        pub(super) fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
           // This is a public call, so we ensure that the origin is some signed account.
           T::DoasOrigin::ensure_origin(origin)?;
 
@@ -87,7 +92,7 @@ pub mod pallet {
         /// - The weight of this call is defined by the caller.
         /// # </weight>
         #[pallet::weight((*_weight, call.get_dispatch_info().class))]
-        fn doas_root_unchecked_weight(origin: OriginFor<T>, call: Box<<T as Config>::Call>, _weight: Weight) -> DispatchResultWithPostInfo {
+        pub(super) fn doas_root_unchecked_weight(origin: OriginFor<T>, call: Box<<T as Config>::Call>, _weight: Weight) -> DispatchResultWithPostInfo {
           // This is a public call, so we ensure that the origin is some signed account.
           T::DoasOrigin::ensure_origin(origin)?;
 
@@ -118,7 +123,7 @@ pub mod pallet {
             dispatch_info.class,
           )
         })]
-        fn doas(origin: OriginFor<T>,
+        pub(super) fn doas(origin: OriginFor<T>,
           who: <T::Lookup as StaticLookup>::Source,
           call: Box<<T as Config>::Call>
         ) -> DispatchResultWithPostInfo {
@@ -130,7 +135,7 @@ pub mod pallet {
           let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Signed(who).into());
 
           Self::deposit_event(Event::DidAs(res.map(|_| ()).map_err(|e| e.error)));
-          // Duas user does not pay a fee.
+          // Doas user does not pay a fee.
           Ok(Pays::No.into())
         }
     }
