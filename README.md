@@ -319,7 +319,7 @@ pub(super) type KeyScheduleId<T: Config> = StorageValue<_, Option<Vec<u8>>, Valu
 
 The first exposes the maintained swarm key, whilst the latter the handle used with the `pallet-scheduling` frame pallet for setting a rotation schedule. This schedule is configured for a 7 day rotation.
 
-Two extrinsics are exposed by this pallet, one for updating a shared symmetric key and one for forcing a rotation of the key based on a configured randomness source. In the `runtime` in this repository these can only be called by `sudo`:
+Two extrinsics are exposed by this pallet, one for updating a shared symmetric key and one for forcing a rotation of the key based on a configured randomness source. In the `runtime` in this repository `update_key` can be called by either `sudo` or a simple majority of the Membership. `rotate_key` can be called either by `sudo` or a pair of accounts in the `Membership` set.
 
 ```rust
 pub(super) fn update_key(origin: OriginFor<T>, new_key: Vec<u8>) -> DispatchResultWithPostInfo { ... }
@@ -330,6 +330,18 @@ Pallet tests can be run with:
 
 ```bash
 cargo test -p pallet-symmetric-key
+```
+
+### Doas pallet
+
+The `Doas` pallet allows for a configurable `Origin` to execute dispatchable functions that require a `Root` call. This is seen as a more flexible of the [`sudo`](https://docs.rs/pallet-sudo/latest/pallet_sudo) pallet provided by ParityTech. This pallet may be used in conjunction with the [`collective`](https://docs.rs/pallet-sudo/latest/pallet_collective) pallet to enable `sudo` like functionality where a majority of the collective must agree to perform the action.
+
+This pallet exposes three extrinsics:
+
+```rust
+pub(super) fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo { ... }
+pub(super) fn doas_root_unchecked_weight(origin: OriginFor<T>, call: Box<<T as Config>::Call>, _weight: Weight) -> DispatchResultWithPostInfo { ... }
+pub(super) fn doas(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo { ... }
 ```
 
 ## Repo Structure

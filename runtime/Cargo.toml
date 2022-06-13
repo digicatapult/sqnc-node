@@ -4,7 +4,7 @@ edition = '2018'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-node-runtime'
-version = '3.6.0'
+version = '3.7.0'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -25,6 +25,7 @@ hex-literal = { optional = true, version = '0.3.1' }
 serde = { features = ['derive'], optional = true, version = '1.0.101' }
 
 # local dependencies
+pallet-doas = { version = '1.0.0', default-features = false, package = 'pallet-doas', path = '../pallets/doas' }
 pallet-simple-nft = { version = '3.0.1', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
 pallet-process-validation = { version = '2.6.0', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
 pallet-symmetric-key = { version = '1.0.2', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
@@ -36,6 +37,7 @@ frame-system-benchmarking = { default-features = false, optional = true, version
 frame-system-rpc-runtime-api = { default-features = false, version = '3.0.0' }
 pallet-aura = { default-features = false, version = '3.0.0' }
 pallet-balances = { default-features = false, version = '3.0.0' }
+pallet-collective = { default-features = false, version = '3.0.0' }
 pallet-grandpa = { default-features = false, version = '3.0.0' }
 pallet-membership = { default-features = false, version = '3.0.0' }
 pallet-node-authorization = { default-features = false, version = '3.0.0' }
@@ -83,9 +85,12 @@ std = [
     'frame-system-rpc-runtime-api/std',
     'pallet-aura/std',
     'pallet-balances/std',
+    'pallet-collective/std',
+    'pallet-doas/std',
     'pallet-grandpa/std',
     'pallet-membership/std',
     'pallet-node-authorization/std',
+    'pallet-process-validation/std',
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
     'pallet-timestamp/std',

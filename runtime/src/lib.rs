@@ -7,12 +7,16 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode};
-use frame_system::EnsureRoot;
+use frame_system::{EnsureOneOf, EnsureRoot};
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_core::{
+    crypto::KeyTypeId,
+    u32_trait::{_1, _2},
+    OpaqueMetadata
+};
 use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
@@ -125,6 +129,18 @@ pub fn native_version() -> NativeVersion {
 }
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+
+type MoreThanHalfMembers = EnsureOneOf<
+    AccountId,
+    EnsureRoot<AccountId>,
+    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GovernanceCollective>
+>;
+
+type MoreThanTwoMembers = EnsureOneOf<
+    AccountId,
+    EnsureRoot<AccountId>,
+    pallet_collective::EnsureMembers<_2, AccountId, GovernanceCollective>
+>;
 
 parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
@@ -253,6 +269,12 @@ impl pallet_sudo::Config for Runtime {
     type Call = Call;
 }
 
+impl pallet_doas::Config for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type DoasOrigin = MoreThanHalfMembers;
+}
+
 parameter_types! {
     pub const MaxWellKnownNodes: u32 = 16;
     pub const MaxPeerIdLength: u32 = 128;
@@ -262,10 +284,10 @@ impl pallet_node_authorization::Config for Runtime {
     type Event = Event;
     type MaxWellKnownNodes = MaxWellKnownNodes;
     type MaxPeerIdLength = MaxPeerIdLength;
-    type AddOrigin = EnsureRoot<AccountId>;
-    type RemoveOrigin = EnsureRoot<AccountId>;
-    type SwapOrigin = EnsureRoot<AccountId>;
-    type ResetOrigin = EnsureRoot<AccountId>;
+    type AddOrigin = MoreThanHalfMembers;
+    type RemoveOrigin = MoreThanHalfMembers;
+    type SwapOrigin = MoreThanHalfMembers;
+    type ResetOrigin = MoreThanHalfMembers;
     type WeightInfo = ();
 }
 
@@ -354,8 +376,8 @@ impl pallet_process_validation::Config for Runtime {
     type Event = Event;
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = ProcessVersion;
-    type CreateProcessOrigin = EnsureRoot<AccountId>;
-    type DisableProcessOrigin = EnsureRoot<AccountId>;
+    type CreateProcessOrigin = MoreThanTwoMembers;
+    type DisableProcessOrigin = MoreThanTwoMembers;
     type WeightInfo = pallet_process_validation::weights::SubstrateWeight<Runtime>;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
@@ -364,25 +386,34 @@ impl pallet_process_validation::Config for Runtime {
     type MaxRestrictionDepth = MaxRestrictionDepth;
 }
 
-pub struct DummyChangeMembers;
-impl<T: core::cmp::Ord + core::clone::Clone> ChangeMembers<T> for DummyChangeMembers {
-    fn change_members_sorted(_incoming: &[T], _outgoing: &[T], _new: &[T]) {}
-    fn set_prime(_who: Option<T>) {}
+parameter_types! {
+    pub const GovernanceMotionDuration: BlockNumber = 7 * DAYS;
+    pub const GovernanceMaxProposals: u32 = 100;
+    pub const GovernanceMaxMembers: u32 = 100;
 }
 
-impl<T: core::cmp::Ord + core::clone::Clone> InitializeMembers<T> for DummyChangeMembers {
-    fn initialize_members(_members: &[T]) {}
+type GovernanceCollective = pallet_collective::Instance1;
+impl pallet_collective::Config<GovernanceCollective> for Runtime {
+    type Origin = Origin;
+    type Proposal = Call;
+    type Event = Event;
+    type MotionDuration = GovernanceMotionDuration;
+    type MaxProposals = GovernanceMaxProposals;
+    type MaxMembers = GovernanceMaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
+    type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_membership::Config for Runtime {
+type GovernanceMembershipInstance = pallet_membership::Instance1;
+impl pallet_membership::Config<GovernanceMembershipInstance> for Runtime {
     type Event = Event;
     type AddOrigin = EnsureRoot<AccountId>;
     type RemoveOrigin = EnsureRoot<AccountId>;
-    type SwapOrigin = EnsureRoot<AccountId>;
-    type ResetOrigin = EnsureRoot<AccountId>;
+    type SwapOrigin = MoreThanHalfMembers;
+    type ResetOrigin = MoreThanHalfMembers;
     type PrimeOrigin = EnsureRoot<AccountId>;
-    type MembershipInitialized = DummyChangeMembers;
-    type MembershipChanged = DummyChangeMembers;
+    type MembershipInitialized = TechnicalCommittee;
+    type MembershipChanged = TechnicalCommittee;
 }
 
 parameter_types! {
@@ -395,8 +426,8 @@ impl pallet_symmetric_key::Config for Runtime {
     type KeyLength = KeyLength;
     type RefreshPeriod = RefreshPeriod;
     type ScheduleCall = Call;
-    type UpdateOrigin = EnsureRoot<AccountId>;
-    type RotateOrigin = EnsureRoot<AccountId>;
+    type UpdateOrigin = MoreThanHalfMembers;
+    type RotateOrigin = MoreThanTwoMembers;
     type Randomness = RandomnessCollectiveFlip;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
@@ -423,7 +454,9 @@ construct_runtime!(
         NodeAuthorization: pallet_node_authorization::{Module, Call, Storage, Event<T>, Config<T>},
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         IpfsKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},
-        Membership: pallet_membership::{Module, Call, Storage, Event<T>, Config<T>}
+        Membership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
+        TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        Doas: pallet_doas::{Module, Call, Event<T>}
     }
 );
 
