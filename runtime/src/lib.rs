@@ -7,12 +7,16 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode};
-use frame_system::{EnsureRoot, EnsureOneOf};
+use frame_system::{EnsureOneOf, EnsureRoot};
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata, u32_trait::{_1, _2}};
+use sp_core::{
+    crypto::KeyTypeId,
+    u32_trait::{_1, _2},
+    OpaqueMetadata
+};
 use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
@@ -129,13 +133,13 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 type MoreThanHalfMembers = EnsureOneOf<
     AccountId,
     EnsureRoot<AccountId>,
-    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GovernanceCollective>,
+    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GovernanceCollective>
 >;
 
 type MoreThanTwoMembers = EnsureOneOf<
     AccountId,
     EnsureRoot<AccountId>,
-    pallet_collective::EnsureMembers<_2, AccountId, GovernanceCollective>,
+    pallet_collective::EnsureMembers<_2, AccountId, GovernanceCollective>
 >;
 
 parameter_types! {

@@ -2,17 +2,15 @@
 
 pub use pallet::*;
 
+use sp_runtime::{traits::StaticLookup, DispatchResult};
 use sp_std::prelude::*;
-use sp_runtime::{DispatchResult, traits::StaticLookup};
 
 use frame_support::{
-  Parameter, traits::EnsureOrigin
+    dispatch::DispatchResultWithPostInfo,
+    traits::{Get, UnfilteredDispatchable},
+    weights::{GetDispatchInfo, Pays, Weight}
 };
-use frame_support::{
-  weights::{Weight, GetDispatchInfo, Pays},
-  traits::{UnfilteredDispatchable, Get},
-  dispatch::DispatchResultWithPostInfo,
-};
+use frame_support::{traits::EnsureOrigin, Parameter};
 
 #[cfg(test)]
 mod mock;
@@ -28,14 +26,14 @@ pub mod pallet {
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
-      /// The overarching event type.
-      type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        /// The overarching event type.
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-      /// A sudo-able call.
-      type Call: Parameter + UnfilteredDispatchable<Origin=Self::Origin> + GetDispatchInfo;
+        /// A sudo-able call.
+        type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
 
-      /// An Origin that is permitted to perform Doas operations
-      type DoasOrigin: EnsureOrigin<Self::Origin>;
+        /// An Origin that is permitted to perform Doas operations
+        type DoasOrigin: EnsureOrigin<Self::Origin>;
     }
 
     #[pallet::pallet]
@@ -51,7 +49,7 @@ pub mod pallet {
         /// A doas_root just took place. \[result\]
         DidAsRoot(DispatchResult),
         /// A doas just took place. \[result\]
-        DidAs(DispatchResult),
+        DidAs(DispatchResult)
     }
 
     // The pallet's dispatchable functions.
@@ -72,13 +70,13 @@ pub mod pallet {
           (dispatch_info.weight.saturating_add(10_000), dispatch_info.class)
         })]
         pub(super) fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
-          // This is a public call, so we ensure that the origin is some signed account.
-          T::DoasOrigin::ensure_origin(origin)?;
+            // This is a public call, so we ensure that the origin is some signed account.
+            T::DoasOrigin::ensure_origin(origin)?;
 
-          let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
-          Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
-          // Sudo user does not pay a fee.
-          Ok(Pays::No.into())
+            let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
+            Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
+            // Sudo user does not pay a fee.
+            Ok(Pays::No.into())
         }
 
         /// Authenticates the sudo key and dispatches a function call with `Root` origin.
@@ -92,14 +90,18 @@ pub mod pallet {
         /// - The weight of this call is defined by the caller.
         /// # </weight>
         #[pallet::weight((*_weight, call.get_dispatch_info().class))]
-        pub(super) fn doas_root_unchecked_weight(origin: OriginFor<T>, call: Box<<T as Config>::Call>, _weight: Weight) -> DispatchResultWithPostInfo {
-          // This is a public call, so we ensure that the origin is some signed account.
-          T::DoasOrigin::ensure_origin(origin)?;
+        pub(super) fn doas_root_unchecked_weight(
+            origin: OriginFor<T>,
+            call: Box<<T as Config>::Call>,
+            _weight: Weight
+        ) -> DispatchResultWithPostInfo {
+            // This is a public call, so we ensure that the origin is some signed account.
+            T::DoasOrigin::ensure_origin(origin)?;
 
-          let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
-          Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
-          // Sudo user does not pay a fee.
-          Ok(Pays::No.into())
+            let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
+            Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
+            // Sudo user does not pay a fee.
+            Ok(Pays::No.into())
         }
 
         /// Authenticates the sudo key and dispatches a function call with `Signed` origin from
@@ -123,20 +125,21 @@ pub mod pallet {
             dispatch_info.class,
           )
         })]
-        pub(super) fn doas(origin: OriginFor<T>,
-          who: <T::Lookup as StaticLookup>::Source,
-          call: Box<<T as Config>::Call>
+        pub(super) fn doas(
+            origin: OriginFor<T>,
+            who: <T::Lookup as StaticLookup>::Source,
+            call: Box<<T as Config>::Call>
         ) -> DispatchResultWithPostInfo {
-          // This is a public call, so we ensure that the origin is some signed account.
-          T::DoasOrigin::ensure_origin(origin)?;
+            // This is a public call, so we ensure that the origin is some signed account.
+            T::DoasOrigin::ensure_origin(origin)?;
 
-          let who = T::Lookup::lookup(who)?;
+            let who = T::Lookup::lookup(who)?;
 
-          let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Signed(who).into());
+            let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Signed(who).into());
 
-          Self::deposit_event(Event::DidAs(res.map(|_| ()).map_err(|e| e.error)));
-          // Doas user does not pay a fee.
-          Ok(Pays::No.into())
+            Self::deposit_event(Event::DidAs(res.map(|_| ()).map_err(|e| e.error)));
+            // Doas user does not pay a fee.
+            Ok(Pays::No.into())
         }
     }
 }

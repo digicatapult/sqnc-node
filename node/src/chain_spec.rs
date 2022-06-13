@@ -1,5 +1,5 @@
 use dscp_node_runtime::{
-    AccountId, AuraConfig, BalancesConfig, MembershipConfig, GenesisConfig, GrandpaConfig, NodeAuthorizationConfig,
+    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
     Signature, SudoConfig, SystemConfig, WASM_BINARY
 };
 use sc_service::ChainType;
