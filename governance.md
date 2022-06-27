@@ -8,7 +8,7 @@ In order to create a vote, in the Polkadot JS Apps frontend select the Governanc
 
 In order to start a new vote select proposals.
 
-<img width="1680" alt="Screenshot 2022-06-27 at 14 02 49" src="../assets/1.png">
+![Architecture Diagram v2](../assets/1.svg)
 
 On the proposal screen select submit proposal on the right hand side. This will bring up a new proposal which must be made from an initial account, for example, here Alice is creating a proposal. You may notice the use of the doAs pallet, for more information visit [the readme](README.md) on how it works.
 
