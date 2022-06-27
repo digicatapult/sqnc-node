@@ -10,6 +10,8 @@ In order to start a new vote select proposals.
 
 <img width="1680" alt="Screenshot 2022-06-27 at 14 02 49" src="https://user-images.githubusercontent.com/35331926/175948593-aae8d69a-a722-47f8-8a58-a75c0d9af3d7.png">
 
+![Governance](../dscp-node/documentation/assets/1.png)
+
 On the proposal screen select submit proposal on the right hand side. This will bring up a new proposal which must be made from an initial account, for example, here Alice is creating a proposal. You may notice the use of the doAs pallet, for more information visit [the readme](README.md) on how it works.
 
 <img width="1278" alt="3" src="https://user-images.githubusercontent.com/35331926/175949271-6d9b543a-95aa-4a49-b637-dd1668c179af.png">
