@@ -2,6 +2,8 @@
 
 This repository contains the source code for the blockchain nodes used in the DSCP project. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
 
+For more on governance visit [Governance](governance.md)
+
 ## Getting started
 
 You will need a Rust environment, including targets for WASM builds. The former can be easily achieved using `rustup`:
