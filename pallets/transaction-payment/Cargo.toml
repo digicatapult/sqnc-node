@@ -1,11 +1,13 @@
 [package]
 name = "pallet-transaction-payment"
-version = "3.0.0"
-authors = ["Parity Technologies <admin@parity.io>"]
+version = "1.0.0"
+authors = [
+	"Digital Catapult <https://www.digicatapult.org.uk>",
+	"Parity Technologies <admin@parity.io>",
+]
 edition = "2018"
 license = "Apache-2.0"
-homepage = "https://substrate.dev"
-repository = "https://github.com/paritytech/substrate/"
+repository = "https://github.com/digicatapult/dscp-node/"
 description = "FRAME pallet to manage transaction payments"
 readme = "README.md"
 

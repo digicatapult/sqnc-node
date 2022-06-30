@@ -1,6 +1,6 @@
 # Transaction Payment Module
 
-This module provides the basic logic needed to allow member to transact for free, as long at they have a non-zero balance.
+This module allows members to transact for free, as long as they have a non-zero balance.
 
 # Attribution
 
