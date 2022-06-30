@@ -29,7 +29,7 @@ pallet-doas = { version = '1.0.0', default-features = false, package = 'pallet-d
 pallet-simple-nft = { version = '3.0.1', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
 pallet-process-validation = { version = '2.6.0', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
 pallet-symmetric-key = { version = '1.0.2', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
-pallet-transaction-payment = { default-features = false, version = '1.0.0', package = 'pallet-transaction-payment', path = '../pallets/transaction-payment' }
+pallet-transaction-payment-free = { default-features = false, version = '1.0.0', package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
 frame-executive = { default-features = false, version = '3.0.0' }
 frame-support = { default-features = false, version = '3.0.0' }
@@ -93,7 +93,7 @@ std = [
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
     'pallet-timestamp/std',
-    'pallet-transaction-payment/std',
+    'pallet-transaction-payment-free/std',
     'sp-api/std',
     'sp-block-builder/std',
     'sp-consensus-aura/std',

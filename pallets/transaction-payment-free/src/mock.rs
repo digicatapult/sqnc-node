@@ -1,5 +1,5 @@
 use super::*;
-use crate as pallet_transaction_payment;
+use crate as pallet_transaction_payment_free;
 use frame_support::{
     parameter_types,
     weights::{DispatchClass, DispatchInfo, Weight}
@@ -24,7 +24,7 @@ frame_support::construct_runtime!(
     {
         System: system::{Module, Call, Config, Storage, Event<T>},
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-        TransactionPayment: pallet_transaction_payment::{Module},
+        TransactionPaymentFree: pallet_transaction_payment_free::{Module},
     }
 );
 

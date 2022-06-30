@@ -1323,7 +1323,7 @@ dependencies = [
  "pallet-sudo",
  "pallet-symmetric-key",
  "pallet-timestamp",
- "pallet-transaction-payment",
+ "pallet-transaction-payment-free",
  "parity-scale-codec",
  "serde",
  "sp-api",
@@ -4097,7 +4097,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-transaction-payment"
+name = "pallet-transaction-payment-free"
 version = "1.0.0"
 dependencies = [
  "frame-support",

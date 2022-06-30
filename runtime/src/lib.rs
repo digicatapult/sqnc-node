@@ -39,7 +39,7 @@ pub use frame_support::{
     },
     StorageValue
 };
-use pallet_transaction_payment::CurrencyAdapter;
+use pallet_transaction_payment_free::CurrencyAdapter;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
@@ -253,7 +253,7 @@ impl pallet_balances::Config for Runtime {
     type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_transaction_payment::Config for Runtime {
+impl pallet_transaction_payment_free::Config for Runtime {
     type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
 }
 
@@ -440,7 +440,7 @@ construct_runtime!(
         Aura: pallet_aura::{Module, Config<T>},
         Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-        TransactionPayment: pallet_transaction_payment::{Module},
+        TransactionPaymentFree: pallet_transaction_payment_free::{Module},
         Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
         ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},
@@ -471,7 +471,7 @@ pub type SignedExtra = (
     frame_system::CheckEra<Runtime>,
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment::ChargeTransactionPayment<Runtime>
+    pallet_transaction_payment_free::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
