@@ -253,15 +253,8 @@ impl pallet_balances::Config for Runtime {
     type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-    pub const TransactionByteFee: Balance = 1;
-}
-
 impl pallet_transaction_payment::Config for Runtime {
     type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
-    type TransactionByteFee = TransactionByteFee;
-    type WeightToFee = IdentityFee<Balance>;
-    type FeeMultiplierUpdate = ();
 }
 
 impl pallet_sudo::Config for Runtime {
@@ -447,7 +440,7 @@ construct_runtime!(
         Aura: pallet_aura::{Module, Config<T>},
         Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-        TransactionPayment: pallet_transaction_payment::{Module, Storage},
+        TransactionPayment: pallet_transaction_payment::{Module},
         Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
         SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
         ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},

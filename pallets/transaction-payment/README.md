@@ -1,16 +1,14 @@
 # Transaction Payment Module
 
-This module provides the basic logic needed to pay the absolute minimum amount needed for a
-transaction to be included. This includes:
-  - _weight fee_: A fee proportional to amount of weight a transaction consumes.
-  - _length fee_: A fee proportional to the encoded length of the transaction.
-  - _tip_: An optional tip. Tip increases the priority of the transaction, giving it a higher
-    chance to be included by the transaction queue.
+This module provides the basic logic needed to allow member to transact for free, as long at they have a non-zero balance.
 
-Additionally, this module allows one to configure:
-  - The mapping between one unit of weight to one unit of fee via [`Config::WeightToFee`].
-  - A means of updating the fee for the next block, via defining a multiplier, based on the
-    final state of the chain at the end of the previous block. This can be configured via
-    [`Config::FeeMultiplierUpdate`]
+# Attribution
+
+`pallet-transaction-payment` has been adapted from the version `3.0.0` of the
+[`transaction-payment`](https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment) pallet originally
+licensed under the Apache-2.0 license. A copy of this license can
+be found at [./licenses/pallet-transaction-payment.LICENSE](./licenses/pallet-sudo.LICENSE).
+This module is then relicensed by Digital Catapult under the same Apache-2.0
+license a copy of which is [in the root of this repository](../../LICENSE)
 
 License: Apache-2.0
