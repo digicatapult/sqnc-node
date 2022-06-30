@@ -2,7 +2,7 @@
 use crate::Config;
 use codec::FullCodec;
 use frame_support::{
-	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced, WithdrawReasons},
+	traits::{Currency, Get, Imbalance, OnUnbalanced},
 	unsigned::TransactionValidityError,
 };
 use sp_runtime::{
@@ -75,22 +75,18 @@ where
 		_call: &T::Call,
 		_info: &DispatchInfoOf<T::Call>,
 		fee: Self::Balance,
-		tip: Self::Balance,
+		_tip: Self::Balance,
 	) -> Result<Self::LiquidityInfo, TransactionValidityError> {
 		if fee.is_zero() {
 			return Ok(None);
 		}
 
-		let withdraw_reason = if tip.is_zero() {
-			WithdrawReasons::TRANSACTION_PAYMENT
-		} else {
-			WithdrawReasons::TRANSACTION_PAYMENT | WithdrawReasons::TIP
-		};
+		let balance = C::total_balance(who);
 
-		match C::withdraw(who, fee, withdraw_reason, ExistenceRequirement::KeepAlive) {
-			Ok(imbalance) => Ok(Some(imbalance)),
-			Err(_) => Err(InvalidTransaction::Payment.into()),
+		if balance == Zero::zero() {
+			return Err(InvalidTransaction::Payment.into());
 		}
+		Ok(Some(C::NegativeImbalance::zero()))
 	}
 
 	/// Hand the fee and the tip over to the `[OnUnbalanced]` implementation.
