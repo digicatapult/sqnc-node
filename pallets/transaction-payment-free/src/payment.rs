@@ -19,10 +19,6 @@ pub trait OnChargeTransaction<T: Config> {
     type Balance: AtLeast32BitUnsigned + FullCodec + Copy + MaybeSerializeDeserialize + Debug + Default;
     type LiquidityInfo: Default;
 
-    /// Before the transaction is executed the payment of the transaction fees
-    /// need to be secured.
-    ///
-    /// Note: The `fee` already includes the `tip`.
     fn withdraw_fee(
         who: &T::AccountId,
         call: &T::Call,
@@ -51,9 +47,7 @@ where
     type LiquidityInfo = Option<NegativeImbalanceOf<C, T>>;
     type Balance = <C as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-    /// Withdraw the predicted fee from the transaction origin.
-    ///
-    /// Note: The `fee` already includes the `tip`.
+    /// Check the account has balance and set fee to 0.
     fn withdraw_fee(
         who: &T::AccountId,
         _call: &T::Call,
@@ -61,10 +55,6 @@ where
         _fee: Self::Balance,
         _tip: Self::Balance
     ) -> Result<Self::LiquidityInfo, TransactionValidityError> {
-        // if fee.is_zero() {
-        // 	return Ok(None);
-        // }
-
         let balance = C::total_balance(who);
 
         if balance == Zero::zero() {
