@@ -14,8 +14,8 @@ mod tests;
 
 use sp_runtime::{
     traits::{DispatchInfoOf, Dispatchable, SignedExtension, Zero},
-    transaction_validity::{TransactionValidityError},
-    FixedPointOperand,
+    transaction_validity::TransactionValidityError,
+    FixedPointOperand
 };
 
 mod payment;
