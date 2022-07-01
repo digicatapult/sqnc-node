@@ -19,7 +19,10 @@
 
 use super::*;
 use crate as doas;
-use frame_support::{ord_parameter_types, traits::{Contains, ConstU64, ConstU32}};
+use frame_support::{
+    ord_parameter_types,
+    traits::{ConstU32, ConstU64, Contains}
+};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_io;
@@ -97,24 +100,23 @@ pub mod logger {
 }
 
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		Doas: doas::{Pallet, Call, Event<T>},
-		Logger: logger::{Pallet, Call, Storage, Event<T>},
-	}
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Doas: doas::{Pallet, Call, Event<T>},
+        Logger: logger::{Pallet, Call, Storage, Event<T>},
+    }
 );
 
 pub struct BlockEverything;
 impl Contains<Call> for BlockEverything {
-	fn contains(_: &Call) -> bool {
-		false
-	}
+    fn contains(_: &Call) -> bool {
+        false
+    }
 }
-
 
 impl frame_system::Config for Test {
     type BaseCallFilter = BlockEverything;
@@ -140,7 +142,7 @@ impl frame_system::Config for Test {
     type SystemWeightInfo = ();
     type SS58Prefix = ();
     type OnSetCode = ();
-	type MaxConsumers = ConstU32<16>;
+    type MaxConsumers = ConstU32<16>;
 }
 
 // Implement the logger module's `Config` on the Test runtime.

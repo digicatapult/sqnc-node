@@ -5,11 +5,11 @@ pub use pallet::*;
 use sp_runtime::{traits::StaticLookup, DispatchResult};
 use sp_std::prelude::*;
 
+use frame_support::traits::EnsureOrigin;
 use frame_support::{
     traits::UnfilteredDispatchable,
     weights::{GetDispatchInfo, Pays, Weight}
 };
-use frame_support::{traits::EnsureOrigin};
 
 #[cfg(test)]
 mod mock;
