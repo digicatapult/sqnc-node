@@ -17,18 +17,18 @@ use sp_runtime::{
 
 mod payment;
 
-pub use payment::*;
 pub use pallet::*;
+pub use payment::*;
 
 pub mod weights;
 
-type BalanceOf<T> = <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::Balance;
+type BalanceOf<T> = <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::Balance;
 
 // pub use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
-    // use super::*;
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
@@ -39,7 +39,7 @@ pub mod pallet {
     /// The pallet's configuration trait.
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        type OnChargeTransaction: OnChargeTransaction<Self>;
+        type OnFreeTransaction: OnFreeTransaction<Self>;
     }
 
     #[pallet::hooks]
@@ -72,11 +72,11 @@ where
     ) -> Result<
         (
             BalanceOf<T>,
-            <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo
+            <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
         ),
         TransactionValidityError
     > {
-        <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::zero_fee(
+        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::zero_fee(
             who,
             call,
             info,
@@ -113,7 +113,7 @@ where
         // who paid the fee
         Self::AccountId,
         // imbalance resulting from withdrawing the fee
-        <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo
+        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
     );
     fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
         Ok(())

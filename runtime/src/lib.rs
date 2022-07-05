@@ -254,7 +254,7 @@ impl pallet_balances::Config for Runtime {
 }
 
 impl pallet_transaction_payment_free::Config for Runtime {
-    type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
+    type OnFreeTransaction = CurrencyAdapter<Balances, ()>;
 }
 
 impl pallet_sudo::Config for Runtime {

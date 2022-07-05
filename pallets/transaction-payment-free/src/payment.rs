@@ -13,7 +13,7 @@ use sp_std::{fmt::Debug, marker::PhantomData};
 
 type NegativeImbalanceOf<C, T> = <C as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
-pub trait ChargeTransactionPayment<T: Config> {
+pub trait OnFreeTransaction<T: Config> {
     /// The underlying integer type in which fees are calculated.
     type Balance: AtLeast32BitUnsigned + FullCodec + Copy + MaybeSerializeDeserialize + Debug + Default;
     type LiquidityInfo: Default;
@@ -33,7 +33,7 @@ pub trait ChargeTransactionPayment<T: Config> {
 pub struct CurrencyAdapter<C, OU>(PhantomData<(C, OU)>);
 
 /// Default implementation for a Currency and an OnUnbalanced handler.
-impl<T, C, OU> ChargeTransactionPayment<T> for CurrencyAdapter<C, OU>
+impl<T, C, OU> OnFreeTransaction<T> for CurrencyAdapter<C, OU>
 where
     T: Config,
     C: Currency<<T as frame_system::Config>::AccountId>,
@@ -59,6 +59,6 @@ where
         if balance == Zero::zero() {
             return Err(InvalidTransaction::Payment.into());
         }
-        Ok(None)
+        Ok(Some(C::NegativeImbalance::zero()))
     }
 }
