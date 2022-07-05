@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{Parameter, traits::Get, BoundedVec, bounded_vec, RuntimeDebug};
+use frame_support::{Parameter, traits::Get, BoundedVec, RuntimeDebug};
 pub use pallet::*;
 use scale_info::TypeInfo;
 use sp_runtime::traits::{AtLeast32Bit, One};
@@ -61,7 +61,7 @@ where
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
-            restrictions: bounded_vec![]
+            restrictions: Default::default()
         }
     }
 }
