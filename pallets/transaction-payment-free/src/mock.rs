@@ -54,7 +54,7 @@ parameter_types! {
     pub const BlockHashCount: u64 = 250;
 }
 
-impl frame_system::Config for Test {
+impl system::Config for Test {
     type BaseCallFilter = ();
     type BlockWeights = BlockWeights;
     type BlockLength = ();
@@ -106,7 +106,7 @@ pub fn info_from_weight(w: Weight) -> DispatchInfo {
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+    let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
     pallet_balances::GenesisConfig::<Test> {
         balances: vec![(1, 10)]
     }

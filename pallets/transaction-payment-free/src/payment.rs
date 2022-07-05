@@ -1,10 +1,9 @@
+use crate::Config;
 use codec::FullCodec;
 use frame_support::{
     traits::{Currency, Imbalance, OnUnbalanced},
     unsigned::TransactionValidityError
 };
-///! Traits and default implementation for paying transaction fees.
-use frame_system::Config;
 use sp_runtime::{
     traits::{AtLeast32BitUnsigned, DispatchInfoOf, MaybeSerializeDeserialize, Zero},
     transaction_validity::InvalidTransaction
@@ -27,7 +26,7 @@ pub trait OnFreeTransaction<T: Config> {
     ) -> Result<Self::LiquidityInfo, TransactionValidityError>;
 }
 
-/// Implements the transaction payment for a module implementing the `Currency`
+/// Implements the transaction payment for a pallet implementing the `Currency`
 /// trait (eg. the pallet_balances) using an unbalance handler (implementing
 /// `OnUnbalanced`).
 pub struct CurrencyAdapter<C, OU>(PhantomData<(C, OU)>);

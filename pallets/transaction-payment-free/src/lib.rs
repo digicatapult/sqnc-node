@@ -104,11 +104,8 @@ where
     type Call = T::Call;
     type AdditionalSigned = ();
     type Pre = (
-        // tip
         BalanceOf<T>,
-        // who paid the fee
         Self::AccountId,
-        // imbalance resulting from withdrawing the fee
         <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
     );
     fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
