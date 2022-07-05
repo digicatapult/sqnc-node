@@ -14,12 +14,12 @@ use sp_std::{fmt::Debug, marker::PhantomData};
 type NegativeImbalanceOf<C, T> = <C as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 /// Handle withdrawing, refunding and depositing of transaction fees.
-pub trait OnChargeTransaction<T: Config> {
+pub trait OnFreeTransaction<T: Config> {
     /// The underlying integer type in which fees are calculated.
     type Balance: AtLeast32BitUnsigned + FullCodec + Copy + MaybeSerializeDeserialize + Debug + Default;
     type LiquidityInfo: Default;
 
-    fn withdraw_fee(
+    fn zero_fee(
         who: &T::AccountId,
         call: &T::Call,
         dispatch_info: &DispatchInfoOf<T::Call>,
@@ -34,7 +34,7 @@ pub trait OnChargeTransaction<T: Config> {
 pub struct CurrencyAdapter<C, OU>(PhantomData<(C, OU)>);
 
 /// Default implementation for a Currency and an OnUnbalanced handler.
-impl<T, C, OU> OnChargeTransaction<T> for CurrencyAdapter<C, OU>
+impl<T, C, OU> OnFreeTransaction<T> for CurrencyAdapter<C, OU>
 where
     T: Config,
     C: Currency<<T as frame_system::Config>::AccountId>,
@@ -48,7 +48,7 @@ where
     type Balance = <C as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     /// Check the account has balance and set fee to 0.
-    fn withdraw_fee(
+    fn zero_fee(
         who: &T::AccountId,
         _call: &T::Call,
         _info: &DispatchInfoOf<T::Call>,

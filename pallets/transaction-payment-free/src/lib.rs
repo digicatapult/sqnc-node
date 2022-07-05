@@ -22,10 +22,10 @@ mod payment;
 
 pub use payment::*;
 
-type BalanceOf<T> = <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::Balance;
+type BalanceOf<T> = <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::Balance;
 
 pub trait Config: frame_system::Config {
-    type OnChargeTransaction: OnChargeTransaction<Self>;
+    type OnFreeTransaction: OnFreeTransaction<Self>;
 }
 
 decl_module! {
@@ -34,9 +34,9 @@ decl_module! {
 
 /// Require the transactor have balance. All transactions are free - they have no fee
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct ChargeTransactionPayment<T: Config>(#[codec(compact)] BalanceOf<T>);
+pub struct FreeTransaction<T: Config>(#[codec(compact)] BalanceOf<T>);
 
-impl<T: Config> ChargeTransactionPayment<T>
+impl<T: Config> FreeTransaction<T>
 where
     T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
     BalanceOf<T>: Send + Sync + FixedPointOperand
@@ -46,7 +46,7 @@ where
         Self(fee)
     }
 
-    fn withdraw_fee(
+    fn zero_fee(
         &self,
         who: &T::AccountId,
         call: &T::Call,
@@ -55,11 +55,11 @@ where
     ) -> Result<
         (
             BalanceOf<T>,
-            <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo
+            <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
         ),
         TransactionValidityError
     > {
-        <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::withdraw_fee(
+        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::zero_fee(
             who,
             call,
             info,
@@ -70,10 +70,10 @@ where
     }
 }
 
-impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
+impl<T: Config> sp_std::fmt::Debug for FreeTransaction<T> {
     #[cfg(feature = "std")]
     fn fmt(&self, f: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
-        write!(f, "ChargeTransactionPayment<{:?}>", self.0)
+        write!(f, "FreeTransaction<{:?}>", self.0)
     }
     #[cfg(not(feature = "std"))]
     fn fmt(&self, _: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
@@ -81,22 +81,19 @@ impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
     }
 }
 
-impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
+impl<T: Config> SignedExtension for FreeTransaction<T>
 where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
     T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
 {
-    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
+    const IDENTIFIER: &'static str = "FreeTransaction";
     type AccountId = T::AccountId;
     type Call = T::Call;
     type AdditionalSigned = ();
     type Pre = (
-        // tip
         BalanceOf<T>,
-        // who paid the fee
         Self::AccountId,
-        // imbalance resulting from withdrawing the fee
-        <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo
+        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
     );
     fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
         Ok(())
@@ -109,7 +106,7 @@ where
         info: &DispatchInfoOf<Self::Call>,
         len: usize
     ) -> Result<Self::Pre, TransactionValidityError> {
-        let (_fee, imbalance) = self.withdraw_fee(who, call, info, len)?;
+        let (_fee, imbalance) = self.zero_fee(who, call, info, len)?;
         Ok((self.0, who.clone(), imbalance))
     }
 }
