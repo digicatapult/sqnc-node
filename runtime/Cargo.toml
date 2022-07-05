@@ -1,6 +1,6 @@
 [package]
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
-edition = '2018'
+edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-node-runtime'
@@ -10,17 +10,12 @@ version = '3.7.0'
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-substrate-wasm-builder = '4.0.0'
-
-# alias "parity-scale-code" to "codec"
-[dependencies.codec]
-default-features = false
-features = ['derive']
-package = 'parity-scale-codec'
-version = '2.0.0'
+substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 
 [dependencies]
 hex-literal = { optional = true, version = '0.3.1' }
+scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive"] }
 
 serde = { features = ['derive'], optional = true, version = '1.0.101' }
 
@@ -35,12 +30,14 @@ frame-support = { default-features = false, version = "4.0.0-dev", git = "https:
 frame-system = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 frame-system-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25", optional = true }
 frame-system-rpc-runtime-api = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+frame-try-runtime = { version = "0.10.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25", optional = true }
 pallet-aura = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-balances = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-collective = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-grandpa = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-membership = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-node-authorization = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+pallet-preimage = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-randomness-collective-flip = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-scheduler = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 pallet-sudo = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
@@ -90,6 +87,7 @@ std = [
     'pallet-grandpa/std',
     'pallet-membership/std',
     'pallet-node-authorization/std',
+    'pallet-preimage/std',
     'pallet-process-validation/std',
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
@@ -110,4 +108,26 @@ std = [
     'pallet-simple-nft/std',
     'pallet-scheduler/std',
     'pallet-symmetric-key/std',
+]
+try-runtime = [
+	"frame-executive/try-runtime",
+	"frame-try-runtime",
+	"frame-system/try-runtime",
+	"pallet-aura/try-runtime",
+	"pallet-balances/try-runtime",
+	"pallet-grandpa/try-runtime",
+	"pallet-randomness-collective-flip/try-runtime",
+	"pallet-sudo/try-runtime",
+	"pallet-doas/try-runtime",
+	"pallet-simple-nft/try-runtime",
+	"pallet-process-validation/try-runtime",
+	"pallet-symmetric-key/try-runtime",
+	"pallet-timestamp/try-runtime",
+	"pallet-transaction-payment/try-runtime",
+    "pallet-collective/try-runtime",
+    "pallet-grandpa/try-runtime",
+    "pallet-membership/try-runtime",
+    "pallet-node-authorization/try-runtime",
+    "pallet-preimage/try-runtime",
+    "pallet-scheduler/try-runtime",
 ]
