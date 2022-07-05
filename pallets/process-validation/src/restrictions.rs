@@ -1,13 +1,14 @@
 // This file contains the different types of restrictions that can be evaluated during
 // a call to `validate_process`
 
-use codec::{Decode, Encode};
+use codec::{Decode, Encode, MaxEncodedLen};
 use dscp_pallet_traits::ProcessIO;
 use frame_support::Parameter;
+use scale_info::TypeInfo;
 use sp_std::boxed::Box;
 use sp_std::vec::Vec;
 
-#[derive(Encode, Decode, Clone, PartialEq)]
+#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum BinaryOperator {
     AND,
@@ -17,14 +18,9 @@ pub enum BinaryOperator {
     NOR
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
+#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
-where
-    RoleKey: Parameter + Default + Ord,
-    TokenMetadataKey: Parameter + Default + Ord,
-    TokenMetadataValue: Parameter + Default,
-    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
 {
     None,
     Combined {
@@ -100,11 +96,11 @@ pub fn validate_restriction<A, R, T, V, D>(
     outputs: &Vec<ProcessIO<A, R, T, V>>
 ) -> bool
 where
-    A: Parameter + Default,
+    A: Parameter,
     R: Parameter + Default + Ord,
     T: Parameter + Default + Ord,
-    V: Parameter + Default,
-    D: Parameter + Default + From<V>
+    V: Parameter,
+    D: Parameter + From<V>
 {
     match restriction {
         Restriction::<R, T, V, D>::None => true,
@@ -768,7 +764,7 @@ mod tests {
         assert!(!result);
     }
 
-    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    #[derive(Encode, Decode, Clone, PartialEq, TypeInfo, MaxEncodedLen, Debug, Eq)]
     pub enum MetadataValue {
         A,
         B
@@ -779,7 +775,7 @@ mod tests {
         }
     }
 
-    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    #[derive(Encode, Decode, Clone, PartialEq, TypeInfo, MaxEncodedLen, Debug, Eq)]
     pub enum MetadataValueDisc {
         AA,
         BB
