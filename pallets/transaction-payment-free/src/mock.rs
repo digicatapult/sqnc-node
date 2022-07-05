@@ -94,7 +94,7 @@ impl pallet_balances::Config for Test {
 }
 
 impl Config for Test {
-    type OnFreeTransaction = CurrencyAdapter<Balances, ()>;
+    type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
 }
 
 /// create a transaction info struct from weight. Handy to avoid building the whole struct.

@@ -1,10 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{
-    decl_module,
-    weights::{DispatchInfo, PostDispatchInfo}
-};
+use frame_support::weights::{DispatchInfo, PostDispatchInfo};
 use sp_std::prelude::*;
 
 #[cfg(test)]
@@ -21,15 +18,35 @@ use sp_runtime::{
 mod payment;
 
 pub use payment::*;
+pub use pallet::*;
 
-type BalanceOf<T> = <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::Balance;
+pub mod weights;
 
-pub trait Config: frame_system::Config {
-    type OnFreeTransaction: OnFreeTransaction<Self>;
-}
+type BalanceOf<T> = <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::Balance;
 
-decl_module! {
-    pub struct Module<T: Config> for enum Call where origin: T::Origin{}
+// pub use weights::WeightInfo;
+
+#[frame_support::pallet]
+pub mod pallet {
+    // use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
+
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(_);
+
+    /// The pallet's configuration trait.
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        type OnChargeTransaction: OnChargeTransaction<Self>;
+    }
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {}
 }
 
 /// Require the transactor have balance. All transactions are free - they have no fee
@@ -55,11 +72,11 @@ where
     ) -> Result<
         (
             BalanceOf<T>,
-            <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
+            <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo
         ),
         TransactionValidityError
     > {
-        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::zero_fee(
+        <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::zero_fee(
             who,
             call,
             info,
@@ -70,10 +87,10 @@ where
     }
 }
 
-impl<T: Config> sp_std::fmt::Debug for OnChargeTransaction<T> {
+impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
     #[cfg(feature = "std")]
     fn fmt(&self, f: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
-        write!(f, "OnChargeTransaction<{:?}>", self.0)
+        write!(f, "ChargeTransactionPayment<{:?}>", self.0)
     }
     #[cfg(not(feature = "std"))]
     fn fmt(&self, _: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
@@ -81,19 +98,22 @@ impl<T: Config> sp_std::fmt::Debug for OnChargeTransaction<T> {
     }
 }
 
-impl<T: Config> SignedExtension for OnChargeTransaction<T>
+impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
 where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
     T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
 {
-    const IDENTIFIER: &'static str = "OnChargeTransaction";
+    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = T::AccountId;
     type Call = T::Call;
     type AdditionalSigned = ();
     type Pre = (
+        // tip
         BalanceOf<T>,
+        // who paid the fee
         Self::AccountId,
-        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo
+        // imbalance resulting from withdrawing the fee
+        <<T as Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo
     );
     fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
         Ok(())
