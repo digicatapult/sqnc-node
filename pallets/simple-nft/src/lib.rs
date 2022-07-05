@@ -1,18 +1,19 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Codec, MaxEncodedLen};
-use codec::{Decode, Encode};
 use dscp_pallet_traits as traits;
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
-use frame_support::RuntimeDebug;
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
-use frame_support::{BoundedBTreeMap, BoundedVec, traits::Get};
-use scale_info::TypeInfo;
+use frame_support::{BoundedVec, traits::Get};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
 use sp_std::collections::btree_set::BTreeSet;
+
+mod token;
+
+mod output;
 
 #[cfg(test)]
 mod mock;
@@ -22,60 +23,6 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-
-#[derive(Encode, Decode, Default, RuntimeDebug, MaxEncodedLen, TypeInfo, Clone)]
-#[scale_info(skip_type_params(MaxRoleCount, MaxMetadataCount, MaxParentCount, MaxChildCount))]
-pub struct Token<
-    MaxRoleCount: Get<u32>,
-    AccountId,
-    RoleKey: Ord,
-    TokenId,
-    BlockNumber,
-    MaxMetadataCount: Get<u32>,
-    TokenMetadataKey: Ord,
-    TokenMetadataValue,
-    MaxParentCount: Get<u32>,
-    MaxChildCount: Get<u32>
-> {
-    id: TokenId,
-    original_id: TokenId,
-    roles: BoundedBTreeMap<RoleKey, AccountId, MaxRoleCount>,
-    creator: AccountId,
-    created_at: BlockNumber,
-    destroyed_at: Option<BlockNumber>,
-    metadata: BoundedBTreeMap<TokenMetadataKey, TokenMetadataValue, MaxMetadataCount>,
-    parents: BoundedVec<TokenId, MaxParentCount>,
-    children: Option<BoundedVec<TokenId, MaxChildCount>> // children is the only mutable component of the token
-}
-
-impl<MR, A, RK, TID, BN, MM, TK, TV, MP, MC> PartialEq<Token<MR, A, RK, TID, BN, MM, TK, TV, MP, MC>> for Token<MR, A, RK, TID, BN, MM, TK, TV, MP, MC>
-where
-    BoundedBTreeMap<RK, A, MR>: PartialEq,
-    BoundedBTreeMap<TK, TV, MM>: PartialEq,
-    BoundedVec<TID, MP>: PartialEq,
-    BoundedVec<TID, MC>: PartialEq,
-    TID: PartialEq,
-    A: PartialEq,
-    BN: PartialEq,
-    RK: Ord,
-    TK: Ord,
-	MR: Get<u32>,
-	MM: Get<u32>,
-	MP: Get<u32>,
-	MC: Get<u32>,
-{
-	fn eq(&self, other: &Token<MR, A, RK, TID, BN, MM, TK, TV, MP, MC>) -> bool {
-        self.id == other.id &&
-        self.original_id == other.original_id &&
-        self.roles == other.roles &&
-        self.creator == other.creator &&
-        self.created_at == other.created_at &&
-        self.destroyed_at == other.destroyed_at &&
-        self.metadata == other.metadata &&
-        self.parents == other.parents &&
-        self.children == other.children
-	}
-}
 
 pub mod weights;
 
@@ -103,10 +50,8 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
 
         type ProcessValidator: ProcessValidator<
-            Self::MaxRoleCount,
             Self::AccountId,
             Self::RoleKey,
-            Self::MaxMetadataCount,
             Self::TokenMetadataKey,
             Self::TokenMetadataValue
         >;
@@ -132,20 +77,16 @@ pub mod pallet {
 
     // ProcessIdentifier can be pulled off of the configured ProcessValidator
     type ProcessIdentifier<T> = <<T as Config>::ProcessValidator as ProcessValidator<
-        <T as Config>::MaxRoleCount,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
-        <T as Config>::MaxMetadataCount,
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue
     >>::ProcessIdentifier;
 
     // ProcessVersion can be pulled off of the configured ProcessValidator
     type ProcessVersion<T> = <<T as Config>::ProcessValidator as ProcessValidator<
-        <T as Config>::MaxRoleCount,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
-        <T as Config>::MaxMetadataCount,
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue
     >>::ProcessVersion;
@@ -157,7 +98,7 @@ pub mod pallet {
     >;
 
     // The specific Token is derived from Config and the generic Token struct in this crate
-    type Token<T> = crate::Token<
+    type Token<T> = token::Token<
         <T as Config>::MaxRoleCount,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
@@ -171,11 +112,19 @@ pub mod pallet {
     >;
 
     // The specific ProcessIO type can be derived from Config
-    type ProcessIO<T> = traits::ProcessIO<
+    type Output<T> = output::Output<
         <T as Config>::MaxRoleCount,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::MaxMetadataCount,
+        <T as Config>::TokenMetadataKey,
+        <T as Config>::TokenMetadataValue
+    >;
+
+    // The specific ProcessIO type can be derived from Config
+    type ProcessIO<T> = traits::ProcessIO<
+        <T as frame_system::Config>::AccountId,
+        <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue
     >;
@@ -233,13 +182,12 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        // #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
         pub fn run_process(
             origin: OriginFor<T>,
             process: Option<ProcessId<T>>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-            outputs: BoundedVec<ProcessIO<T>, T::MaxOutputCount>
+            outputs: BoundedVec<Output<T>, T::MaxOutputCount>
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -269,6 +217,13 @@ pub mod pallet {
                 }), Error::<T>::InvalidInput);
 
                 let inputs = inputs.into_iter().map(|t| t.unwrap()).collect();
+                let outputs = outputs.iter().map(|o| {
+                    ProcessIO::<T> {
+                        roles: o.roles.clone().into(),
+                        metadata: o.metadata.clone().into(),
+                        parent_index: o.parent_index.clone(),
+                    }
+                }).collect();
 
                 let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &inputs, &outputs);
                 ensure!(process_is_valid, Error::<T>::ProcessInvalid);
