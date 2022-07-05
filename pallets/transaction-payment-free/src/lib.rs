@@ -51,9 +51,9 @@ pub mod pallet {
 
 /// Require the transactor have balance. All transactions are free - they have no fee
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct OnChargeTransaction<T: Config>(#[codec(compact)] BalanceOf<T>);
+pub struct ChargeTransactionPayment<T: Config>(#[codec(compact)] BalanceOf<T>);
 
-impl<T: Config> OnChargeTransaction<T>
+impl<T: Config> ChargeTransactionPayment<T>
 where
     T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
     BalanceOf<T>: Send + Sync + FixedPointOperand

@@ -1263,7 +1263,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node"
-version = "3.7.0"
+version = "3.8.0"
 dependencies = [
  "bs58",
  "dscp-node-runtime",
