@@ -20,11 +20,7 @@ mod payment;
 pub use pallet::*;
 pub use payment::*;
 
-pub mod weights;
-
 type BalanceOf<T> = <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::Balance;
-
-// pub use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
