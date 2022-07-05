@@ -130,10 +130,6 @@ const api = ({ options }) => {
     },
     IsNew: 'bool',
     Restrictions: 'Vec<Restriction>',
-    OnChargeTransaction: {
-      extrinsic: '',
-      payload: '',
-    },
   }
 
   const apiOptions = {
