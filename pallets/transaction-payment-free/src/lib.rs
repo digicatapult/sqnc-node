@@ -34,9 +34,9 @@ decl_module! {
 
 /// Require the transactor have balance. All transactions are free - they have no fee
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct FreeTransaction<T: Config>(#[codec(compact)] BalanceOf<T>);
+pub struct OnChargeTransaction<T: Config>(#[codec(compact)] BalanceOf<T>);
 
-impl<T: Config> FreeTransaction<T>
+impl<T: Config> OnChargeTransaction<T>
 where
     T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
     BalanceOf<T>: Send + Sync + FixedPointOperand
@@ -70,10 +70,10 @@ where
     }
 }
 
-impl<T: Config> sp_std::fmt::Debug for FreeTransaction<T> {
+impl<T: Config> sp_std::fmt::Debug for OnChargeTransaction<T> {
     #[cfg(feature = "std")]
     fn fmt(&self, f: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
-        write!(f, "FreeTransaction<{:?}>", self.0)
+        write!(f, "OnChargeTransaction<{:?}>", self.0)
     }
     #[cfg(not(feature = "std"))]
     fn fmt(&self, _: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
@@ -81,12 +81,12 @@ impl<T: Config> sp_std::fmt::Debug for FreeTransaction<T> {
     }
 }
 
-impl<T: Config> SignedExtension for FreeTransaction<T>
+impl<T: Config> SignedExtension for OnChargeTransaction<T>
 where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
     T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
 {
-    const IDENTIFIER: &'static str = "FreeTransaction";
+    const IDENTIFIER: &'static str = "OnChargeTransaction";
     type AccountId = T::AccountId;
     type Call = T::Call;
     type AdditionalSigned = ();

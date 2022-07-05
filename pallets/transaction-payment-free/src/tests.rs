@@ -8,7 +8,7 @@ fn transaction_payment_works_with_no_fee_for_account_with_balance() {
     new_test_ext().execute_with(|| {
         let user = 1;
         assert_eq!(Balances::free_balance(user), 10);
-        assert_ok!(FreeTransaction::<Test>::from(0).pre_dispatch(&user, CALL, &info_from_weight(0), 0));
+        assert_ok!(OnChargeTransaction::<Test>::from(0).pre_dispatch(&user, CALL, &info_from_weight(0), 0));
         assert_eq!(Balances::free_balance(user), 10);
     });
 }
@@ -22,7 +22,7 @@ fn transaction_payment_fails_for_account_with_no_balance() {
         let user = 2;
         assert_eq!(Balances::free_balance(user), 0);
         assert_err!(
-            FreeTransaction::<Test>::from(0).pre_dispatch(&user, CALL, &info_from_weight(0), 0),
+            OnChargeTransaction::<Test>::from(0).pre_dispatch(&user, CALL, &info_from_weight(0), 0),
             InvalidTransaction::Payment
         );
         // No events for such a scenario
