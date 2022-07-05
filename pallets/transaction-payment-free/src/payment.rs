@@ -58,6 +58,6 @@ where
         if balance == Zero::zero() {
             return Err(InvalidTransaction::Payment.into());
         }
-        Ok(Some(C::NegativeImbalance::zero()))
+        Ok(None)
     }
 }

@@ -12,7 +12,6 @@ use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup}
 };
-use std::cell::RefCell;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -31,17 +30,13 @@ frame_support::construct_runtime!(
 
 pub const CALL: &<Test as frame_system::Config>::Call = &Call::Balances(BalancesCall::transfer(2, 69));
 
-thread_local! {
-    static EXTRINSIC_BASE_WEIGHT: RefCell<u64> = RefCell::new(0);
-}
-
 pub struct BlockWeights;
 impl Get<frame_system::limits::BlockWeights> for BlockWeights {
     fn get() -> frame_system::limits::BlockWeights {
         frame_system::limits::BlockWeights::builder()
             .base_block(0)
             .for_class(DispatchClass::all(), |weights| {
-                weights.base_extrinsic = EXTRINSIC_BASE_WEIGHT.with(|v| *v.borrow()).into();
+                weights.base_extrinsic = 0u64.into();
             })
             .for_class(DispatchClass::non_mandatory(), |weights| {
                 weights.max_total = 1024.into();
