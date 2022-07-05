@@ -1,7 +1,7 @@
 // Tests to be written here
 
-use crate::{mock::*, Error, Token};
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO};
+use crate::{mock::*, Error, token::Token, output::Output};
+use dscp_pallet_traits::{ProcessFullyQualifiedId};
 use frame_support::{assert_err, assert_ok, bounded_vec, bounded_btree_map};
 use sp_core::H256;
 
@@ -25,7 +25,7 @@ fn it_works_for_creating_token_with_file() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -62,7 +62,7 @@ fn it_works_for_creating_token_with_literal() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -99,7 +99,7 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -136,7 +136,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -178,7 +178,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -215,7 +215,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -255,17 +255,17 @@ fn it_works_for_creating_many_token() {
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata0.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata2.clone(),
                     parent_index: None
@@ -336,17 +336,17 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata0.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata2.clone(),
                     parent_index: None
@@ -413,7 +413,7 @@ fn it_works_for_destroying_single_token() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -460,17 +460,17 @@ fn it_works_for_destroying_many_tokens() {
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata0.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata2.clone(),
                     parent_index: None
@@ -547,7 +547,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles0.clone(),
                 metadata: metadata0.clone(),
                 parent_index: None
@@ -559,7 +559,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![1],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles1.clone(),
                 metadata: metadata1.clone(),
                 parent_index: Some(0)
@@ -615,12 +615,12 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
-                ProcessIO {
+                Output {
                     roles: roles0.clone(),
                     metadata: metadata0.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles0.clone(),
                     metadata: metadata1.clone(),
                     parent_index: None
@@ -634,12 +634,12 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             NONE_PROCESS,
             bounded_vec![1, 2],
             bounded_vec![
-                ProcessIO {
+                Output {
                     roles: roles0.clone(),
                     metadata: metadata2.clone(),
                     parent_index: Some(0)
                 },
-                ProcessIO {
+                Output {
                     roles: roles1.clone(),
                     metadata: metadata3.clone(),
                     parent_index: Some(1)
@@ -723,7 +723,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -735,7 +735,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![1],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: Some(0)
@@ -746,7 +746,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![2],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: Some(0)
@@ -810,7 +810,7 @@ fn it_fails_for_destroying_single_token_as_incorrect_role() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -853,7 +853,7 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -884,7 +884,7 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
             Origin::signed(2),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
                 parent_index: None
@@ -895,7 +895,7 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata1.clone(),
                 parent_index: None
@@ -929,7 +929,7 @@ fn it_fails_for_destroying_single_burnt_token() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
                 parent_index: None
@@ -945,7 +945,7 @@ fn it_fails_for_destroying_single_burnt_token() {
                 Origin::signed(1),
                 NONE_PROCESS,
                 bounded_vec![1],
-                bounded_vec![ProcessIO {
+                bounded_vec![Output {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
                     parent_index: None
@@ -972,12 +972,12 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata0.clone(),
                     parent_index: None
                 },
-                ProcessIO {
+                Output {
                     roles: roles.clone(),
                     metadata: metadata1.clone(),
                     parent_index: None
@@ -996,7 +996,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
                 Origin::signed(1),
                 NONE_PROCESS,
                 bounded_vec![1, 2],
-                bounded_vec![ProcessIO {
+                bounded_vec![Output {
                     roles: roles.clone(),
                     metadata: metadata2.clone(),
                     parent_index: None
@@ -1022,7 +1022,7 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -1037,7 +1037,7 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
                 Origin::signed(2),
                 NONE_PROCESS,
                 bounded_vec![1],
-                bounded_vec![ProcessIO {
+                bounded_vec![Output {
                     roles: roles.clone(),
                     metadata: metadata.clone(),
                     parent_index: Some(10)
@@ -1061,7 +1061,7 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -1077,12 +1077,12 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
                 NONE_PROCESS,
                 bounded_vec![1],
                 bounded_vec![
-                    ProcessIO {
+                    Output {
                         roles: roles.clone(),
                         metadata: metadata.clone(),
                         parent_index: Some(0)
                     },
-                    ProcessIO {
+                    Output {
                         roles: roles.clone(),
                         metadata: metadata.clone(),
                         parent_index: Some(0)
@@ -1108,7 +1108,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
             Origin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
-            bounded_vec![ProcessIO {
+            bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
@@ -1123,7 +1123,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
                 Origin::signed(1),
                 NONE_PROCESS,
                 bounded_vec![],
-                bounded_vec![ProcessIO {
+                bounded_vec![Output {
                     roles: roles_empty.clone(),
                     metadata: metadata.clone(),
                     parent_index: None
