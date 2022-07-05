@@ -1,6 +1,7 @@
 use super::*;
 
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
+use frame_support::bounded_vec;
 use sp_std::collections::btree_map::BTreeMap;
 
 use crate::restrictions::Restriction;
@@ -14,7 +15,7 @@ fn it_succeeds_when_process_exists() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: Vec::new()
+                restrictions: bounded_vec![]
             }
         );
 
@@ -38,7 +39,7 @@ fn it_fails_when_process_id_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: Vec::new()
+                restrictions: bounded_vec![]
             }
         );
 
@@ -48,8 +49,8 @@ fn it_fails_when_process_id_doesnt_exist() {
                 version: 1u32
             },
             &0u64,
-            &Vec::new(),
-            &Vec::new(),
+            &bounded_vec![],
+            &bounded_vec![],
         ));
     });
 }
@@ -62,7 +63,7 @@ fn it_fails_when_process_version_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: Vec::new()
+                restrictions: bounded_vec![]
             }
         );
 
@@ -72,8 +73,8 @@ fn it_fails_when_process_version_doesnt_exist() {
                 version: 2u32
             },
             &0u64,
-            &Vec::new(),
-            &Vec::new(),
+            &bounded_vec![],
+            &bounded_vec![],
         ));
     });
 }
@@ -86,7 +87,7 @@ fn it_fails_when_process_disabled() {
             1u32,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: Vec::new()
+                restrictions: bounded_vec![]
             }
         );
 
@@ -96,8 +97,8 @@ fn it_fails_when_process_disabled() {
                 version: 1u32
             },
             &0u64,
-            &Vec::new(),
-            &Vec::new(),
+            &bounded_vec![],
+            &bounded_vec![],
         ));
     });
 }
@@ -110,7 +111,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: vec![Restriction::None, Restriction::SenderOwnsAllInputs]
+                restrictions: bounded_vec![Restriction::None, Restriction::SenderOwnsAllInputs]
             }
         );
 
@@ -128,7 +129,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
                 metadata: BTreeMap::new(),
                 parent_index: None
             }],
-            &Vec::new(),
+            &bounded_vec![],
         ));
     });
 }
@@ -141,7 +142,7 @@ fn it_fails_when_one_restrictions_fails() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: vec![Restriction::None, Restriction::SenderOwnsAllInputs]
+                restrictions: bounded_vec![Restriction::None, Restriction::SenderOwnsAllInputs]
             }
         );
 
@@ -159,7 +160,7 @@ fn it_fails_when_one_restrictions_fails() {
                 metadata: BTreeMap::new(),
                 parent_index: None
             }],
-            &Vec::new(),
+            &bounded_vec![],
         ));
     });
 }
