@@ -1,4 +1,3 @@
-///! Traits and default implementation for paying transaction fees.
 use crate::Config;
 use codec::FullCodec;
 use frame_support::{
@@ -13,7 +12,6 @@ use sp_std::{fmt::Debug, marker::PhantomData};
 
 type NegativeImbalanceOf<C, T> = <C as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
-/// Handle withdrawing, refunding and depositing of transaction fees.
 pub trait OnFreeTransaction<T: Config> {
     /// The underlying integer type in which fees are calculated.
     type Balance: AtLeast32BitUnsigned + FullCodec + Copy + MaybeSerializeDeserialize + Debug + Default;
@@ -28,7 +26,7 @@ pub trait OnFreeTransaction<T: Config> {
     ) -> Result<Self::LiquidityInfo, TransactionValidityError>;
 }
 
-/// Implements the transaction payment for a module implementing the `Currency`
+/// Implements the transaction payment for a pallet implementing the `Currency`
 /// trait (eg. the pallet_balances) using an unbalance handler (implementing
 /// `OnUnbalanced`).
 pub struct CurrencyAdapter<C, OU>(PhantomData<(C, OU)>);

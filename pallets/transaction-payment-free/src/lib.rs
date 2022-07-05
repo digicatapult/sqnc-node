@@ -1,10 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{
-    decl_module,
-    weights::{DispatchInfo, PostDispatchInfo}
-};
+use frame_support::weights::{DispatchInfo, PostDispatchInfo};
 use sp_std::prelude::*;
 
 #[cfg(test)]
@@ -20,16 +17,32 @@ use sp_runtime::{
 
 mod payment;
 
+pub use pallet::*;
 pub use payment::*;
 
 type BalanceOf<T> = <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::Balance;
 
-pub trait Config: frame_system::Config {
-    type OnFreeTransaction: OnFreeTransaction<Self>;
-}
+#[frame_support::pallet]
+pub mod pallet {
+    use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
 
-decl_module! {
-    pub struct Module<T: Config> for enum Call where origin: T::Origin{}
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(_);
+
+    /// The pallet's configuration trait.
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        type OnFreeTransaction: OnFreeTransaction<Self>;
+    }
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {}
 }
 
 /// Require the transactor have balance. All transactions are free - they have no fee
