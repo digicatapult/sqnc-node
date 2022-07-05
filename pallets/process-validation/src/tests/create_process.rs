@@ -2,10 +2,13 @@ use super::*;
 use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
+use crate::tests::Event as TestEvent;
 use crate::{
     BinaryOperator, Process, ProcessModel, ProcessStatus, Restriction::Combined, Restriction::None, VersionModel
 };
+use frame_support::bounded_vec;
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
+use sp_runtime::ModuleError;
 
 // -- fixtures --
 #[allow(dead_code)]
@@ -17,7 +20,7 @@ fn returns_error_if_origin_validation_fails_and_no_data_added() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_noop!(
-            ProcessValidation::create_process(Origin::none(), PROCESS_ID1, vec![{ None }]),
+            ProcessValidation::create_process(Origin::none(), PROCESS_ID1, bounded_vec![{ None }]),
             DispatchError::BadOrigin,
         );
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0u32);
@@ -25,7 +28,7 @@ fn returns_error_if_origin_validation_fails_and_no_data_added() {
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: [].to_vec()
+                restrictions: bounded_vec![]
             }
         );
         assert_eq!(System::events().len(), 0);
@@ -40,10 +43,10 @@ fn handles_if_process_exists_for_the_new_version() {
             1,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: vec![{ None }]
+                restrictions: bounded_vec![{ None }]
             }
         );
-        let result = ProcessValidation::create_process(Origin::root(), PROCESS_ID1, vec![{ None }]);
+        let result = ProcessValidation::create_process(Origin::root(), PROCESS_ID1, bounded_vec![{ None }]);
         assert_noop!(result, Error::<Test>::AlreadyExists);
     });
 }
@@ -56,16 +59,16 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
-            vec![{ None }],
+            bounded_vec![{ None }],
         ));
 
-        let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 1u32, vec![{ None }], true));
+        let expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID1, 1u32, bounded_vec![{ None }], true));
         assert_eq!(System::events()[0].event, expected);
         assert_eq!(
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: vec![{ None }]
+                restrictions: bounded_vec![{ None }]
             }
         );
     });
@@ -97,17 +100,17 @@ fn sets_versions_correctly_for_multiple_processes() {
             assert_ok!(ProcessValidation::update_version(id.clone()));
         });
 
-        let id1_expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 16u32, vec![{ None }], false));
+        let id1_expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID1, 16u32, bounded_vec![{ None }], false));
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
-            vec![{ None }],
+            bounded_vec![{ None }],
         ));
-        let id2_expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID2, 11u32, vec![{ None }], false));
+        let id2_expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID2, 11u32, bounded_vec![{ None }], false));
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID2,
-            vec![{ None }],
+            bounded_vec![{ None }],
         ));
 
         assert_eq!(System::events()[0].event, id1_expected);
@@ -120,11 +123,11 @@ fn updates_version_correctly_for_existing_proces_and_dispatches_event() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         <VersionModel<Test>>::insert(PROCESS_ID1, 9u32);
-        let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 10u32, vec![{ None }], false));
+        let expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID1, 10u32, bounded_vec![{ None }], false));
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
-            vec![{ None }],
+            bounded_vec![{ None }],
         ));
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 10u32);
         assert_eq!(System::events()[0].event, expected);
@@ -138,9 +141,9 @@ fn updates_version_correctly_for_new_process_and_dispatches_event() {
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
-            vec![{ None }],
+            bounded_vec![{ None }],
         ));
-        let expected = Event::pallet_process_validation(ProcessCreated(PROCESS_ID1, 1u32, vec![{ None }], true));
+        let expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID1, 1u32, bounded_vec![{ None }], true));
         // sets version to 1 and returns true to identify that this is a new event
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1u32);
         assert_eq!(System::events()[0].event, expected);
@@ -154,7 +157,7 @@ fn combined_with_depth_succeeds() {
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
-            vec![Combined {
+            bounded_vec![Combined {
                 operator: BinaryOperator::AND,
                 restriction_a: { Box::new(None) },
                 restriction_b: Box::new(Combined {
@@ -164,10 +167,10 @@ fn combined_with_depth_succeeds() {
                 })
             }]
         ));
-        let expected = Event::pallet_process_validation(ProcessCreated(
+        let expected = TestEvent::ProcessValidation(ProcessCreated(
             PROCESS_ID1,
             1u32,
-            vec![Combined {
+            bounded_vec![Combined {
                 operator: BinaryOperator::AND,
                 restriction_a: { Box::new(None) },
                 restriction_b: Box::new(Combined {
@@ -192,7 +195,7 @@ fn combined_over_max_depth_fails() {
             ProcessValidation::create_process(
                 Origin::root(),
                 PROCESS_ID1,
-                vec![Combined {
+                bounded_vec![Combined {
                     operator: BinaryOperator::AND,
                     restriction_a: { Box::new(None) },
                     restriction_b: Box::new(Combined {
@@ -206,18 +209,18 @@ fn combined_over_max_depth_fails() {
                     })
                 }]
             ),
-            DispatchError::Module {
+            DispatchError::Module(ModuleError {
                 index: 1,
-                error: 4,
+                error: [4, 0, 0, 0],
                 message: Some("RestrictionsTooDeep")
-            },
+            }),
         );
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0u32);
         assert_eq!(
             <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: [].to_vec()
+                restrictions: bounded_vec![]
             }
         );
         assert_eq!(System::events().len(), 0);
