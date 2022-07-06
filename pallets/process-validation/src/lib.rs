@@ -97,7 +97,7 @@ pub mod pallet {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         // The primary identifier for a process (i.e. it's name, and version)
-        type ProcessIdentifier: Parameter + MaxEncodedLen;
+        type ProcessIdentifier: Parameter + Default + MaxEncodedLen;
         type ProcessVersion: Parameter + AtLeast32Bit + Default + MaxEncodedLen;
 
         #[pallet::constant]

@@ -1332,7 +1332,6 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "scale-info",
- "serde",
  "sp-api",
  "sp-block-builder",
  "sp-consensus-aura",
