@@ -94,10 +94,6 @@ pub fn development_config() -> Result<ChainSpec, String> {
     ))
 }
 
-pub fn inteli_stage_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/inteli-stage.json")[..])
-}
-
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
     let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm binary not available".to_string())?;
 

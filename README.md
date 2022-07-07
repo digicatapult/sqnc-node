@@ -80,7 +80,7 @@ cargo build --release --features runtime-benchmarks
 Then you can run the benchmark tool with for example
 
 ```bash
-./target/release/dscp-node benchmark \
+./target/release/dscp-node benchmark pallet \
     --pallet 'pallet_simple_nft' \
     --extrinsic '*' \
     --repeat 1000 \

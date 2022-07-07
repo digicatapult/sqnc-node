@@ -166,7 +166,7 @@ pub mod pallet {
         NonExistingProcess,
         // process is already disabled
         AlreadyDisabled,
-        // process not found for this versiion
+        // process not found for this version
         InvalidVersion,
         // restrictions go over maximum depth
         RestrictionsTooDeep
@@ -238,15 +238,15 @@ pub mod pallet {
             }
 
             match restriction {
-                Restriction::Combined {
-                    operator: _,
-                    restriction_a,
-                    restriction_b
-                } => {
-                    let incremented_count = count + 1;
-                    Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
-                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
-                }
+                // Restriction::Combined {
+                //     operator: _,
+                //     restriction_a,
+                //     restriction_b
+                // } => {
+                //     let incremented_count = count + 1;
+                //     Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
+                //         || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
+                // }
                 _ => false
             }
         }
