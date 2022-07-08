@@ -2,7 +2,10 @@
 
 use crate as pallet_process_validation;
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{parameter_types, traits::{ConstU32, ConstU8, ConstU64}};
+use frame_support::{
+    parameter_types,
+    traits::{ConstU32, ConstU64, ConstU8}
+};
 use frame_system as system;
 use scale_info::TypeInfo;
 use sp_core::H256;

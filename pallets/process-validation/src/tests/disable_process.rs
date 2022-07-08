@@ -1,5 +1,5 @@
 use super::*;
-use crate::tests::{ProcessIdentifier, Event as TestEvent};
+use crate::tests::{Event as TestEvent, ProcessIdentifier};
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};

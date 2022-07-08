@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{Parameter, traits::Get, BoundedVec, RuntimeDebug};
+use frame_support::{traits::Get, BoundedVec, Parameter, RuntimeDebug};
 pub use pallet::*;
 use scale_info::TypeInfo;
 use sp_runtime::traits::{AtLeast32Bit, One};
@@ -34,8 +34,13 @@ impl Default for ProcessStatus {
 
 #[derive(Encode, Decode, Clone, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 #[scale_info(skip_type_params(MaxProcessRestrictions))]
-pub struct Process<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessRestrictions>
-where
+pub struct Process<
+    RoleKey,
+    TokenMetadataKey,
+    TokenMetadataValue,
+    TokenMetadataValueDiscriminator,
+    MaxProcessRestrictions
+> where
     RoleKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
@@ -74,10 +79,9 @@ where
     D: Parameter + Default + From<V> + MaxEncodedLen,
     MR: Get<u32>
 {
-	fn eq(&self, other: &Process<R, K, V, D, MR>) -> bool {
-        self.status == other.status &&
-        self.restrictions == other.restrictions
-	}
+    fn eq(&self, other: &Process<R, K, V, D, MR>) -> bool {
+        self.status == other.status && self.restrictions == other.restrictions
+    }
 }
 
 pub mod weights;
@@ -132,7 +136,13 @@ pub mod pallet {
         T::ProcessIdentifier,
         Blake2_128Concat,
         T::ProcessVersion,
-        Process<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator, T::MaxProcessRestrictions>,
+        Process<
+            T::RoleKey,
+            T::TokenMetadataKey,
+            T::TokenMetadataValue,
+            T::TokenMetadataValueDiscriminator,
+            T::MaxProcessRestrictions
+        >,
         ValueQuery
     >;
 

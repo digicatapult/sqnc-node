@@ -4,26 +4,22 @@ use codec::{Decode, Encode};
 use frame_support::{Parameter, RuntimeDebug};
 
 use frame_support::codec::MaxEncodedLen;
-use frame_support::{
-    sp_runtime::traits::AtLeast32Bit
-};
+use frame_support::sp_runtime::traits::AtLeast32Bit;
 use scale_info::TypeInfo;
-use sp_std::prelude::*;
 use sp_std::collections::btree_map::BTreeMap;
+use sp_std::prelude::*;
 
-pub struct ProcessIO<
-    AccountId,
-    RoleKey: Ord,
-    TokenMetadataKey: Ord,
-    TokenMetadataValue
-> {
+pub struct ProcessIO<AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
     pub roles: BTreeMap<RoleKey, AccountId>,
     pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
     pub parent_index: Option<u32>
 }
 
 #[derive(Encode, Decode, Default, RuntimeDebug, MaxEncodedLen, TypeInfo, Clone, PartialEq)]
-pub struct ProcessFullyQualifiedId<ProcessIdentifier: Parameter + MaxEncodedLen, ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen> {
+pub struct ProcessFullyQualifiedId<
+    ProcessIdentifier: Parameter + MaxEncodedLen,
+    ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen
+> {
     pub id: ProcessIdentifier,
     pub version: ProcessVersion
 }
@@ -36,7 +32,7 @@ where
     V: Parameter
 {
     type ProcessIdentifier: Parameter + MaxEncodedLen + Encode + Decode;
-    type ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen  + Encode + Decode;
+    type ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen + Encode + Decode;
 
     fn validate_process(
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,

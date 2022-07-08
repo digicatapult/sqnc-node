@@ -20,8 +20,7 @@ use sp_std::vec::Vec;
 
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
-{
+pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     None,
     // Combined {
     //     operator: BinaryOperator,

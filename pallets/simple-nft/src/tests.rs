@@ -1,8 +1,8 @@
 // Tests to be written here
 
-use crate::{mock::*, Error, token::Token, output::Output};
-use dscp_pallet_traits::{ProcessFullyQualifiedId};
-use frame_support::{assert_err, assert_ok, bounded_vec, bounded_btree_map};
+use crate::{mock::*, output::Output, token::Token, Error};
+use dscp_pallet_traits::ProcessFullyQualifiedId;
+use frame_support::{assert_err, assert_ok, bounded_btree_map, bounded_vec};
 use sp_core::H256;
 
 const NONE_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = None;
@@ -1153,12 +1153,10 @@ fn it_works_for_running_success_process() {
 #[test]
 fn it_fails_for_running_success_process_with_invalid_input() {
     new_test_ext().execute_with(|| {
-        assert_err!(SimpleNFTModule::run_process(
-            Origin::signed(1),
-            SUCCEED_PROCESS,
-            bounded_vec![42],
-            bounded_vec![]
-        ), Error::<Test>::InvalidInput);
+        assert_err!(
+            SimpleNFTModule::run_process(Origin::signed(1), SUCCEED_PROCESS, bounded_vec![42], bounded_vec![]),
+            Error::<Test>::InvalidInput
+        );
     });
 }
 

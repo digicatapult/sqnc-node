@@ -2,7 +2,7 @@ use crate::{
     chain_spec,
     cli::{Cli, Subcommand},
     command_helper::{inherent_benchmark_data, BenchmarkExtrinsicBuilder},
-    service,
+    service
 };
 use dscp_node_runtime::Block;
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
