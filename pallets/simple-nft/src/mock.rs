@@ -33,7 +33,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        SimpleNFTModule: pallet_simple_nft::{Pallet, Call, Storage, Event<T>},
+        SimpleNFT: pallet_simple_nft::{Pallet, Call, Storage, Event<T>},
     }
 );
 parameter_types! {

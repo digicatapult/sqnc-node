@@ -448,7 +448,7 @@ construct_runtime!(
         Balances: pallet_balances,
         TransactionPaymentFree: pallet_transaction_payment_free,
         Sudo: pallet_sudo,
-        SimpleNFTPallet: pallet_simple_nft,
+        SimpleNFT: pallet_simple_nft,
         ProcessValidation: pallet_process_validation,
         NodeAuthorization: pallet_node_authorization,
         Preimage: pallet_preimage,
@@ -498,7 +498,7 @@ mod benches {
         [pallet_timestamp, Timestamp]
         [pallet_grandpa, Grandpa]
         [pallet_balances, Balances]
-        [pallet_simple_nft, SimpleNFTPallet]
+        [pallet_simple_nft, SimpleNFT]
         [pallet_scheduler, Scheduler]
         [pallet_symmetric_key, IpfsKey]
     );
