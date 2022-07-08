@@ -1,8 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use scale_info::TypeInfo;
 use frame_support::weights::{DispatchInfo, PostDispatchInfo};
+use scale_info::TypeInfo;
 use sp_std::prelude::*;
 
 #[cfg(test)]

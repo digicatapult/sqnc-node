@@ -2,7 +2,7 @@ use super::*;
 use crate as pallet_transaction_payment_free;
 use frame_support::{
     parameter_types,
-    traits::{Get, ConstU32, ConstU64},
+    traits::{ConstU32, ConstU64, Get},
     weights::{DispatchClass, DispatchInfo, Weight}
 };
 use frame_system as system;
