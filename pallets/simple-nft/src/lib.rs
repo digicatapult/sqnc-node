@@ -44,8 +44,8 @@ pub mod pallet {
         type TokenId: Parameter + AtLeast32Bit + Default + Copy + Codec + MaxEncodedLen;
         type RoleKey: Parameter + Default + Ord + MaxEncodedLen;
 
-        type TokenMetadataKey: Parameter + Ord + MaxEncodedLen;
-        type TokenMetadataValue: Parameter + MaxEncodedLen;
+        type TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen;
+        type TokenMetadataValue: Parameter + Default + MaxEncodedLen;
 
         type WeightInfo: WeightInfo;
 

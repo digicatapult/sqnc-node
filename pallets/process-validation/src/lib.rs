@@ -97,7 +97,7 @@ pub mod pallet {
         /// The overarching event type.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         // The primary identifier for a process (i.e. it's name, and version)
-        type ProcessIdentifier: Parameter + MaxEncodedLen;
+        type ProcessIdentifier: Parameter + Default + MaxEncodedLen;
         type ProcessVersion: Parameter + AtLeast32Bit + Default + MaxEncodedLen;
 
         #[pallet::constant]
@@ -166,7 +166,7 @@ pub mod pallet {
         NonExistingProcess,
         // process is already disabled
         AlreadyDisabled,
-        // process not found for this versiion
+        // process not found for this version
         InvalidVersion,
         // restrictions go over maximum depth
         RestrictionsTooDeep
@@ -238,15 +238,15 @@ pub mod pallet {
             }
 
             match restriction {
-                Restriction::Combined {
-                    operator: _,
-                    restriction_a,
-                    restriction_b
-                } => {
-                    let incremented_count = count + 1;
-                    Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
-                        || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
-                }
+                // Restriction::Combined {
+                //     operator: _,
+                //     restriction_a,
+                //     restriction_b
+                // } => {
+                //     let incremented_count = count + 1;
+                //     Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
+                //         || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
+                // }
                 _ => false
             }
         }
