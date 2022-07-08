@@ -4,13 +4,13 @@ use crate::Error;
 use crate::Event::*;
 use crate::tests::Event as TestEvent;
 use crate::{
-    BinaryOperator, Process, ProcessModel, ProcessStatus,
-    // Restriction::Combined,
+    Process, ProcessModel, ProcessStatus,
+    // Restriction::Combined, BinaryOperator,
     Restriction::None, VersionModel
 };
 use frame_support::bounded_vec;
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
-use sp_runtime::ModuleError;
+// use sp_runtime::ModuleError;
 
 // -- fixtures --
 #[allow(dead_code)]
