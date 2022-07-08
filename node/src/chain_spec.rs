@@ -220,7 +220,6 @@ fn testnet_genesis(
             members: technical_committee_accounts.try_into().unwrap(),
             ..Default::default()
         },
-        technical_committee: Default::default(),
-        transaction_payment: Default::default()
+        technical_committee: Default::default()
     }
 }

@@ -1260,7 +1260,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-node"
-version = "3.7.0"
+version = "3.8.0"
 dependencies = [
  "bs58",
  "clap",
@@ -1269,8 +1269,7 @@ dependencies = [
  "frame-benchmarking-cli",
  "frame-system",
  "jsonrpsee",
- "pallet-transaction-payment",
- "pallet-transaction-payment-rpc",
+ "pallet-transaction-payment-free",
  "sc-basic-authorship",
  "sc-cli",
  "sc-client-api",
@@ -1303,7 +1302,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "3.7.0"
+version = "3.8.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -1328,8 +1327,7 @@ dependencies = [
  "pallet-sudo",
  "pallet-symmetric-key",
  "pallet-timestamp",
- "pallet-transaction-payment",
- "pallet-transaction-payment-rpc-runtime-api",
+ "pallet-transaction-payment-free",
  "parity-scale-codec",
  "scale-info",
  "sp-api",
@@ -4330,45 +4328,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-transaction-payment"
-version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
+name = "pallet-transaction-payment-free"
+version = "1.0.0"
 dependencies = [
  "frame-support",
  "frame-system",
+ "pallet-balances",
  "parity-scale-codec",
  "scale-info",
  "serde",
+ "serde_json",
+ "smallvec",
  "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
-]
-
-[[package]]
-name = "pallet-transaction-payment-rpc"
-version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
-dependencies = [
- "jsonrpsee",
- "pallet-transaction-payment-rpc-runtime-api",
- "parity-scale-codec",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-rpc",
- "sp-runtime",
-]
-
-[[package]]
-name = "pallet-transaction-payment-rpc-runtime-api"
-version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
-dependencies = [
- "pallet-transaction-payment",
- "parity-scale-codec",
- "sp-api",
- "sp-runtime",
+ "sp-storage",
 ]
 
 [[package]]
