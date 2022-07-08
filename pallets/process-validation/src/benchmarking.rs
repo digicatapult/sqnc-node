@@ -3,8 +3,8 @@
 use super::*;
 
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
-use frame_system::RawOrigin;
 use frame_support::bounded_vec;
+use frame_system::RawOrigin;
 
 #[allow(unused)]
 use crate::Pallet as ProcessValidation;

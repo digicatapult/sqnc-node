@@ -1,18 +1,18 @@
 // Tests to be written here
 
-use crate::{mock::*, Error, token::Token, output::Output};
-use dscp_pallet_traits::{ProcessFullyQualifiedId};
-use frame_support::{assert_err, assert_ok, bounded_vec, bounded_btree_map};
+use crate::{mock::*, output::Output, token::Token, Error};
+use dscp_pallet_traits::ProcessFullyQualifiedId;
+use frame_support::{assert_err, assert_ok, bounded_btree_map, bounded_vec};
 use sp_core::H256;
 
 const NONE_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = None;
 const SUCCEED_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,
-    version: 0u32
+    version: 0u32,
 });
 const FAIL_PROCESS: Option<ProcessFullyQualifiedId<ProcessIdentifier, u32>> = Some(ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldFail,
-    version: 0u32
+    version: 0u32,
 });
 
 #[test]
@@ -417,7 +417,7 @@ fn it_works_for_destroying_single_token() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // create a token with no parents
@@ -475,7 +475,7 @@ fn it_works_for_destroying_many_tokens() {
                     metadata: metadata2.clone(),
                     parent_index: None
                 },
-            ]
+            ],
         )
         .unwrap();
         // create a token with no parents
@@ -551,7 +551,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
                 roles: roles0.clone(),
                 metadata: metadata0.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // create a token with a parent
@@ -625,7 +625,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                     metadata: metadata1.clone(),
                     parent_index: None
                 },
-            ]
+            ],
         )
         .unwrap();
         // create 2 tokens with 2 parents
@@ -727,7 +727,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // token with previous token as parent
@@ -814,7 +814,7 @@ fn it_fails_for_destroying_single_token_as_incorrect_role() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // get old token
@@ -857,7 +857,7 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // get old token
@@ -888,7 +888,7 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         SimpleNFTModule::run_process(
@@ -899,7 +899,7 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
                 roles: roles.clone(),
                 metadata: metadata1.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // get old token
@@ -933,7 +933,7 @@ fn it_fails_for_destroying_single_burnt_token() {
                 roles: roles.clone(),
                 metadata: metadata0.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), NONE_PROCESS, bounded_vec![1], bounded_vec![]).unwrap();
@@ -982,7 +982,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
                     metadata: metadata1.clone(),
                     parent_index: None
                 },
-            ]
+            ],
         )
         .unwrap();
         SimpleNFTModule::run_process(Origin::signed(1), NONE_PROCESS, bounded_vec![1], bounded_vec![]).unwrap();
@@ -1026,7 +1026,7 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // get old token
@@ -1065,7 +1065,7 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // get old token
@@ -1112,7 +1112,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
                 roles: roles.clone(),
                 metadata: metadata.clone(),
                 parent_index: None
-            }]
+            }],
         )
         .unwrap();
         // get old token
@@ -1153,12 +1153,10 @@ fn it_works_for_running_success_process() {
 #[test]
 fn it_fails_for_running_success_process_with_invalid_input() {
     new_test_ext().execute_with(|| {
-        assert_err!(SimpleNFTModule::run_process(
-            Origin::signed(1),
-            SUCCEED_PROCESS,
-            bounded_vec![42],
-            bounded_vec![]
-        ), Error::<Test>::InvalidInput);
+        assert_err!(
+            SimpleNFTModule::run_process(Origin::signed(1), SUCCEED_PROCESS, bounded_vec![42], bounded_vec![]),
+            Error::<Test>::InvalidInput
+        );
     });
 }
 

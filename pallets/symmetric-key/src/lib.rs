@@ -5,9 +5,9 @@ pub use pallet::*;
 use frame_support::{
     traits::{
         schedule::{DispatchTime, Named as ScheduleNamed, LOWEST_PRIORITY},
-        Get, Randomness
+        Get, Randomness,
     },
-    BoundedVec
+    BoundedVec,
 };
 use sp_runtime::traits::Dispatchable;
 
@@ -81,7 +81,7 @@ pub mod pallet {
                         Some((T::RefreshPeriod::get(), u32::max_value())),
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),
-                        Call::rotate_key {}.into()
+                        Call::rotate_key {}.into(),
                     )
                     .is_err()
                     {
@@ -93,7 +93,7 @@ pub mod pallet {
 
                     0
                 }
-                Some(_) => 0
+                Some(_) => 0,
             }
         }
     }
@@ -111,14 +111,14 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // key was updated.
-        UpdateKey(BoundedVec<u8, T::KeyLength>)
+        UpdateKey(BoundedVec<u8, T::KeyLength>),
     }
 
     // TODO: Fix this
     #[pallet::error]
     pub enum Error<T> {
         // The supplied key had incorrect length
-        IncorrectKeyLength
+        IncorrectKeyLength,
     }
 
     // The pallet's dispatchable functions.

@@ -7,7 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::traits::{ConstU128, ConstU64, ConstU32, ConstU8, EitherOfDiverse, EqualPrivilegeOnly};
+use frame_support::traits::{ConstU128, ConstU32, ConstU64, ConstU8, EitherOfDiverse, EqualPrivilegeOnly};
 use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
@@ -19,7 +19,7 @@ use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, Identify
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature
+    ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -33,9 +33,9 @@ pub use frame_support::{
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        IdentityFee, Weight
+        IdentityFee, Weight,
     },
-    StorageValue
+    StorageValue,
 };
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
@@ -120,7 +120,7 @@ pub const DAYS: BlockNumber = HOURS * 24;
 pub fn native_version() -> NativeVersion {
     NativeVersion {
         runtime_version: VERSION,
-        can_author_with: Default::default()
+        can_author_with: Default::default(),
     }
 }
 
@@ -128,7 +128,7 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
 type MoreThanHalfMembers = EitherOfDiverse<
     EnsureRoot<AccountId>,
-    pallet_collective::EnsureProportionMoreThan<AccountId, GovernanceCollective, 1, 2>
+    pallet_collective::EnsureProportionMoreThan<AccountId, GovernanceCollective, 1, 2>,
 >;
 
 type MoreThanTwoMembers =
@@ -320,7 +320,7 @@ pub enum Role {
     Laboratory = 3,
     Buyer = 4,
     Supplier = 5,
-    Reviewer = 6
+    Reviewer = 6,
 }
 
 impl Default for Role {
@@ -336,7 +336,7 @@ pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 32]),
     TokenId(TokenId),
-    None
+    None,
 }
 
 impl<T> Default for MetadataValue<T> {
@@ -478,19 +478,15 @@ pub type SignedExtra = (
     frame_system::CheckEra<Runtime>,
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment::ChargeTransactionPayment<Runtime>
+    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-    Runtime,
-    Block,
-    frame_system::ChainContext<Runtime>,
-    Runtime,
-    AllPalletsWithSystem>;
+pub type Executive =
+    frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]

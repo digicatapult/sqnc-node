@@ -1,12 +1,15 @@
 use super::*;
+use crate::tests::Event as TestEvent;
 use crate::tests::ProcessIdentifier;
 use crate::Error;
 use crate::Event::*;
-use crate::tests::Event as TestEvent;
 use crate::{
-    Process, ProcessModel, ProcessStatus,
+    Process,
+    ProcessModel,
+    ProcessStatus,
     // Restriction::Combined, BinaryOperator,
-    Restriction::None, VersionModel
+    Restriction::None,
+    VersionModel,
 };
 use frame_support::bounded_vec;
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
@@ -45,8 +48,8 @@ fn handles_if_process_exists_for_the_new_version() {
             1,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: bounded_vec![{ None }]
-            }
+                restrictions: bounded_vec![{ None }],
+            },
         );
         let result = ProcessValidation::create_process(Origin::root(), PROCESS_ID1, bounded_vec![{ None }]);
         assert_noop!(result, Error::<Test>::AlreadyExists);
@@ -102,13 +105,15 @@ fn sets_versions_correctly_for_multiple_processes() {
             assert_ok!(ProcessValidation::update_version(id.clone()));
         });
 
-        let id1_expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID1, 16u32, bounded_vec![{ None }], false));
+        let id1_expected =
+            TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID1, 16u32, bounded_vec![{ None }], false));
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID1,
             bounded_vec![{ None }],
         ));
-        let id2_expected = TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID2, 11u32, bounded_vec![{ None }], false));
+        let id2_expected =
+            TestEvent::ProcessValidation(ProcessCreated(PROCESS_ID2, 11u32, bounded_vec![{ None }], false));
         assert_ok!(ProcessValidation::create_process(
             Origin::root(),
             PROCESS_ID2,

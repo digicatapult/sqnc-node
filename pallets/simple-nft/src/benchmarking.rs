@@ -4,33 +4,40 @@ use super::*;
 
 use core::convert::TryInto;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
-use frame_system::RawOrigin;
 use frame_support::{BoundedBTreeMap, BoundedVec};
+use frame_system::RawOrigin;
 use sp_std::vec::Vec;
 
+use crate::output::Output;
 #[allow(unused)]
 use crate::Pallet as SimpleNFT;
-use crate::output::Output;
 
 const SEED: u32 = 0;
 
 fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
     let account_id: T::AccountId = account("owner", 0, SEED);
-    let mut roles = BoundedBTreeMap::<_,_,_>::new();
-    let mut metadata = BoundedBTreeMap::<_,_,_>::new();
+    let mut roles = BoundedBTreeMap::<_, _, _>::new();
+    let mut metadata = BoundedBTreeMap::<_, _, _>::new();
     roles.try_insert(T::RoleKey::default(), account_id.clone()).unwrap();
-    metadata.try_insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default()).unwrap();
+    metadata
+        .try_insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default())
+        .unwrap();
 
     let outputs: BoundedVec<_, T::MaxOutputCount> = (0..r)
         .map(|_| Output {
             roles: roles.clone(),
             metadata: metadata.clone(),
-            parent_index: None
+            parent_index: None,
         })
         .collect::<Vec<_>>()
         .try_into()
         .unwrap();
-    SimpleNFT::<T>::run_process(RawOrigin::Signed(account_id.clone()).into(), None, BoundedVec::<_,_>::with_max_capacity(), outputs)?;
+    SimpleNFT::<T>::run_process(
+        RawOrigin::Signed(account_id.clone()).into(),
+        None,
+        BoundedVec::<_, _>::with_max_capacity(),
+        outputs,
+    )?;
 
     let expected_last_token = nth_token_id::<T>(r)?;
 
@@ -50,18 +57,33 @@ fn mk_inputs<T: Config>(i: u32) -> Result<BoundedVec<T::TokenId, T::MaxInputCoun
 
 fn mk_outputs<T: Config>(
     o: u32,
-    inputs_len: u32
-) -> Result<BoundedVec<Output<T::MaxRoleCount, T::AccountId, T::RoleKey, T::MaxMetadataCount, T::TokenMetadataKey, T::TokenMetadataValue>, T::MaxOutputCount>, &'static str> {
+    inputs_len: u32,
+) -> Result<
+    BoundedVec<
+        Output<
+            T::MaxRoleCount,
+            T::AccountId,
+            T::RoleKey,
+            T::MaxMetadataCount,
+            T::TokenMetadataKey,
+            T::TokenMetadataValue,
+        >,
+        T::MaxOutputCount,
+    >,
+    &'static str,
+> {
     let account_id: T::AccountId = account("owner", 0, SEED);
-    let mut roles = BoundedBTreeMap::<_,_,_>::new();
-    let mut metadata = BoundedBTreeMap::<_,_,_>::new();
+    let mut roles = BoundedBTreeMap::<_, _, _>::new();
+    let mut metadata = BoundedBTreeMap::<_, _, _>::new();
     roles.try_insert(T::RoleKey::default(), account_id.clone()).unwrap();
-    metadata.try_insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default()).unwrap();
+    metadata
+        .try_insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default())
+        .unwrap();
     let outputs = (0..o)
         .map(|output_index| Output {
             roles: roles.clone(),
             metadata: metadata.clone(),
-            parent_index: valid_parent_index(inputs_len, output_index)
+            parent_index: valid_parent_index(inputs_len, output_index),
         })
         .collect::<Vec<_>>()
         .try_into()

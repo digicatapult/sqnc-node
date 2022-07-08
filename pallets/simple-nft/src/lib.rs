@@ -3,13 +3,13 @@
 use codec::{Codec, MaxEncodedLen};
 use dscp_pallet_traits as traits;
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
+use frame_support::{traits::Get, BoundedVec};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
-use frame_support::{BoundedVec, traits::Get};
 
+use sp_std::collections::btree_set::BTreeSet;
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
-use sp_std::collections::btree_set::BTreeSet;
 
 mod token;
 
@@ -32,7 +32,7 @@ pub use weights::WeightInfo;
 pub mod pallet {
 
     use super::*;
-    use frame_support::{pallet_prelude::*, Parameter, ensure};
+    use frame_support::{ensure, pallet_prelude::*, Parameter};
     use frame_system::pallet_prelude::*;
 
     /// The pallet's configuration trait.
@@ -53,7 +53,7 @@ pub mod pallet {
             Self::AccountId,
             Self::RoleKey,
             Self::TokenMetadataKey,
-            Self::TokenMetadataValue
+            Self::TokenMetadataValue,
         >;
 
         // Maximum number of metadata items allowed per token
@@ -80,7 +80,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >>::ProcessIdentifier;
 
     // ProcessVersion can be pulled off of the configured ProcessValidator
@@ -88,14 +88,11 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >>::ProcessVersion;
 
     // Construct ProcessId
-    type ProcessId<T> = ProcessFullyQualifiedId<
-        ProcessIdentifier<T>,
-        ProcessVersion<T>
-    >;
+    type ProcessId<T> = ProcessFullyQualifiedId<ProcessIdentifier<T>, ProcessVersion<T>>;
 
     // The specific Token is derived from Config and the generic Token struct in this crate
     type Token<T> = token::Token<
@@ -108,7 +105,7 @@ pub mod pallet {
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue,
         <T as Config>::MaxInputCount,
-        <T as Config>::MaxOutputCount
+        <T as Config>::MaxOutputCount,
     >;
 
     // The specific ProcessIO type can be derived from Config
@@ -118,7 +115,7 @@ pub mod pallet {
         <T as Config>::RoleKey,
         <T as Config>::MaxMetadataCount,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >;
 
     // The specific ProcessIO type can be derived from Config
@@ -126,7 +123,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >;
 
     #[pallet::pallet]
@@ -147,7 +144,7 @@ pub mod pallet {
         T::TokenId,
         Token<T>,
         // We need to use OptionQuery as AccountId is held in the Config trait but doesn't guarantee Copy trait
-        OptionQuery
+        OptionQuery,
     >;
 
     #[pallet::event]
@@ -156,7 +153,7 @@ pub mod pallet {
         /// A token was issued.
         Minted(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxInputCount>),
         /// A token was burnt.
-        Burnt(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxOutputCount>)
+        Burnt(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxOutputCount>),
     }
 
     #[pallet::error]
@@ -187,7 +184,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             process: Option<ProcessId<T>>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-            outputs: BoundedVec<Output<T>, T::MaxOutputCount>
+            outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -204,26 +201,30 @@ pub mod pallet {
                         token.map(|t| ProcessIO::<T> {
                             roles: t.roles.into(),
                             metadata: t.metadata.into(),
-                            parent_index: None
+                            parent_index: None,
                         })
                     })
                     .collect();
 
-                ensure!(inputs.iter().all(|opt_t| {
-                    match opt_t {
-                        None => false,
-                        Some(_) => true
-                    }
-                }), Error::<T>::InvalidInput);
+                ensure!(
+                    inputs.iter().all(|opt_t| {
+                        match opt_t {
+                            None => false,
+                            Some(_) => true,
+                        }
+                    }),
+                    Error::<T>::InvalidInput
+                );
 
                 let inputs = inputs.into_iter().map(|t| t.unwrap()).collect();
-                let outputs = outputs.iter().map(|o| {
-                    ProcessIO::<T> {
+                let outputs = outputs
+                    .iter()
+                    .map(|o| ProcessIO::<T> {
                         roles: o.roles.clone().into(),
                         metadata: o.metadata.clone().into(),
                         parent_index: o.parent_index.clone(),
-                    }
-                }).collect();
+                    })
+                    .collect();
 
                 let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &inputs, &outputs);
                 ensure!(process_is_valid, Error::<T>::ProcessInvalid);
@@ -262,32 +263,35 @@ pub mod pallet {
             let last = LastToken::<T>::get();
 
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) = outputs.iter().fold((last, BoundedVec::<T::TokenId, T::MaxOutputCount>::default()), |(last, children), output| {
-                let next = _next_token(last);
-                let original_id = if output.parent_index.is_some() {
-                    let parent_id = inputs.get(output.parent_index.unwrap() as usize).unwrap();
-                    <TokensById<T>>::get(parent_id).unwrap().original_id.clone()
-                } else {
-                    next
-                };
-                <TokensById<T>>::insert(
-                    next,
-                    Token::<T> {
-                        id: next,
-                        original_id: original_id,
-                        roles: output.roles.clone(),
-                        creator: sender.clone(),
-                        created_at: now,
-                        destroyed_at: None,
-                        metadata: output.metadata.clone(),
-                        parents: inputs.clone(),
-                        children: None
-                    }
-                );
-                let mut next_children = children.clone();
-                next_children.force_push(next);
-                (next, next_children)
-            });
+            let (last, children) = outputs.iter().fold(
+                (last, BoundedVec::<T::TokenId, T::MaxOutputCount>::default()),
+                |(last, children), output| {
+                    let next = _next_token(last);
+                    let original_id = if output.parent_index.is_some() {
+                        let parent_id = inputs.get(output.parent_index.unwrap() as usize).unwrap();
+                        <TokensById<T>>::get(parent_id).unwrap().original_id.clone()
+                    } else {
+                        next
+                    };
+                    <TokensById<T>>::insert(
+                        next,
+                        Token::<T> {
+                            id: next,
+                            original_id: original_id,
+                            roles: output.roles.clone(),
+                            creator: sender.clone(),
+                            created_at: now,
+                            destroyed_at: None,
+                            metadata: output.metadata.clone(),
+                            parents: inputs.clone(),
+                            children: None,
+                        },
+                    );
+                    let mut next_children = children.clone();
+                    next_children.force_push(next);
+                    (next, next_children)
+                },
+            );
 
             // Burn inputs
             inputs.iter().for_each(|id| {

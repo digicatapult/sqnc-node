@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{Parameter, traits::Get, BoundedVec, RuntimeDebug};
+use frame_support::{traits::Get, BoundedVec, Parameter, RuntimeDebug};
 pub use pallet::*;
 use scale_info::TypeInfo;
 use sp_runtime::traits::{AtLeast32Bit, One};
@@ -23,7 +23,7 @@ use restrictions::*;
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum ProcessStatus {
     Disabled,
-    Enabled
+    Enabled,
 }
 
 impl Default for ProcessStatus {
@@ -34,19 +34,24 @@ impl Default for ProcessStatus {
 
 #[derive(Encode, Decode, Clone, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 #[scale_info(skip_type_params(MaxProcessRestrictions))]
-pub struct Process<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessRestrictions>
-where
+pub struct Process<
+    RoleKey,
+    TokenMetadataKey,
+    TokenMetadataValue,
+    TokenMetadataValueDiscriminator,
+    MaxProcessRestrictions,
+> where
     RoleKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue> + MaxEncodedLen,
-    MaxProcessRestrictions: Get<u32>
+    MaxProcessRestrictions: Get<u32>,
 {
     status: ProcessStatus,
     restrictions: BoundedVec<
         Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>,
-        MaxProcessRestrictions
-    >
+        MaxProcessRestrictions,
+    >,
 }
 
 impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessRestrictions> Default
@@ -56,12 +61,12 @@ where
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue> + MaxEncodedLen,
-    MaxProcessRestrictions: Get<u32>
+    MaxProcessRestrictions: Get<u32>,
 {
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
-            restrictions: Default::default()
+            restrictions: Default::default(),
         }
     }
 }
@@ -72,12 +77,11 @@ where
     K: Parameter + Default + Ord + MaxEncodedLen,
     V: Parameter + Default + MaxEncodedLen,
     D: Parameter + Default + From<V> + MaxEncodedLen,
-    MR: Get<u32>
+    MR: Get<u32>,
 {
-	fn eq(&self, other: &Process<R, K, V, D, MR>) -> bool {
-        self.status == other.status &&
-        self.restrictions == other.restrictions
-	}
+    fn eq(&self, other: &Process<R, K, V, D, MR>) -> bool {
+        self.status == other.status && self.restrictions == other.restrictions
+    }
 }
 
 pub mod weights;
@@ -132,8 +136,14 @@ pub mod pallet {
         T::ProcessIdentifier,
         Blake2_128Concat,
         T::ProcessVersion,
-        Process<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator, T::MaxProcessRestrictions>,
-        ValueQuery
+        Process<
+            T::RoleKey,
+            T::TokenMetadataKey,
+            T::TokenMetadataValue,
+            T::TokenMetadataValueDiscriminator,
+            T::MaxProcessRestrictions,
+        >,
+        ValueQuery,
     >;
 
     #[pallet::storage]
@@ -150,12 +160,12 @@ pub mod pallet {
             T::ProcessVersion,
             BoundedVec<
                 Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-                T::MaxProcessRestrictions
+                T::MaxProcessRestrictions,
             >,
-            bool
+            bool,
         ),
         //id, version
-        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion)
+        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
     }
 
     #[pallet::error]
@@ -169,7 +179,7 @@ pub mod pallet {
         // process not found for this version
         InvalidVersion,
         // restrictions go over maximum depth
-        RestrictionsTooDeep
+        RestrictionsTooDeep,
     }
 
     // The pallet's dispatchable functions.
@@ -181,8 +191,8 @@ pub mod pallet {
             id: T::ProcessIdentifier,
             restrictions: BoundedVec<
                 Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-                T::MaxProcessRestrictions
-            >
+                T::MaxProcessRestrictions,
+            >,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
@@ -200,7 +210,7 @@ pub mod pallet {
                 id,
                 version.clone(),
                 restrictions,
-                version == One::one()
+                version == One::one(),
             ));
 
             return Ok(().into());
@@ -210,7 +220,7 @@ pub mod pallet {
         pub fn disable_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            version: T::ProcessVersion
+            version: T::ProcessVersion,
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
             Pallet::<T>::validate_version_and_process(&id, &version)?;
@@ -228,10 +238,10 @@ pub mod pallet {
                 T::RoleKey,
                 T::TokenMetadataKey,
                 T::TokenMetadataValue,
-                T::TokenMetadataValueDiscriminator
+                T::TokenMetadataValueDiscriminator,
             >,
             count: u8,
-            max_depth: u8
+            max_depth: u8,
         ) -> bool {
             if count > max_depth {
                 return true;
@@ -247,14 +257,14 @@ pub mod pallet {
                 //     Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
                 //         || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
                 // }
-                _ => false
+                _ => false,
             }
         }
 
         pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
             return match <VersionModel<T>>::contains_key(&id) {
                 true => <VersionModel<T>>::get(&id) + One::one(),
-                false => One::one()
+                false => One::one(),
             };
         }
 
@@ -262,7 +272,7 @@ pub mod pallet {
             let version: T::ProcessVersion = Pallet::<T>::get_version(&id);
             match version == One::one() {
                 true => <VersionModel<T>>::insert(&id, version.clone()),
-                false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone())
+                false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone()),
             };
 
             return Ok(version);
@@ -273,8 +283,8 @@ pub mod pallet {
             v: &T::ProcessVersion,
             r: &BoundedVec<
                 Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-                T::MaxProcessRestrictions
-            >
+                T::MaxProcessRestrictions,
+            >,
         ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
@@ -284,8 +294,8 @@ pub mod pallet {
                         v,
                         Process {
                             restrictions: r.clone(),
-                            status: ProcessStatus::Enabled
-                        }
+                            status: ProcessStatus::Enabled,
+                        },
                     );
                     return Ok(());
                 }
@@ -307,7 +317,7 @@ pub mod pallet {
 
         pub fn validate_version_and_process(
             id: &T::ProcessIdentifier,
-            version: &T::ProcessVersion
+            version: &T::ProcessVersion,
         ) -> Result<(), Error<T>> {
             ensure!(
                 <ProcessModel<T>>::contains_key(&id, version.clone()),
@@ -316,7 +326,7 @@ pub mod pallet {
             ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
             return match *version > <VersionModel<T>>::get(&id) {
                 true => Err(Error::<T>::InvalidVersion),
-                false => Ok(())
+                false => Ok(()),
             };
         }
     }
@@ -330,7 +340,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &T::AccountId,
         inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
+        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
     ) -> bool {
         let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
 
@@ -346,7 +356,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                         T::RoleKey,
                         T::TokenMetadataKey,
                         T::TokenMetadataValue,
-                        T::TokenMetadataValueDiscriminator
+                        T::TokenMetadataValueDiscriminator,
                     >(restriction, &sender, inputs, outputs);
 
                     if !is_valid {
@@ -355,7 +365,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                 }
                 true
             }
-            Err(_) => false
+            Err(_) => false,
         }
     }
 }

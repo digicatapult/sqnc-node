@@ -5,7 +5,7 @@ use frame_support::{
     parameter_types,
     traits::{ConstU32, EqualPrivilegeOnly, OnInitialize},
     weights::Weight,
-    BoundedVec
+    BoundedVec,
 };
 use frame_support_test::TestRandomness;
 use frame_system as system;
@@ -13,7 +13,7 @@ use sp_core::H256;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
-    Perbill
+    Perbill,
 };
 
 mod rotate_key;
