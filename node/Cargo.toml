@@ -6,7 +6,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-node'
-version = '3.8.0'
+version = '4.0.0'
 
 [[bin]]
 name = 'dscp-node'
@@ -38,7 +38,7 @@ sp-timestamp = { version = "4.0.0-dev", git = "https://github.com/paritytech/sub
 sp-inherents = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 sp-keyring = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 frame-system = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
-pallet-transaction-payment-free = { default-features = false, version = '1.0.0', package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
+pallet-transaction-payment-free = { default-features = false, version = '2.0.0', package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
 
 # These dependencies are used for the node template's RPCs
 jsonrpsee = { version = "0.14.0", features = ["server"] }
@@ -55,7 +55,7 @@ frame-benchmarking = { version = "4.0.0-dev", git = "https://github.com/parityte
 frame-benchmarking-cli = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 
 # Local Dependencies
-dscp-node-runtime = { path = '../runtime', version = '3.7.0' }
+dscp-node-runtime = { path = '../runtime', version = '4.0.0' }
 
 # CLI-specific dependencies
 try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
