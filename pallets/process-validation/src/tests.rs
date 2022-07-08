@@ -4,14 +4,14 @@ use crate as pallet_process_validation;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, ConstU64, ConstU8},
+    traits::{ConstU32, ConstU64, ConstU8}
 };
 use frame_system as system;
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup}
 };
 
 mod create_process;
@@ -71,7 +71,7 @@ impl system::Config for Test {
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq)]
 pub enum ProcessIdentifier {
     A,
-    B,
+    B
 }
 
 impl Default for ProcessIdentifier {
@@ -82,7 +82,7 @@ impl Default for ProcessIdentifier {
 
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Default, Eq)]
 pub struct TokenMetadataValueDiscriminator {
-    value: u8,
+    value: u8
 }
 impl From<u128> for TokenMetadataValueDiscriminator {
     fn from(a: u128) -> TokenMetadataValueDiscriminator {

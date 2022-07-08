@@ -13,11 +13,11 @@ pub struct Output<
     RoleKey: Ord,
     MaxMetadataCount: Get<u32>,
     TokenMetadataKey: Ord,
-    TokenMetadataValue,
+    TokenMetadataValue
 > {
     pub roles: BoundedBTreeMap<RoleKey, AccountId, MaxRoleCount>,
     pub metadata: BoundedBTreeMap<TokenMetadataKey, TokenMetadataValue, MaxMetadataCount>,
-    pub parent_index: Option<u32>,
+    pub parent_index: Option<u32>
 }
 
 impl<MR, A, R, MM, TK, TV> Clone for Output<MR, A, R, MM, TK, TV>
@@ -27,13 +27,13 @@ where
     R: Ord,
     TK: Ord,
     BoundedBTreeMap<R, A, MR>: Clone,
-    BoundedBTreeMap<TK, TV, MM>: Clone,
+    BoundedBTreeMap<TK, TV, MM>: Clone
 {
     fn clone(&self) -> Self {
         Output {
             roles: self.roles.clone(),
             metadata: self.metadata.clone(),
-            parent_index: self.parent_index.clone(),
+            parent_index: self.parent_index.clone()
         }
     }
 }
@@ -45,7 +45,7 @@ where
     R: Ord,
     TK: Ord,
     BoundedBTreeMap<R, A, MR>: sp_std::fmt::Debug,
-    BoundedBTreeMap<TK, TV, MM>: sp_std::fmt::Debug,
+    BoundedBTreeMap<TK, TV, MM>: sp_std::fmt::Debug
 {
     fn fmt(&self, f: &mut sp_std::fmt::Formatter<'_>) -> sp_std::fmt::Result {
         f.debug_struct("Output")
@@ -63,7 +63,7 @@ where
     BoundedBTreeMap<R, A, MR>: PartialEq,
     BoundedBTreeMap<TK, TV, MM>: PartialEq,
     MR: Get<u32>,
-    MM: Get<u32>,
+    MM: Get<u32>
 {
     fn eq(&self, other: &Output<MR, A, R, MM, TK, TV>) -> bool {
         self.roles == other.roles && self.metadata == other.metadata && self.parent_index == other.parent_index

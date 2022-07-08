@@ -27,7 +27,7 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
         .map(|_| Output {
             roles: roles.clone(),
             metadata: metadata.clone(),
-            parent_index: None,
+            parent_index: None
         })
         .collect::<Vec<_>>()
         .try_into()
@@ -36,7 +36,7 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
         RawOrigin::Signed(account_id.clone()).into(),
         None,
         BoundedVec::<_, _>::with_max_capacity(),
-        outputs,
+        outputs
     )?;
 
     let expected_last_token = nth_token_id::<T>(r)?;
@@ -57,7 +57,7 @@ fn mk_inputs<T: Config>(i: u32) -> Result<BoundedVec<T::TokenId, T::MaxInputCoun
 
 fn mk_outputs<T: Config>(
     o: u32,
-    inputs_len: u32,
+    inputs_len: u32
 ) -> Result<
     BoundedVec<
         Output<
@@ -66,11 +66,11 @@ fn mk_outputs<T: Config>(
             T::RoleKey,
             T::MaxMetadataCount,
             T::TokenMetadataKey,
-            T::TokenMetadataValue,
+            T::TokenMetadataValue
         >,
-        T::MaxOutputCount,
+        T::MaxOutputCount
     >,
-    &'static str,
+    &'static str
 > {
     let account_id: T::AccountId = account("owner", 0, SEED);
     let mut roles = BoundedBTreeMap::<_, _, _>::new();
@@ -83,7 +83,7 @@ fn mk_outputs<T: Config>(
         .map(|output_index| Output {
             roles: roles.clone(),
             metadata: metadata.clone(),
-            parent_index: valid_parent_index(inputs_len, output_index),
+            parent_index: valid_parent_index(inputs_len, output_index)
         })
         .collect::<Vec<_>>()
         .try_into()

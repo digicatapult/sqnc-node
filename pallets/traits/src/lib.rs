@@ -12,16 +12,16 @@ use sp_std::prelude::*;
 pub struct ProcessIO<AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
     pub roles: BTreeMap<RoleKey, AccountId>,
     pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
-    pub parent_index: Option<u32>,
+    pub parent_index: Option<u32>
 }
 
 #[derive(Encode, Decode, Default, RuntimeDebug, MaxEncodedLen, TypeInfo, Clone, PartialEq)]
 pub struct ProcessFullyQualifiedId<
     ProcessIdentifier: Parameter + MaxEncodedLen,
-    ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen,
+    ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen
 > {
     pub id: ProcessIdentifier,
-    pub version: ProcessVersion,
+    pub version: ProcessVersion
 }
 
 pub trait ProcessValidator<A, R, T, V>
@@ -29,7 +29,7 @@ where
     A: Parameter,
     R: Parameter + Ord,
     T: Parameter + Ord,
-    V: Parameter,
+    V: Parameter
 {
     type ProcessIdentifier: Parameter + MaxEncodedLen + Encode + Decode;
     type ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen + Encode + Decode;
@@ -38,7 +38,7 @@ where
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &A,
         inputs: &Vec<ProcessIO<A, R, T, V>>,
-        outputs: &Vec<ProcessIO<A, R, T, V>>,
+        outputs: &Vec<ProcessIO<A, R, T, V>>
     ) -> bool;
 }
 
@@ -47,7 +47,7 @@ where
     A: Parameter,
     R: Parameter + Ord,
     T: Parameter + Ord,
-    V: Parameter,
+    V: Parameter
 {
     type ProcessIdentifier = ();
     type ProcessVersion = u32;
@@ -56,7 +56,7 @@ where
         _id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         _sender: &A,
         _inputs: &Vec<ProcessIO<A, R, T, V>>,
-        _outputs: &Vec<ProcessIO<A, R, T, V>>,
+        _outputs: &Vec<ProcessIO<A, R, T, V>>
     ) -> bool {
         true
     }

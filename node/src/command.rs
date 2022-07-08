@@ -2,7 +2,7 @@ use crate::{
     chain_spec,
     cli::{Cli, Subcommand},
     command_helper::{inherent_benchmark_data, BenchmarkExtrinsicBuilder},
-    service,
+    service
 };
 use dscp_node_runtime::Block;
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
@@ -39,7 +39,7 @@ impl SubstrateCli for Cli {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()?),
             "" | "local" => Box::new(chain_spec::local_testnet_config()?),
-            path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+            path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?)
         })
     }
 
@@ -153,7 +153,7 @@ pub fn run() -> sc_cli::Result<()> {
 
                         cmd.run(config, client, inherent_benchmark_data()?, Arc::new(ext_builder))
                     }
-                    BenchmarkCmd::Machine(cmd) => cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
+                    BenchmarkCmd::Machine(cmd) => cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone())
                 }
             })
         }

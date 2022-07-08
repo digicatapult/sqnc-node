@@ -6,7 +6,7 @@ pub struct Cli {
     pub subcommand: Option<Subcommand>,
 
     #[clap(flatten)]
-    pub run: RunCmd,
+    pub run: RunCmd
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -49,5 +49,5 @@ pub enum Subcommand {
     TryRuntime,
 
     /// Db meta columns information.
-    ChainInfo(sc_cli::ChainInfoCmd),
+    ChainInfo(sc_cli::ChainInfoCmd)
 }

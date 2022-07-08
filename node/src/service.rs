@@ -36,7 +36,7 @@ type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
 pub fn new_partial(
-    config: &Configuration,
+    config: &Configuration
 ) -> Result<
     sc_service::PartialComponents<
         FullClient,
@@ -47,10 +47,10 @@ pub fn new_partial(
         (
             sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
             sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-            Option<Telemetry>,
-        ),
+            Option<Telemetry>
+        )
     >,
-    ServiceError,
+    ServiceError
 > {
     if config.keystore_remote.is_some() {
         return Err(ServiceError::Other("Remote Keystores are not supported.".into()));
@@ -71,13 +71,13 @@ pub fn new_partial(
         config.wasm_method,
         config.default_heap_pages,
         config.max_runtime_instances,
-        config.runtime_cache_size,
+        config.runtime_cache_size
     );
 
     let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<Block, RuntimeApi, _>(
         config,
         telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-        executor,
+        executor
     )?;
     let client = Arc::new(client);
 
@@ -93,14 +93,14 @@ pub fn new_partial(
         config.role.is_authority().into(),
         config.prometheus_registry(),
         task_manager.spawn_essential_handle(),
-        client.clone(),
+        client.clone()
     );
 
     let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
         client.clone(),
         &(client.clone() as Arc<_>),
         select_chain.clone(),
-        telemetry.as_ref().map(|x| x.handle()),
+        telemetry.as_ref().map(|x| x.handle())
     )?;
 
     let slot_duration = sc_consensus_aura::slot_duration(&*client)?;
@@ -114,7 +114,7 @@ pub fn new_partial(
 
             let slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
                 *timestamp,
-                slot_duration,
+                slot_duration
             );
 
             Ok((timestamp, slot))
@@ -123,7 +123,7 @@ pub fn new_partial(
         can_author_with: sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
         registry: config.prometheus_registry(),
         check_for_equivocation: Default::default(),
-        telemetry: telemetry.as_ref().map(|x| x.handle()),
+        telemetry: telemetry.as_ref().map(|x| x.handle())
     })?;
 
     Ok(sc_service::PartialComponents {
@@ -134,7 +134,7 @@ pub fn new_partial(
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (grandpa_block_import, grandpa_link, telemetry),
+        other: (grandpa_block_import, grandpa_link, telemetry)
     })
 }
 
@@ -155,7 +155,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         mut keystore_container,
         select_chain,
         transaction_pool,
-        other: (block_import, grandpa_link, mut telemetry),
+        other: (block_import, grandpa_link, mut telemetry)
     } = new_partial(&config)?;
 
     if let Some(url) = &config.keystore_remote {
@@ -171,19 +171,19 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
     }
     let grandpa_protocol_name = sc_finality_grandpa::protocol_standard_name(
         &client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
-        &config.chain_spec,
+        &config.chain_spec
     );
 
     config
         .network
         .extra_sets
         .push(sc_finality_grandpa::grandpa_peers_set_config(
-            grandpa_protocol_name.clone(),
+            grandpa_protocol_name.clone()
         ));
     let warp_sync = Arc::new(sc_finality_grandpa::warp_proof::NetworkProvider::new(
         backend.clone(),
         grandpa_link.shared_authority_set().clone(),
-        Vec::default(),
+        Vec::default()
     ));
 
     let (network, system_rpc_tx, network_starter) = sc_service::build_network(sc_service::BuildNetworkParams {
@@ -193,7 +193,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         spawn_handle: task_manager.spawn_handle(),
         import_queue,
         block_announce_validator_builder: None,
-        warp_sync: Some(warp_sync),
+        warp_sync: Some(warp_sync)
     })?;
 
     if config.offchain_worker.enabled {
@@ -215,7 +215,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             let deps = crate::rpc::FullDeps {
                 client: client.clone(),
                 pool: pool.clone(),
-                deny_unsafe,
+                deny_unsafe
             };
             crate::rpc::create_full(deps).map_err(Into::into)
         })
@@ -231,7 +231,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         backend,
         system_rpc_tx,
         config,
-        telemetry: telemetry.as_mut(),
+        telemetry: telemetry.as_mut()
     })?;
 
     if role.is_authority() {
@@ -240,7 +240,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             client.clone(),
             transaction_pool,
             prometheus_registry.as_ref(),
-            telemetry.as_ref().map(|x| x.handle()),
+            telemetry.as_ref().map(|x| x.handle())
         );
 
         let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
@@ -258,7 +258,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 
                 let slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
                     *timestamp,
-                    slot_duration,
+                    slot_duration
                 );
 
                 Ok((timestamp, slot))
@@ -271,7 +271,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             justification_sync_link: network.clone(),
             block_proposal_slot_portion: SlotProportion::new(2f32 / 3f32),
             max_block_proposal_slot_portion: None,
-            telemetry: telemetry.as_ref().map(|x| x.handle()),
+            telemetry: telemetry.as_ref().map(|x| x.handle())
         })?;
 
         // the AURA authoring task is considered essential, i.e. if it
@@ -298,7 +298,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         keystore,
         local_role: role,
         telemetry: telemetry.as_ref().map(|x| x.handle()),
-        protocol_name: grandpa_protocol_name,
+        protocol_name: grandpa_protocol_name
     };
 
     if enable_grandpa {
@@ -315,7 +315,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             voting_rule: sc_finality_grandpa::VotingRulesBuilder::default().build(),
             prometheus_registry,
             shared_voter_state: SharedVoterState::empty(),
-            telemetry: telemetry.as_ref().map(|x| x.handle()),
+            telemetry: telemetry.as_ref().map(|x| x.handle())
         };
 
         // the GRANDPA voter task is considered infallible, i.e.
@@ -323,7 +323,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         task_manager.spawn_essential_handle().spawn_blocking(
             "grandpa-voter",
             None,
-            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
+            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
         );
     }
 

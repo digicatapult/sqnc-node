@@ -21,14 +21,14 @@ use super::*;
 use crate as doas;
 use frame_support::{
     ord_parameter_types,
-    traits::{ConstU32, ConstU64, Contains},
+    traits::{ConstU32, ConstU64, Contains}
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_io;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup}
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -70,7 +70,7 @@ pub mod logger {
             Self::deposit_event(Event::AppendI32AndAccount {
                 sender,
                 value: i,
-                weight,
+                weight
             });
             Ok(().into())
         }
@@ -81,13 +81,13 @@ pub mod logger {
     pub enum Event<T: Config> {
         AppendI32 {
             value: i32,
-            weight: Weight,
+            weight: Weight
         },
         AppendI32AndAccount {
             sender: T::AccountId,
             value: i32,
-            weight: Weight,
-        },
+            weight: Weight
+        }
     }
 
     #[pallet::storage]

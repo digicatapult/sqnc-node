@@ -16,7 +16,7 @@ pub struct FullDeps<C, P> {
     /// Transaction pool instance.
     pub pool: Arc<P>,
     /// Whether to deny unsafe calls
-    pub deny_unsafe: DenyUnsafe,
+    pub deny_unsafe: DenyUnsafe
 }
 
 /// Instantiate all full RPC extensions.
@@ -28,7 +28,7 @@ where
     C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BlockBuilder<Block>,
-    P: TransactionPool + 'static,
+    P: TransactionPool + 'static
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
     use substrate_frame_rpc_system::{System, SystemApiServer};
@@ -37,7 +37,7 @@ where
     let FullDeps {
         client,
         pool,
-        deny_unsafe,
+        deny_unsafe
     } = deps;
 
     module.merge(System::new(client.clone(), pool.clone(), deny_unsafe).into_rpc())?;

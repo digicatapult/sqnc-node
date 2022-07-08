@@ -9,7 +9,7 @@ use crate::{
     ProcessStatus,
     // Restriction::Combined, BinaryOperator,
     Restriction::None,
-    VersionModel,
+    VersionModel
 };
 use frame_support::bounded_vec;
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
@@ -48,8 +48,8 @@ fn handles_if_process_exists_for_the_new_version() {
             1,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: bounded_vec![{ None }],
-            },
+                restrictions: bounded_vec![{ None }]
+            }
         );
         let result = ProcessValidation::create_process(Origin::root(), PROCESS_ID1, bounded_vec![{ None }]);
         assert_noop!(result, Error::<Test>::AlreadyExists);

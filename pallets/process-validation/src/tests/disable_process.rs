@@ -42,8 +42,8 @@ fn returns_error_if_process_is_already_disabled() {
             1u32,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: bounded_vec![{ None }],
-            },
+                restrictions: bounded_vec![{ None }]
+            }
         );
         assert_noop!(
             ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1),
@@ -63,8 +63,8 @@ fn disables_process_and_dispatches_event() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![{ None }],
-            },
+                restrictions: bounded_vec![{ None }]
+            }
         );
         assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
         let expected = TestEvent::ProcessValidation(ProcessDisabled(PROCESS_ID, 1));
@@ -82,16 +82,16 @@ fn disables_process_and_dispatches_event_previous_version() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![{ None }],
-            },
+                restrictions: bounded_vec![{ None }]
+            }
         );
         <ProcessModel<Test>>::insert(
             PROCESS_ID,
             2u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![{ None }],
-            },
+                restrictions: bounded_vec![{ None }]
+            }
         );
         assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
         let expected = TestEvent::ProcessValidation(ProcessDisabled(PROCESS_ID, 1));

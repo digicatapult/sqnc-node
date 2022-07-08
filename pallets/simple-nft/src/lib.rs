@@ -53,7 +53,7 @@ pub mod pallet {
             Self::AccountId,
             Self::RoleKey,
             Self::TokenMetadataKey,
-            Self::TokenMetadataValue,
+            Self::TokenMetadataValue
         >;
 
         // Maximum number of metadata items allowed per token
@@ -80,7 +80,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue,
+        <T as Config>::TokenMetadataValue
     >>::ProcessIdentifier;
 
     // ProcessVersion can be pulled off of the configured ProcessValidator
@@ -88,7 +88,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue,
+        <T as Config>::TokenMetadataValue
     >>::ProcessVersion;
 
     // Construct ProcessId
@@ -105,7 +105,7 @@ pub mod pallet {
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue,
         <T as Config>::MaxInputCount,
-        <T as Config>::MaxOutputCount,
+        <T as Config>::MaxOutputCount
     >;
 
     // The specific ProcessIO type can be derived from Config
@@ -115,7 +115,7 @@ pub mod pallet {
         <T as Config>::RoleKey,
         <T as Config>::MaxMetadataCount,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue,
+        <T as Config>::TokenMetadataValue
     >;
 
     // The specific ProcessIO type can be derived from Config
@@ -123,7 +123,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue,
+        <T as Config>::TokenMetadataValue
     >;
 
     #[pallet::pallet]
@@ -144,7 +144,7 @@ pub mod pallet {
         T::TokenId,
         Token<T>,
         // We need to use OptionQuery as AccountId is held in the Config trait but doesn't guarantee Copy trait
-        OptionQuery,
+        OptionQuery
     >;
 
     #[pallet::event]
@@ -153,7 +153,7 @@ pub mod pallet {
         /// A token was issued.
         Minted(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxInputCount>),
         /// A token was burnt.
-        Burnt(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxOutputCount>),
+        Burnt(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxOutputCount>)
     }
 
     #[pallet::error]
@@ -173,7 +173,7 @@ pub mod pallet {
         /// Process failed validation checks
         ProcessInvalid,
         /// An invalid input token id was provided
-        InvalidInput,
+        InvalidInput
     }
 
     // The pallet's dispatchable functions.
@@ -184,7 +184,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             process: Option<ProcessId<T>>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-            outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
+            outputs: BoundedVec<Output<T>, T::MaxOutputCount>
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -201,7 +201,7 @@ pub mod pallet {
                         token.map(|t| ProcessIO::<T> {
                             roles: t.roles.into(),
                             metadata: t.metadata.into(),
-                            parent_index: None,
+                            parent_index: None
                         })
                     })
                     .collect();
@@ -210,7 +210,7 @@ pub mod pallet {
                     inputs.iter().all(|opt_t| {
                         match opt_t {
                             None => false,
-                            Some(_) => true,
+                            Some(_) => true
                         }
                     }),
                     Error::<T>::InvalidInput
@@ -222,7 +222,7 @@ pub mod pallet {
                     .map(|o| ProcessIO::<T> {
                         roles: o.roles.clone().into(),
                         metadata: o.metadata.clone().into(),
-                        parent_index: o.parent_index.clone(),
+                        parent_index: o.parent_index.clone()
                     })
                     .collect();
 
@@ -284,13 +284,13 @@ pub mod pallet {
                             destroyed_at: None,
                             metadata: output.metadata.clone(),
                             parents: inputs.clone(),
-                            children: None,
-                        },
+                            children: None
+                        }
                     );
                     let mut next_children = children.clone();
                     next_children.force_push(next);
                     (next, next_children)
-                },
+                }
             );
 
             // Burn inputs
