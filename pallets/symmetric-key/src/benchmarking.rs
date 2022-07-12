@@ -4,15 +4,15 @@ use super::*;
 
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
-use sp_std::{boxed::Box, vec, vec::Vec};
+use sp_std::vec::Vec;
 
 #[allow(unused)]
-use crate::Module as SymmetricKey;
+use crate::Pallet as SymmetricKey;
 
 benchmarks! {
   update_key {
     let key = (0..32).collect::<Vec<u8>>();
-  }: _(RawOrigin::Root, key.clone())
+  }: _(RawOrigin::Root, key.clone().try_into().unwrap())
   verify {
     assert_eq!(Key::<T>::get(), key);
   }

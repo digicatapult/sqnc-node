@@ -2,7 +2,7 @@ use super::*;
 use crate as pallet_transaction_payment_free;
 use frame_support::{
     parameter_types,
-    traits::Get,
+    traits::{ConstU32, ConstU64, Get},
     weights::{DispatchClass, DispatchInfo, Weight}
 };
 use frame_system as system;
@@ -22,13 +22,13 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-        TransactionPaymentFree: pallet_transaction_payment_free::{Module},
+        System: system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+        TransactionPaymentFree: pallet_transaction_payment_free::{Pallet},
     }
 );
 
-pub const CALL: &<Test as frame_system::Config>::Call = &Call::Balances(BalancesCall::transfer(2, 69));
+pub const CALL: &<Test as frame_system::Config>::Call = &Call::Balances(BalancesCall::transfer { dest: 2, value: 69 });
 
 pub struct BlockWeights;
 impl Get<frame_system::limits::BlockWeights> for BlockWeights {
@@ -45,12 +45,8 @@ impl Get<frame_system::limits::BlockWeights> for BlockWeights {
     }
 }
 
-parameter_types! {
-    pub const BlockHashCount: u64 = 250;
-}
-
 impl system::Config for Test {
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
     type BlockWeights = BlockWeights;
     type BlockLength = ();
     type DbWeight = ();
@@ -64,7 +60,7 @@ impl system::Config for Test {
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
     type Event = Event;
-    type BlockHashCount = BlockHashCount;
+    type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<u64>;
@@ -72,6 +68,8 @@ impl system::Config for Test {
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
     type SS58Prefix = ();
+    type OnSetCode = ();
+    type MaxConsumers = ConstU32<16>;
 }
 
 parameter_types! {
@@ -85,6 +83,8 @@ impl pallet_balances::Config for Test {
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
     type MaxLocks = ();
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
 

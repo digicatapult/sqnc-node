@@ -14,7 +14,13 @@ type NegativeImbalanceOf<C, T> = <C as Currency<<T as frame_system::Config>::Acc
 
 pub trait OnFreeTransaction<T: Config> {
     /// The underlying integer type in which fees are calculated.
-    type Balance: AtLeast32BitUnsigned + FullCodec + Copy + MaybeSerializeDeserialize + Debug + Default;
+    type Balance: AtLeast32BitUnsigned
+        + FullCodec
+        + Copy
+        + MaybeSerializeDeserialize
+        + Debug
+        + Default
+        + scale_info::TypeInfo;
     type LiquidityInfo: Default;
 
     fn zero_fee(

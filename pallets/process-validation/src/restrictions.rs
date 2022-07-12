@@ -1,37 +1,32 @@
 // This file contains the different types of restrictions that can be evaluated during
 // a call to `validate_process`
 
-use codec::{Decode, Encode};
+use codec::{Decode, Encode, MaxEncodedLen};
 use dscp_pallet_traits::ProcessIO;
 use frame_support::Parameter;
-use sp_std::boxed::Box;
+use scale_info::TypeInfo;
+// use sp_std::boxed::Box;
 use sp_std::vec::Vec;
 
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
-pub enum BinaryOperator {
-    AND,
-    OR,
-    XOR,
-    NAND,
-    NOR
-}
+// #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
+// #[cfg_attr(feature = "std", derive(Debug))]
+// pub enum BinaryOperator {
+//     AND,
+//     OR,
+//     XOR,
+//     NAND,
+//     NOR
+// }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
+#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
-where
-    RoleKey: Parameter + Default + Ord,
-    TokenMetadataKey: Parameter + Default + Ord,
-    TokenMetadataValue: Parameter + Default,
-    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>
-{
+pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     None,
-    Combined {
-        operator: BinaryOperator,
-        restriction_a: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>,
-        restriction_b: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>
-    },
+    // Combined {
+    //     operator: BinaryOperator,
+    //     restriction_a: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>,
+    //     restriction_b: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>
+    // },
     SenderOwnsAllInputs,
     SenderHasInputRole {
         index: u32,
@@ -100,44 +95,44 @@ pub fn validate_restriction<A, R, T, V, D>(
     outputs: &Vec<ProcessIO<A, R, T, V>>
 ) -> bool
 where
-    A: Parameter + Default,
+    A: Parameter,
     R: Parameter + Default + Ord,
     T: Parameter + Default + Ord,
-    V: Parameter + Default,
-    D: Parameter + Default + From<V>
+    V: Parameter,
+    D: Parameter + From<V>
 {
     match restriction {
         Restriction::<R, T, V, D>::None => true,
-        Restriction::Combined {
-            operator,
-            restriction_a,
-            restriction_b
-        } => {
-            let res_a = *restriction_a;
-            let res_b = *restriction_b;
-            match operator {
-                BinaryOperator::AND => {
-                    validate_restriction(res_a, sender, inputs, outputs)
-                        && validate_restriction(res_b, sender, inputs, outputs)
-                }
-                BinaryOperator::OR => {
-                    validate_restriction(res_a, sender, inputs, outputs)
-                        || validate_restriction(res_b, sender, inputs, outputs)
-                }
-                BinaryOperator::XOR => {
-                    (validate_restriction(res_a, sender, inputs, outputs))
-                        ^ (validate_restriction(res_b, sender, inputs, outputs))
-                }
-                BinaryOperator::NAND => {
-                    !(validate_restriction(res_a, sender, inputs, outputs)
-                        && validate_restriction(res_b, sender, inputs, outputs))
-                }
-                BinaryOperator::NOR => {
-                    !(validate_restriction(res_a, sender, inputs, outputs)
-                        || validate_restriction(res_b, sender, inputs, outputs))
-                }
-            }
-        }
+        // Restriction::Combined {
+        //     operator,
+        //     restriction_a,
+        //     restriction_b
+        // } => {
+        //     let res_a = *restriction_a;
+        //     let res_b = *restriction_b;
+        //     match operator {
+        //         BinaryOperator::AND => {
+        //             validate_restriction(res_a, sender, inputs, outputs)
+        //                 && validate_restriction(res_b, sender, inputs, outputs)
+        //         }
+        //         BinaryOperator::OR => {
+        //             validate_restriction(res_a, sender, inputs, outputs)
+        //                 || validate_restriction(res_b, sender, inputs, outputs)
+        //         }
+        //         BinaryOperator::XOR => {
+        //             (validate_restriction(res_a, sender, inputs, outputs))
+        //                 ^ (validate_restriction(res_b, sender, inputs, outputs))
+        //         }
+        //         BinaryOperator::NAND => {
+        //             !(validate_restriction(res_a, sender, inputs, outputs)
+        //                 && validate_restriction(res_b, sender, inputs, outputs))
+        //         }
+        //         BinaryOperator::NOR => {
+        //             !(validate_restriction(res_a, sender, inputs, outputs)
+        //                 || validate_restriction(res_b, sender, inputs, outputs))
+        //         }
+        //     }
+        // }
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedInputMetadataValue {
@@ -768,7 +763,7 @@ mod tests {
         assert!(!result);
     }
 
-    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    #[derive(Encode, Decode, Clone, PartialEq, TypeInfo, MaxEncodedLen, Debug, Eq)]
     pub enum MetadataValue {
         A,
         B
@@ -779,7 +774,7 @@ mod tests {
         }
     }
 
-    #[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+    #[derive(Encode, Decode, Clone, PartialEq, TypeInfo, MaxEncodedLen, Debug, Eq)]
     pub enum MetadataValueDisc {
         AA,
         BB
@@ -1440,323 +1435,323 @@ mod tests {
         assert!(!result);
     }
 
-    #[test]
-    fn combined_and_succeeds() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::AND,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(result);
-    }
+    // #[test]
+    // fn combined_and_succeeds() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::AND,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(result);
+    // }
 
-    #[test]
-    fn combined_and_fails() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::AND,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(!result);
-    }
+    // #[test]
+    // fn combined_and_fails() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::AND,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(!result);
+    // }
 
-    #[test]
-    fn combined_or_succeeds() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::OR,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(result);
-    }
+    // #[test]
+    // fn combined_or_succeeds() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::OR,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(result);
+    // }
 
-    #[test]
-    fn combined_or_fails() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::OR,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 2,
-                        metadata_value: 2
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(!result);
-    }
+    // #[test]
+    // fn combined_or_fails() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::OR,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 2,
+    //                     metadata_value: 2
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(!result);
+    // }
 
-    #[test]
-    fn combined_xor_succeeds() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::XOR,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(result);
-    }
+    // #[test]
+    // fn combined_xor_succeeds() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::XOR,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(result);
+    // }
 
-    #[test]
-    fn combined_xor_fails() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::XOR,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(!result);
-    }
+    // #[test]
+    // fn combined_xor_fails() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::XOR,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(!result);
+    // }
 
-    #[test]
-    fn combined_nand_succeeds() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::new(),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::NAND,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(result);
-    }
+    // #[test]
+    // fn combined_nand_succeeds() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::new(),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::NAND,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(result);
+    // }
 
-    #[test]
-    fn combined_nand_fails() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::NAND,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(!result);
-    }
+    // #[test]
+    // fn combined_nand_fails() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0), (1, 1)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::NAND,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(!result);
+    // }
 
-    #[test]
-    fn combined_nor_succeeds() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::new(),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::NOR,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(result);
-    }
+    // #[test]
+    // fn combined_nor_succeeds() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::new(),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::NOR,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(result);
+    // }
 
-    #[test]
-    fn combined_nor_fails() {
-        let outputs = vec![ProcessIO {
-            roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
-            metadata: BTreeMap::from_iter(vec![(0, 0)]),
-            parent_index: None
-        }];
-        let result = validate_restriction::<u64, u32, u32, u64, u64>(
-            Restriction::Combined {
-                operator: BinaryOperator::NOR,
-                restriction_a: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 0,
-                        metadata_value: 0
-                    })
-                },
-                restriction_b: {
-                    Box::new(Restriction::FixedOutputMetadataValue {
-                        index: 0,
-                        metadata_key: 1,
-                        metadata_value: 1
-                    })
-                }
-            },
-            &1,
-            &Vec::new(),
-            &outputs
-        );
-        assert!(!result);
-    }
+    // #[test]
+    // fn combined_nor_fails() {
+    //     let outputs = vec![ProcessIO {
+    //         roles: BTreeMap::from_iter(vec![(Default::default(), 1)]),
+    //         metadata: BTreeMap::from_iter(vec![(0, 0)]),
+    //         parent_index: None
+    //     }];
+    //     let result = validate_restriction::<u64, u32, u32, u64, u64>(
+    //         Restriction::Combined {
+    //             operator: BinaryOperator::NOR,
+    //             restriction_a: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 0,
+    //                     metadata_value: 0
+    //                 })
+    //             },
+    //             restriction_b: {
+    //                 Box::new(Restriction::FixedOutputMetadataValue {
+    //                     index: 0,
+    //                     metadata_key: 1,
+    //                     metadata_value: 1
+    //                 })
+    //             }
+    //         },
+    //         &1,
+    //         &Vec::new(),
+    //         &outputs
+    //     );
+    //     assert!(!result);
+    // }
 }

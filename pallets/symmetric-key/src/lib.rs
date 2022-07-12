@@ -1,10 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::traits::{
-    schedule::{DispatchTime, Named as ScheduleNamed, LOWEST_PRIORITY},
-    Randomness
-};
 pub use pallet::*;
+
+use frame_support::{
+    traits::{
+        schedule::{DispatchTime, Named as ScheduleNamed, LOWEST_PRIORITY},
+        Get, Randomness
+    },
+    BoundedVec
+};
 use sp_runtime::traits::Dispatchable;
 
 /// A FRAME pallet for handling non-fungible tokens
@@ -47,7 +51,7 @@ pub mod pallet {
         type RotateOrigin: EnsureOrigin<Self::Origin>;
         /// Source of randomness when generating new keys.
         /// In production this should come from a secure source such as the Babe pallet
-        type Randomness: Randomness<Self::Hash>;
+        type Randomness: Randomness<Self::Hash, Self::BlockNumber>;
 
         #[pallet::constant]
         type RefreshPeriod: Get<Self::BlockNumber>;
@@ -77,7 +81,7 @@ pub mod pallet {
                         Some((T::RefreshPeriod::get(), u32::max_value())),
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),
-                        Call::rotate_key().into()
+                        Call::rotate_key {}.into()
                     )
                     .is_err()
                     {
@@ -85,7 +89,7 @@ pub mod pallet {
                         return 0;
                     }
 
-                    <KeyScheduleId<T>>::put(Some(id));
+                    <KeyScheduleId<T>>::put(Some(BoundedVec::<_, _>::truncate_from(id)));
 
                     0
                 }
@@ -97,20 +101,20 @@ pub mod pallet {
     /// Storage map definition
     #[pallet::storage]
     #[pallet::getter(fn key)]
-    pub(super) type Key<T: Config> = StorageValue<_, Vec<u8>, ValueQuery>;
+    pub(super) type Key<T: Config> = StorageValue<_, BoundedVec<u8, T::KeyLength>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn key_schedule)]
-    pub(super) type KeyScheduleId<T: Config> = StorageValue<_, Option<Vec<u8>>, ValueQuery>;
+    pub(super) type KeyScheduleId<T: Config> = StorageValue<_, Option<BoundedVec<u8, ConstU32<32>>>, ValueQuery>;
 
     #[pallet::event]
-    #[pallet::metadata(Vec<u8> = "Key")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // key was updated.
-        UpdateKey(Vec<u8>)
+        UpdateKey(BoundedVec<u8, T::KeyLength>)
     }
 
+    // TODO: Fix this
     #[pallet::error]
     pub enum Error<T> {
         // The supplied key had incorrect length
@@ -121,7 +125,7 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(T::WeightInfo::update_key())]
-        pub(super) fn update_key(origin: OriginFor<T>, new_key: Vec<u8>) -> DispatchResultWithPostInfo {
+        pub fn update_key(origin: OriginFor<T>, new_key: BoundedVec<u8, T::KeyLength>) -> DispatchResultWithPostInfo {
             T::UpdateOrigin::ensure_origin(origin)?;
             ensure!(
                 new_key.len() == T::KeyLength::get() as usize,
@@ -135,7 +139,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(T::WeightInfo::rotate_key())]
-        pub(super) fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+        pub fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::RotateOrigin::ensure_origin(origin)?;
 
             let new_key = generate_key::<T>();
@@ -146,16 +150,16 @@ pub mod pallet {
         }
     }
 
-    fn generate_key<T: Config>() -> Vec<u8> {
+    fn generate_key<T: Config>() -> BoundedVec<u8, T::KeyLength> {
         let key_length = T::KeyLength::get() as usize;
         let mut output = Vec::<u8>::new();
 
         while output.len() < key_length {
             let random_seed = T::Randomness::random(&KEY_RANDOM_ID[..]);
-            let random = random_seed.as_ref();
+            let random = random_seed.0.as_ref();
             output.extend_from_slice(random);
         }
 
-        (&output[0..key_length]).to_vec()
+        BoundedVec::<_, T::KeyLength>::truncate_from(output)
     }
 }

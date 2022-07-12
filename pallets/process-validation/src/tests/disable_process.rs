@@ -1,8 +1,9 @@
 use super::*;
-use crate::tests::ProcessIdentifier;
+use crate::tests::{Event as TestEvent, ProcessIdentifier};
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
+use frame_support::bounded_vec;
 use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 
 const PROCESS_ID: ProcessIdentifier = ProcessIdentifier::A;
@@ -41,7 +42,7 @@ fn returns_error_if_process_is_already_disabled() {
             1u32,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: [{ None }].to_vec()
+                restrictions: bounded_vec![{ None }]
             }
         );
         assert_noop!(
@@ -62,11 +63,11 @@ fn disables_process_and_dispatches_event() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: [{ None }].to_vec()
+                restrictions: bounded_vec![{ None }]
             }
         );
         assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
-        let expected = Event::pallet_process_validation(ProcessDisabled(PROCESS_ID, 1));
+        let expected = TestEvent::ProcessValidation(ProcessDisabled(PROCESS_ID, 1));
         assert_eq!(System::events()[0].event, expected);
     });
 }
@@ -81,7 +82,7 @@ fn disables_process_and_dispatches_event_previous_version() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: [{ None }].to_vec()
+                restrictions: bounded_vec![{ None }]
             }
         );
         <ProcessModel<Test>>::insert(
@@ -89,11 +90,11 @@ fn disables_process_and_dispatches_event_previous_version() {
             2u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: [{ None }].to_vec()
+                restrictions: bounded_vec![{ None }]
             }
         );
         assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
-        let expected = Event::pallet_process_validation(ProcessDisabled(PROCESS_ID, 1));
+        let expected = TestEvent::ProcessValidation(ProcessDisabled(PROCESS_ID, 1));
         assert_eq!(System::events()[0].event, expected);
     });
 }

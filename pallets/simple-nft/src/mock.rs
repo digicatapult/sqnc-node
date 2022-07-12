@@ -1,9 +1,13 @@
 // Creating mock runtime here
 
 use crate as pallet_simple_nft;
-use codec::{Decode, Encode};
-use frame_support::parameter_types;
+use codec::{Decode, Encode, MaxEncodedLen};
+use frame_support::{
+    parameter_types,
+    traits::{ConstU32, ConstU64}
+};
 use frame_system as system;
+use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -28,17 +32,16 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        SimpleNFTModule: pallet_simple_nft::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        SimpleNFT: pallet_simple_nft::{Pallet, Call, Storage, Event<T>},
     }
 );
 parameter_types! {
-    pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
 }
 
 impl system::Config for Test {
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = ();
@@ -52,7 +55,7 @@ impl system::Config for Test {
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
     type Event = Event;
-    type BlockHashCount = BlockHashCount;
+    type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
     type AccountData = ();
@@ -60,13 +63,11 @@ impl system::Config for Test {
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
     type SS58Prefix = SS58Prefix;
+    type OnSetCode = ();
+    type MaxConsumers = ConstU32<16>;
 }
 
-parameter_types! {
-    pub const MaxMetadataCount: u32 = 4;
-}
-
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Ord, PartialOrd)]
+#[derive(Encode, Decode, Clone, PartialEq, MaxEncodedLen, TypeInfo, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
     Owner,
     NotOwner
@@ -78,7 +79,7 @@ impl Default for Role {
     }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+#[derive(Encode, Decode, Clone, PartialEq, MaxEncodedLen, TypeInfo, Debug, Eq)]
 pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 1]),
@@ -92,7 +93,7 @@ impl<T> Default for MetadataValue<T> {
     }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+#[derive(Encode, Decode, Clone, PartialEq, MaxEncodedLen, TypeInfo, Debug, Eq)]
 pub enum ProcessIdentifier {
     ShouldSucceed,
     ShouldFail
@@ -106,15 +107,18 @@ impl Default for ProcessIdentifier {
 
 pub struct MockProcessValidator {}
 
+type TestProcessId = ProcessFullyQualifiedId<ProcessIdentifier, u32>;
+type TestProcessIO = ProcessIO<u64, Role, u64, MetadataValue<u64>>;
+
 impl ProcessValidator<u64, Role, u64, MetadataValue<u64>> for MockProcessValidator {
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = u32;
 
     fn validate_process(
-        id: ProcessFullyQualifiedId<ProcessIdentifier, u32>,
+        id: TestProcessId,
         _sender: &u64,
-        _inputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>,
-        _outputs: &Vec<ProcessIO<u64, Role, u64, MetadataValue<u64>>>
+        _inputs: &Vec<TestProcessIO>,
+        _outputs: &Vec<TestProcessIO>
     ) -> bool {
         id.id == ProcessIdentifier::ShouldSucceed
     }
@@ -131,7 +135,10 @@ impl pallet_simple_nft::Config for Test {
     type ProcessValidator = MockProcessValidator;
     type WeightInfo = ();
 
-    type MaxMetadataCount = MaxMetadataCount;
+    type MaxMetadataCount = ConstU32<4>;
+    type MaxRoleCount = ConstU32<2>;
+    type MaxInputCount = ConstU32<5>;
+    type MaxOutputCount = ConstU32<5>;
 }
 
 // This function basically just builds a genesis storage key/value store according to

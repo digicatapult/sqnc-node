@@ -19,7 +19,10 @@
 
 use super::*;
 use crate as doas;
-use frame_support::{ord_parameter_types, parameter_types, weights::Weight};
+use frame_support::{
+    ord_parameter_types,
+    traits::{ConstU32, ConstU64, Contains}
+};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_io;
@@ -32,70 +35,91 @@ type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 // Logger module to track execution.
+#[frame_support::pallet]
 pub mod logger {
-    use super::*;
-    use frame_system::{ensure_root, ensure_signed};
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
 
+    #[pallet::config]
     pub trait Config: frame_system::Config {
-        type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
     }
 
-    frame_support::decl_storage! {
-        trait Store for Module<T: Config> as Logger {
-            AccountLog get(fn account_log): Vec<T::AccountId>;
-            I32Log get(fn i32_log): Vec<i32>;
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    #[pallet::without_storage_info]
+    pub struct Pallet<T>(PhantomData<T>);
+
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        #[pallet::weight(*weight)]
+        pub fn privileged_i32_log(origin: OriginFor<T>, i: i32, weight: Weight) -> DispatchResultWithPostInfo {
+            // Ensure that the `origin` is `Root`.
+            ensure_root(origin)?;
+            <I32Log<T>>::append(i);
+            Self::deposit_event(Event::AppendI32 { value: i, weight });
+            Ok(().into())
+        }
+
+        #[pallet::weight(*weight)]
+        pub fn non_privileged_log(origin: OriginFor<T>, i: i32, weight: Weight) -> DispatchResultWithPostInfo {
+            // Ensure that the `origin` is some signed account.
+            let sender = ensure_signed(origin)?;
+            <I32Log<T>>::append(i);
+            <AccountLog<T>>::append(sender.clone());
+            Self::deposit_event(Event::AppendI32AndAccount {
+                sender,
+                value: i,
+                weight
+            });
+            Ok(().into())
         }
     }
 
-    frame_support::decl_event! {
-        pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
-            AppendI32(i32, Weight),
-            AppendI32AndAccount(AccountId, i32, Weight),
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    pub enum Event<T: Config> {
+        AppendI32 {
+            value: i32,
+            weight: Weight
+        },
+        AppendI32AndAccount {
+            sender: T::AccountId,
+            value: i32,
+            weight: Weight
         }
     }
 
-    frame_support::decl_module! {
-        pub struct Module<T: Config> for enum Call where origin: <T as frame_system::Config>::Origin {
-            fn deposit_event() = default;
+    #[pallet::storage]
+    #[pallet::getter(fn account_log)]
+    pub(super) type AccountLog<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
-            #[weight = *weight]
-            fn privileged_i32_log(origin, i: i32, weight: Weight){
-                // Ensure that the `origin` is `Root`.
-                ensure_root(origin)?;
-                <I32Log>::append(i);
-                Self::deposit_event(RawEvent::AppendI32(i, weight));
-            }
-
-            #[weight = *weight]
-            fn non_privileged_log(origin, i: i32, weight: Weight){
-                // Ensure that the `origin` is some signed account.
-                let sender = ensure_signed(origin)?;
-                <I32Log>::append(i);
-                <AccountLog<T>>::append(sender.clone());
-                Self::deposit_event(RawEvent::AppendI32AndAccount(sender, i, weight));
-            }
-        }
-    }
+    #[pallet::storage]
+    #[pallet::getter(fn i32_log)]
+    pub(super) type I32Log<T> = StorageValue<_, Vec<i32>, ValueQuery>;
 }
 
 frame_support::construct_runtime!(
     pub enum Test where
-    Block = Block,
-    NodeBlock = Block,
-    UncheckedExtrinsic = UncheckedExtrinsic,
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Doas: doas::{Module, Call, Event<T>},
-        Logger: logger::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Doas: doas::{Pallet, Call, Event<T>},
+        Logger: logger::{Pallet, Call, Storage, Event<T>},
     }
 );
-parameter_types! {
-    pub const BlockHashCount: u64 = 250;
-    pub const SS58Prefix: u8 = 42;
+
+pub struct BlockEverything;
+impl Contains<Call> for BlockEverything {
+    fn contains(_: &Call) -> bool {
+        false
+    }
 }
 
 impl frame_system::Config for Test {
-    type BaseCallFilter = ();
+    type BaseCallFilter = BlockEverything;
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = ();
@@ -109,14 +133,16 @@ impl frame_system::Config for Test {
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
     type Event = Event;
-    type BlockHashCount = BlockHashCount;
+    type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
     type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
-    type SS58Prefix = SS58Prefix;
+    type SS58Prefix = ();
+    type OnSetCode = ();
+    type MaxConsumers = ConstU32<16>;
 }
 
 // Implement the logger module's `Config` on the Test runtime.

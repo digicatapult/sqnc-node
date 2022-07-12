@@ -1,40 +1,31 @@
 [package]
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 description = 'A FRAME pallet for storing and evaluating process validation restrictions'
-edition = '2018'
+edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'pallet-process-validation'
-version = "2.6.0"
+version = "3.0.0"
 
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
-
-# alias "parity-scale-code" to "codec"
-[dependencies.codec]
-default-features = false
-features = ['derive']
-package = 'parity-scale-codec'
-version = '2.0.0'
-
-
 [dependencies]
-dscp-pallet-traits = { version = '2.0.1', default-features = false, path = '../traits' }
-frame-support = { default-features = false, version = '3.0.0' }
-frame-system = { default-features = false, version = '3.0.0' }
-frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
-sp-runtime = { default-features = false, version = '3.0.0' }
-sp-io = { default-features = false, version = '3.0.0' }
-sp-std = { default-features = false, version = '3.0.0' }
+scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive"] }
+dscp-pallet-traits = { version = '3.0.0', default-features = false, path = '../traits' }
+frame-support = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+frame-system = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25", optional = true }
+sp-runtime = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+sp-io = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+sp-std = { default-features = false, version = "4.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 
 
 [dev-dependencies]
-serde = { version = "1.0.119" }
-sp-core = { default-features = false, version = '3.0.0' }
-sp-io = { default-features = false, version = '3.0.0' }
-sp-runtime = { default-features = false, version = '3.0.0' }
+serde = { version = "1.0.137" }
+sp-core = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 
 
 [features]
@@ -48,3 +39,4 @@ std = [
     'dscp-pallet-traits/std',
 ]
 runtime-benchmarks = ['frame-benchmarking']
+try-runtime = ["frame-support/try-runtime"]

@@ -23,13 +23,13 @@ const utf8ToUint8Array = (str, len) => {
 
 const getLastTokenId = async (context) => {
   await context.api.isReady
-  const lastTokenId = await context.api.query.simpleNftModule.lastToken()
+  const lastTokenId = await context.api.query.simpleNFT.lastToken()
   return lastTokenId ? parseInt(lastTokenId, 10) : -1
 }
 
 const getToken = async (context, tokenId) => {
   await context.api.isReady
-  const token = await context.api.query.simpleNftModule.tokensById(tokenId)
+  const token = await context.api.query.simpleNFT.tokensById(tokenId)
   return token.toJSON()
 }
 
@@ -39,7 +39,7 @@ const runProcess = async (context, process, inputs, outputs) => {
 
   return new Promise((resolve, reject) => {
     let unsub = null
-    context.api.tx.simpleNftModule
+    context.api.tx.simpleNFT
       .runProcess(process, inputs, outputs)
       .signAndSend(alice, (result) => {
         if (result.status.isInBlock) {
@@ -48,7 +48,7 @@ const runProcess = async (context, process, inputs, outputs) => {
             .map(({ event: { data } }) => data[0])
 
           if (errors.length > 0) {
-            reject('ExtrinsicFailed error in simpleNftModule')
+            reject('ExtrinsicFailed error in simpleNFT')
           }
 
           const tokens = result.events

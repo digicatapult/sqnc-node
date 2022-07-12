@@ -65,7 +65,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Bob"),
                     get_account_id_from_seed::<sr25519::Public>("Charlie"),
                 ],
-                Some(NodeAuthorizationConfig {
+                NodeAuthorizationConfig {
                     nodes: vec![(
                         //0000000000000000000000000000000000000000000000000000000000000001
                         OpaquePeerId(
@@ -75,7 +75,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
                         ),
                         get_account_id_from_seed::<sr25519::Public>("Alice")
                     )]
-                }),
+                },
                 true
             )
         },
@@ -85,15 +85,13 @@ pub fn development_config() -> Result<ChainSpec, String> {
         None,
         // Protocol ID
         Some(DEFAULT_PROTOCOL_ID),
+        // fork id
+        None,
         // Properties
         None,
         // Extensions
         None
     ))
-}
-
-pub fn inteli_stage_config() -> Result<ChainSpec, String> {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/inteli-stage.json")[..])
 }
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
@@ -130,7 +128,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Bob"),
                     get_account_id_from_seed::<sr25519::Public>("Charlie"),
                 ],
-                Some(NodeAuthorizationConfig {
+                NodeAuthorizationConfig {
                     nodes: vec![
                         (
                             // 0000000000000000000000000000000000000000000000000000000000000001
@@ -169,7 +167,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                             get_account_id_from_seed::<sr25519::Public>("Eve")
                         ),
                     ]
-                }),
+                },
                 true
             )
         },
@@ -179,6 +177,8 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
         None,
         // Protocol ID
         Some(DEFAULT_PROTOCOL_ID),
+        // fork id
+        None,
         // Properties
         None,
         // Extensions
@@ -193,34 +193,33 @@ fn testnet_genesis(
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
     technical_committee_accounts: Vec<AccountId>,
-    node_authorization_config: Option<NodeAuthorizationConfig>,
+    node_authorization_config: NodeAuthorizationConfig,
     _enable_println: bool
 ) -> GenesisConfig {
     GenesisConfig {
-        frame_system: Some(SystemConfig {
+        system: SystemConfig {
             // Add Wasm runtime to storage.
-            code: wasm_binary.to_vec(),
-            changes_trie_config: Default::default()
-        }),
-        pallet_balances: Some(BalancesConfig {
+            code: wasm_binary.to_vec()
+        },
+        balances: BalancesConfig {
             // Configure endowed accounts with initial balance of 1 << 60.
             balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect()
-        }),
-        pallet_aura: Some(AuraConfig {
+        },
+        aura: AuraConfig {
             authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect()
-        }),
-        pallet_grandpa: Some(GrandpaConfig {
+        },
+        grandpa: GrandpaConfig {
             authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect()
-        }),
-        pallet_sudo: Some(SudoConfig {
+        },
+        sudo: SudoConfig {
             // Assign network admin rights.
-            key: root_key
-        }),
-        pallet_node_authorization: node_authorization_config,
-        pallet_membership_Instance1: Some(MembershipConfig {
-            members: technical_committee_accounts.iter().cloned().collect(),
+            key: Some(root_key)
+        },
+        node_authorization: node_authorization_config,
+        membership: MembershipConfig {
+            members: technical_committee_accounts.try_into().unwrap(),
             ..Default::default()
-        }),
-        pallet_collective_Instance1: Some(Default::default())
+        },
+        technical_committee: Default::default()
     }
 }

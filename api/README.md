@@ -11,9 +11,6 @@ const { api, types, keyring } = buildApi({
   options: {
     apiHost: 'localhost',
     apiPort: 9944,
-    metadataKeyLength: 32,
-    metadataValueLiteralLength: 32,
-    processorIdentifierLength: 32,
   },
 })
 ```
@@ -23,6 +20,3 @@ The following `options` can be configured:
 | :------------------------- | :------: | :---------------------------------------------------: | :-------------------------------------------------------------------- |
 | apiHost                    |    N     |                      `localhost`                      | The hostname of the `dscp-node` the API should connect to             |
 | apiPort                    |    N     |                        `9944`                         | The port of the `dscp-node` the API should connect to                 |
-| metadataKeyLength          |    N     |                         `32`                          | Fixed length of `dscp-node` metadata key type                         |
-| metadataValueLiteralLength |    N     |                         `32`                          | Fixed length of `dscp-node` metadata `LITERAL` value type             |
-| processorIdentifierLength  |    N     |                         `32`                          | Fixed length of `dscp-node` process identifier type                   |

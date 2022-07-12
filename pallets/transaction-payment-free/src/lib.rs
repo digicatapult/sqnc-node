@@ -2,6 +2,7 @@
 
 use codec::{Decode, Encode};
 use frame_support::weights::{DispatchInfo, PostDispatchInfo};
+use scale_info::TypeInfo;
 use sp_std::prelude::*;
 
 #[cfg(test)]
@@ -46,7 +47,8 @@ pub mod pallet {
 }
 
 /// Require the transactor have balance. All transactions are free - they have no fee
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct ChargeTransactionPayment<T: Config>(#[codec(compact)] BalanceOf<T>);
 
 impl<T: Config> ChargeTransactionPayment<T>

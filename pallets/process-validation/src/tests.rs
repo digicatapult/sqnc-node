@@ -1,9 +1,13 @@
 // Creating mock runtime here
 
 use crate as pallet_process_validation;
-use codec::{Decode, Encode};
-use frame_support::parameter_types;
+use codec::{Decode, Encode, MaxEncodedLen};
+use frame_support::{
+    parameter_types,
+    traits::{ConstU32, ConstU64, ConstU8}
+};
 use frame_system as system;
+use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -28,19 +32,17 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        ProcessValidation: pallet_process_validation::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        ProcessValidation: pallet_process_validation::{Pallet, Call, Storage, Event<T>},
 
     }
 );
 parameter_types! {
-    pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
-    pub const MaxRestrictionDepth: u8 = 2;
 }
 
 impl system::Config for Test {
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = ();
@@ -54,7 +56,7 @@ impl system::Config for Test {
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
     type Event = Event;
-    type BlockHashCount = BlockHashCount;
+    type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
     type AccountData = ();
@@ -62,9 +64,11 @@ impl system::Config for Test {
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
     type SS58Prefix = SS58Prefix;
+    type OnSetCode = ();
+    type MaxConsumers = ConstU32<16>;
 }
 
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq)]
+#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq)]
 pub enum ProcessIdentifier {
     A,
     B
@@ -76,7 +80,7 @@ impl Default for ProcessIdentifier {
     }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq, Debug, Eq, Default)]
+#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Default, Eq)]
 pub struct TokenMetadataValueDiscriminator {
     value: u8
 }
@@ -93,12 +97,14 @@ impl pallet_process_validation::Config for Test {
     type CreateProcessOrigin = system::EnsureRoot<u64>;
     type DisableProcessOrigin = system::EnsureRoot<u64>;
     type WeightInfo = ();
-    type MaxRestrictionDepth = MaxRestrictionDepth;
 
     type RoleKey = u32;
     type TokenMetadataKey = u32;
     type TokenMetadataValue = u128;
     type TokenMetadataValueDiscriminator = TokenMetadataValueDiscriminator;
+
+    type MaxRestrictionDepth = ConstU8<2>;
+    type MaxProcessRestrictions = ConstU32<32>;
 }
 
 // This function basically just builds a genesis storage key/value store according to

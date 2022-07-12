@@ -20,8 +20,9 @@ describe('types', function () {
       const roles = new Map(Object.entries({ 0: USER_ALICE_TOKEN }))
       const key = utf8ToUint8Array('test', METADATA_KEY_LENGTH)
       const value = utf8ToUint8Array('test', METADATA_VALUE_LITERAL_LENGTH)
-      const metadata = new Map(Object.entries({ [key]: { Literal: value } }))
-      const newToken = await runProcess(context, undefined, [], [[roles, metadata, undefined]])
+      const metadata = new Map([[key, { Literal: value }]])
+      const parent_index = null
+      const newToken = await runProcess(context, undefined, [], [{ roles, metadata, parent_index }])
       expect(newToken[0]).to.equal(lastTokenId + 1)
     })
 

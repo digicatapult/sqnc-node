@@ -5,12 +5,11 @@ pub use pallet::*;
 use sp_runtime::{traits::StaticLookup, DispatchResult};
 use sp_std::prelude::*;
 
+use frame_support::traits::EnsureOrigin;
 use frame_support::{
-    dispatch::DispatchResultWithPostInfo,
-    traits::{Get, UnfilteredDispatchable},
+    traits::UnfilteredDispatchable,
     weights::{GetDispatchInfo, Pays, Weight}
 };
-use frame_support::{traits::EnsureOrigin, Parameter};
 
 #[cfg(test)]
 mod mock;
@@ -20,7 +19,7 @@ mod tests;
 #[frame_support::pallet]
 pub mod pallet {
 
-    use super::*;
+    use super::{DispatchResult, *};
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
@@ -39,9 +38,6 @@ pub mod pallet {
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
-
-    #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -69,7 +65,7 @@ pub mod pallet {
           let dispatch_info = call.get_dispatch_info();
           (dispatch_info.weight.saturating_add(10_000), dispatch_info.class)
         })]
-        pub(super) fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
+        pub fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
             // This is a public call, so we ensure that the origin is some signed account.
             T::DoasOrigin::ensure_origin(origin)?;
 
@@ -90,7 +86,7 @@ pub mod pallet {
         /// - The weight of this call is defined by the caller.
         /// # </weight>
         #[pallet::weight((*_weight, call.get_dispatch_info().class))]
-        pub(super) fn doas_root_unchecked_weight(
+        pub fn doas_root_unchecked_weight(
             origin: OriginFor<T>,
             call: Box<<T as Config>::Call>,
             _weight: Weight
@@ -125,7 +121,7 @@ pub mod pallet {
             dispatch_info.class,
           )
         })]
-        pub(super) fn doas(
+        pub fn doas(
             origin: OriginFor<T>,
             who: <T::Lookup as StaticLookup>::Source,
             call: Box<<T as Config>::Call>

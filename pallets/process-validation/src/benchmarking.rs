@@ -3,21 +3,21 @@
 use super::*;
 
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
+use frame_support::bounded_vec;
 use frame_system::RawOrigin;
-use sp_std::{boxed::Box, vec, vec::Vec};
 
 #[allow(unused)]
-use crate::Module as ProcessValidation;
+use crate::Pallet as ProcessValidation;
 
 // TODO implement benchmarking
 benchmarks! {
   create_process {
-  }: _(RawOrigin::Root)
+  }: _(RawOrigin::Root, T::ProcessIdentifier::default(), bounded_vec![])
   verify {
   }
 
   disable_process {
-  }: _(RawOrigin::Root)
+  }: _(RawOrigin::Root, T::ProcessIdentifier::default(), One::one())
   verify {
   }
 }

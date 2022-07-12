@@ -3,9 +3,11 @@
 use crate as pallet_symmetric_key;
 use frame_support::{
     parameter_types,
-    traits::{OnInitialize, TestRandomness},
-    weights::Weight
+    traits::{ConstU32, EqualPrivilegeOnly, OnInitialize},
+    weights::Weight,
+    BoundedVec
 };
+use frame_support_test::TestRandomness;
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
@@ -32,9 +34,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: system::{Module, Call, Config, Storage, Event<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
-        SymmetricKey: pallet_symmetric_key::{Module, Call, Storage, Event<T>},
+        System: system::{Pallet, Call, Config, Storage, Event<T>},
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+        SymmetricKey: pallet_symmetric_key::{Pallet, Call, Storage, Event<T>},
     }
 );
 parameter_types! {
@@ -45,7 +47,7 @@ parameter_types! {
 }
 
 impl system::Config for Test {
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
     type BlockWeights = BlockWeights;
     type BlockLength = ();
     type DbWeight = ();
@@ -67,6 +69,8 @@ impl system::Config for Test {
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
     type SS58Prefix = SS58Prefix;
+    type OnSetCode = ();
+    type MaxConsumers = ConstU32<16>;
 }
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
@@ -80,20 +84,22 @@ impl pallet_scheduler::Config for Test {
     type ScheduleOrigin = system::EnsureRoot<u64>;
     type MaxScheduledPerBlock = ();
     type WeightInfo = ();
+    type OriginPrivilegeCmp = EqualPrivilegeOnly;
+    type PreimageProvider = ();
+    type NoPreimagePostponement = ();
 }
 
 parameter_types! {
-    pub const KeyLength: u32 = 32;
     pub const RefreshPeriod: u32 = 5;
 }
 impl pallet_symmetric_key::Config for Test {
     type Event = Event;
-    type KeyLength = KeyLength;
+    type KeyLength = ConstU32<32>;
     type RefreshPeriod = RefreshPeriod;
     type ScheduleCall = Call;
     type UpdateOrigin = system::EnsureRoot<u64>;
     type RotateOrigin = system::EnsureRoot<u64>;
-    type Randomness = TestRandomness;
+    type Randomness = TestRandomness<Self>;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
     type WeightInfo = ();

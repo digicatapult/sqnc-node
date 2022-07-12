@@ -1,22 +1,21 @@
 [package]
 name = "dscp-pallet-traits"
-version = "2.0.1"
-edition = "2018"
+version = "3.0.0"
+edition = "2021"
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 description = "Common pallet traits for the dscp-node"
 
-[dependencies.codec]
-default-features = false
-features = ['derive']
-package = 'parity-scale-codec'
-version = '2.0.0'
-
 [dependencies]
-sp-std = { version = '3.0', default-features = false }
-frame-support = { default-features = false, version = '3.0.0' }
+scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive"] }
+sp-std = { default-features = false, version = "4.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
+frame-support = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.25" }
 
 [features]
 default = ['std']
-std = ['sp-std/std']
+std = [
+  'sp-std/std',
+  'frame-support/std',
+]
