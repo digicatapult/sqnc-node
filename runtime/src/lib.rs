@@ -7,6 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode, MaxEncodedLen};
+use frame_support::BoundedVec;
 use frame_support::traits::{ConstU128, ConstU32, ConstU64, ConstU8, EitherOfDiverse, EqualPrivilegeOnly};
 use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
@@ -331,7 +332,7 @@ impl Default for Role {
 #[strum_discriminants(name(MetadataValueType))]
 pub enum MetadataValue<TokenId> {
     File(Hash),
-    Literal([u8; 32]),
+    Literal(BoundedVec<u8, ConstU32<32>>),
     TokenId(TokenId),
     None
 }
@@ -348,9 +349,9 @@ impl Default for MetadataValueType {
 }
 
 type TokenId = u128;
-type TokenMetadataKey = [u8; 32];
+type TokenMetadataKey = BoundedVec<u8, ConstU32<32>>;
 type TokenMetadataValue = MetadataValue<TokenId>;
-type ProcessIdentifier = [u8; 32];
+type ProcessIdentifier = BoundedVec<u8, ConstU32<32>>;
 type ProcessVersion = u32;
 
 /// Configure the template pallet in pallets/simple-nft.
