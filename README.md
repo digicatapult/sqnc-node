@@ -98,7 +98,7 @@ Then follow the instructions at the top of [`docker-compose.yaml`](docker-compos
 
 ## API
 
-Interaction with the node can be done using the `@digicatapult/dscp-node` package published as an github package.
+Interaction with the node can be done using the `@digicatapult/dscp-node` package published on npmjs.
 
 ### SimpleNFT pallet
 
