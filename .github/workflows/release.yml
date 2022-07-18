@@ -180,22 +180,32 @@ jobs:
       # if it's a non new version tag with hash and latest-dev
       run: |
         if [ "$IS_NEW_VERSION" == "true" ]; then
-          echo "##[set-output name=VERSION_TAG;]ghcr.io/digicatapult/dscp-node:$VERSION";
+          echo "##[set-output name=GHCR_VERSION_TAG;]ghcr.io/digicatapult/dscp-node:$VERSION";
+          echo "##[set-output name=DOCKERHUB_VERSION_TAG;]digicatapult/dscp-node:$VERSION";
           if [ "$IS_PRERELEASE" == "false" ]; then
-            echo "##[set-output name=LATEST_TAG;]ghcr.io/digicatapult/dscp-node:latest";
+            echo "##[set-output name=GHCR_LATEST_TAG;]ghcr.io/digicatapult/dscp-node:latest";
+            echo "##[set-output name=DOCKERHUB_LATEST_TAG;]digicatapult/dscp-node:latest";
           else
-            echo "##[set-output name=LATEST_TAG;]";
+            echo "##[set-output name=GHCR_LATEST_TAG;]";
+            echo "##[set-output name=DOCKERHUB_LATEST_TAG;]";
           fi;
         else
-          echo "##[set-output name=VERSION_TAG;]";
-          echo "##[set-output name=LATEST_TAG;]";
+          echo "##[set-output name=GHCR_VERSION_TAG;]";
+          echo "##[set-output name=GHCR_LATEST_TAG;]";
+          echo "##[set-output name=DOCKERHUB_VERSION_TAG;]";
+          echo "##[set-output name=DOCKERHUB_LATEST_TAG;]";
         fi;
     - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Login to Dockerhub Registry
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DSCP_DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DSCP_DOCKERHUB_TOKEN }}
     - name: Build image
       uses: docker/build-push-action@v2
       with:
@@ -207,10 +217,14 @@ jobs:
           DSCP_VERSION=${{ needs.get-version.outputs.version }}
         file: ./Dockerfile
         platforms: linux/amd64
+        push: true
         tags: |
           ghcr.io/digicatapult/dscp-node:${{ github.sha }}
-          ${{ steps.generate-tags.outputs.VERSION_TAG }}
-          ${{ steps.generate-tags.outputs.LATEST_TAG }}
+          ${{ steps.generate-tags.outputs.GHCR_VERSION_TAG }}
+          ${{ steps.generate-tags.outputs.GHCR_LATEST_TAG }}
+          digicatapult/dscp-node:${{ github.sha }}
+          ${{ steps.generate-tags.outputs.DOCKERHUB_VERSION_TAG }}
+          ${{ steps.generate-tags.outputs.DOCKERHUB_LATEST_TAG }}
         labels: |
           org.opencontainers.image.title=dscp-node
           org.opencontainers.image.description=${{ github.event.repository.description }}
@@ -219,5 +233,3 @@ jobs:
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.version=${{ needs.get-version.outputs.version }}
           org.opencontainers.image.created=${{ needs.get-version.outputs.build_date }}
-    - name: Publish image
-      run: docker push --all-tags ghcr.io/digicatapult/dscp-node
