@@ -209,7 +209,6 @@ jobs:
     - name: Build image
       uses: docker/build-push-action@v2
       with:
-        load: true
         builder: ${{ steps.buildx.outputs.name }}
         context: .
         build-args: |
