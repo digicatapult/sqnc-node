@@ -95,7 +95,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 400,
+    spec_version: 422,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -363,7 +363,7 @@ impl pallet_simple_nft::Config for Runtime {
     type TokenMetadataValue = TokenMetadataValue;
     type ProcessValidator = ProcessValidation;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
-    type MaxMetadataCount = ConstU32<16>;
+    type MaxMetadataCount = ConstU32<64>;
     type MaxRoleCount = ConstU32<16>;
     type MaxInputCount = ConstU32<64>;
     type MaxOutputCount = ConstU32<64>;
