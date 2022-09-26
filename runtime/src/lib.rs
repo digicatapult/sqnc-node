@@ -363,7 +363,7 @@ impl pallet_simple_nft::Config for Runtime {
     type TokenMetadataValue = TokenMetadataValue;
     type ProcessValidator = ProcessValidation;
     type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
-    type MaxMetadataCount = ConstU32<16>;
+    type MaxMetadataCount = ConstU32<64>;
     type MaxRoleCount = ConstU32<16>;
     type MaxInputCount = ConstU32<64>;
     type MaxOutputCount = ConstU32<64>;
