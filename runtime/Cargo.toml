@@ -1,6 +1,6 @@
 [package]
 name = "dscp-node-runtime"
-version = "4.2.2"
+version = "4.3.2"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -56,7 +56,7 @@ hex-literal = { version = "0.3.4", optional = true }
 # Local Dependencies
 pallet-doas = { version = '2.0.0', default-features = false, package = 'pallet-doas', path = '../pallets/doas' }
 pallet-simple-nft = { version = '4.0.0', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
-pallet-process-validation = { version = '3.0.0', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
+pallet-process-validation = { version = '3.1.0', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
 pallet-symmetric-key = { version = '2.0.0', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, version = '2.0.0', package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
 
