@@ -6,10 +6,7 @@ use sp_runtime::{traits::StaticLookup, DispatchResult};
 use sp_std::prelude::*;
 
 use frame_support::traits::EnsureOrigin;
-use frame_support::{
-    traits::UnfilteredDispatchable,
-    weights::{GetDispatchInfo, Pays, Weight}
-};
+use frame_support::{dispatch::GetDispatchInfo, traits::UnfilteredDispatchable};
 
 #[cfg(test)]
 mod mock;
@@ -20,7 +17,7 @@ mod tests;
 pub mod pallet {
 
     use super::{DispatchResult, *};
-    use frame_support::pallet_prelude::*;
+    use frame_support::pallet_prelude::{Pays, *};
     use frame_system::pallet_prelude::*;
 
     #[pallet::config]
@@ -29,10 +26,10 @@ pub mod pallet {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// A sudo-able call.
-        type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
+        type Call: Parameter + UnfilteredDispatchable<RuntimeOrigin = Self::RuntimeOrigin> + GetDispatchInfo;
 
         /// An Origin that is permitted to perform Doas operations
-        type DoasOrigin: EnsureOrigin<Self::Origin>;
+        type DoasOrigin: EnsureOrigin<Self::RuntimeOrigin>;
     }
 
     #[pallet::pallet]
@@ -63,7 +60,7 @@ pub mod pallet {
         /// # </weight>
         #[pallet::weight({
           let dispatch_info = call.get_dispatch_info();
-          (dispatch_info.weight.saturating_add(10_000), dispatch_info.class)
+          (dispatch_info.weight, dispatch_info.class)
         })]
         pub fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
             // This is a public call, so we ensure that the origin is some signed account.
@@ -115,7 +112,6 @@ pub mod pallet {
           let dispatch_info = call.get_dispatch_info();
           (
             dispatch_info.weight
-              .saturating_add(10_000)
               // AccountData for inner call origin accountdata.
               .saturating_add(T::DbWeight::get().reads_writes(1, 1)),
             dispatch_info.class,
