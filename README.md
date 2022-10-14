@@ -138,19 +138,79 @@ cargo test -p pallet-simple-nft
 
 Pallet for defining process restrictions. Intended for use with `pallet-simple-nft`. Processes can be defined using the extrinsic `create_process`:
 
-<!-- TODO update with actual signature -->
-
 ```rust
-pub fn create_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
+pub fn create_process(
+  origin: OriginFor<T>,
+  id: T::ProcessIdentifier,
+  program: BoundedVec<
+      BooleanExpressionSymbol<
+          T::RoleKey,
+          T::TokenMetadataKey,
+          T::TokenMetadataValue,
+          T::TokenMetadataValueDiscriminator
+      >,
+      T::MaxProcessProgramLength
+  >) -> DispatchResultWithPostInfo;
 ```
 
 And disabled using `disable_process`:
 
-<!-- TODO update with actual signature -->
-
 ```rust
-pub fn disable_process(origin: OriginFor<T>) -> DispatchResultWithPostInfo;
+pub fn disable_process(
+  origin: OriginFor<T>,
+  id: T::ProcessIdentifier,
+  version: T::ProcessVersion
+) -> DispatchResultWithPostInfo;
 ```
+
+#### Process program
+
+The process `program` argument is formed of a `BoundedVec` of `BooleanExpressionSymbol`s with a configured maximum length in our runtime of 200 symbols. Each `BooleanExpressionSymbol` can be either a process `Restriction` (see below) which evaluates to a boolean value at runtime or a `BooleanOperation` which can perform an binary operation on a pair of boolean arguments. The program itself is then a binary expression tree written in `postfix` notation so the tree:
+
+```
+     OR
+   /    \
+ AND    OR
+ / \    / \
+A   B  C   D
+```
+
+Could be represented as:
+
+```
+[
+  Restriction(A),
+  Restriction(B),
+  Op(AND),
+  Restriction(C),
+  Restriction(D),
+  Op(OR),
+  Op(AND)
+]
+```
+
+#### Binary Operations
+
+A complete truth table set of binary operators is available when writing a process program. The table below describes each operation:
+
+| Operation      | description              |
+| :------------- | :----------------------- |
+| `Null`         | false                    |
+| `Identity`     | true                     |
+| `TransferL`    | A                        |
+| `TransferR`    | B                        |
+| `NotL`         | !A                       |
+| `NotR`         | !B                       |
+| `And`          | A and B                  |
+| `Nand`         | !(A and B)               |
+| `Or`           | A or B                   |
+| `Nor`          | !(A or B)                |
+| `Xor`          | (A and !B) or (!A and B) |
+| `Xnor`         | A equals B               |
+| `ImplicationL` | if(A) then B else true   |
+| `ImplicationR` | if(B) then A else true   |
+| `InhibitionL`  | A and !B                 |
+| `InhibitionR`  | B and !A                 |
 
 #### Restrictions
 
@@ -159,6 +219,7 @@ The pallet defines various type of process restrictions that can be applied to a
 | Restriction                     |                                                                                  description                                                                                   |
 | :------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | `None`                          |                                                                Default `Restriction` value that always succeeds                                                                |
+| `Fail`                          |                                                                     `Restriction` value that always fails                                                                      |
 | `Combined`                      |                            Requires two specified restrictions combined via a specified operator [`AND`, `OR`, `XOR`, `NAND`, `NOR`] returns `true`                            |
 | `SenderOwnsAllInputs`           |                                             Requires that the process `sender` is assigned the `default` role on all input tokens                                              |
 | `SenderHasInputRole`            |                                    Requires that the process `sender` is assigned to a specified role on a specified (by index) input token                                    |
