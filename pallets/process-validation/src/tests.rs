@@ -4,7 +4,7 @@ use crate as pallet_process_validation;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, ConstU64, ConstU8}
+    traits::{ConstU32, ConstU64}
 };
 use frame_system as system;
 use scale_info::TypeInfo;
@@ -103,8 +103,7 @@ impl pallet_process_validation::Config for Test {
     type TokenMetadataValue = u128;
     type TokenMetadataValueDiscriminator = TokenMetadataValueDiscriminator;
 
-    type MaxRestrictionDepth = ConstU8<2>;
-    type MaxProcessRestrictions = ConstU32<32>;
+    type MaxProcessProgramLength = ConstU32<8>;
 }
 
 // This function basically just builds a genesis storage key/value store according to

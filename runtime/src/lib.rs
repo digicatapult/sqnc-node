@@ -7,7 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::traits::{ConstU128, ConstU32, ConstU64, ConstU8, EitherOfDiverse, EqualPrivilegeOnly};
+use frame_support::traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly};
 use frame_support::BoundedVec;
 use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
@@ -95,7 +95,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 422,
+    spec_version: 430,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -380,8 +380,7 @@ impl pallet_process_validation::Config for Runtime {
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type TokenMetadataValueDiscriminator = MetadataValueType;
-    type MaxRestrictionDepth = ConstU8<3>;
-    type MaxProcessRestrictions = ConstU32<100>;
+    type MaxProcessProgramLength = ConstU32<200>;
 }
 
 parameter_types! {
