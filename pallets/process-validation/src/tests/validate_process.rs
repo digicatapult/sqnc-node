@@ -1,7 +1,7 @@
 use super::*;
 
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
-use frame_support::{bounded_vec};
+use frame_support::bounded_vec;
 use sp_std::collections::btree_map::BTreeMap;
 
 use crate::binary_expression_tree::{BooleanExpressionSymbol, BooleanOperator};
