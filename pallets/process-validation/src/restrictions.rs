@@ -5,28 +5,13 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use dscp_pallet_traits::ProcessIO;
 use frame_support::Parameter;
 use scale_info::TypeInfo;
-// use sp_std::boxed::Box;
 use sp_std::vec::Vec;
-
-// #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-// #[cfg_attr(feature = "std", derive(Debug))]
-// pub enum BinaryOperator {
-//     AND,
-//     OR,
-//     XOR,
-//     NAND,
-//     NOR
-// }
 
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     None,
-    // Combined {
-    //     operator: BinaryOperator,
-    //     restriction_a: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>,
-    //     restriction_b: Box<Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>>
-    // },
+    Fail,
     SenderOwnsAllInputs,
     SenderHasInputRole {
         index: u32,
@@ -103,36 +88,7 @@ where
 {
     match restriction {
         Restriction::<R, T, V, D>::None => true,
-        // Restriction::Combined {
-        //     operator,
-        //     restriction_a,
-        //     restriction_b
-        // } => {
-        //     let res_a = *restriction_a;
-        //     let res_b = *restriction_b;
-        //     match operator {
-        //         BinaryOperator::AND => {
-        //             validate_restriction(res_a, sender, inputs, outputs)
-        //                 && validate_restriction(res_b, sender, inputs, outputs)
-        //         }
-        //         BinaryOperator::OR => {
-        //             validate_restriction(res_a, sender, inputs, outputs)
-        //                 || validate_restriction(res_b, sender, inputs, outputs)
-        //         }
-        //         BinaryOperator::XOR => {
-        //             (validate_restriction(res_a, sender, inputs, outputs))
-        //                 ^ (validate_restriction(res_b, sender, inputs, outputs))
-        //         }
-        //         BinaryOperator::NAND => {
-        //             !(validate_restriction(res_a, sender, inputs, outputs)
-        //                 && validate_restriction(res_b, sender, inputs, outputs))
-        //         }
-        //         BinaryOperator::NOR => {
-        //             !(validate_restriction(res_a, sender, inputs, outputs)
-        //                 || validate_restriction(res_b, sender, inputs, outputs))
-        //         }
-        //     }
-        // }
+        Restriction::<R, T, V, D>::Fail => false,
         Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
         Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
         Restriction::FixedInputMetadataValue {
@@ -236,10 +192,17 @@ mod tests {
     use sp_std::iter::FromIterator;
 
     #[test]
-    fn no_restriction_succeeds() {
+    fn none_restriction_succeeds() {
         let result =
             validate_restriction::<u64, u32, u32, u64, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
         assert!(result);
+    }
+
+    #[test]
+    fn fail_restriction_fails() {
+        let result =
+            validate_restriction::<u64, u32, u32, u64, u64>(Restriction::Fail, &1u64, &Vec::new(), &Vec::new());
+        assert!(!result);
     }
 
     #[test]

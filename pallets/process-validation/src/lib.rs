@@ -19,6 +19,9 @@ mod benchmarking;
 mod restrictions;
 use restrictions::*;
 
+mod binary_expression_tree;
+use binary_expression_tree::*;
+
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum ProcessStatus {
@@ -33,40 +36,42 @@ impl Default for ProcessStatus {
 }
 
 #[derive(Encode, Decode, Clone, RuntimeDebug, MaxEncodedLen, TypeInfo)]
-#[scale_info(skip_type_params(MaxProcessRestrictions))]
+#[scale_info(skip_type_params(MaxProcessProgramLength))]
 pub struct Process<
     RoleKey,
     TokenMetadataKey,
     TokenMetadataValue,
     TokenMetadataValueDiscriminator,
-    MaxProcessRestrictions
+    MaxProcessProgramLength
 > where
     RoleKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue> + MaxEncodedLen,
-    MaxProcessRestrictions: Get<u32>
+    MaxProcessProgramLength: Get<u32>
 {
     status: ProcessStatus,
-    restrictions: BoundedVec<
-        Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>,
-        MaxProcessRestrictions
+    program: BoundedVec<
+        BooleanExpressionSymbol<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>,
+        MaxProcessProgramLength
     >
 }
 
-impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessRestrictions> Default
-    for Process<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessRestrictions>
+impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessProgramLength> Default
+    for Process<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessProgramLength>
 where
     RoleKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue> + MaxEncodedLen,
-    MaxProcessRestrictions: Get<u32>
+    MaxProcessProgramLength: Get<u32>
 {
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
-            restrictions: Default::default()
+            program: vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
+                .try_into()
+                .unwrap()
         }
     }
 }
@@ -80,7 +85,7 @@ where
     MR: Get<u32>
 {
     fn eq(&self, other: &Process<R, K, V, D, MR>) -> bool {
-        self.status == other.status && self.restrictions == other.restrictions
+        self.status == other.status && self.program == other.program
     }
 }
 
@@ -105,10 +110,7 @@ pub mod pallet {
         type ProcessVersion: Parameter + AtLeast32Bit + Default + MaxEncodedLen;
 
         #[pallet::constant]
-        type MaxRestrictionDepth: Get<u8>;
-
-        #[pallet::constant]
-        type MaxProcessRestrictions: Get<u32>;
+        type MaxProcessProgramLength: Get<u32>;
 
         // Origins for calling these extrinsics. For now these are expected to be root
         type CreateProcessOrigin: EnsureOrigin<Self::Origin>;
@@ -141,7 +143,7 @@ pub mod pallet {
             T::TokenMetadataKey,
             T::TokenMetadataValue,
             T::TokenMetadataValueDiscriminator,
-            T::MaxProcessRestrictions
+            T::MaxProcessProgramLength
         >,
         ValueQuery
     >;
@@ -154,13 +156,18 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        // id, version, restrictions, is_new
+        // id, version, program, is_new
         ProcessCreated(
             T::ProcessIdentifier,
             T::ProcessVersion,
             BoundedVec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-                T::MaxProcessRestrictions
+                BooleanExpressionSymbol<
+                    T::RoleKey,
+                    T::TokenMetadataKey,
+                    T::TokenMetadataValue,
+                    T::TokenMetadataValueDiscriminator
+                >,
+                T::MaxProcessProgramLength
             >,
             bool
         ),
@@ -178,8 +185,8 @@ pub mod pallet {
         AlreadyDisabled,
         // process not found for this version
         InvalidVersion,
-        // restrictions go over maximum depth
-        RestrictionsTooDeep
+        // restriction program is invalid
+        InvalidProgram
     }
 
     // The pallet's dispatchable functions.
@@ -189,27 +196,30 @@ pub mod pallet {
         pub fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            restrictions: BoundedVec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-                T::MaxProcessRestrictions
+            program: BoundedVec<
+                BooleanExpressionSymbol<
+                    T::RoleKey,
+                    T::TokenMetadataKey,
+                    T::TokenMetadataValue,
+                    T::TokenMetadataValueDiscriminator
+                >,
+                T::MaxProcessProgramLength
             >
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
-            for restriction in restrictions.iter() {
-                ensure!(
-                    !Pallet::<T>::restriction_over_max_depth(restriction.clone(), 0, T::MaxRestrictionDepth::get()),
-                    Error::<T>::RestrictionsTooDeep
-                );
-            }
+            ensure!(
+                Pallet::<T>::validate_program(program.clone()),
+                Error::<T>::InvalidProgram
+            );
 
             let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
-            Pallet::<T>::persist_process(&id, &version, &restrictions)?;
+            Pallet::<T>::persist_process(&id, &version, &program)?;
 
             Self::deposit_event(Event::ProcessCreated(
                 id,
                 version.clone(),
-                restrictions,
+                program,
                 version == One::one()
             ));
 
@@ -233,32 +243,22 @@ pub mod pallet {
 
     // helper methods
     impl<T: Config> Pallet<T> {
-        pub fn restriction_over_max_depth(
-            restriction: Restriction<
-                T::RoleKey,
-                T::TokenMetadataKey,
-                T::TokenMetadataValue,
-                T::TokenMetadataValueDiscriminator
-            >,
-            count: u8,
-            max_depth: u8
+        pub fn validate_program(
+            program: BoundedVec<
+                BooleanExpressionSymbol<
+                    T::RoleKey,
+                    T::TokenMetadataKey,
+                    T::TokenMetadataValue,
+                    T::TokenMetadataValueDiscriminator
+                >,
+                T::MaxProcessProgramLength
+            >
         ) -> bool {
-            if count > max_depth {
-                return true;
-            }
-
-            match restriction {
-                // Restriction::Combined {
-                //     operator: _,
-                //     restriction_a,
-                //     restriction_b
-                // } => {
-                //     let incremented_count = count + 1;
-                //     Pallet::<T>::restriction_over_max_depth(*restriction_a, incremented_count, max_depth)
-                //         || Pallet::<T>::restriction_over_max_depth(*restriction_b, incremented_count, max_depth)
-                // }
-                _ => false
-            }
+            let executed_stack_height = program.iter().try_fold(0u8, |stack_height, symbol| match symbol {
+                BooleanExpressionSymbol::Op(_) => stack_height.checked_sub(1),
+                BooleanExpressionSymbol::Restriction(_) => stack_height.checked_add(1)
+            });
+            executed_stack_height == Some(1u8)
         }
 
         pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
@@ -281,9 +281,14 @@ pub mod pallet {
         pub fn persist_process(
             id: &T::ProcessIdentifier,
             v: &T::ProcessVersion,
-            r: &BoundedVec<
-                Restriction<T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue, T::TokenMetadataValueDiscriminator>,
-                T::MaxProcessRestrictions
+            p: &BoundedVec<
+                BooleanExpressionSymbol<
+                    T::RoleKey,
+                    T::TokenMetadataKey,
+                    T::TokenMetadataValue,
+                    T::TokenMetadataValueDiscriminator
+                >,
+                T::MaxProcessProgramLength
             >
         ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
@@ -293,7 +298,7 @@ pub mod pallet {
                         id,
                         v,
                         Process {
-                            restrictions: r.clone(),
+                            program: p.clone(),
                             status: ProcessStatus::Enabled
                         }
                     );
@@ -350,20 +355,28 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                     return false;
                 }
 
-                for restriction in process.restrictions {
-                    let is_valid = validate_restriction::<
-                        T::AccountId,
-                        T::RoleKey,
-                        T::TokenMetadataKey,
-                        T::TokenMetadataValue,
-                        T::TokenMetadataValueDiscriminator
-                    >(restriction, &sender, inputs, outputs);
-
-                    if !is_valid {
-                        return false;
+                let mut stack: Vec<bool> = Vec::with_capacity(T::MaxProcessProgramLength::get() as usize);
+                for symbol in process.program {
+                    match symbol {
+                        BooleanExpressionSymbol::Op(op) => {
+                            if let (Some(a), Some(b)) = (stack.pop(), stack.pop()) {
+                                stack.push(op.eval(a, b));
+                            } else {
+                                return false;
+                            }
+                        }
+                        BooleanExpressionSymbol::Restriction(r) => {
+                            stack.push(validate_restriction::<
+                                T::AccountId,
+                                T::RoleKey,
+                                T::TokenMetadataKey,
+                                T::TokenMetadataValue,
+                                T::TokenMetadataValueDiscriminator
+                            >(r, &sender, inputs, outputs));
+                        }
                     }
                 }
-                true
+                stack.pop().unwrap_or(false)
             }
             Err(_) => false
         }

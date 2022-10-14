@@ -4,6 +4,7 @@ use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
 use frame_support::bounded_vec;
 use sp_std::collections::btree_map::BTreeMap;
 
+use crate::binary_expression_tree::{BooleanExpressionSymbol, BooleanOperator};
 use crate::restrictions::Restriction;
 use crate::{Process, ProcessModel, ProcessStatus};
 
@@ -15,7 +16,7 @@ fn it_succeeds_when_process_exists() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![]
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
             }
         );
 
@@ -39,7 +40,7 @@ fn it_fails_when_process_id_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![]
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
             }
         );
 
@@ -63,7 +64,7 @@ fn it_fails_when_process_version_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![]
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
             }
         );
 
@@ -87,7 +88,7 @@ fn it_fails_when_process_disabled() {
             1u32,
             Process {
                 status: ProcessStatus::Disabled,
-                restrictions: bounded_vec![]
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
             }
         );
 
@@ -111,7 +112,11 @@ fn it_succeeds_when_all_restrictions_succeed() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![Restriction::None, Restriction::SenderOwnsAllInputs]
+                program: bounded_vec![
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
+                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Op(BooleanOperator::And)
+                ]
             }
         );
 
@@ -142,7 +147,11 @@ fn it_fails_when_one_restrictions_fails() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                restrictions: bounded_vec![Restriction::None, Restriction::SenderOwnsAllInputs]
+                program: bounded_vec![
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
+                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Op(BooleanOperator::And)
+                ]
             }
         );
 
@@ -155,6 +164,80 @@ fn it_fails_when_one_restrictions_fails() {
                 version: 1u32
             },
             &0u64,
+            &vec![ProcessIO {
+                roles: token_roles,
+                metadata: BTreeMap::new(),
+                parent_index: None
+            }],
+            &bounded_vec![],
+        ));
+    });
+}
+
+#[test]
+fn it_succeeds_wth_complex_tree() {
+    new_test_ext().execute_with(|| {
+        ProcessModel::<Test>::insert(
+            ProcessIdentifier::A,
+            1u32,
+            Process {
+                status: ProcessStatus::Enabled,
+                program: bounded_vec![
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
+                    BooleanExpressionSymbol::Restriction(Restriction::Fail),
+                    BooleanExpressionSymbol::Op(BooleanOperator::Or),
+                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Op(BooleanOperator::And)
+                ]
+            }
+        );
+
+        let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
+        token_roles.insert(Default::default(), 1u64);
+
+        assert!(ProcessValidation::validate_process(
+            ProcessFullyQualifiedId {
+                id: ProcessIdentifier::A,
+                version: 1u32
+            },
+            &1u64,
+            &vec![ProcessIO {
+                roles: token_roles,
+                metadata: BTreeMap::new(),
+                parent_index: None
+            }],
+            &bounded_vec![],
+        ));
+    });
+}
+
+#[test]
+fn it_fails_wth_complex_tree() {
+    new_test_ext().execute_with(|| {
+        ProcessModel::<Test>::insert(
+            ProcessIdentifier::A,
+            1u32,
+            Process {
+                status: ProcessStatus::Enabled,
+                program: bounded_vec![
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
+                    BooleanExpressionSymbol::Restriction(Restriction::Fail),
+                    BooleanExpressionSymbol::Op(BooleanOperator::Or),
+                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Op(BooleanOperator::Xor)
+                ]
+            }
+        );
+
+        let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
+        token_roles.insert(Default::default(), 1u64);
+
+        assert!(!ProcessValidation::validate_process(
+            ProcessFullyQualifiedId {
+                id: ProcessIdentifier::A,
+                version: 1u32
+            },
+            &1u64,
             &vec![ProcessIO {
                 roles: token_roles,
                 metadata: BTreeMap::new(),

@@ -1296,7 +1296,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-node"
-version = "4.2.2"
+version = "4.3.0"
 dependencies = [
  "bs58",
  "clap",
@@ -1338,7 +1338,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "4.2.2"
+version = "4.3.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -4184,7 +4184,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-process-validation"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
