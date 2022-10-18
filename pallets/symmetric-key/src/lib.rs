@@ -40,7 +40,7 @@ pub mod pallet {
         /// what does this do!!!!
         type ScheduleCall: Parameter + Dispatchable<Origin = Self::Origin> + From<Call<Self>>;
         /// The overarching event type.
-		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         #[pallet::constant]
         type KeyLength: Get<u32>;
