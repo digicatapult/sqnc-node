@@ -25,8 +25,8 @@ pub trait OnFreeTransaction<T: Config> {
 
     fn zero_fee(
         who: &T::AccountId,
-        call: &T::Call,
-        dispatch_info: &DispatchInfoOf<T::Call>,
+        call: &T::RuntimeCall,
+        dispatch_info: &DispatchInfoOf<T::RuntimeCall>,
         fee: Self::Balance,
         tip: Self::Balance
     ) -> Result<Self::LiquidityInfo, TransactionValidityError>;
@@ -54,8 +54,8 @@ where
     /// Check the account has balance and set fee to 0.
     fn zero_fee(
         who: &T::AccountId,
-        _call: &T::Call,
-        _info: &DispatchInfoOf<T::Call>,
+        _call: &T::RuntimeCall,
+        _info: &DispatchInfoOf<T::RuntimeCall>,
         _fee: Self::Balance,
         _tip: Self::Balance
     ) -> Result<Self::LiquidityInfo, TransactionValidityError> {

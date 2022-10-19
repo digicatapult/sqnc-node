@@ -3,6 +3,7 @@
 use codec::{Decode, Encode};
 use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
 use scale_info::TypeInfo;
+use sp_runtime::traits::SignedExtensionMetadata;
 use sp_std::prelude::*;
 
 #[cfg(test)]
@@ -53,7 +54,7 @@ pub struct ChargeTransactionPayment<T: Config>(#[codec(compact)] BalanceOf<T>);
 
 impl<T: Config> ChargeTransactionPayment<T>
 where
-    T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+    T::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
     BalanceOf<T>: Send + Sync + FixedPointOperand
 {
     /// utility constructor. Used only in client/factory code.
@@ -64,8 +65,8 @@ where
     fn zero_fee(
         &self,
         who: &T::AccountId,
-        call: &T::Call,
-        info: &DispatchInfoOf<T::Call>,
+        call: &T::RuntimeCall,
+        info: &DispatchInfoOf<T::RuntimeCall>,
         _len: usize
     ) -> Result<
         (
@@ -99,11 +100,11 @@ impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
 impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
 where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
-    RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
+    T::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = T::AccountId;
-    type Call = T::Call;
+    type Call = T::RuntimeCall;
     type AdditionalSigned = ();
     type Pre = (
         BalanceOf<T>,
@@ -123,5 +124,49 @@ where
     ) -> Result<Self::Pre, TransactionValidityError> {
         let (_fee, imbalance) = self.zero_fee(who, call, info, len)?;
         Ok((self.0, who.clone(), imbalance))
+    }
+
+    fn validate(
+        &self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize
+    ) -> frame_support::unsigned::TransactionValidity {
+        Ok(frame_support::pallet_prelude::ValidTransaction::default())
+    }
+
+    fn validate_unsigned(
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize
+    ) -> frame_support::unsigned::TransactionValidity {
+        Ok(frame_support::pallet_prelude::ValidTransaction::default())
+    }
+
+    fn pre_dispatch_unsigned(
+        call: &Self::Call,
+        info: &DispatchInfoOf<Self::Call>,
+        len: usize
+    ) -> Result<(), TransactionValidityError> {
+        Self::validate_unsigned(call, info, len).map(|_| ()).map_err(Into::into)
+    }
+
+    fn post_dispatch(
+        _pre: Option<Self::Pre>,
+        _info: &DispatchInfoOf<Self::Call>,
+        _post_info: &sp_runtime::traits::PostDispatchInfoOf<Self::Call>,
+        _len: usize,
+        _result: &sp_runtime::DispatchResult
+    ) -> Result<(), TransactionValidityError> {
+        Ok(())
+    }
+
+    fn metadata() -> Vec<sp_runtime::traits::SignedExtensionMetadata> {
+        sp_std::vec![SignedExtensionMetadata {
+            identifier: Self::IDENTIFIER,
+            ty: scale_info::meta_type::<Self>(),
+            additional_signed: scale_info::meta_type::<Self::AdditionalSigned>()
+        }]
     }
 }

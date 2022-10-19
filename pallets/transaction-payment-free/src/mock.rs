@@ -1,9 +1,10 @@
 use super::*;
 use crate as pallet_transaction_payment_free;
+use frame_support::dispatch::{DispatchClass, DispatchInfo};
 use frame_support::{
     parameter_types,
     traits::{ConstU32, ConstU64, Get},
-    weights::{DispatchClass, DispatchInfo, Weight}
+    weights::Weight
 };
 use frame_system as system;
 use pallet_balances::Call as BalancesCall;
@@ -28,18 +29,19 @@ frame_support::construct_runtime!(
     }
 );
 
-pub const CALL: &<Test as frame_system::Config>::Call = &Call::Balances(BalancesCall::transfer { dest: 2, value: 69 });
+pub const CALL: &<Test as frame_system::Config>::RuntimeCall =
+    &RuntimeCall::Balances(BalancesCall::transfer { dest: 2, value: 69 });
 
 pub struct BlockWeights;
 impl Get<frame_system::limits::BlockWeights> for BlockWeights {
     fn get() -> frame_system::limits::BlockWeights {
         frame_system::limits::BlockWeights::builder()
-            .base_block(0)
+            .base_block(Weight::from_ref_time(0))
             .for_class(DispatchClass::all(), |weights| {
                 weights.base_extrinsic = 0u64.into();
             })
             .for_class(DispatchClass::non_mandatory(), |weights| {
-                weights.max_total = 1024.into();
+                weights.max_total = 1024u64.into();
             })
             .build_or_panic()
     }
@@ -50,16 +52,16 @@ impl system::Config for Test {
     type BlockWeights = BlockWeights;
     type BlockLength = ();
     type DbWeight = ();
-    type Origin = Origin;
+    type RuntimeOrigin = RuntimeOrigin;
     type Index = u64;
     type BlockNumber = u64;
-    type Call = Call;
+    type RuntimeCall = RuntimeCall;
     type Hash = H256;
     type Hashing = BlakeTwo256;
     type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
@@ -78,7 +80,7 @@ parameter_types! {
 
 impl pallet_balances::Config for Test {
     type Balance = u64;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
