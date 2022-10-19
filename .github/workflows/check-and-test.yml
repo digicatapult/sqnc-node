@@ -30,12 +30,11 @@ jobs:
   check-helm-version:
     name: Check helm version
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - run: git fetch --depth=1 --tags origin
       - name: Install yq
-        run: sudo snap install yq
+        run: pip3 install yq==2.13.0
       - name: Check Helm Version
         id: get_version
         run: ./scripts/check-helm-version.sh
