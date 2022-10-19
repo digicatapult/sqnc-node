@@ -38,10 +38,10 @@ impl Get<frame_system::limits::BlockWeights> for BlockWeights {
         frame_system::limits::BlockWeights::builder()
             .base_block(Weight::from_ref_time(0))
             .for_class(DispatchClass::all(), |weights| {
-                weights.base_extrinsic = 0u64.into();
+                weights.base_extrinsic = Weight::from_ref_time(0u64);
             })
             .for_class(DispatchClass::non_mandatory(), |weights| {
-                weights.max_total = 1024u64.into();
+                weights.max_total = Some(Weight::from_ref_time(1024u64));
             })
             .build_or_panic()
     }
