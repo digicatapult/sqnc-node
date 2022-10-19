@@ -39,7 +39,7 @@ fn it_works_for_creating_token_with_file() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -76,7 +76,7 @@ fn it_works_for_creating_token_with_literal() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -113,7 +113,7 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -150,7 +150,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -192,7 +192,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -229,7 +229,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -280,7 +280,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 1,
-                riginal_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -295,7 +295,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 2,
-                Original_id: 2,
+                original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -310,7 +310,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 3,
-                Original_id: 3,
+                original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -361,7 +361,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -376,7 +376,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 2,
-                Original_id: 2,
+                original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -391,7 +391,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 3,
-                Original_id: 3,
+                original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -435,7 +435,7 @@ fn it_works_for_destroying_single_token() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -493,7 +493,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 1,
-                Original_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -508,7 +508,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 2,
-                Original_id: 2,
+                original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -523,7 +523,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 3,
-                Original_id: 3,
+                original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -573,7 +573,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             token,
             Token {
                 id: 1,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -588,7 +588,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             token,
             Token {
                 id: 2,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles1.clone(),
                 creator: 1,
                 created_at: 0,
@@ -654,7 +654,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 1,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -669,7 +669,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 2,
-                RuntimeOriginal_id: 2,
+                original_id: 2,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -685,7 +685,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 3,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -700,7 +700,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 4,
-                Original_id: 2,
+                original_id: 2,
                 roles: roles1.clone(),
                 creator: 1,
                 created_at: 0,
@@ -714,7 +714,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 }
 
 #[test]
-fn it_works_for_maintaining_RuntimeOriginal_id_through_multiple_children() {
+fn it_works_for_maintaining_original_id_through_multiple_children() {
     new_test_ext().execute_with(|| {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
@@ -752,13 +752,13 @@ fn it_works_for_maintaining_RuntimeOriginal_id_through_multiple_children() {
                 parent_index: Some(0)
             },]
         ));
-        // check all tokens have the same RuntimeOriginal_id
+        // check all tokens have the same original_id
         let token = SimpleNFT::tokens_by_id(1).unwrap();
         assert_eq!(
             token,
             Token {
                 id: 1,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -773,7 +773,7 @@ fn it_works_for_maintaining_RuntimeOriginal_id_through_multiple_children() {
             token,
             Token {
                 id: 2,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -788,7 +788,7 @@ fn it_works_for_maintaining_RuntimeOriginal_id_through_multiple_children() {
             token,
             Token {
                 id: 3,
-                RuntimeOriginal_id: 1,
+                original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
