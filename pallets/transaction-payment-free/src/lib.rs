@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::weights::{DispatchInfo, PostDispatchInfo};
+use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
 
@@ -36,8 +36,6 @@ pub mod pallet {
     /// The pallet's configuration trait.
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-
         type OnFreeTransaction: OnFreeTransaction<Self>;
     }
 
@@ -101,7 +99,7 @@ impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
 impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
 where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
-    T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
+    RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = T::AccountId;
