@@ -32,7 +32,6 @@ CURRENT_VERSION=$(yq eval '.version' ./helm/dscp-node/Chart.yaml)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
   echo "##[set-output name=VERSION;]$CURRENT_VERSION"
-  echo "##[set-output name=APP_VERSION;]$(tomlq .package.version node/Cargo.toml |tr -d '"')"
   echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   echo "##[set-output name=IS_NEW_VERSION;]true"
 else
