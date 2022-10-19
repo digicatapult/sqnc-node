@@ -34,7 +34,7 @@ pub use frame_support::{
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        IdentityFee, Weight
+        DispatchInfo, GetDispatchInfo, IdentityFee, Weight
     },
     StorageValue
 };
@@ -617,6 +617,34 @@ impl_runtime_apis! {
     impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
         fn account_nonce(account: AccountId) -> Index {
             System::account_nonce(account)
+        }
+    }
+
+    // Certain elements of the polkadot UI assume the presence of the payment RPC API
+    // Because we do not have transaction fees we implement the API but returning zero fees
+    impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<Block, Balance> for Runtime {
+        fn query_info(
+            uxt: <Block as BlockT>::Extrinsic,
+            _len: u32,
+        ) -> pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo<Balance> {
+            let dispatch_info = <<Block as BlockT>::Extrinsic as GetDispatchInfo>::get_dispatch_info(&uxt);
+            let DispatchInfo { weight, class, .. } = dispatch_info;
+
+            pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo {
+                weight,
+                class,
+                partial_fee: 0u32.into()
+            }
+        }
+
+        fn query_fee_details(
+            _uxt: <Block as BlockT>::Extrinsic,
+            _len: u32,
+        ) -> pallet_transaction_payment_rpc_runtime_api::FeeDetails<Balance> {
+            pallet_transaction_payment_rpc_runtime_api::FeeDetails {
+                inclusion_fee: None,
+                tip: 0u32.into()
+            }
         }
     }
 
