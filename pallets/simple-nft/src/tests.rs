@@ -22,7 +22,7 @@ fn it_works_for_creating_token_with_file() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -39,7 +39,7 @@ fn it_works_for_creating_token_with_file() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -59,7 +59,7 @@ fn it_works_for_creating_token_with_literal() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::Literal([0]));
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -76,7 +76,7 @@ fn it_works_for_creating_token_with_literal() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -96,7 +96,7 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 =>  MetadataValue::TokenId(0));
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -113,7 +113,7 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -133,7 +133,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -150,7 +150,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -175,7 +175,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             3 => MetadataValue::None,
         );
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -192,7 +192,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -212,7 +212,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
         let roles = bounded_btree_map!(Default::default() => 1, Role::NotOwner => 2);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -229,7 +229,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -251,7 +251,7 @@ fn it_works_for_creating_many_token() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
         let metadata2 = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -280,7 +280,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                riginal_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -295,7 +295,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 2,
-                original_id: 2,
+                Original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -310,7 +310,7 @@ fn it_works_for_creating_many_token() {
             token,
             Token {
                 id: 3,
-                original_id: 3,
+                Original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -332,7 +332,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::Literal([0]));
         let metadata2 = bounded_btree_map!(1 => MetadataValue::Literal([0]));
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -361,7 +361,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -376,7 +376,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 2,
-                original_id: 2,
+                Original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -391,7 +391,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             token,
             Token {
                 id: 3,
-                original_id: 3,
+                Original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -410,7 +410,7 @@ fn it_works_for_destroying_single_token() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -422,7 +422,7 @@ fn it_works_for_destroying_single_token() {
         .unwrap();
         // create a token with no parents
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![1],
             bounded_vec![]
@@ -435,7 +435,7 @@ fn it_works_for_destroying_single_token() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -456,7 +456,7 @@ fn it_works_for_destroying_many_tokens() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -480,7 +480,7 @@ fn it_works_for_destroying_many_tokens() {
         .unwrap();
         // create a token with no parents
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![1, 2, 3],
             bounded_vec![]
@@ -493,7 +493,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                Original_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -508,7 +508,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 2,
-                original_id: 2,
+                Original_id: 2,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -523,7 +523,7 @@ fn it_works_for_destroying_many_tokens() {
             token,
             Token {
                 id: 3,
-                original_id: 3,
+                Original_id: 3,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -544,7 +544,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -556,7 +556,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
         .unwrap();
         // create a token with a parent
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![1],
             bounded_vec![Output {
@@ -573,7 +573,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -588,7 +588,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             token,
             Token {
                 id: 2,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles1.clone(),
                 creator: 1,
                 created_at: 0,
@@ -611,7 +611,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata3 = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -630,7 +630,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
         .unwrap();
         // create 2 tokens with 2 parents
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![1, 2],
             bounded_vec![
@@ -654,7 +654,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -669,7 +669,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 2,
-                original_id: 2,
+                RuntimeOriginal_id: 2,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -685,7 +685,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 3,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles0.clone(),
                 creator: 1,
                 created_at: 0,
@@ -700,7 +700,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             token,
             Token {
                 id: 4,
-                original_id: 2,
+                Original_id: 2,
                 roles: roles1.clone(),
                 creator: 1,
                 created_at: 0,
@@ -714,13 +714,13 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 }
 
 #[test]
-fn it_works_for_maintaining_original_id_through_multiple_children() {
+fn it_works_for_maintaining_RuntimeOriginal_id_through_multiple_children() {
     new_test_ext().execute_with(|| {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         // initial token
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -732,7 +732,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
         .unwrap();
         // token with previous token as parent
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![1],
             bounded_vec![Output {
@@ -743,7 +743,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
         ));
         // token with previous token as parent again
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![2],
             bounded_vec![Output {
@@ -752,13 +752,13 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
                 parent_index: Some(0)
             },]
         ));
-        // check all tokens have the same original_id
+        // check all tokens have the same RuntimeOriginal_id
         let token = SimpleNFT::tokens_by_id(1).unwrap();
         assert_eq!(
             token,
             Token {
                 id: 1,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -773,7 +773,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
             token,
             Token {
                 id: 2,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -788,7 +788,7 @@ fn it_works_for_maintaining_original_id_through_multiple_children() {
             token,
             Token {
                 id: 3,
-                original_id: 1,
+                RuntimeOriginal_id: 1,
                 roles: roles.clone(),
                 creator: 1,
                 created_at: 0,
@@ -807,7 +807,7 @@ fn it_fails_for_destroying_single_token_as_incorrect_role() {
         let roles = bounded_btree_map!(Default::default() => 1, Role::NotOwner => 2);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -821,7 +821,7 @@ fn it_fails_for_destroying_single_token_as_incorrect_role() {
         let token = SimpleNFT::tokens_by_id(1);
         // Try to destroy token as incorrect user
         assert_err!(
-            SimpleNFT::run_process(Origin::signed(2), NONE_PROCESS, bounded_vec![1], bounded_vec![]),
+            SimpleNFT::run_process(RuntimeOrigin::signed(2), NONE_PROCESS, bounded_vec![1], bounded_vec![]),
             Error::<Test>::NotOwned
         );
         // assert no more tokens were created
@@ -836,7 +836,7 @@ fn it_fails_for_destroying_single_invalid_token() {
     new_test_ext().execute_with(|| {
         // Try to destroy token as incorrect user
         assert_err!(
-            SimpleNFT::run_process(Origin::signed(1), NONE_PROCESS, bounded_vec![42], bounded_vec![]),
+            SimpleNFT::run_process(RuntimeOrigin::signed(1), NONE_PROCESS, bounded_vec![42], bounded_vec![]),
             Error::<Test>::InvalidInput
         );
         // assert no more tokens were created
@@ -850,7 +850,7 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -864,7 +864,7 @@ fn it_fails_for_destroying_single_token_as_other_signer() {
         let token = SimpleNFT::tokens_by_id(1);
         // Try to destroy token as incorrect user
         assert_err!(
-            SimpleNFT::run_process(Origin::signed(2), NONE_PROCESS, bounded_vec![1], bounded_vec![]),
+            SimpleNFT::run_process(RuntimeOrigin::signed(2), NONE_PROCESS, bounded_vec![1], bounded_vec![]),
             Error::<Test>::NotOwned
         );
         // assert no more tokens were created
@@ -881,7 +881,7 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(2),
+            RuntimeOrigin::signed(2),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -892,7 +892,7 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
         )
         .unwrap();
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -907,7 +907,12 @@ fn it_fails_for_destroying_multiple_tokens_as_other_signer() {
         let token_2 = SimpleNFT::tokens_by_id(2);
         // Try to destroy token as incorrect user
         assert_err!(
-            SimpleNFT::run_process(Origin::signed(2), NONE_PROCESS, bounded_vec![1, 2], bounded_vec![]),
+            SimpleNFT::run_process(
+                RuntimeOrigin::signed(2),
+                NONE_PROCESS,
+                bounded_vec![1, 2],
+                bounded_vec![]
+            ),
             Error::<Test>::NotOwned
         );
         // assert no more tokens were created
@@ -926,7 +931,7 @@ fn it_fails_for_destroying_single_burnt_token() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -936,13 +941,13 @@ fn it_fails_for_destroying_single_burnt_token() {
             }]
         )
         .unwrap();
-        SimpleNFT::run_process(Origin::signed(1), NONE_PROCESS, bounded_vec![1], bounded_vec![]).unwrap();
+        SimpleNFT::run_process(RuntimeOrigin::signed(1), NONE_PROCESS, bounded_vec![1], bounded_vec![]).unwrap();
         // get old token
         let token = SimpleNFT::tokens_by_id(1);
         // Try to destroy token as incorrect user
         assert_err!(
             SimpleNFT::run_process(
-                Origin::signed(1),
+                RuntimeOrigin::signed(1),
                 NONE_PROCESS,
                 bounded_vec![1],
                 bounded_vec![Output {
@@ -968,7 +973,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -985,7 +990,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
             ]
         )
         .unwrap();
-        SimpleNFT::run_process(Origin::signed(1), NONE_PROCESS, bounded_vec![1], bounded_vec![]).unwrap();
+        SimpleNFT::run_process(RuntimeOrigin::signed(1), NONE_PROCESS, bounded_vec![1], bounded_vec![]).unwrap();
         // get old token
         let token_1 = SimpleNFT::tokens_by_id(1);
         // get old token
@@ -993,7 +998,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         // Try to destroy token as incorrect user
         assert_err!(
             SimpleNFT::run_process(
-                Origin::signed(1),
+                RuntimeOrigin::signed(1),
                 NONE_PROCESS,
                 bounded_vec![1, 2],
                 bounded_vec![Output {
@@ -1019,7 +1024,7 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -1034,7 +1039,7 @@ fn it_fails_for_invalid_index_to_set_parent_from_inputs() {
         // try to use an out of bounds index to set parents from one of the inputs
         assert_err!(
             SimpleNFT::run_process(
-                Origin::signed(2),
+                RuntimeOrigin::signed(2),
                 NONE_PROCESS,
                 bounded_vec![1],
                 bounded_vec![Output {
@@ -1058,7 +1063,7 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -1073,7 +1078,7 @@ fn it_fails_for_setting_multiple_tokens_to_have_the_same_parent() {
         // try to set two tokens to have the same parent
         assert_err!(
             SimpleNFT::run_process(
-                Origin::signed(2),
+                RuntimeOrigin::signed(2),
                 NONE_PROCESS,
                 bounded_vec![1],
                 bounded_vec![
@@ -1105,7 +1110,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
         let roles_empty = bounded_btree_map!();
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
         SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             NONE_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -1120,7 +1125,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
         // Try to create token without setting default role in roles
         assert_err!(
             SimpleNFT::run_process(
-                Origin::signed(1),
+                RuntimeOrigin::signed(1),
                 NONE_PROCESS,
                 bounded_vec![],
                 bounded_vec![Output {
@@ -1142,7 +1147,7 @@ fn it_fails_for_creating_single_token_with_no_default_role() {
 fn it_works_for_running_success_process() {
     new_test_ext().execute_with(|| {
         assert_ok!(SimpleNFT::run_process(
-            Origin::signed(1),
+            RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![]
@@ -1154,7 +1159,12 @@ fn it_works_for_running_success_process() {
 fn it_fails_for_running_success_process_with_invalid_input() {
     new_test_ext().execute_with(|| {
         assert_err!(
-            SimpleNFT::run_process(Origin::signed(1), SUCCEED_PROCESS, bounded_vec![42], bounded_vec![]),
+            SimpleNFT::run_process(
+                RuntimeOrigin::signed(1),
+                SUCCEED_PROCESS,
+                bounded_vec![42],
+                bounded_vec![]
+            ),
             Error::<Test>::InvalidInput
         );
     });
@@ -1164,7 +1174,7 @@ fn it_fails_for_running_success_process_with_invalid_input() {
 fn it_fails_for_running_fail_process() {
     new_test_ext().execute_with(|| {
         assert_err!(
-            SimpleNFT::run_process(Origin::signed(1), FAIL_PROCESS, bounded_vec![], bounded_vec![]),
+            SimpleNFT::run_process(RuntimeOrigin::signed(1), FAIL_PROCESS, bounded_vec![], bounded_vec![]),
             Error::<Test>::ProcessInvalid
         );
     });

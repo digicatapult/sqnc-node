@@ -30,20 +30,20 @@ pub trait WeightInfo {
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     fn update_key() -> Weight {
-        (2_000_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
+        (Weight::from_ref_time(2_000_000)).saturating_add(T::DbWeight::get().writes(1u64))
     }
     fn rotate_key() -> Weight {
-        (18_000_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(1 as Weight))
-            .saturating_add(T::DbWeight::get().writes(1 as Weight))
+        (Weight::from_ref_time(18_000_000))
+            .saturating_add(T::DbWeight::get().reads(1u64))
+            .saturating_add(T::DbWeight::get().writes(1u64))
     }
 }
 
 impl WeightInfo for () {
     fn update_key() -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0)
     }
     fn rotate_key() -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0)
     }
 }

@@ -43,6 +43,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 
 impl WeightInfo for () {
     fn run_process(_: usize, _: usize) -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0)
     }
 }
