@@ -25,7 +25,7 @@ frame-system = { default-features = false, version = "4.0.0-dev", git = "https:/
 smallvec = "1.4.1"
 sp-io = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
 sp-core = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-protoc-rust = "2.28.0"
+
 
 [dev-dependencies]
 pallet-balances = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
