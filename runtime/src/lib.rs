@@ -38,9 +38,9 @@ pub use frame_support::{
     },
     StorageValue
 };
-pub use frame_system::Call as SystemCall;
-pub use pallet_balances::Call as BalancesCall;
-pub use pallet_timestamp::Call as TimestampCall;
+pub use frame_system::RuntimeCall as SystemCall;
+pub use pallet_balances::RuntimeCall as BalancesCall;
+pub use pallet_timestamp::RuntimeCall as TimestampCall;
 use pallet_transaction_payment_free::CurrencyAdapter;
 
 #[cfg(any(feature = "std", test))]
@@ -159,7 +159,7 @@ impl frame_system::Config for Runtime {
     /// The identifier used to distinguish between accounts.
     type AccountId = AccountId;
     /// The aggregated dispatch type that is available for extrinsics.
-    type Call = Call;
+    type RuntimeCall = RuntimeCall;
     /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
     /// The index type for storing how many extrinsics an account has signed.
@@ -173,9 +173,9 @@ impl frame_system::Config for Runtime {
     /// The header type.
     type Header = generic::Header<BlockNumber, BlakeTwo256>;
     /// The ubiquitous event type.
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     /// The ubiquitous origin type.
-    type Origin = Origin;
+    type RuntimeOrigin = RuntimeOrigin;
     /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
     type BlockHashCount = BlockHashCount;
     /// The weight of database operations that the runtime can invoke.
@@ -210,8 +210,9 @@ impl pallet_aura::Config for Runtime {
 }
 
 impl pallet_grandpa::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
+
+    type RuntimeCall = RuntimeCall;
 
     type KeyOwnerProofSystem = ();
 
@@ -241,7 +242,7 @@ impl pallet_balances::Config for Runtime {
     /// The type for recording an account's balance.
     type Balance = Balance;
     /// The ubiquitous event type.
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type DustRemoval = ();
     type ExistentialDeposit = ConstU128<500>;
     type AccountStore = System;
@@ -253,18 +254,18 @@ impl pallet_transaction_payment_free::Config for Runtime {
 }
 
 impl pallet_sudo::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
 }
 
 impl pallet_doas::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
     type DoasOrigin = MoreThanHalfMembers;
 }
 
 impl pallet_node_authorization::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type MaxWellKnownNodes = ConstU32<16>;
     type MaxPeerIdLength = ConstU32<128>;
     type AddOrigin = MoreThanHalfMembers;
@@ -281,10 +282,10 @@ parameter_types! {
 }
 
 impl pallet_scheduler::Config for Runtime {
-    type Event = Event;
-    type Origin = Origin;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
     type PalletsOrigin = OriginCaller;
-    type Call = Call;
+    type RuntimeCall = RuntimeCall;
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type MaxScheduledPerBlock = ConstU32<50>;
@@ -302,7 +303,7 @@ parameter_types! {
 
 impl pallet_preimage::Config for Runtime {
     type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
     type MaxSize = PreimageMaxSize;
@@ -356,7 +357,7 @@ type ProcessVersion = u32;
 
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type TokenId = TokenId;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
@@ -370,7 +371,7 @@ impl pallet_simple_nft::Config for Runtime {
 }
 
 impl pallet_process_validation::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = ProcessVersion;
     type CreateProcessOrigin = MoreThanTwoMembers;
@@ -391,9 +392,9 @@ parameter_types! {
 
 type GovernanceCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<GovernanceCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
+    type RuntimeOrigin = RuntimeOrigin;
+    type Proposal = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
     type MotionDuration = GovernanceMotionDuration;
     type MaxProposals = GovernanceMaxProposals;
     type MaxMembers = GovernanceMaxMembers;
@@ -403,7 +404,7 @@ impl pallet_collective::Config<GovernanceCollective> for Runtime {
 
 type GovernanceMembershipInstance = pallet_membership::Instance1;
 impl pallet_membership::Config<GovernanceMembershipInstance> for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type AddOrigin = EnsureRoot<AccountId>;
     type RemoveOrigin = EnsureRoot<AccountId>;
     type SwapOrigin = MoreThanHalfMembers;
@@ -421,10 +422,10 @@ parameter_types! {
 }
 
 impl pallet_symmetric_key::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type KeyLength = KeyLength;
     type RefreshPeriod = RefreshPeriod;
-    type ScheduleCall = Call;
+    type ScheduleCall = RuntimeCall;
     type UpdateOrigin = MoreThanHalfMembers;
     type RotateOrigin = MoreThanTwoMembers;
     type Randomness = RandomnessCollectiveFlip;
@@ -478,9 +479,9 @@ pub type SignedExtra = (
     pallet_transaction_payment_free::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 /// The payload being signed in transactions.
-pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
+pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
     frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
