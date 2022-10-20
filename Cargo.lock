@@ -4344,7 +4344,6 @@ dependencies = [
  "frame-system",
  "pallet-balances",
  "parity-scale-codec",
- "protoc-rust",
  "scale-info",
  "serde",
  "serde_json",
