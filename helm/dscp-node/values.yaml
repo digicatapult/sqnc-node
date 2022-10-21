@@ -16,7 +16,7 @@ kubectl:
 googleCloudSdk:
   image:
     repository: google/cloud-sdk
-    tag: slim # more lightweight than the full image and still contains gsutil
+    tag: slim  # more lightweight than the full image and still contains gsutil
   # serviceAccountKey: ""
 
 imagePullSecrets: []
@@ -68,9 +68,8 @@ node:
   # chainDataKubernetesVolumeSnapshot: ""
   # chainDataGcsBucketUrl: ""
   collator:
-    isParachain:
-      false
-      # relayChain: polkadot
+    isParachain: false
+    # relayChain: polkadot
   #  relayChainCustomChainspecUrl: ""
   #  relayChainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
   #  relayChainDataSnapshotFormat: 7z
@@ -106,7 +105,7 @@ node:
   perNodeServices:
     createApiService: true
     createP2pService: true
-    p2pServiceType: ClusterIP # Must be type ClusterIP, NodePort or LoadBalancer, If using type NodePort or LoadBalancer then you must set NodeSelecter accordingly.
+    p2pServiceType: ClusterIP  # Must be type ClusterIP, NodePort or LoadBalancer, If using type NodePort or LoadBalancer then you must set NodeSelecter accordingly.
     setPublicAddressToExternal:
       enabled: true
       ipRetrievalServiceUrl: https://ifconfig.io/ip
