@@ -91,8 +91,6 @@ jobs:
             ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}
             ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-
             ${{ runner.os }}-cargo-build-cache-release-
-      - name: install protobuf compiler
-        uses: sudo apt-get install protobuf-compiler
       - name: Cargo build
         uses: actions-rs/cargo@v1
         env:
