@@ -4,8 +4,8 @@ use crate::{
     command_helper::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
     service
 };
-use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
 use dscp_node_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
 use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;

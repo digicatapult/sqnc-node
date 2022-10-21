@@ -439,7 +439,8 @@ impl pallet_symmetric_key::Config for Runtime {
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
-    pub struct Runtime where
+    pub struct Runtime
+    where
         Block = Block,
         NodeBlock = opaque::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
@@ -458,8 +459,8 @@ construct_runtime!(
         Preimage: pallet_preimage,
         Scheduler: pallet_scheduler,
         IpfsKey: pallet_symmetric_key,
-        Membership: pallet_membership::<Instance1>,
-        TechnicalCommittee: pallet_collective::<Instance1>,
+        Membership: pallet_membership<Instance1>,
+        TechnicalCommittee: pallet_collective<Instance1>,
         Doas: pallet_doas
     }
 );

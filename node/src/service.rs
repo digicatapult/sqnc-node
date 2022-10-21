@@ -1,7 +1,7 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use dscp_node_runtime::{self, opaque::Block, RuntimeApi};
-use sc_client_api::{BlockBackend};
+use sc_client_api::BlockBackend;
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
@@ -185,15 +185,16 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         Vec::default()
     ));
 
-    let (network, system_rpc_tx, tx_handler_controller, network_starter) = sc_service::build_network(sc_service::BuildNetworkParams {
-        config: &config,
-        client: client.clone(),
-        transaction_pool: transaction_pool.clone(),
-        spawn_handle: task_manager.spawn_handle(),
-        import_queue,
-        block_announce_validator_builder: None,
-        warp_sync: Some(warp_sync)
-    })?;
+    let (network, system_rpc_tx, tx_handler_controller, network_starter) =
+        sc_service::build_network(sc_service::BuildNetworkParams {
+            config: &config,
+            client: client.clone(),
+            transaction_pool: transaction_pool.clone(),
+            spawn_handle: task_manager.spawn_handle(),
+            import_queue,
+            block_announce_validator_builder: None,
+            warp_sync: Some(warp_sync)
+        })?;
 
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(&config, task_manager.spawn_handle(), client.clone(), network.clone());
@@ -231,7 +232,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         system_rpc_tx,
         tx_handler_controller,
         config,
-        telemetry: telemetry.as_mut(),
+        telemetry: telemetry.as_mut()
     })?;
 
     if role.is_authority() {
