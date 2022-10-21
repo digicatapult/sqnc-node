@@ -439,7 +439,7 @@ impl pallet_symmetric_key::Config for Runtime {
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
-    pub struct Runtime
+    pub enum Runtime
     where
         Block = Block,
         NodeBlock = opaque::Block,
