@@ -459,8 +459,8 @@ construct_runtime!(
         Preimage: pallet_preimage,
         Scheduler: pallet_scheduler,
         IpfsKey: pallet_symmetric_key,
-        Membership: pallet_membership<Instance1>,
         TechnicalCommittee: pallet_collective<Instance1>,
+        Membership: pallet_membership<Instance1>,
         Doas: pallet_doas
     }
 );
