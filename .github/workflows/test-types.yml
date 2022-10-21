@@ -2,9 +2,9 @@ name: Test types
 
 on:
   push:
-    paths: 
-      - 'runtime/**'
-      - 'api/test/**'
+    paths:
+      - "runtime/**"
+      - "api/test/**"
 
 jobs:
   build-and-test:
@@ -29,6 +29,8 @@ jobs:
           mv $TEMP/sccache-v*-x86_64-unknown-linux-musl/sccache $TEMP/sccache
           rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
           chmod +x $TEMP/sccache
+      - name: install protobuf-compiler
+        uses: apt-get install protobuf-compiler
       - name: Cache cargo registry
         uses: actions/cache@v2
         with:
@@ -63,8 +65,8 @@ jobs:
           command: build
           args: --release
       - name: Start dev chain
-        run:  ./target/release/dscp-node --dev &
-      - name: Setup node 
+        run: ./target/release/dscp-node --dev &
+      - name: Setup node
         uses: actions/setup-node@master
         with:
           node-version: 16.x
