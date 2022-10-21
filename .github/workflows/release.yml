@@ -55,8 +55,6 @@ jobs:
         with:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
           target: wasm32-unknown-unknown
-      - name: install protobuf compiler
-        uses: sudo apt-get install protobuf-compiler
       - name: Install sccache
         env:
           TEMP: ${{ runner.temp }}
