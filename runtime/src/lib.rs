@@ -30,17 +30,19 @@ use strum_macros::EnumDiscriminants;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
-    construct_runtime, parameter_types,
+    construct_runtime,
+    dispatch::{DispatchInfo, GetDispatchInfo},
+    parameter_types,
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        DispatchInfo, GetDispatchInfo, IdentityFee, Weight
+        IdentityFee, Weight
     },
     StorageValue
 };
-pub use frame_system::RuntimeCall as SystemCall;
-pub use pallet_balances::RuntimeCall as BalancesCall;
-pub use pallet_timestamp::RuntimeCall as TimestampCall;
+pub use frame_system::Call as SystemCall;
+pub use pallet_balances::Call as BalancesCall;
+pub use pallet_timestamp::Call as TimestampCall;
 use pallet_transaction_payment_free::CurrencyAdapter;
 
 #[cfg(any(feature = "std", test))]
@@ -141,7 +143,7 @@ parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
     /// We allow for 2 seconds of compute with a 6 second average block time.
     pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
-        ::with_sensible_defaults(2 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
+        ::with_sensible_defaults(2u64 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
     pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
         ::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
     pub const SS58Prefix: u8 = 42;
@@ -212,8 +214,6 @@ impl pallet_aura::Config for Runtime {
 impl pallet_grandpa::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
 
-    type RuntimeCall = RuntimeCall;
-
     type KeyOwnerProofSystem = ();
 
     type KeyOwnerProof = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
@@ -260,7 +260,7 @@ impl pallet_sudo::Config for Runtime {
 
 impl pallet_doas::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type RuntimeCall = RuntimeCall;
+    type Call = RuntimeCall;
     type DoasOrigin = MoreThanHalfMembers;
 }
 
@@ -628,7 +628,7 @@ impl_runtime_apis! {
             uxt: <Block as BlockT>::Extrinsic,
             _len: u32,
         ) -> pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo<Balance> {
-            let dispatch_info = <<Block as BlockT>::Extrinsic as GetDispatchInfo>::get_dispatch_info(&uxt);
+            let dispatch_info = frame_support::dispatch::GetDispatchInfo::get_dispatch_info(&uxt);
             let DispatchInfo { weight, class, .. } = dispatch_info;
 
             pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo {
