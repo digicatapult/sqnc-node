@@ -1340,7 +1340,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "4.3.1"
+version = "4.3.2"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
