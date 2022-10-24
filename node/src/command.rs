@@ -16,19 +16,19 @@ impl SubstrateCli for Cli {
     }
 
     fn impl_version() -> String {
-        env!('SUBSTRATE_CLI_IMPL_VERSION').into()
+        env!("SUBSTRATE_CLI_IMPL_VERSION").into()
     }
 
     fn description() -> String {
-        env!('CARGO_PKG_DESCRIPTION').into()
+        env!("CARGO_PKG_DESCRIPTION").into()
     }
 
     fn author() -> String {
-        env!('CARGO_PKG_AUTHORS').into()
+        env!("CARGO_PKG_AUTHORS").into()
     }
 
     fn support_url() -> String {
-        'support.anonymous.an'.into()
+        "support.anonymous.an".into()
     }
 
     fn copyright_start_year() -> i32 {
@@ -37,8 +37,8 @@ impl SubstrateCli for Cli {
 
     fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
         Ok(match id {
-            'dev' => Box::new(chain_spec::development_config()?),
-            '' | "local" => Box::new(chain_spec::local_testnet_config()?),
+            "dev" => Box::new(chain_spec::development_config()?),
+            "" | "local" => Box::new(chain_spec::local_testnet_config()?),
             path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?)
         })
     }
@@ -128,9 +128,9 @@ pub fn run() -> sc_cli::Result<()> {
                 // which sub-commands it wants to support.
                 match cmd {
                     BenchmarkCmd::Pallet(cmd) => {
-                        if !cfg!(feature = 'runtime-benchmarks') {
-                            return Err('Runtime benchmarking wasn't enabled when building the node. \
-							You can enable it with `--features runtime-benchmarks`.'
+                        if !cfg!(feature = "runtime-benchmarks") {
+                            return Err("Runtime benchmarking wasn't enabled when building the node. \
+							You can enable it with `--features runtime-benchmarks`."
                                 .into());
                         }
 
@@ -142,7 +142,7 @@ pub fn run() -> sc_cli::Result<()> {
                     }
                     #[cfg(not(feature = "runtime-benchmarks"))]
                     BenchmarkCmd::Storage(_) => {
-                        Err('Storage benchmarking can be enabled with `--features runtime-benchmarks`.'.into())
+                        Err("Storage benchmarking can be enabled with `--features runtime-benchmarks`.".into())
                     }
                     #[cfg(feature = "runtime-benchmarks")]
                     BenchmarkCmd::Storage(cmd) => {
