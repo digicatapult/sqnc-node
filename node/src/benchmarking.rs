@@ -48,11 +48,11 @@ impl RemarkBuilder {
 
 impl frame_benchmarking_cli::ExtrinsicBuilder for RemarkBuilder {
     fn pallet(&self) -> &str {
-        'system'
+        "system"
     }
 
     fn extrinsic(&self) -> &str {
-        'remark'
+        "remark"
     }
 
     fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
@@ -87,11 +87,11 @@ impl TransferKeepAliveBuilder {
 
 impl frame_benchmarking_cli::ExtrinsicBuilder for TransferKeepAliveBuilder {
     fn pallet(&self) -> &str {
-        'balances'
+        "balances"
     }
 
     fn extrinsic(&self) -> &str {
-        'transfer_keep_alive'
+        "transfer_keep_alive"
     }
 
     fn build(&self, nonce: u32) -> std::result::Result<OpaqueExtrinsic, &'static str> {
@@ -121,7 +121,7 @@ pub fn create_benchmark_extrinsic(
     call: runtime::RuntimeCall,
     nonce: u32
 ) -> runtime::UncheckedExtrinsic {
-    let genesis_hash = client.block_hash(0).ok().flatten().expect('Genesis block exists; qed');
+    let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
     let best_hash = client.chain_info().best_hash;
     let best_block = client.chain_info().best_number;
 
@@ -177,6 +177,6 @@ pub fn inherent_benchmark_data() -> Result<InherentData> {
 
     timestamp
         .provide_inherent_data(&mut inherent_data)
-        .map_err(|e| format!('creating inherent data: {:?}', e))?;
+        .map_err(|e| format!("creating inherent data: {:?}", e))?;
     Ok(inherent_data)
 }
