@@ -180,21 +180,21 @@ jobs:
         # if it's a new prerelease version tag with hash, version and latest-dev
         # if it's a non new version tag with hash and latest-dev
         run: |
-          if [ "$IS_NEW_VERSION" == "true" ]; then
-            echo "##[set-output name=GHCR_VERSION_TAG;]ghcr.io/digicatapult/dscp-node:$VERSION";
-            echo "##[set-output name=DOCKERHUB_VERSION_TAG;]digicatapult/dscp-node:$VERSION";
-            if [ "$IS_PRERELEASE" == "false" ]; then
-              echo "##[set-output name=GHCR_LATEST_TAG;]ghcr.io/digicatapult/dscp-node:latest";
-              echo "##[set-output name=DOCKERHUB_LATEST_TAG;]digicatapult/dscp-node:latest";
+          if [ '$IS_NEW_VERSION' == 'true' ]; then
+            echo '##[set-output name=GHCR_VERSION_TAG;]ghcr.io/digicatapult/dscp-node:$VERSION';
+            echo '##[set-output name=DOCKERHUB_VERSION_TAG;]digicatapult/dscp-node:$VERSION';
+            if [ '$IS_PRERELEASE' == 'false' ]; then
+              echo '##[set-output name=GHCR_LATEST_TAG;]ghcr.io/digicatapult/dscp-node:latest';
+              echo '##[set-output name=DOCKERHUB_LATEST_TAG;]digicatapult/dscp-node:latest';
             else
-              echo "##[set-output name=GHCR_LATEST_TAG;]";
-              echo "##[set-output name=DOCKERHUB_LATEST_TAG;]";
+              echo '##[set-output name=GHCR_LATEST_TAG;]';
+              echo '##[set-output name=DOCKERHUB_LATEST_TAG;]';
             fi;
           else
-            echo "##[set-output name=GHCR_VERSION_TAG;]";
-            echo "##[set-output name=GHCR_LATEST_TAG;]";
-            echo "##[set-output name=DOCKERHUB_VERSION_TAG;]";
-            echo "##[set-output name=DOCKERHUB_LATEST_TAG;]";
+            echo '##[set-output name=GHCR_VERSION_TAG;]';
+            echo '##[set-output name=GHCR_LATEST_TAG;]';
+            echo '##[set-output name=DOCKERHUB_VERSION_TAG;]';
+            echo '##[set-output name=DOCKERHUB_LATEST_TAG;]';
           fi;
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
