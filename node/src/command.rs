@@ -1,7 +1,7 @@
 use crate::{
+    benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
     chain_spec,
     cli::{Cli, Subcommand},
-    command_helper::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
     service
 };
 use dscp_node_runtime::{Block, EXISTENTIAL_DEPOSIT};
