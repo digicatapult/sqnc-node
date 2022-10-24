@@ -125,48 +125,4 @@ where
         let (_fee, imbalance) = self.zero_fee(who, call, info, len)?;
         Ok((self.0, who.clone(), imbalance))
     }
-
-    fn validate(
-        &self,
-        _who: &Self::AccountId,
-        _call: &Self::Call,
-        _info: &DispatchInfoOf<Self::Call>,
-        _len: usize
-    ) -> frame_support::unsigned::TransactionValidity {
-        Ok(frame_support::pallet_prelude::ValidTransaction::default())
-    }
-
-    fn validate_unsigned(
-        _call: &Self::Call,
-        _info: &DispatchInfoOf<Self::Call>,
-        _len: usize
-    ) -> frame_support::unsigned::TransactionValidity {
-        Ok(frame_support::pallet_prelude::ValidTransaction::default())
-    }
-
-    fn pre_dispatch_unsigned(
-        call: &Self::Call,
-        info: &DispatchInfoOf<Self::Call>,
-        len: usize
-    ) -> Result<(), TransactionValidityError> {
-        Self::validate_unsigned(call, info, len).map(|_| ()).map_err(Into::into)
-    }
-
-    fn post_dispatch(
-        _pre: Option<Self::Pre>,
-        _info: &DispatchInfoOf<Self::Call>,
-        _post_info: &sp_runtime::traits::PostDispatchInfoOf<Self::Call>,
-        _len: usize,
-        _result: &sp_runtime::DispatchResult
-    ) -> Result<(), TransactionValidityError> {
-        Ok(())
-    }
-
-    fn metadata() -> Vec<sp_runtime::traits::SignedExtensionMetadata> {
-        sp_std::vec![SignedExtensionMetadata {
-            identifier: Self::IDENTIFIER,
-            ty: scale_info::meta_type::<Self>(),
-            additional_signed: scale_info::meta_type::<Self::AdditionalSigned>()
-        }]
-    }
 }
