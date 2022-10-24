@@ -3,8 +3,8 @@ name: Test types
 on:
   push:
     paths:
-      - "runtime/**"
-      - "api/test/**"
+      - 'runtime/**'
+      - 'api/test/**'
 
 jobs:
   build-and-test:
