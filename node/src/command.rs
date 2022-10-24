@@ -188,9 +188,9 @@ pub fn run() -> sc_cli::Result<()> {
                 Ok((cmd.run::<Block, service::ExecutorDispatch>(config), task_manager))
             })
         }
-        #[cfg(not(feature = 'try-runtime'))]
-        Some(Subcommand::TryRuntime) => Err('TryRuntime wasn't enabled when building the node. \
-				You can enable it with `--features try-runtime`.'
+        #[cfg(not(feature = "try-runtime"))]
+        Some(Subcommand::TryRuntime) => Err("TryRuntime wasn't enabled when building the node. \
+				You can enable it with `--features try-runtime`."
             .into()),
         Some(Subcommand::ChainInfo(cmd)) => {
             let runner = cli.create_runner(cmd)?;
