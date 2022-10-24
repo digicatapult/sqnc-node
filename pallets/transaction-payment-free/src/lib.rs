@@ -3,7 +3,6 @@
 use codec::{Decode, Encode};
 use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
 use scale_info::TypeInfo;
-use sp_runtime::traits::SignedExtensionMetadata;
 use sp_std::prelude::*;
 
 #[cfg(test)]
