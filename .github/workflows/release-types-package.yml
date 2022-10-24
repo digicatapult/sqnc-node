@@ -17,23 +17,23 @@ jobs:
           fetch-depth: 0
       - name: Check Github token
         run: |
-          if [ -z "${{ secrets.GITHUB_TOKEN }}"]; then
-            echo "Must provide a GITHUB_TOKEN secret in order to run release workflow"
+          if [ -z '${{ secrets.GITHUB_TOKEN }}']; then
+            echo 'Must provide a GITHUB_TOKEN secret in order to run release workflow'
             exit 1
           fi
       - name: Check npmjs token
         run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}"]; then
-            echo "Must provide a NPM_TOKEN secret in order to run release workflow"
+          if [ -z '${{ secrets.NPM_TOKEN }}']; then
+            echo 'Must provide a NPM_TOKEN secret in order to run release workflow'
             exit 1
           fi
       - name: Get repository identifiers
         id: repo_ids
         run: |
-          REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-          ORG_NAME=$(echo "${{ github.event.repository.owner.name }}" | tr '[:upper:]' '[:lower:]')
-          echo "::set-output name=REPO_NAME::$REPO_NAME"
-          echo "::set-output name=ORG_NAME::$ORG_NAME"
+          REPO_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')
+          ORG_NAME=$(echo '${{ github.event.repository.owner.name }}' | tr '[:upper:]' '[:lower:]')
+          echo '::set-output name=REPO_NAME::$REPO_NAME'
+          echo '::set-output name=ORG_NAME::$ORG_NAME'
   lint:
     name: Run lint
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
         if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
         shell: bash
         run: |
-          echo "Skipping release as current version has already been published"
+          echo 'Skipping release as current version has already been published'
   publish-gh:
     name: 'Publish package to Github'
     needs:
