@@ -2,7 +2,7 @@ name: Release (types package)
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   preconditions:
@@ -87,7 +87,7 @@ jobs:
         run: npm run depcheck
 
   check-version:
-    name: "Check version"
+    name: 'Check version'
     runs-on: ubuntu-latest
     outputs:
       is_new_version: ${{ steps.get_version.outputs.IS_NEW_VERSION }}
@@ -110,7 +110,7 @@ jobs:
           echo "Skipping release as current version has already been published"
 
   publish-gh:
-    name: "Publish package to Github"
+    name: 'Publish package to Github'
     needs:
       - preconditions
       - lint
@@ -123,9 +123,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "16.x"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@digicatapult"
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@digicatapult'
       - name: Install packages
         working-directory: api
         run: npm ci
@@ -136,7 +136,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-npm:
-    name: "Publish package to NPMJS"
+    name: 'Publish package to NPMJS'
     needs:
       - preconditions
       - lint
@@ -149,9 +149,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "16.x"
-          registry-url: "https://registry.npmjs.org"
-          scope: "@digicatapult"
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@digicatapult'
       - name: Install packages
         working-directory: api
         run: npm ci
