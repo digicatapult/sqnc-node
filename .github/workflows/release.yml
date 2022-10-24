@@ -39,7 +39,7 @@ jobs:
       - name: Get Toolchain Version
         id: get_toolchain
         run: |
-          echo '##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)'
+          echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
 
   # Github releases are only performed when the release version changes
   build-release:
