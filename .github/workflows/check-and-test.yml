@@ -25,7 +25,7 @@ jobs:
       - name: Get Toolchain Version
         id: get_toolchain
         run: |
-          echo '##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)'
+          echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
 
   check-helm-version:
     name: Check helm version
