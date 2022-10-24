@@ -39,7 +39,7 @@ jobs:
       - name: Get Toolchain Version
         id: get_toolchain
         run: |
-          echo '##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)'
+          echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
 
   # Github releases are only performed when the release version changes
   build-release:
@@ -120,7 +120,7 @@ jobs:
       - name: Build release version
         uses: softprops/action-gh-release@v1
         with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
+          token: '${{ secrets.GITHUB_TOKEN }}'
           tag_name: ${{ needs.get-version.outputs.version }}
           name: ${{ needs.get-version.outputs.version }}
           prerelease: ${{ needs.get-version.outputs.is_prerelease == 'true' }}
@@ -145,7 +145,7 @@ jobs:
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
         uses: softprops/action-gh-release@v1
         with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
+          token: '${{ secrets.GITHUB_TOKEN }}'
           tag_name: latest
           name: Latest ${{ needs.get-version.outputs.version }}
           prerelease: false
