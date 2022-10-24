@@ -59,14 +59,20 @@ pub mod pallet {
         /// - Weight of derivative `call` execution + 10,000.
         /// # </weight>
         #[pallet::weight({
-          let dispatch_info = call.get_dispatch_info();
+          let dispatch_info = Runtimecall.get_dispatch_info();
           (dispatch_info.weight, dispatch_info.class)
         })]
-        pub fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
+        pub fn doas_root(origin: OriginFor<T>, Runtimecall: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
+            let dispatch_info = Runtimecall.get_dispatch_info();
+            (
+                dispatch_info.weight.saturating_add(Weight::from_ref_time(10_000)),
+                dispatch_info.class
+            );
+
             // This is a public call, so we ensure that the origin is some signed account.
             T::DoasOrigin::ensure_origin(origin)?;
 
-            let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
+            let res = Runtimecall.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
             Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
             // Sudo user does not pay a fee.
             Ok(Pays::No.into())
@@ -112,9 +118,10 @@ pub mod pallet {
           let dispatch_info = call.get_dispatch_info();
           (
             dispatch_info.weight
-              // AccountData for inner call origin accountdata.
-              .saturating_add(T::DbWeight::get().reads_writes(1, 1)),
-            dispatch_info.class,
+                .saturating_add(Weight::from_ref_time(10_000))
+                // AccountData for inner call origin accountdata.
+                .saturating_add(T::DbWeight::get().reads_writes(1, 1)),
+                dispatch_info.class,
           )
         })]
         pub fn doas(
