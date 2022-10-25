@@ -89,7 +89,7 @@ jobs:
       - name: Install rustfmt
         run: rustup component add rustfmt
       - name: Cache cargo registry
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -97,7 +97,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-registry-
       - name: Cache cargo index
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -105,7 +105,7 @@ jobs:
             ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-index-
       - name: Cache sccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache
           key: ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
