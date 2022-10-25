@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::weights::{DispatchInfo, PostDispatchInfo};
+use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
 
@@ -53,7 +53,7 @@ pub struct ChargeTransactionPayment<T: Config>(#[codec(compact)] BalanceOf<T>);
 
 impl<T: Config> ChargeTransactionPayment<T>
 where
-    T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+    T::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
     BalanceOf<T>: Send + Sync + FixedPointOperand
 {
     /// utility constructor. Used only in client/factory code.
@@ -64,8 +64,8 @@ where
     fn zero_fee(
         &self,
         who: &T::AccountId,
-        call: &T::Call,
-        info: &DispatchInfoOf<T::Call>,
+        call: &T::RuntimeCall,
+        info: &DispatchInfoOf<T::RuntimeCall>,
         _len: usize
     ) -> Result<
         (
@@ -99,11 +99,11 @@ impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
 impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
 where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
-    T::Call: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
+    T::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = T::AccountId;
-    type Call = T::Call;
+    type Call = T::RuntimeCall;
     type AdditionalSigned = ();
     type Pre = (
         BalanceOf<T>,

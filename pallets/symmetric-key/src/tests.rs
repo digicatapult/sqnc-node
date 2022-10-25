@@ -43,7 +43,7 @@ parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
     pub BlockWeights: frame_system::limits::BlockWeights =
-        frame_system::limits::BlockWeights::simple_max(1_000_000);
+        frame_system::limits::BlockWeights::simple_max(Weight::from_ref_time(1_000_000));
 }
 
 impl system::Config for Test {
@@ -51,8 +51,8 @@ impl system::Config for Test {
     type BlockWeights = BlockWeights;
     type BlockLength = ();
     type DbWeight = ();
-    type Origin = Origin;
-    type Call = Call;
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeCall = RuntimeCall;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -60,7 +60,7 @@ impl system::Config for Test {
     type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type BlockHashCount = BlockHashCount;
     type Version = ();
     type PalletInfo = PalletInfo;
@@ -76,10 +76,10 @@ parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
 }
 impl pallet_scheduler::Config for Test {
-    type Event = Event;
-    type Origin = Origin;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
     type PalletsOrigin = OriginCaller;
-    type Call = Call;
+    type RuntimeCall = RuntimeCall;
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = system::EnsureRoot<u64>;
     type MaxScheduledPerBlock = ();
@@ -93,10 +93,10 @@ parameter_types! {
     pub const RefreshPeriod: u32 = 5;
 }
 impl pallet_symmetric_key::Config for Test {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type KeyLength = ConstU32<32>;
     type RefreshPeriod = RefreshPeriod;
-    type ScheduleCall = Call;
+    type ScheduleCall = RuntimeCall;
     type UpdateOrigin = system::EnsureRoot<u64>;
     type RotateOrigin = system::EnsureRoot<u64>;
     type Randomness = TestRandomness<Self>;

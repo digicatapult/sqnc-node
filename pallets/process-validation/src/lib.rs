@@ -104,7 +104,7 @@ pub mod pallet {
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// The overarching event type.
-        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
         // The primary identifier for a process (i.e. it's name, and version)
         type ProcessIdentifier: Parameter + Default + MaxEncodedLen;
         type ProcessVersion: Parameter + AtLeast32Bit + Default + MaxEncodedLen;
@@ -113,8 +113,8 @@ pub mod pallet {
         type MaxProcessProgramLength: Get<u32>;
 
         // Origins for calling these extrinsics. For now these are expected to be root
-        type CreateProcessOrigin: EnsureOrigin<Self::Origin>;
-        type DisableProcessOrigin: EnsureOrigin<Self::Origin>;
+        type CreateProcessOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+        type DisableProcessOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
         type RoleKey: Parameter + Default + Ord + MaxEncodedLen;
         type TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen;

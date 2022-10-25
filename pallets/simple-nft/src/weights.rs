@@ -28,21 +28,21 @@ pub trait WeightInfo {
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     fn run_process(i: usize, o: usize) -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0 as u64)
             // Standard Error: 7_000
-            .saturating_add((14_228_000 as Weight).saturating_mul(i as Weight))
+            .saturating_add((Weight::from_ref_time(14_228_228)).saturating_mul(i as u64))
             // Standard Error: 7_000
-            .saturating_add((8_026_000 as Weight).saturating_mul(o as Weight))
-            .saturating_add(T::DbWeight::get().reads(1 as Weight))
-            .saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(i as Weight)))
-            .saturating_add(T::DbWeight::get().writes(1 as Weight))
-            .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(i as Weight)))
-            .saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(o as Weight)))
+            .saturating_add((Weight::from_ref_time(8_026_000)).saturating_mul(o as u64))
+            .saturating_add(T::DbWeight::get().reads(1 as u64))
+            .saturating_add(T::DbWeight::get().reads((1 as u64).saturating_mul(i as u64)))
+            .saturating_add(T::DbWeight::get().writes(1 as u64))
+            .saturating_add(T::DbWeight::get().writes((1 as u64).saturating_mul(i as u64)))
+            .saturating_add(T::DbWeight::get().writes((1 as u64).saturating_mul(o as u64)))
     }
 }
 
 impl WeightInfo for () {
     fn run_process(_: usize, _: usize) -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0 as u64)
     }
 }

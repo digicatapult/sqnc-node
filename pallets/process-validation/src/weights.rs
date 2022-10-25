@@ -13,18 +13,18 @@ pub trait WeightInfo {
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     fn create_process() -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0 as u64)
     }
     fn disable_process() -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0 as u64)
     }
 }
 
 impl WeightInfo for () {
     fn create_process() -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0 as u64)
     }
     fn disable_process() -> Weight {
-        (0 as Weight)
+        Weight::from_ref_time(0 as u64)
     }
 }

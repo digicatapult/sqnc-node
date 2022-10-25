@@ -69,7 +69,7 @@ node:
   # chainDataGcsBucketUrl: ""
   collator:
     isParachain: false
-     # relayChain: polkadot
+    # relayChain: polkadot
   #  relayChainCustomChainspecUrl: ""
   #  relayChainDataSnapshotUrl: "https://dot-rocksdb.polkashots.io/snapshot"
   #  relayChainDataSnapshotFormat: 7z
