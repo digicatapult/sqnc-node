@@ -32,8 +32,8 @@ jobs:
         run: |
           REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
           ORG_NAME=$(echo "${{ github.event.repository.owner.name }}" | tr '[:upper:]' '[:lower:]')
-          echo "::set-output name=REPO_NAME::$REPO_NAME"
-          echo "::set-output name=ORG_NAME::$ORG_NAME"
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "ORG_NAME=$ORG_NAME" >> $GITHUB_OUTPUT
 
   lint:
     name: Run lint

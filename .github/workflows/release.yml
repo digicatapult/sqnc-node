@@ -40,7 +40,7 @@ jobs:
       - name: Get Toolchain Version
         id: get_toolchain
         run: |
-          echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
+          echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
 
   # Github releases are only performed when the release version changes
   build-release:
@@ -180,20 +180,20 @@ jobs:
       # if it's a non new version tag with hash and latest-dev
       run: |
         if [ "$IS_NEW_VERSION" == "true" ]; then
-          echo "##[set-output name=GHCR_VERSION_TAG;]ghcr.io/digicatapult/dscp-node:$VERSION";
-          echo "##[set-output name=DOCKERHUB_VERSION_TAG;]digicatapult/dscp-node:$VERSION";
+          echo "GHCR_VERSION_TAG=ghcr.io/digicatapult/dscp-node:$VERSION" >> $GITHUB_OUTPUT
+          echo "DOCKERHUB_VERSION_TAG=digicatapult/dscp-node:$VERSION" >> $GITHUB_OUTPUT
           if [ "$IS_PRERELEASE" == "false" ]; then
-            echo "##[set-output name=GHCR_LATEST_TAG;]ghcr.io/digicatapult/dscp-node:latest";
-            echo "##[set-output name=DOCKERHUB_LATEST_TAG;]digicatapult/dscp-node:latest";
+            echo "GHCR_LATEST_TAG=ghcr.io/digicatapult/dscp-node:latest" >> $GITHUB_OUTPUT
+            echo "DOCKERHUB_LATEST_TAG=digicatapult/dscp-node:latest" >> $GITHUB_OUTPUT
           else
-            echo "##[set-output name=GHCR_LATEST_TAG;]";
-            echo "##[set-output name=DOCKERHUB_LATEST_TAG;]";
+            echo "GHCR_LATEST_TAG=" >> $GITHUB_OUTPUT
+            echo "DOCKERHUB_LATEST_TAG=" >> $GITHUB_OUTPUT
           fi;
         else
-          echo "##[set-output name=GHCR_VERSION_TAG;]";
-          echo "##[set-output name=GHCR_LATEST_TAG;]";
-          echo "##[set-output name=DOCKERHUB_VERSION_TAG;]";
-          echo "##[set-output name=DOCKERHUB_LATEST_TAG;]";
+          echo "GHCR_VERSION_TAG=" >> $GITHUB_OUTPUT
+          echo "GHCR_LATEST_TAG=" >> $GITHUB_OUTPUT
+          echo "DOCKERHUB_VERSION_TAG=" >> $GITHUB_OUTPUT       
+          echo "DOCKERHUB_LATEST_TAG=" >> $GITHUB_OUTPUT
         fi;
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
