@@ -1,8 +1,8 @@
 use super::*;
 use crate::binary_expression_tree::BooleanExpressionSymbol;
 use crate::binary_expression_tree::BooleanOperator;
-use crate::tests::Event as TestEvent;
 use crate::tests::ProcessIdentifier;
+use crate::tests::RuntimeEvent as TestEvent;
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
@@ -21,7 +21,7 @@ fn returns_error_if_origin_validation_fails_and_no_data_added() {
         System::set_block_number(1);
         assert_noop!(
             ProcessValidation::create_process(
-                Origin::none(),
+                RuntimeOrigin::none(),
                 PROCESS_ID1,
                 bounded_vec![BooleanExpressionSymbol::Restriction(None)]
             ),
@@ -45,7 +45,7 @@ fn handles_if_process_exists_for_the_new_version() {
             }
         );
         let result = ProcessValidation::create_process(
-            Origin::root(),
+            RuntimeOrigin::root(),
             PROCESS_ID1,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)]
         );
@@ -59,7 +59,7 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
         System::set_block_number(1);
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0u32);
         assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
+            RuntimeOrigin::root(),
             PROCESS_ID1,
             bounded_vec![
                 BooleanExpressionSymbol::Restriction(None),
@@ -126,7 +126,7 @@ fn sets_versions_correctly_for_multiple_processes() {
             false
         ));
         assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
+            RuntimeOrigin::root(),
             PROCESS_ID1,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
         ));
@@ -137,7 +137,7 @@ fn sets_versions_correctly_for_multiple_processes() {
             false
         ));
         assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
+            RuntimeOrigin::root(),
             PROCESS_ID2,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
         ));
@@ -159,7 +159,7 @@ fn updates_version_correctly_for_existing_proces_and_dispatches_event() {
             false
         ));
         assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
+            RuntimeOrigin::root(),
             PROCESS_ID1,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
         ));
@@ -173,7 +173,7 @@ fn updates_version_correctly_for_new_process_and_dispatches_event() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_ok!(ProcessValidation::create_process(
-            Origin::root(),
+            RuntimeOrigin::root(),
             PROCESS_ID1,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
         ));
@@ -195,7 +195,7 @@ fn program_invalid_negative_stack() {
         System::set_block_number(1);
         assert_noop!(
             ProcessValidation::create_process(
-                Origin::root(),
+                RuntimeOrigin::root(),
                 PROCESS_ID1,
                 bounded_vec![
                     BooleanExpressionSymbol::Restriction(None),
@@ -220,7 +220,7 @@ fn program_invalid_expect_single_stack() {
         System::set_block_number(1);
         assert_noop!(
             ProcessValidation::create_process(
-                Origin::root(),
+                RuntimeOrigin::root(),
                 PROCESS_ID1,
                 bounded_vec![
                     BooleanExpressionSymbol::Restriction(None),

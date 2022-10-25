@@ -30,11 +30,13 @@ use strum_macros::EnumDiscriminants;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
-    construct_runtime, parameter_types,
+    construct_runtime,
+    dispatch::{DispatchInfo, GetDispatchInfo},
+    parameter_types,
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        DispatchInfo, GetDispatchInfo, IdentityFee, Weight
+        IdentityFee, Weight
     },
     StorageValue
 };
@@ -95,7 +97,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 432,
+    spec_version: 441,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -141,7 +143,7 @@ parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
     /// We allow for 2 seconds of compute with a 6 second average block time.
     pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
-        ::with_sensible_defaults(2 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
+        ::with_sensible_defaults(2u64 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
     pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
         ::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
     pub const SS58Prefix: u8 = 42;
@@ -159,7 +161,7 @@ impl frame_system::Config for Runtime {
     /// The identifier used to distinguish between accounts.
     type AccountId = AccountId;
     /// The aggregated dispatch type that is available for extrinsics.
-    type Call = Call;
+    type RuntimeCall = RuntimeCall;
     /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
     type Lookup = AccountIdLookup<AccountId, ()>;
     /// The index type for storing how many extrinsics an account has signed.
@@ -173,9 +175,9 @@ impl frame_system::Config for Runtime {
     /// The header type.
     type Header = generic::Header<BlockNumber, BlakeTwo256>;
     /// The ubiquitous event type.
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     /// The ubiquitous origin type.
-    type Origin = Origin;
+    type RuntimeOrigin = RuntimeOrigin;
     /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
     type BlockHashCount = BlockHashCount;
     /// The weight of database operations that the runtime can invoke.
@@ -210,8 +212,7 @@ impl pallet_aura::Config for Runtime {
 }
 
 impl pallet_grandpa::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
 
     type KeyOwnerProofSystem = ();
 
@@ -234,6 +235,9 @@ impl pallet_timestamp::Config for Runtime {
     type WeightInfo = ();
 }
 
+/// Existential deposit.
+pub const EXISTENTIAL_DEPOSIT: u128 = 500;
+
 impl pallet_balances::Config for Runtime {
     type MaxLocks = ConstU32<50>;
     type MaxReserves = ();
@@ -241,9 +245,9 @@ impl pallet_balances::Config for Runtime {
     /// The type for recording an account's balance.
     type Balance = Balance;
     /// The ubiquitous event type.
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type DustRemoval = ();
-    type ExistentialDeposit = ConstU128<500>;
+    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
     type AccountStore = System;
     type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 }
@@ -253,18 +257,18 @@ impl pallet_transaction_payment_free::Config for Runtime {
 }
 
 impl pallet_sudo::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
 }
 
 impl pallet_doas::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
+    type Call = RuntimeCall;
     type DoasOrigin = MoreThanHalfMembers;
 }
 
 impl pallet_node_authorization::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type MaxWellKnownNodes = ConstU32<16>;
     type MaxPeerIdLength = ConstU32<128>;
     type AddOrigin = MoreThanHalfMembers;
@@ -281,10 +285,10 @@ parameter_types! {
 }
 
 impl pallet_scheduler::Config for Runtime {
-    type Event = Event;
-    type Origin = Origin;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
     type PalletsOrigin = OriginCaller;
-    type Call = Call;
+    type RuntimeCall = RuntimeCall;
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type MaxScheduledPerBlock = ConstU32<50>;
@@ -302,7 +306,7 @@ parameter_types! {
 
 impl pallet_preimage::Config for Runtime {
     type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
     type MaxSize = PreimageMaxSize;
@@ -356,7 +360,7 @@ type ProcessVersion = u32;
 
 /// Configure the template pallet in pallets/simple-nft.
 impl pallet_simple_nft::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type TokenId = TokenId;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
@@ -370,7 +374,7 @@ impl pallet_simple_nft::Config for Runtime {
 }
 
 impl pallet_process_validation::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = ProcessVersion;
     type CreateProcessOrigin = MoreThanTwoMembers;
@@ -391,9 +395,9 @@ parameter_types! {
 
 type GovernanceCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<GovernanceCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
+    type RuntimeOrigin = RuntimeOrigin;
+    type Proposal = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
     type MotionDuration = GovernanceMotionDuration;
     type MaxProposals = GovernanceMaxProposals;
     type MaxMembers = GovernanceMaxMembers;
@@ -403,7 +407,7 @@ impl pallet_collective::Config<GovernanceCollective> for Runtime {
 
 type GovernanceMembershipInstance = pallet_membership::Instance1;
 impl pallet_membership::Config<GovernanceMembershipInstance> for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type AddOrigin = EnsureRoot<AccountId>;
     type RemoveOrigin = EnsureRoot<AccountId>;
     type SwapOrigin = MoreThanHalfMembers;
@@ -421,10 +425,10 @@ parameter_types! {
 }
 
 impl pallet_symmetric_key::Config for Runtime {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type KeyLength = KeyLength;
     type RefreshPeriod = RefreshPeriod;
-    type ScheduleCall = Call;
+    type ScheduleCall = RuntimeCall;
     type UpdateOrigin = MoreThanHalfMembers;
     type RotateOrigin = MoreThanTwoMembers;
     type Randomness = RandomnessCollectiveFlip;
@@ -435,7 +439,8 @@ impl pallet_symmetric_key::Config for Runtime {
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
-    pub enum Runtime where
+    pub enum Runtime
+    where
         Block = Block,
         NodeBlock = opaque::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
@@ -478,9 +483,9 @@ pub type SignedExtra = (
     pallet_transaction_payment_free::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 /// The payload being signed in transactions.
-pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
+pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
     frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
@@ -627,7 +632,7 @@ impl_runtime_apis! {
             uxt: <Block as BlockT>::Extrinsic,
             _len: u32,
         ) -> pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo<Balance> {
-            let dispatch_info = <<Block as BlockT>::Extrinsic as GetDispatchInfo>::get_dispatch_info(&uxt);
+            let dispatch_info = frame_support::dispatch::GetDispatchInfo::get_dispatch_info(&uxt);
             let DispatchInfo { weight, class, .. } = dispatch_info;
 
             pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo {
@@ -678,18 +683,8 @@ impl_runtime_apis! {
             impl frame_system_benchmarking::Config for Runtime {}
             impl baseline::Config for Runtime {}
 
-            let whitelist: Vec<TrackedStorageKey> = vec![
-                // Block Number
-                hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
-                // Total Issuance
-                hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
-                // Execution Phase
-                hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a").to_vec().into(),
-                // Event Count
-                hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
-                // System Events
-                hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
-            ];
+            use frame_support::traits::WhitelistedStorageKeys;
+            let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();
 
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&config, &whitelist);
@@ -712,5 +707,32 @@ impl_runtime_apis! {
         fn execute_block_no_check(block: Block) -> Weight {
             Executive::execute_block_no_check(block)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frame_support::traits::WhitelistedStorageKeys;
+    use sp_core::hexdisplay::HexDisplay;
+    use std::collections::HashSet;
+
+    #[test]
+    fn check_whitelist() {
+        let whitelist: HashSet<String> = AllPalletsWithSystem::whitelisted_storage_keys()
+            .iter()
+            .map(|e| HexDisplay::from(&e.key).to_string())
+            .collect();
+
+        // Block Number
+        assert!(whitelist.contains("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac"));
+        // Total Issuance
+        assert!(whitelist.contains("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80"));
+        // Execution Phase
+        assert!(whitelist.contains("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a"));
+        // Event Count
+        assert!(whitelist.contains("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850"));
+        // System Events
+        assert!(whitelist.contains("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7"));
     }
 }

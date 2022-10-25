@@ -45,8 +45,8 @@ impl system::Config for Test {
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = ();
-    type Origin = Origin;
-    type Call = Call;
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeCall = RuntimeCall;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -54,7 +54,7 @@ impl system::Config for Test {
     type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
@@ -125,7 +125,7 @@ impl ProcessValidator<u64, Role, u64, MetadataValue<u64>> for MockProcessValidat
 }
 
 impl pallet_simple_nft::Config for Test {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
 
     type TokenId = u64;
     type RoleKey = Role;

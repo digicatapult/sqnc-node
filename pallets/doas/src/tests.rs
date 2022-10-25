@@ -18,8 +18,10 @@
 //! Tests for the module.
 
 use super::*;
-use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
-use mock::{new_test_ext, Call, Doas, DoasCall, Event as TestEvent, Logger, LoggerCall, Origin, System};
+use frame_support::{assert_noop, assert_ok, dispatch::DispatchError, weights::Weight};
+use mock::{
+    new_test_ext, Doas, DoasCall, Logger, LoggerCall, RuntimeCall, RuntimeEvent as TestEvent, RuntimeOrigin, System
+};
 
 #[test]
 fn test_setup_works() {
@@ -35,13 +37,22 @@ fn doas_root_basics() {
     // Configure a default test environment and set the root `key` to 1.
     new_test_ext().execute_with(|| {
         // A privileged function should work when the correct Origin SignedBy(One) is used
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1_000 }));
-        assert_ok!(Doas::doas_root(Origin::signed(1), call));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1_000)
+        }));
+        assert_ok!(Doas::doas_root(RuntimeOrigin::signed(1), call));
         assert_eq!(Logger::i32_log(), vec![42i32]);
 
         // A privileged function should not work when the incorrect Origin is used
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1_000 }));
-        assert_noop!(Doas::doas_root(Origin::signed(2), call), DispatchError::BadOrigin);
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1_000)
+        }));
+        assert_noop!(
+            Doas::doas_root(RuntimeOrigin::signed(2), call),
+            DispatchError::BadOrigin
+        );
     });
 }
 
@@ -52,8 +63,11 @@ fn doas_root_emits_events_correctly() {
         System::set_block_number(1);
 
         // Should emit event to indicate success when called with the root `key` and `call` is `Ok`.
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1 }));
-        assert_ok!(Doas::doas_root(Origin::signed(1), call));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1)
+        }));
+        assert_ok!(Doas::doas_root(RuntimeOrigin::signed(1), call));
         let expected_event = TestEvent::Doas(Event::DidAsRoot(Ok(())));
         assert!(System::events().iter().any(|a| a.event == expected_event));
     })
@@ -63,24 +77,40 @@ fn doas_root_emits_events_correctly() {
 fn doas_root_unchecked_weight_basics() {
     new_test_ext().execute_with(|| {
         // A privileged function should work when `sudo` is passed the root `key` as origin.
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1_000 }));
-        assert_ok!(Doas::doas_root_unchecked_weight(Origin::signed(1), call, 1_000));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1_000)
+        }));
+        assert_ok!(Doas::doas_root_unchecked_weight(
+            RuntimeOrigin::signed(1),
+            call,
+            Weight::from_ref_time(1_000)
+        ));
         assert_eq!(Logger::i32_log(), vec![42i32]);
 
         // A privileged function should not work when called with a non-root `key`.
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1_000 }));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1_000)
+        }));
         assert_noop!(
-            Doas::doas_root_unchecked_weight(Origin::signed(2), call, 1_000),
+            Doas::doas_root_unchecked_weight(RuntimeOrigin::signed(2), call, Weight::from_ref_time(1_000)),
             DispatchError::BadOrigin,
         );
         // `I32Log` is unchanged after unsuccessful call.
         assert_eq!(Logger::i32_log(), vec![42i32]);
 
         // Controls the dispatched weight.
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1 }));
-        let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight { call, weight: 1_000 };
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1)
+        }));
+        let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight {
+            call,
+            weight: Weight::from_ref_time(1_000)
+        };
         let info = doas_root_unchecked_weight_call.get_dispatch_info();
-        assert_eq!(info.weight, 1_000);
+        assert_eq!(info.weight, Weight::from_ref_time(1_000));
     });
 }
 
@@ -91,8 +121,15 @@ fn doas_root_unchecked_weight_emits_events_correctly() {
         System::set_block_number(1);
 
         // Should emit event to indicate success when called with the root `key` and `call` is `Ok`.
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1 }));
-        assert_ok!(Doas::doas_root_unchecked_weight(Origin::signed(1), call, 1_000));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1)
+        }));
+        assert_ok!(Doas::doas_root_unchecked_weight(
+            RuntimeOrigin::signed(1),
+            call,
+            Weight::from_ref_time(1_000)
+        ));
         let expected_event = TestEvent::Doas(Event::DidAsRoot(Ok(())));
         assert!(System::events().iter().any(|a| a.event == expected_event));
     })
@@ -102,18 +139,27 @@ fn doas_root_unchecked_weight_emits_events_correctly() {
 fn doas_basics() {
     new_test_ext().execute_with(|| {
         // A privileged function will not work when passed to `sudo_as`.
-        let call = Box::new(Call::Logger(LoggerCall::privileged_i32_log { i: 42, weight: 1_000 }));
-        assert_ok!(Doas::doas(Origin::signed(1), 2, call));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::privileged_i32_log {
+            i: 42,
+            weight: Weight::from_ref_time(1_000)
+        }));
+        assert_ok!(Doas::doas(RuntimeOrigin::signed(1), 2, call));
         assert!(Logger::i32_log().is_empty());
         assert!(Logger::account_log().is_empty());
 
         // A non-privileged function should not work when called with a non-root `key`.
-        let call = Box::new(Call::Logger(LoggerCall::non_privileged_log { i: 42, weight: 1 }));
-        assert_noop!(Doas::doas(Origin::signed(3), 2, call), DispatchError::BadOrigin);
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::non_privileged_log {
+            i: 42,
+            weight: Weight::from_ref_time(1)
+        }));
+        assert_noop!(Doas::doas(RuntimeOrigin::signed(3), 2, call), DispatchError::BadOrigin);
 
         // A non-privileged function will work when passed to `sudo_as` with the root `key`.
-        let call = Box::new(Call::Logger(LoggerCall::non_privileged_log { i: 42, weight: 1 }));
-        assert_ok!(Doas::doas(Origin::signed(1), 2, call));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::non_privileged_log {
+            i: 42,
+            weight: Weight::from_ref_time(1)
+        }));
+        assert_ok!(Doas::doas(RuntimeOrigin::signed(1), 2, call));
         assert_eq!(Logger::i32_log(), vec![42i32]);
         // The correct user makes the call within `sudo_as`.
         assert_eq!(Logger::account_log(), vec![2]);
@@ -127,8 +173,11 @@ fn doas_emits_events_correctly() {
         System::set_block_number(1);
 
         // A non-privileged function will work when passed to `sudo_as` with the root `key`.
-        let call = Box::new(Call::Logger(LoggerCall::non_privileged_log { i: 42, weight: 1 }));
-        assert_ok!(Doas::doas(Origin::signed(1), 2, call));
+        let call = Box::new(RuntimeCall::Logger(LoggerCall::non_privileged_log {
+            i: 42,
+            weight: Weight::from_ref_time(1)
+        }));
+        assert_ok!(Doas::doas(RuntimeOrigin::signed(1), 2, call));
         let expected_event = TestEvent::Doas(Event::DidAs(Ok(())));
         assert!(System::events().iter().any(|a| a.event == expected_event));
     });

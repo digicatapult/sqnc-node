@@ -1,5 +1,5 @@
 use super::*;
-use crate::tests::{Event as TestEvent, ProcessIdentifier};
+use crate::tests::{ProcessIdentifier, RuntimeEvent as TestEvent};
 use crate::Error;
 use crate::Event::*;
 use crate::{binary_expression_tree::*, Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
@@ -13,7 +13,7 @@ fn returns_error_if_origin_validation_fails_and_no_data_added() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_noop!(
-            ProcessValidation::disable_process(Origin::none(), PROCESS_ID, 1u32),
+            ProcessValidation::disable_process(RuntimeOrigin::none(), PROCESS_ID, 1u32),
             DispatchError::BadOrigin,
         );
         assert_eq!(System::events().len(), 0);
@@ -25,7 +25,7 @@ fn returns_error_if_process_does_not_exist() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
         assert_noop!(
-            ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32),
+            ProcessValidation::disable_process(RuntimeOrigin::root(), PROCESS_ID, 1u32),
             Error::<Test>::NonExistingProcess,
         );
         assert_eq!(System::events().len(), 0);
@@ -46,7 +46,7 @@ fn returns_error_if_process_is_already_disabled() {
             }
         );
         assert_noop!(
-            ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1),
+            ProcessValidation::disable_process(RuntimeOrigin::root(), PROCESS_ID, 1),
             Error::<Test>::AlreadyDisabled,
         );
         assert_eq!(System::events().len(), 0);
@@ -66,7 +66,11 @@ fn disables_process_and_dispatches_event() {
                 program: bounded_vec![BooleanExpressionSymbol::Restriction(None)]
             }
         );
-        assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
+        assert_ok!(ProcessValidation::disable_process(
+            RuntimeOrigin::root(),
+            PROCESS_ID,
+            1u32,
+        ));
         let expected = TestEvent::ProcessValidation(ProcessDisabled(PROCESS_ID, 1));
         assert_eq!(System::events()[0].event, expected);
     });
@@ -93,7 +97,11 @@ fn disables_process_and_dispatches_event_previous_version() {
                 program: bounded_vec![BooleanExpressionSymbol::Restriction(None)]
             }
         );
-        assert_ok!(ProcessValidation::disable_process(Origin::root(), PROCESS_ID, 1u32,));
+        assert_ok!(ProcessValidation::disable_process(
+            RuntimeOrigin::root(),
+            PROCESS_ID,
+            1u32,
+        ));
         let expected = TestEvent::ProcessValidation(ProcessDisabled(PROCESS_ID, 1));
         assert_eq!(System::events()[0].event, expected);
     });

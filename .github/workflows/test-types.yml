@@ -2,7 +2,7 @@ name: Test types
 
 on:
   push:
-    paths: 
+    paths:
       - 'runtime/**'
       - 'api/test/**'
 
@@ -18,6 +18,8 @@ jobs:
         with:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
           target: wasm32-unknown-unknown
+      - name: install protobuf compiler
+        run: sudo apt-get install protobuf-compiler
       - name: Install sccache
         env:
           TEMP: ${{ runner.temp }}
@@ -63,8 +65,8 @@ jobs:
           command: build
           args: --release
       - name: Start dev chain
-        run:  ./target/release/dscp-node --dev &
-      - name: Setup node 
+        run: ./target/release/dscp-node --dev &
+      - name: Setup node
         uses: actions/setup-node@master
         with:
           node-version: 16.x

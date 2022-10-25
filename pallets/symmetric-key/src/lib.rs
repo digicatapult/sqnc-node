@@ -38,17 +38,17 @@ pub mod pallet {
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// what does this do!!!!
-        type ScheduleCall: Parameter + Dispatchable<Origin = Self::Origin> + From<Call<Self>>;
+        type ScheduleCall: Parameter + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin> + From<Call<Self>>;
         /// The overarching event type.
-        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         #[pallet::constant]
         type KeyLength: Get<u32>;
 
         /// The origin which can update the key
-        type UpdateOrigin: EnsureOrigin<Self::Origin>;
+        type UpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
         /// The origin which can rotate the key
-        type RotateOrigin: EnsureOrigin<Self::Origin>;
+        type RotateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
         /// Source of randomness when generating new keys.
         /// In production this should come from a secure source such as the Babe pallet
         type Randomness: Randomness<Self::Hash, Self::BlockNumber>;
@@ -86,14 +86,14 @@ pub mod pallet {
                     .is_err()
                     {
                         frame_support::print("Error initialising symmetric key rotation schedule");
-                        return 0;
+                        return Weight::from_ref_time(0);
                     }
 
                     <KeyScheduleId<T>>::put(Some(BoundedVec::<_, _>::truncate_from(id)));
 
-                    0
+                    Weight::from_ref_time(0)
                 }
-                Some(_) => 0
+                Some(_) => Weight::from_ref_time(0)
             }
         }
     }
