@@ -504,6 +504,7 @@ mod benches {
         [pallet_grandpa, Grandpa]
         [pallet_balances, Balances]
         [pallet_simple_nft, SimpleNFT]
+        [pallet_process_validation, ProcessValidation]
         [pallet_scheduler, Scheduler]
         [pallet_symmetric_key, IpfsKey]
     );

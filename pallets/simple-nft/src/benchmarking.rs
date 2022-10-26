@@ -5,7 +5,7 @@ use super::*;
 
 use core::convert::TryInto;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
-use frame_support::BoundedBTreeMap;
+use frame_support::{BoundedBTreeMap, BoundedVec};
 use frame_system::RawOrigin;
 use sp_std::vec::Vec;
 
@@ -110,7 +110,6 @@ benchmarks! {
   run_process {
     let i in 1..10;
     let o in 1..10;
-
 
     add_nfts::<T>(i)?;
     let inputs = mk_inputs::<T>(i)?;

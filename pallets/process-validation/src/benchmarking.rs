@@ -1,8 +1,7 @@
 // ! Benchmarking setup for pallet-template
-
 use super::*;
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
-use frame_support::bounded_vec;
+use frame_support::{BoundedVec};
 use frame_system::RawOrigin;
 
 #[allow(unused)]
@@ -16,10 +15,13 @@ benchmarks! {
   // }
 
   disable_process {
+    let mut program = BoundedVec::<_, _>::with_bounded_capacity(1);
+    program.try_push(BooleanExpressionSymbol::Restriction(Restriction::None)).unwrap();
+
       ProcessValidation::<T>::create_process(
             RawOrigin::Root.into(),
             T::ProcessIdentifier::default(),
-            bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)],
+            program,
         );
   }: _(RawOrigin::Root, T::ProcessIdentifier::default(), One::one())
   verify {
@@ -27,7 +29,7 @@ benchmarks! {
       // ProcessModel::<T>::get(T::ProcessIdentifier::default(), One::one()),
       // Process {
       //     status: ProcessStatus::Disabled,
-      //     program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
+      //     program: BoundedVec::<_, _>::with_bounded_capacity(0),
       // }
   //)
   }
