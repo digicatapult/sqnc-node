@@ -119,6 +119,7 @@ runtime-benchmarks = [
     "pallet-simple-nft/runtime-benchmarks",
     "pallet-symmetric-key/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
+    "pallet-process-validation/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-try-runtime",
