@@ -136,26 +136,3 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: test
-          
-      - name: Clean Versions
-      run: |
-        echo "TAG_VERSION=$(echo ${{env.TAG}} | tr -dc '0-9')" >> $GITHUB_ENV
-        echo "PACKAGE_VERSION=$(echo ${{env.PACKAGE}} | tr -dc '0-9')" >> $GITHUB_ENV
-
-      - name: 
-      run: |
-        echo "TAG_NUMBER=$echo$((${{env.TAG_VERSION}} - 0 ))" >> $GITHUB_ENV
-        echo "PACKAGE_NUMBER=$echo$((${{env.PACKAGE_VERSION}} - 0 ))" >> $GITHUB_ENV
-
-      - name: Compare Versions
-      run: |
-        if (( ${{env.PACKAGE_NUMBER}} > ${{env.TAG_NUMBER}} )); then
-        echo "PUSH=true" >> "$GITHUB_ENV"
-        echo "Correct Version"
-
-          elif (( ${{env.PACKAGE_NUMBER}} -eq ${{env.TAG_NUMBER}} )); then
-          echo "PUSH=false" >> "$GITHUB_ENV"
-          echo "Version needs increasing"
-        else
-          echo "PUSH=false" >> "$GITHUB_ENV"
-          echo "Version needs increasing"
