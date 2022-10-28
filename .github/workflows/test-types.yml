@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -32,7 +32,7 @@ jobs:
           rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
           chmod +x $TEMP/sccache
       - name: Cache cargo registry
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-registry-
       - name: Cache cargo index
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -48,7 +48,7 @@ jobs:
             ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-index-
       - name: Cache sccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache
           key: ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
@@ -73,7 +73,7 @@ jobs:
       - name: Use npm v8
         run: npm install -g npm@8
       - name: Cache Node.js modules
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}

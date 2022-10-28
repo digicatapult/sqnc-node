@@ -79,18 +79,18 @@ PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\
 
 get_working_copy_version
 
-echo "##[set-output name=VERSION;]v$CURRENT_VERSION"
-echo "##[set-output name=SANE_BRANCH_NAME_KEY;]$SANE_BRANCH_NAME_KEY"
-echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+echo "VERSION=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
+echo "SANE_BRANCH_NAME_KEY=$SANE_BRANCH_NAME_KEY" >> $GITHUB_OUTPUT
+echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
-  echo "##[set-output name=IS_NEW_VERSION;]true"
+  echo "IS_NEW_VERSION=true" >> $GITHUB_OUTPUT
 else
-  echo "##[set-output name=IS_NEW_VERSION;]false"
+  echo "IS_NEW_VERSION=false" >> $GITHUB_OUTPUT
 fi
 
 if [ $IS_PRERELEASE ]; then
-  echo "##[set-output name=IS_PRERELEASE;]true"
+  echo "IS_NEW_VERSION=true" >> $GITHUB_OUTPUT
 else
-  echo "##[set-output name=IS_PRERELEASE;]false"
+  echo "IS_NEW_VERSION=false" >> $GITHUB_OUTPUT
 fi

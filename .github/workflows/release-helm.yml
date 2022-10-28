@@ -15,7 +15,7 @@ jobs:
       org_name: ${{ steps.repo_ids.outputs.ORG_NAME }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Check token
@@ -29,8 +29,8 @@ jobs:
         run: |
           REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
           ORG_NAME=$(echo "${{ github.event.repository.owner.name }}" | tr '[:upper:]' '[:lower:]')
-          echo "::set-output name=REPO_NAME::$REPO_NAME"
-          echo "::set-output name=ORG_NAME::$ORG_NAME"
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "ORG_NAME=$ORG_NAME" >> $GITHUB_OUTPUT
 
 
   helm-lint:
@@ -38,14 +38,14 @@ jobs:
     needs: [preconditions]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.7
       - name: Set up chart-testing
@@ -60,23 +60,23 @@ jobs:
   #     - check-version
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@v2
+  #       uses: actions/checkout@v3
   #       with:
   #         fetch-depth: 0
   #     - name: Setup QEMU
-  #       uses: docker/setup-qemu-action@v1
+  #       uses: docker/setup-qemu-action@v2
   #       with:
   #         platforms: all
   #     - name: Setup Docker Buildx
   #       id: buildx
-  #       uses: docker/setup-buildx-action@v1
+  #       uses: docker/setup-buildx-action@v2
   #       with:
   #         buildkitd-flags: "--debug"
   #     - name: Set up Helm
-  #       uses: azure/setup-helm@v1
+  #       uses: azure/setup-helm@v3
   #       with:
   #         version: v3.4.0
-  #     - uses: actions/setup-python@v2
+  #     - uses: actions/setup-python@v4
   #       with:
   #         python-version: 3.7
   #     - name: Set up chart-testing
@@ -89,7 +89,7 @@ jobs:
   #     - name: Login to minikube docker registry
   #       run: eval $(minikube -p minikube docker-env)
   #     - name: Build and Publish image
-  #       uses: docker/build-push-action@v2
+  #       uses: docker/build-push-action@v3
   #       with:
   #         builder: ${{ steps.buildx.outputs.name }}
   #         context: .
@@ -118,7 +118,7 @@ jobs:
       build_date: ${{ steps.get_version.outputs.BUILD_DATE }}
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: git fetch --depth=1 --tags origin
       - name: Install yq
         run: sudo snap install yq
@@ -129,7 +129,7 @@ jobs:
       - name: Get toolchain version
         id: get_toolchain
         run: |
-          echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
+          echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
       - name: Skipping release as version has not increased
         if: steps.get_version.outputs.IS_NEW_VERSION != 'true'
         shell: bash
@@ -147,7 +147,7 @@ jobs:
     if: ${{ needs.check-version.outputs.is_new_version == 'true' }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Publish Helm charts
         uses: stefanprodan/helm-gh-pages@master
