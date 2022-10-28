@@ -43,6 +43,27 @@ jobs:
         shell: bash
         run: |
           exit $([[ "${{steps.get_version.outputs.IS_NEW_VERSION}}" = "true" ]] && echo 0 || echo 1)
+    
+    Check Weights have changes:
+      - name: Check Weights
+      run: |
+          URL="https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files"
+          files_changed_data=$(curl -s --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' -X GET -G "$URL")
+          files_changed="$(echo $files_changed_data | jq -r '.[] | .filename')"
+          # Adding || true to avoid "Process exited with code 1" errors
+          charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "charts/[^/]*" | sort | uniq || true)"
+            for chart in ${charts_dirs_changed}; do
+            echo "comparing README.md to values for ${chart}"
+            mkdir -p /tmp/${chart}
+            cp charts/${chart}/README.md /tmp/${chart}/README.md
+            readme-generator-for-helm/bin/index.js --values "charts/${chart}/values.yaml" --readme "/tmp/${chart}/README.md"
+            if cmp --silent -- "charts/${chart}/README.md" "/tmp/${chart}/README.md"; then
+              echo "${chart}/README.md was updated per the values file prior to commit."
+          else
+              echo "${chart}/README.md needs updating according the values.yaml file."
+            exit 1
+          fi
+        done
 
   helm-lint:
     runs-on: ubuntu-latest
