@@ -57,7 +57,7 @@ jobs:
           for chart in ${charts_dirs_changed}; do
             echo "comparing README.md to values for ${chart}"
             mkdir -p /tmp/${chart}
-          for pallet in ${pallet_dirs_changed}; do
+          for pallet in ${pallet_dirs_changed};
             cp charts/${chart}/README.md /tmp/${chart}/README.md
             readme-generator-for-helm/bin/index.js --values "charts/${chart}/values.yaml" --readme "/tmp/${chart}/README.md"
           if cmp --silent -- "charts/${chart}/README.md" "/tmp/${chart}/README.md"; then
@@ -66,6 +66,7 @@ jobs:
             echo "${chart}/README.md needs updating according the values.yaml file."
             exit 1
           fi
+          done
 
   helm-lint:
     runs-on: ubuntu-latest
