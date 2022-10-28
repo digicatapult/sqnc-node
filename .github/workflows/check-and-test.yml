@@ -56,7 +56,7 @@ jobs:
         for chart in ${charts_dirs_changed}; do
             echo "comparing README.md to values for ${chart}"
             mkdir -p /tmp/${chart}
-            echo "pallet"
+          for pallet in ${pallet_dirs_changed}; do
             cp charts/${chart}/README.md /tmp/${chart}/README.md
             readme-generator-for-helm/bin/index.js --values "charts/${chart}/values.yaml" --readme "/tmp/${chart}/README.md"
           if cmp --silent -- "charts/${chart}/README.md" "/tmp/${chart}/README.md"; then
