@@ -55,7 +55,7 @@ jobs:
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${pallet}" | xargs dirname | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           for chart in ${charts_dirs_changed}; do
-          echo "comparing README.md to values for ${chart}"
+          echo "comparing weights.rs to values for ${chart}"
           done
 
   helm-lint:
