@@ -1,7 +1,7 @@
 [package]
 name = "dscp-pallet-traits"
 version = "3.0.0"
-edition = "2021"
+edition = "2022"
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
