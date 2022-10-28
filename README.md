@@ -74,20 +74,17 @@ For `dev` chain, the network only contains a node for `Alice` so other nodes wil
 To calculate the weights for a pallet you first must ensure the node is built with the benchmarking feature enabled:
 
 ```bash
-cargo build --release --features runtime-benchmarks
+cargo run --release --features=runtime-benchmarks \
+--manifest-path=Cargo.toml \
+-- benchmark pallet --chain=dev \
+--steps=50 --repeat=20 \
+--pallet=pallet-symmetric-key \
+--extrinsic=* --execution=wasm --wasm-execution=compiled \
+--heap-pages=4096 --output=./pallets/symmetric-key/src/weights.rs \
+--template=./.maintain/frame-weight-template.hbs
 ```
 
-Then you can run the benchmark tool with for example
-
-```bash
-./target/release/dscp-node benchmark pallet \
-    --pallet 'pallet_simple_nft' \
-    --extrinsic '*' \
-    --repeat 1000 \
-    --output ./weights/
-```
-
-The generated weights implementation should then be integrated into the `pallet_simple_nft` module.
+The generated weights will then be integrated into the `pallet-symmetric-key` module.
 
 ### Run in Docker
 
