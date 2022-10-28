@@ -2,7 +2,7 @@
 name = "pallet-doas"
 version = "2.0.0"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>", "Parity Technologies <admin@parity.io>"]
-edition = "2021"
+edition = "2022"
 license = "Apache-2.0"
 repository = "https://github.com/digicatapult/dscp-node/"
 description = "FRAME pallet for doas"
