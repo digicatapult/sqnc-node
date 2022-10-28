@@ -65,7 +65,7 @@ jobs:
             echo "${chart}/README.md needs updating according the values.yaml file."
             exit 1
           fi
-        done
+        done 
           
 
   helm-lint:
