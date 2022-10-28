@@ -54,7 +54,8 @@ jobs:
           files_changed="$(echo $files_changed_data | jq -r '.[] | .filename')"
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${pallet}" | xargs dirname | grep -o "pallets/[^/]*" | sort | uniq || true)"      
-          for pallet in ${pallet_dirs_changed}; echo "${pallet}" do
+          for chart in ${charts_dirs_changed}; do
+          echo "comparing README.md to values for ${chart}"
           done
 
   helm-lint:
