@@ -13,6 +13,8 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+//TEST
+
 #[frame_support::pallet]
 pub mod pallet {
 
