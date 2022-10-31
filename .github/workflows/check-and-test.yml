@@ -61,10 +61,11 @@ jobs:
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           echo "$pallet_dirs_changed"
           # if [ $pallet_dirs_changed = 0]
-          if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  fi
+          if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  
           "myArray contain ${#pallet_dirs_changed[*]} elements"
           set -- ${#pallet_dirs_changed[*]}
           echo #2
+          fi
 
   helm-lint:
     runs-on: ubuntu-latest
