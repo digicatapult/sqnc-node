@@ -57,15 +57,15 @@ jobs:
           files_changed_data=$(curl -s --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' -X GET -G "$URL")
           files_changed="$(echo $files_changed_data | jq -r '.[] | .filename')"
           echo "${files_changed}"
-          read FIRST __ <<< "$files_changed"
-          echo "$FIRST"
-          read SECOND __ <<< "$files_changed"
-          echo "$SECOND"
-          read THIRD __ <<< "$files_changed"
-          echo "$THIRD"
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           echo "$pallet_dirs_changed"
+          read FIRST __ <<< "$pallet_dirs_changed"
+          echo "$FIRST"
+          read SECOND __ <<< "$pallet_dirs_changed"
+          echo "$SECOND"
+          read THIRD __ <<< "$pallet_dirs_changed"
+          echo "$THIRD"
           # if [ $pallet_dirs_changed = 0]
           if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  fi
 
