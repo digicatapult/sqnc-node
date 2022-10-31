@@ -191,7 +191,7 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(T::WeightInfo::create_process())]
+        #[pallet::weight(T::WeightInfo::create_process(program.len()))]
         pub fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
