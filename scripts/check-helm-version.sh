@@ -31,9 +31,9 @@ yq eval '.entries.[env(REPOSITORY_NAME)] | .[0].version' -)
 CURRENT_VERSION=$(yq eval '.version' ./helm/dscp-node/Chart.yaml)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
-  echo "##[set-output name=VERSION;]$CURRENT_VERSION"
-  echo "##[set-output name=BUILD_DATE;]$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-  echo "##[set-output name=IS_NEW_VERSION;]true"
+  echo "VERSION=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
+  echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+  echo "IS_NEW_VERSION=true" >> $GITHUB_OUTPUT
 else
-  echo "##[set-output name=IS_NEW_VERSION;]false"
+  echo "IS_NEW_VERSION=false" >> $GITHUB_OUTPUT
 fi

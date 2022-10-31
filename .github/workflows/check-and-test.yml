@@ -13,7 +13,7 @@ jobs:
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - run: git fetch --tags
@@ -25,13 +25,13 @@ jobs:
       - name: Get Toolchain Version
         id: get_toolchain
         run: |
-          echo "##[set-output name=TOOLCHAIN;]$(cat rust-toolchain)"
+          echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
 
   check-helm-version:
     name: Check helm version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: git fetch --depth=1 --tags origin
       - name: Install yq
         run: sudo snap install yq
@@ -48,14 +48,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v3.4.0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.7
       - name: Set up chart-testing
@@ -69,7 +69,7 @@ jobs:
     needs: [get-version]
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -91,7 +91,7 @@ jobs:
       - name: Install rustfmt
         run: rustup component add rustfmt
       - name: Cache cargo registry
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -99,7 +99,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-registry-
       - name: Cache cargo index
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -107,7 +107,7 @@ jobs:
             ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-index-
       - name: Cache sccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache
           key: ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
