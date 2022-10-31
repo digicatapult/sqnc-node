@@ -60,7 +60,7 @@ jobs:
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           echo "$pallet_dirs_changed"
-          read FIRST __ <<< "$pallet_dirs_changed.lib.rs"
+          read FIRST __ <<< "$pallet_dirs_changed"
           echo "$FIRST"
           read SECOND __ <<< "$pallet_dirs_changed"
           echo "$SECOND"
@@ -68,6 +68,8 @@ jobs:
           echo "$THIRD"
           read FOURTH __ <<< "$pallet_dirs_changed"
           echo "$FOURTH"
+          files = ls | egrep 'lib.rs'
+          echo $files
           # if [ $pallet_dirs_changed = 0]
           if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  fi
 
