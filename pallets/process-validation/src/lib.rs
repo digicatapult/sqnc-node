@@ -22,8 +22,7 @@ use restrictions::*;
 mod binary_expression_tree;
 use binary_expression_tree::*;
 
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Debug, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 pub enum ProcessStatus {
     Disabled,
     Enabled

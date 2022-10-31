@@ -1,18 +1,28 @@
 // ! Benchmarking setup for pallet-template
 use super::*;
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
-use frame_support::{BoundedVec};
+use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 
 #[allow(unused)]
 use crate::Pallet as ProcessValidation;
 
-// TODO implement benchmarking
 benchmarks! {
-  // create_process {
-  // }: _(RawOrigin::Root, T::ProcessIdentifier::default(), bounded_vec![])
-  // verify {
-  // }
+  create_process {
+    let i in 1..200;
+
+    let mut program = BoundedVec::<_, _>::with_bounded_capacity(i as usize);
+    for _ in 1..i {
+      program.try_push(BooleanExpressionSymbol::Restriction(Restriction::None)).unwrap();
+    }
+
+  }: _(RawOrigin::Root,
+  T::ProcessIdentifier::default(),
+  program.clone())
+  verify {
+    let version = ProcessValidation::<T>::get_version(&T::ProcessIdentifier::default());
+    assert_eq!(version, i.into());
+  }
 
   disable_process {
     let mut program = BoundedVec::<_, _>::with_bounded_capacity(1);
@@ -25,13 +35,9 @@ benchmarks! {
         );
   }: _(RawOrigin::Root, T::ProcessIdentifier::default(), One::one())
   verify {
-    // assert_eq!(
-      // ProcessModel::<T>::get(T::ProcessIdentifier::default(), One::one()),
-      // Process {
-      //     status: ProcessStatus::Disabled,
-      //     program: BoundedVec::<_, _>::with_bounded_capacity(0),
-      // }
-  //)
+    let version = ProcessValidation::<T>::get_version(&T::ProcessIdentifier::default());
+    let process = ProcessModel::<T>::get(T::ProcessIdentifier::default(), version);
+    assert_eq!(process.status, ProcessStatus::Disabled)
   }
 }
 impl_benchmark_test_suite!(ProcessValidation, crate::mock::new_test_ext(), crate::mock::Test,);
