@@ -63,7 +63,7 @@ jobs:
           # if [ $pallet_dirs_changed = 0]
           if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  fi
           echo "myArray contain ${#pallet_dirs_changed[*]} elements"
-          set -- "%pallet_dirs_changed"
+          echo set -- "%pallet_dirs_changed"
 
   helm-lint:
     runs-on: ubuntu-latest
