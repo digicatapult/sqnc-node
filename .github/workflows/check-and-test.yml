@@ -61,6 +61,8 @@ jobs:
           echo "$FIRST"
           read SECOND __ <<< "$files_changed"
           echo "$SECOND"
+          read THIRD __ <<< "$files_changed"
+          echo "$THIRD"
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           echo "$pallet_dirs_changed"
