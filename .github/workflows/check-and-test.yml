@@ -60,12 +60,11 @@ jobs:
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           echo "$pallet_dirs_changed"
+          for value in "${pallet_dirs_changed[@]}"; do echo "$value";
           read FIRST __ <<< "$pallet_dirs_changed"
           echo "$FIRST"
           read SECOND __ <<< "$pallet_dirs_changed"
           echo "$SECOND"
-          read FIFTH __ <<< "$pallet_dirs_changed"
-          echo "$FIFTH"
           # if [ $pallet_dirs_changed = 0]
           if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  fi
 
