@@ -61,7 +61,7 @@ jobs:
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
           if [[ -z "$pallet_dirs_changed" ]]; then echo "myArray is empty"; else echo "My Array has contents";  fi
-          curl -s -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.api_url }}/pulls/${{ github.event.pull_request.number }}/comments -d '{"body":"Great stuff!","commit_id":"${current_head_sha}","path":"file1.txt","start_line":1,"start_side":"RIGHT","line":2,"side":"RIGHT"}'
+          curl -s -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments -d '{"body":"Great stuff!","commit_id":"${current_head_sha}","path":"file1.txt","start_line":1,"start_side":"RIGHT","line":2,"side":"RIGHT"}'
           #curl -s -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"   https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -d '{"body":"Me too"}'
 
   helm-lint:
