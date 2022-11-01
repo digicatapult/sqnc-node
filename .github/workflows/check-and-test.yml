@@ -3,7 +3,7 @@ name: Cargo check and test
 on: [pull_request]
 
 permissions:
-  contents: read-all|write-all
+  contents: read-all | write-all
 
 jobs:
   get-version:
