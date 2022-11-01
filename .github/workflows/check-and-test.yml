@@ -62,8 +62,6 @@ jobs:
           echo "$pallet_dirs_changed"
           read FIRST __ <<< "$pallet_dirs_changed"
           echo "$FIRST"
-          read SECOND __ <<< "$pallet_dirs_changed"
-          echo "$SECOND"
           # if [ $pallet_dirs_changed = 0]
           if ! (( ${#pallet_dirs_changed[@]} > 0 )); then echo "myArray is empty"; else echo "My Array has contents";  fi
 
