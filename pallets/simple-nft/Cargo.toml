@@ -1,7 +1,7 @@
 [package]
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 description = 'A FRAME pallet for handling non-fungible tokens'
-edition = '2021'
+edition = '2022'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'pallet-simple-nft'
