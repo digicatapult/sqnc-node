@@ -97,7 +97,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 441,
+    spec_version: 442,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -384,7 +384,7 @@ impl pallet_process_validation::Config for Runtime {
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type TokenMetadataValueDiscriminator = MetadataValueType;
-    type MaxProcessProgramLength = ConstU32<200>;
+    type MaxProcessProgramLength = ConstU32<201>;
 }
 
 parameter_types! {
@@ -504,6 +504,7 @@ mod benches {
         [pallet_grandpa, Grandpa]
         [pallet_balances, Balances]
         [pallet_simple_nft, SimpleNFT]
+        [pallet_process_validation, ProcessValidation]
         [pallet_scheduler, Scheduler]
         [pallet_symmetric_key, IpfsKey]
     );
