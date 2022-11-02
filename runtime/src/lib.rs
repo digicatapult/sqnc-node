@@ -384,7 +384,7 @@ impl pallet_process_validation::Config for Runtime {
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type TokenMetadataValueDiscriminator = MetadataValueType;
-    type MaxProcessProgramLength = ConstU32<200>;
+    type MaxProcessProgramLength = ConstU32<201>;
 }
 
 parameter_types! {

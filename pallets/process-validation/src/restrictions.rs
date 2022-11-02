@@ -7,8 +7,7 @@ use frame_support::Parameter;
 use scale_info::TypeInfo;
 use sp_std::vec::Vec;
 
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     None,
     Fail,

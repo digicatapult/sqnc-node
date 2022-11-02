@@ -9,27 +9,24 @@ use crate::Pallet as ProcessValidation;
 
 benchmarks! {
   create_process {
-    let i in 1..200;
+    let r in 1 .. (1 + T::MaxProcessProgramLength::get() / 2);
 
-    let mut program = BoundedVec::<_, _>::with_bounded_capacity(i as usize);
-    for j in 0..i {
-      if j == 0 {
-        program.try_push(BooleanExpressionSymbol::Restriction(Restriction::None)).unwrap();
-      }
-      // add every other loop to have valid postfix notation
-      else if j % 2 == 0 {
+    let mut program = BoundedVec::<_, _>::with_bounded_capacity(T::MaxProcessProgramLength::get() as usize);
+    program.try_push(BooleanExpressionSymbol::Restriction(Restriction::None)).unwrap();
+
+    for j in 0..(r - 1) {
         program.try_push(BooleanExpressionSymbol::Restriction(Restriction::None)).unwrap();
         program.try_push(BooleanExpressionSymbol::Op(BooleanOperator::And)).unwrap();
-      }
     }
 
   }: _(RawOrigin::Root,
   T::ProcessIdentifier::default(),
   program.clone())
   verify {
-    // let version = ProcessValidation::<T>::get_version(&T::ProcessIdentifier::default());
-    // let process = ProcessModel::<T>::get(T::ProcessIdentifier::default(), version);
-    // assert_eq!(process.status, ProcessStatus::Enabled)
+    let version = VersionModel::<T>::get(T::ProcessIdentifier::default());
+    let process = ProcessModel::<T>::get(T::ProcessIdentifier::default(), version);
+    assert_eq!(process.status, ProcessStatus::Enabled);
+    assert_eq!(process.program, program);
   }
 
   disable_process {

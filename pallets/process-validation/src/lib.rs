@@ -260,15 +260,16 @@ pub mod pallet {
             executed_stack_height == Some(1u8)
         }
 
-        pub fn get_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
-            return match <VersionModel<T>>::contains_key(&id) {
-                true => <VersionModel<T>>::get(&id) + One::one(),
-                false => One::one()
+        pub fn get_next_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
+            let current_version = <VersionModel<T>>::try_get(&id);
+            return match current_version {
+                Ok(version) => version + One::one(),
+                Err(_) => One::one()
             };
         }
 
         pub fn update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, Error<T>> {
-            let version: T::ProcessVersion = Pallet::<T>::get_version(&id);
+            let version: T::ProcessVersion = Pallet::<T>::get_next_version(&id);
             match version == One::one() {
                 true => <VersionModel<T>>::insert(&id, version.clone()),
                 false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone())

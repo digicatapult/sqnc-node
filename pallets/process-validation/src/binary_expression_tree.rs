@@ -3,8 +3,7 @@ use scale_info::TypeInfo;
 
 use crate::Restriction;
 
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 pub enum BooleanOperator {
     Null,         // false
     Identity,     // true
@@ -24,8 +23,7 @@ pub enum BooleanOperator {
     InhibitionR   // B and !A
 }
 
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 pub enum BooleanExpressionSymbol<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     Op(BooleanOperator),
     Restriction(Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>)
