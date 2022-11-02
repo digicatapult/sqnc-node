@@ -32,11 +32,12 @@ benchmarks! {
     let mut program = BoundedVec::<_, _>::with_bounded_capacity(T::MaxProcessProgramLength::get() as usize);
     program.try_push(BooleanExpressionSymbol::Restriction(Restriction::None)).unwrap();
 
-      ProcessValidation::<T>::create_process(
-            RawOrigin::Root.into(),
-            T::ProcessIdentifier::default(),
-            program.clone(),
-        ).unwrap();
+    ProcessValidation::<T>::create_process(
+          RawOrigin::Root.into(),
+          T::ProcessIdentifier::default(),
+          program.clone(),
+      ).unwrap();
+
   }: _(RawOrigin::Root, T::ProcessIdentifier::default(), 1u32.into())
   verify {
     let version = VersionModel::<T>::get(T::ProcessIdentifier::default());
