@@ -90,9 +90,8 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            This is a multi-line test comment
-            - With GitHub **Markdown** :sparkles:
-            - Created by [create-or-update-comment][1]
+            Error with this **PR**
+            - Does the  **weigth** need changing?
 
   check:
     name: Check and test
