@@ -47,12 +47,11 @@ jobs:
   check-weights-have-changes:
     name: Check Weights
     runs-on: ubuntu-latest
-    id: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-        fetch-depth: 0
+          fetch-depth: 0
       - run: |
           set -x
           URL="https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files"
