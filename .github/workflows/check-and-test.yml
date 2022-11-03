@@ -92,6 +92,7 @@ jobs:
           body: |
             Error with this **PR**
             - Does the  **weigth** need changing?
+            - Is there another fault?
 
   check:
     name: Check and test
