@@ -66,6 +66,9 @@ jobs:
   check-weights-have-changes:
     name: Check Weights
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
