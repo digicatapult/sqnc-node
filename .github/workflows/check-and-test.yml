@@ -47,6 +47,7 @@ jobs:
   check-weights-have-changes:
     name: Check Weights
     runs-on: ubuntu-latest
+    id: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -61,9 +62,16 @@ jobs:
           echo current_head_sha
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"      
-          if [[ -z "$pallet_dirs_changed" ]]; then echo "myArray is empty"; else echo "My Array has contents";  fi
-          #curl -s -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments -d '{"body":"Great stuff!","commit_id":"${current_head_sha}","path":"file1.txt","start_line":1,"start_side":"RIGHT","line":2,"side":"RIGHT"}'
-          curl -s -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -d '{"body":"Me too"}'
+          if [[ -z "$pallet_dirs_changed" ]]; then echo "exit_code=1" >> $GITHUB_OUTPUT; else echo "exit_code=0" >> $GITHUB_OUTPUT;  fi        - name: Create comment
+        - name: Create comment
+          uses: peter-evans/create-or-update-comment@v2
+          if: steps.name-of-previous-steps-id.exit_code == 0
+          with:
+          issue-number: 1
+          body: |
+            This is a multi-line test comment
+            - With GitHub **Markdown** :sparkles:
+            - Created by [create-or-update-comment][1]
 
   helm-lint:
     runs-on: ubuntu-latest
