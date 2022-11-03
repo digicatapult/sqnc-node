@@ -1296,11 +1296,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-node"
-<<<<<<< HEAD
-version = "4.4.1"
-=======
 version = "4.4.2"
->>>>>>> afaeeead28d9b1f08f8670653888787dba626145
 dependencies = [
  "bs58",
  "clap",
