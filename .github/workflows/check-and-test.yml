@@ -87,13 +87,13 @@ jobs:
       - name: Find Comment
         id: find
         uses: peter-evans/find-comment@v2
-        if: ${{ steps.find.outputs.comment-id == '' && success() }}
+        if: steps.check.outputs.exit_code == 1
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: This PR seems to update one or more pallets and therefore may
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v2
-        if: steps.find.outputs.comment-id == ''
+        if: ${{ steps.find.outputs.comment-id == '' && success() }}
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
