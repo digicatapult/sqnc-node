@@ -101,8 +101,7 @@ jobs:
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-includes: |
-            This PR seems to update one or more pallets and therefore may
+          body-includes: This PR seems to update one or more pallets and therefore may
 
   check:
     name: Check and test
