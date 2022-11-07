@@ -102,12 +102,8 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: |
-            This PR seems to update one or more pallets and therefore may require updates to extrinsic weights. For a guide on running bencmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
+            This PR seems to update one or more pallets and therefore may
 
-            For the author and any reviewers:
-              - check what pallets have been updated
-              - consider whether the changes could significantly affect the weight of any extrinsics
-              - consider whether benchmarks need updating to correctly cover weight variations over inputs
   check:
     name: Check and test
     runs-on: ubuntu-latest
