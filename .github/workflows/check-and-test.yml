@@ -84,9 +84,15 @@ jobs:
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"
           if [[ -z "$pallet_dirs_changed" ]]; then echo "exit_code=1" >> $GITHUB_OUTPUT; else echo "exit_code=0" >> $GITHUB_OUTPUT;  fi
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        if: steps.check.outputs.exit_code == 0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: This PR seems to update one or more pallets and therefore may
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v2
-        if: steps.check.outputs.exit_code == 1
+        if: steps.check.outputs.exit_code == 0
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
@@ -96,12 +102,6 @@ jobs:
               - check what pallets have been updated
               - consider whether the changes could significantly affect the weight of any extrinsics
               - consider whether benchmarks need updating to correctly cover weight variations over inputs
-      - name: Find Comment
-        uses: peter-evans/find-comment@v2
-        if: steps.check.outputs.exit_code == 1
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: This PR seems to update one or more pallets and therefore may
 
   check:
     name: Check and test
