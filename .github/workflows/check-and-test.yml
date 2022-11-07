@@ -98,7 +98,7 @@ jobs:
               - consider whether benchmarks need updating to correctly cover weight variations over inputs
       - name: Find Comment
         uses: peter-evans/find-comment@v2
-        id: fc
+        if: steps.check.outputs.exit_code == 1
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: This PR seems to update one or more pallets and therefore may
