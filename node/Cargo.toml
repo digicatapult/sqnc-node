@@ -6,7 +6,7 @@ edition = '2022'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-node'
-version = '4.4.2'
+version = '4.4.3'
 
 [[bin]]
 name = 'dscp-node'
@@ -61,7 +61,7 @@ frame-benchmarking = { version = "4.0.0-dev", git = "https://github.com/parityte
 frame-benchmarking-cli = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
 
 # Local Dependencies
-dscp-node-runtime = { path = '../runtime', version = '4.4.2' }
+dscp-node-runtime = { path = '../runtime', version = '4.4.3' }
 
 # CLI-specific dependencies
 try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }

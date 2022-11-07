@@ -90,7 +90,7 @@ else
 fi
 
 if [ $IS_PRERELEASE ]; then
-  echo "IS_NEW_VERSION=true" >> $GITHUB_OUTPUT
+  echo "IS_PRERELEASE=true" >> $GITHUB_OUTPUT
 else
-  echo "IS_NEW_VERSION=false" >> $GITHUB_OUTPUT
+  echo "IS_PRERELEASE=false" >> $GITHUB_OUTPUT
 fi

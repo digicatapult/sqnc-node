@@ -154,7 +154,7 @@ jobs:
             ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
             ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
 
-  # Docker build  are always performed but are only version tagged on new version
+  # Docker build are always performed but are only version tagged on new version
   build-docker:
     name: Build Docker
     runs-on: ubuntu-latest
