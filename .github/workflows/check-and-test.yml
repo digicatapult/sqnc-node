@@ -86,7 +86,7 @@ jobs:
           if [[ -z "$pallet_dirs_changed" ]]; then echo "exit_code=1" >> $GITHUB_OUTPUT; else echo "exit_code=0" >> $GITHUB_OUTPUT;  fi
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v2
-        if: steps.check.outputs.exit_code == 0
+        if: steps.check.outputs.exit_code == 1
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
