@@ -30,7 +30,7 @@ cargo build --release
 
 Depending on the lenght of time between versions there may be a **lot** of changes.
 
-If there are errors you will need to investigate, some may be obvius but it might be worth looking at the latest version of the branch or use any documentation if available.
+If there are errors you will need to investigate, some may be obvious but it might be worth looking at the latest version of the branch or use any documentation if available.
 
 For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
