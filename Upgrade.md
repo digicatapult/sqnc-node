@@ -36,7 +36,7 @@ For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEve
 `RuntimeOrigin`. This information was
 obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.31). Checking the branch will help with renaming and syntax changes.
 
-For example:
+There can calso be code changes, these will need to be researchded,for example:
 
 ```rust
     let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight { call, weight: 1_000 }
