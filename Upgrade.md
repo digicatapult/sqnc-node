@@ -4,7 +4,7 @@ This guide will hopefull help in the future when it comes to upgrading Substrate
 
 # First Thing
 
-Make sure you have pulled the main branch, then checkout a branch.
+Make sure you have pulled the main branch. Tthen checkout a integration branch, this branch is where all other project branches will be merged, **NOT INTO MAIN**. As Matt said "that will break up the reviews and make the changes more understandable...and it provides a point of integration so we’re not doing weird `git reset` commands or the like".
 
 # Rustup
 
