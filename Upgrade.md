@@ -38,7 +38,7 @@ obtained from checking the [Polkadot `0.9.30` branch](https://github.com/parityt
 
 # Code Changes
 
-There can calso be code changes, these will need to be researchded,for example:
+There can also be code changes, these will need to be researchded,for example:
 
 ```rust
     let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight { call, weight: 1_000 }
