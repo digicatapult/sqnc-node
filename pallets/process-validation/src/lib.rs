@@ -254,7 +254,10 @@ pub mod pallet {
             >
         ) -> bool {
             let executed_stack_height = program.iter().try_fold(0u8, |stack_height, symbol| match symbol {
-                BooleanExpressionSymbol::Op(_) => stack_height.checked_sub(1),
+                BooleanExpressionSymbol::Op(_) => {
+                    let stack_height = stack_height.checked_sub(2);
+                    return stack_height.and_then(|stack_height| stack_height.checked_add(1));
+                }
                 BooleanExpressionSymbol::Restriction(_) => stack_height.checked_add(1)
             });
             executed_stack_height == Some(1u8)
