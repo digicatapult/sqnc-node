@@ -85,7 +85,7 @@ jobs:
           pallets_requiring_weights=()
           for pallet_dir in ${pallet_dirs_changed}; do
             weights="$(echo "${files_changed}" | grep -o "${pallet_dir}/src/weights.rs" || true)"
-            if [[ -z "$weights" ]]; then pallets_requiring_weights+=('%0A'$(basename $pallet_dir)); fi
+            if [[ -z "$weights" ]]; then pallets_requiring_weights+=($(basename $pallet_dir)); fi
           done
 
           echo "pallets=${pallets_requiring_weights[*]}" >> $GITHUB_OUTPUT     
