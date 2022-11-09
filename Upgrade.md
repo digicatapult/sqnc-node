@@ -53,7 +53,7 @@ let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight {
 
 [Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial changes (depending on the update).
 
-After the change each pallet needs to be inspected, fixed if needed along with fixes to tests and ensuring the runtime-benchmarks feature build.
+After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests and ensuring the runtime-benchmarks feature build.
 
 Once a pallet is working it should be put into it's own PR into the **integration**.
 
