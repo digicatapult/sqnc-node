@@ -2,29 +2,13 @@
 
 This guide will hopefull help in the future when it comes to upgrading Substrate.
 
-This is a case study of updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
+This is a guide based o updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
 
 # First Thing
 
-Make sure you have pulled the main branch. Then, as Dave advised, checkout a integration branch, this branch is where all other project branches will be merged, **NOT INTO MAIN**. Matt said "that will break up the reviews and make the changes more understandable...and it provides a point of integration so we’re not doing weird `git reset` commands or the like".
+You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
 
-# Rustup
-
-You'll need rustup up so run:
-
-    ```bash
-    curl https://sh.rustup.rs -sSf | sh
-    ```
-
-The you'll need the scripts:
-
-    ```bash
-    ./scripts/init.sh
-    ```
-
-First search for the version you want to change (search/replace), then replace it with the version you require.
-
-After making the changes build the repo
+Then build the Node:
 
 ```bash
 cargo build --release
