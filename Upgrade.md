@@ -55,4 +55,4 @@ let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight {
         };
 ```
 
-Perhaps the most [difficult part is the changes to the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1L66), if you look at the original to the new version there are substancial changes (depending on the update).
+Perhaps the most [difficult parts are the changes to the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1L66), if you look at the original to the new version there are substancial changes (depending on the update).
