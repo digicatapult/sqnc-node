@@ -85,7 +85,7 @@ jobs:
           pallets_requiring_weights=()
           for pallet_dir in ${pallet_dirs_changed}; do
             weights="$(echo "${files_changed}" | grep -o "${pallet_dir}/src/weights.rs" || true)"
-            if [[ -z "$weights" ]]; then pallets_requiring_weights+=($(basename $pallet_dir)); fi
+            if [[ -z "$weights" ]]; then pallets_requiring_weights+=('%0A'$(basename $pallet_dir)); fi
           done
 
           echo "pallets=${pallets_requiring_weights[*]}" >> $GITHUB_OUTPUT     
@@ -96,15 +96,15 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: This PR seems to update the following pallets
+          body-includes: This PR updates the following pallets
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v2
         if: ${{ steps.find.outputs.comment-id == '' && steps.find.outcome == 'success' }}
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            This PR seems to update the following pallets which may require updates to their extrinsic weights:
-              ${{ steps.check.outputs.pallets }}
+            This PR updates the following pallets - they may also require updates to their extrinsic weights:
+              **${{ steps.check.outputs.pallets }}**
 
             For the author and any reviewers:
               - consider whether the changes could significantly affect the weight of any extrinsics
