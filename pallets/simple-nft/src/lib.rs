@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-// pallet change
+
 use codec::{Codec, MaxEncodedLen};
 use dscp_pallet_traits as traits;
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};

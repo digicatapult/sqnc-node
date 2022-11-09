@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-// pallet change
+
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{traits::Get, BoundedVec, Parameter, RuntimeDebug};
 pub use pallet::*;

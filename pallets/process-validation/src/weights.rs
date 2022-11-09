@@ -1,6 +1,6 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
-// weights change
+
 pub trait WeightInfo {
     fn create_process(i: u32) -> Weight;
     fn disable_process() -> Weight;

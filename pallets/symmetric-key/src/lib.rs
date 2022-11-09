@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-// pallet change 
+
 pub use pallet::*;
 
 use frame_support::{
