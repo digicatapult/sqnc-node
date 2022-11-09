@@ -1,12 +1,14 @@
 # Upgrading Substrate Dependencies
 
-This guide will hopefull help in the future when it comes to upgrading Substrate.
+This guide will hopefully help upgrade Substrate in the future.
 
-This is a guide based o updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
+This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
 
 # First Thing
 
 You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
+
+# Build the Node
 
 Then build the Node:
 
@@ -14,9 +16,9 @@ Then build the Node:
 cargo build --release
 ```
 
-Depending on the lenght of time between versions there may be a **lot** of changes.
+Depending on the lenght of time between version leases there may be a **lot** of changes.
 
-If there are errors you will need to investigate, some may be obvious but it might be worth looking at the latest version of the branch or use any documentation if available.
+If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available.
 
 For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
