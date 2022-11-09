@@ -16,7 +16,7 @@ Then build the Node:
 cargo build --release
 ```
 
-Depending on the lenght of time between version leases there may be a **lot** of changes.
+After this has built, depending on the length of time between version releases there may be a **lot** of changes.
 
 If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available.
 
@@ -41,4 +41,4 @@ let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight {
         };
 ```
 
-Perhaps the most [difficult parts are the changes to the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1L66), if you look at the original to the new version there are substancial changes (depending on the update).
+Perhaps the most [difficult parts are the changes to the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1L66), if you look at the original compared to the new version there could substancial changes (depending on the update).
