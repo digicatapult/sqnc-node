@@ -140,10 +140,10 @@ jobs:
   weight-generation:
     name: weights - ${{ matrix.pallets.pallet-dir }}
     runs-on: ubuntu-latest
-    # needs: [check]
+    needs: [check]
     strategy:
       matrix:
-        pallets: [ { pallet-dir: process-validation, pallet-name: pallet-process-validation }, { pallet-dir: simple-nft, pallet-name: pallet-simple-nft }, { pallet-dir: symmetric-key, pallet-name: pallet-symmetric-key } ]
+        pallets: [ { pallet-dir: process-validation, pallet-name: pallet-process-validation, steps: 200 }, { pallet-dir: simple-nft, pallet-name: pallet-simple-nft, steps: 500 }, { pallet-dir: symmetric-key, pallet-name: pallet-symmetric-key, steps: 50 } ]
 
     steps:
       - uses: actions/checkout@v3
@@ -196,4 +196,4 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: run
-          args: --release --features=runtime-benchmarks --manifest-path=Cargo.toml -- benchmark pallet --chain=dev --steps=50 --repeat=20 --extrinsic=* --execution=wasm --wasm-execution=compiled --heap-pages=4096 --template=./.maintain/frame-weight-template.hbs  --pallet=${{ matrix.pallets.pallet-name }} --output=./pallets/${{ matrix.pallets.pallet-dir }}/src/weights.rs
+          args: --release --features=runtime-benchmarks --manifest-path=Cargo.toml -- benchmark pallet --chain=dev --steps=${{ matrix.pallets.steps }} --repeat=20 --extrinsic=* --execution=wasm --wasm-execution=compiled --heap-pages=4096 --template=./.maintain/frame-weight-template.hbs  --pallet=${{ matrix.pallets.pallet-name }} --output=./pallets/${{ matrix.pallets.pallet-dir }}/src/weights.rs
