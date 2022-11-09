@@ -1,10 +1,12 @@
 # Upgrading Substrate Dependencies
 
-This guide will hopefull help in the future when it comes to upgrading Substrate. It was updated from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
+This guide will hopefull help in the future when it comes to upgrading Substrate.
+
+This is a case study of updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
 
 # First Thing
 
-Make sure you have pulled the main branch. Tthen checkout a integration branch, this branch is where all other project branches will be merged, **NOT INTO MAIN**. As Matt said "that will break up the reviews and make the changes more understandable...and it provides a point of integration so we’re not doing weird `git reset` commands or the like".
+Make sure you have pulled the main branch. Then, as Dave advised, checkout a integration branch, this branch is where all other project branches will be merged, **NOT INTO MAIN**. Matt said "that will break up the reviews and make the changes more understandable...and it provides a point of integration so we’re not doing weird `git reset` commands or the like".
 
 # Rustup
 
