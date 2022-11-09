@@ -215,6 +215,32 @@ fn program_invalid_negative_stack() {
 }
 
 #[test]
+fn program_invalid_negative_intermediate_stack() {
+    new_test_ext().execute_with(|| {
+        System::set_block_number(1);
+        assert_noop!(
+            ProcessValidation::create_process(
+                RuntimeOrigin::root(),
+                PROCESS_ID1,
+                bounded_vec![
+                    BooleanExpressionSymbol::Restriction(None),
+                    BooleanExpressionSymbol::Op(BooleanOperator::And),
+                    BooleanExpressionSymbol::Restriction(None),
+                ]
+            ),
+            DispatchError::Module(ModuleError {
+                index: 1,
+                error: [4, 0, 0, 0],
+                message: Some("InvalidProgram")
+            }),
+        );
+        assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 0u32);
+        assert_eq!(<ProcessModel<Test>>::get(PROCESS_ID1, 1u32), Default::default());
+        assert_eq!(System::events().len(), 0);
+    });
+}
+
+#[test]
 fn program_invalid_expect_single_stack() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
