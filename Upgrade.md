@@ -16,7 +16,9 @@ Then build the Node:
 cargo build --release
 ```
 
-After this has built, depending on the length of time between version releases there may be a **lot** of changes.
+This [tool](https://crates.io/crates/diener) can be used to update the version.
+
+After the changes have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
 If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available.
 
