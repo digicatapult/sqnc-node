@@ -53,7 +53,7 @@ let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight {
 
 After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests and ensuring the runtime-benchmarks feature build.
 
-Once a pallet has been brought up to date it needs to be tested, something like `cargo test -p pallet-transaction-payment-free`, of course change the pallet name to what is necessary. If it passes push it and potentially into it's own PR into the **integration**.
+Once a pallet has been brought up to date it needs to be tested, something like `cargo test -p pallet-transaction-payment-free`, of course change the pallet name to what is necessary. If it passes push it and potentially into it's own PR into the **integration**. If there are errors Rust is very good at highlighting issues and suggesting looking error codes `rustc --explain E0152 `.
 
 ## DSCP-Node
 
