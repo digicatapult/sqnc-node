@@ -20,7 +20,7 @@ After the version updates have been made, depending on the length of time betwee
 
 If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available. It may also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading.
 
-For example, during the `0.9.31` upgrade `Event` and `Origin` became `RuntimeEvent` and
+For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
 obtained from checking the [Polkadot `0.9.31` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.31). Checking the branch will help with renaming and syntax changes.
 
