@@ -30,7 +30,7 @@ If there are errors you will need to investigate, some may be obvious but it wil
 
 For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
-obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.31). Checking the branch will help with renaming and syntax changes.
+obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.30). Checking the branch will help with renaming and syntax changes.
 
 # Code Change Example
 
