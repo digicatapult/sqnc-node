@@ -32,22 +32,7 @@ To build the Node:
 cargo build --release
 ```
 
-# Code Change Example
-
-This code requires a change to the parameter:
-
-```rust
-    let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight { call, weight: 1_000 }
-```
-
-Becomes:
-
-```rust
-let doas_root_unchecked_weight_call = DoasCall::doas_root_unchecked_weight {
-            call,
-            weight: Weight::from_ref_time(1_000)
-        };
-```
+# Code Changes
 
 [Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial changes (depending on the update).
 
