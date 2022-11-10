@@ -8,7 +8,7 @@ This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it ca
 
 Create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
 
-upgrade the references to the [paritytech/substrate](https://github.com/paritytech/substrate) repo in each of the wrokspaces cargo.toml files. By doing this it will ensure that the `cargo build` (as seen below) works and the rest of the process can take place.
+Upgrade the references to the [paritytech/substrate](https://github.com/paritytech/substrate) repo in each of the workspace cargo.toml files. Doing this it will help ensure that the `cargo build` (as seen below) works and the rest of the process can take place.
 
 You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
 
@@ -18,7 +18,7 @@ This [tool](https://crates.io/crates/diener) can be used to update the version f
 
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
-If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available.
+If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available. It may also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading.
 
 For example, during the `0.9.31` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
