@@ -42,7 +42,7 @@ Once a pallet has been brought up to date it needs to be tested, something like 
 
 ## DSCP-Node
 
-The final node to look at is the dscp-node. The first thing to do is update the dscp-node and then and then complete the tests and check runtime-benchmarks builds.
+The final node to look at is the dscp-node. There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds. And in the Runtime file, roughly line 100, the version must be changed there as a set of numbers, so instead of `5.6.8` it would be `568`
 
 If the tests pass create a PR from the **integration** branch.
 
