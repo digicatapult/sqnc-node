@@ -26,8 +26,6 @@ This [tool](https://crates.io/crates/diener) can be used to update the version f
 
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
-Here is a brief example:
-
 If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available.
 
 For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
