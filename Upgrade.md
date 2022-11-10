@@ -57,8 +57,8 @@ Once a pallet is working it should be put into it's own PR into the **integratio
 
 ## DSCP-Node
 
-The final pallet to look at is the dscp-node. The first thing to do is update the dscp-node and then follow the previous tests from the other pallets and check runtime-benchmarks builds.
+The final node to look at is the dscp-node. The first thing to do is update the dscp-node and then and then complete the tests and check runtime-benchmarks builds.
 
 If the tests pass create a PR from the **integration** branch.
 
-Once all of the pallets have been checked and pass their tests a PR can be raised against the **integration** branch into main.
+Once all of the nodes/pallets have been checked and pass their tests a PR can be raised against the **integration** branch into main.
