@@ -32,7 +32,7 @@ For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEve
 `RuntimeOrigin`. This information was
 obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.31). Checking the branch will help with renaming and syntax changes.
 
-# Code Changes
+# Code Change Example
 
 This code requires a change to the parameter:
 
