@@ -8,17 +8,9 @@ This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it ca
 
 Create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
 
-Upgrade the references in the repo. By doing this it will ensure that the `cargo build` (as seen below) works and the rest of the process can take place.
+upgrade the references to the [paritytech/substrate](https://github.com/paritytech/substrate) repo in each of the wrokspaces cargo.toml files. By doing this it will ensure that the `cargo build` (as seen below) works and the rest of the process can take place.
 
 You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
-
-# Build the Node
-
-To build the Node:
-
-```bash
-cargo build --release
-```
 
 # Upgrade Substrate
 
@@ -31,6 +23,14 @@ If there are errors you will need to investigate, some may be obvious but it wil
 For example, during the `0.9.31` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
 obtained from checking the [Polkadot `0.9.31` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.31). Checking the branch will help with renaming and syntax changes.
+
+# Build the Node
+
+To build the Node:
+
+```bash
+cargo build --release
+```
 
 # Code Change Example
 
