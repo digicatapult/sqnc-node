@@ -82,26 +82,35 @@ jobs:
           files_changed="$(echo $files_changed_data | jq -r '.[] | .filename')"
           # Adding || true to avoid "Process exited with code 1" errors
           pallet_dirs_changed="$(echo "${files_changed}" | xargs dirname | grep -v "pallets/traits/*" | grep -v "pallets/doas/*" | grep -v "pallets/transaction-payment-free/*" | grep -o "pallets/[^/]*" | sort | uniq || true)"
-          if [[ -z "$pallet_dirs_changed" ]]; then echo "exit_code=0" >> $GITHUB_OUTPUT; else echo "exit_code=1" >> $GITHUB_OUTPUT;  fi
+          pallets_requiring_weights=()
+          for pallet_dir in ${pallet_dirs_changed}; do
+            weights="$(echo "${files_changed}" | grep -o "${pallet_dir}/src/weights.rs" || true)"
+            if [[ -z "$weights" ]]; then pallets_requiring_weights+=($(basename $pallet_dir)); fi
+          done
+
+          echo "pallets=${pallets_requiring_weights[*]}" >> $GITHUB_OUTPUT     
       - name: Find Comment
         id: find
         uses: peter-evans/find-comment@v2
-        if: steps.check.outputs.exit_code == 1
+        if: steps.check.outputs.pallets != ''
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-includes: This PR seems to update one or more pallets and therefore may
+          comment-author: 'github-actions[bot]'
+          body-includes: This PR updates the following pallets
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v2
         if: ${{ steps.find.outputs.comment-id == '' && steps.find.outcome == 'success' }}
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            This PR seems to update one or more pallets and therefore may require updates to extrinsic weights. For a guide on running bencmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
+            This PR updates the following pallets - they may also require updates to their extrinsic weights:
+              **${{ steps.check.outputs.pallets }}**
 
             For the author and any reviewers:
-              - check what pallets have been updated
               - consider whether the changes could significantly affect the weight of any extrinsics
               - consider whether benchmarks need updating to correctly cover weight variations over inputs
+            
+            For a guide on running benchmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
 
   check:
     name: Check and test
