@@ -52,4 +52,4 @@ The last stop in the node section is to update the dscp-node.
 
 There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds.
 
-Once all of the nodes/pallets have been checked and pass their tests a PR can be raised against the **integration** branch into main.
+Once all of the nodes/pallets have been checked, `cargo fmt` passes and their tests pass a PR can be raised against the **integration** branch into main.
