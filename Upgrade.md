@@ -1,6 +1,6 @@
 # Description
 
-This guide will hopefully help upgrade Substrate in the future.
+This guide will hopefully provide the help and tools to upgrade Substrate in the future.
 
 This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
 
@@ -12,7 +12,7 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 
 # Upgrade Substrate
 
-This [diener tool](https://crates.io/crates/diener) can be used to update the file versions fairly painlesslly.
+This [diener tool](https://crates.io/crates/diener) can be used to update the file versions fairly painlesslly by upgrading each `cargo.toml` given a specific branch/path.
 
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
@@ -32,22 +32,22 @@ cargo build --release
 
 # Pallets
 
-[Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial changes (depending on the update).
+[Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial, or minor, changes (depending on the update).
 
-After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests and ensuring the runtime-benchmarks feature build.
+After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests, ensuring the runtime-benchmarks feature build.
 
-Once a pallet has been brought up to date it needs to be tested, something like `cargo test -p pallet-transaction-payment-free`, of course change the pallet name to what is necessary. If it passes push it and potentially into it's own PR into the **integration**. If there are errors Rust is very good at highlighting issues and suggesting looking error codes `rustc --explain E0152 `.
-
-## Node
-
-The last stop in the node section is to update the dscp-node.
-
-There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds.
+Once a pallet has been bought up to date it needs to be tested, something like `cargo test -p pallet-transaction-payment-free`, of course change the pallet name to the pallet you are on. If it passes, push it and potentially into it's own PR into the **integration**. If there are errors Rust is very good at highlighting issues and suggesting looking error codes `rustc --explain E0152 `.
 
 ## Runtime
 
 Inn the Runtime file, lib.rs, roughly line 100, the version must be changed there as a set of numbers, so instead of `5.6.8` it would be `568`, for example `spec_version: 444`
 
 If the tests pass create a PR from the **integration** branch.
+
+## Node
+
+The last stop in the node section is to update the dscp-node.
+
+There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds.
 
 Once all of the nodes/pallets have been checked and pass their tests a PR can be raised against the **integration** branch into main.
