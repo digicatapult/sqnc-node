@@ -42,11 +42,13 @@ Once a pallet has been brought up to date it needs to be tested, something like 
 
 ## Node
 
-The final step is to update the dscp-node. There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds.
+The last stop in the node section is to update the dscp-node.
+
+There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds.
 
 ## Runtime
 
-And in the Runtime file lib.rs file, roughly line 100, the version must be changed there as a set of numbers, so instead of `5.6.8` it would be `568`, for example `spec_version: 444`
+Inn the Runtime file, lib.rs, roughly line 100, the version must be changed there as a set of numbers, so instead of `5.6.8` it would be `568`, for example `spec_version: 444`
 
 If the tests pass create a PR from the **integration** branch.
 
