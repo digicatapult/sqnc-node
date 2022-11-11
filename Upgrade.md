@@ -1,4 +1,4 @@
-# Upgrading Substrate Dependencies
+# Description
 
 This guide will hopefully help upgrade Substrate in the future.
 
@@ -14,7 +14,7 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 
 # Upgrade Substrate
 
-This [tool](https://crates.io/crates/diener) can be used to update the version fairlessly painlesslly.
+This [diener tool](https://crates.io/crates/diener) can be used to update the file versions fairly painlesslly.
 
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
@@ -32,7 +32,7 @@ To build the Node:
 cargo build --release
 ```
 
-# Code Changes
+# Pallets
 
 [Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial changes (depending on the update).
 
@@ -40,7 +40,7 @@ After the change each pallet needs to be inspected, fixed if needed, along with 
 
 Once a pallet has been brought up to date it needs to be tested, something like `cargo test -p pallet-transaction-payment-free`, of course change the pallet name to what is necessary. If it passes push it and potentially into it's own PR into the **integration**. If there are errors Rust is very good at highlighting issues and suggesting looking error codes `rustc --explain E0152 `.
 
-## DSCP-Node
+## Runtime
 
 The final step is to update the dscp-node. There are several steps to do now, the dscp-node version must be changed and then and then complete the tests and check runtime-benchmarks builds. And in the Runtime file lib.rs file, roughly line 100, the version must be changed there as a set of numbers, so instead of `5.6.8` it would be `568`, for example `spec_version: 444`
 
