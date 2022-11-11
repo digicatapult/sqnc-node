@@ -8,8 +8,6 @@ This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it ca
 
 Create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
 
-Upgrade the references to the [paritytech/substrate](https://github.com/paritytech/substrate) repo in each of the workspace cargo.toml files. Doing this it will help ensure that the `cargo build` (as seen below) works and the rest of the process can take place.
-
 You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
 
 # Upgrade Substrate
