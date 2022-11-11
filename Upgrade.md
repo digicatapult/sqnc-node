@@ -14,14 +14,6 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 
 This [diener tool](https://crates.io/crates/diener) can be used to update the file versions fairly painlesslly by upgrading each `cargo.toml` given a specific branch/path.
 
-After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
-
-If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available. It may also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading.
-
-For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
-`RuntimeOrigin`. This information was
-obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.30). Checking the branch will help with renaming and syntax changes.
-
 # Build the Node
 
 To build the Node:
@@ -29,6 +21,14 @@ To build the Node:
 ```bash
 cargo build --release
 ```
+
+After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
+
+If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available. It may also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading.
+
+For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
+`RuntimeOrigin`. This information was
+obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.30). Checking the branch will help with renaming and syntax changes.
 
 # Pallets
 
