@@ -1,4 +1,4 @@
-# Description
+# Upgrading Substrate dependencies
 
 This guide will hopefully provide help to upgrade Substrate in the future.
 
@@ -16,7 +16,7 @@ This [diener tool](https://crates.io/crates/diener) can be used to update the to
 
 `cargo install diener`
 and in the root of the `dscp-node` directory run `diener update --substrate --branch polkadot-v0.9.30`
-## Build the Node
+### Test Building the Node
 
 To build the Node:
 
@@ -24,7 +24,7 @@ To build the Node:
 cargo build --release --features runtime-benchmarks
 ```
 
-## Pallets
+### Pallets
 
 Once the version updates have been made we should try to build a pallet, in this example we shall try to build the `pallet-doas` in isolation.
 
@@ -49,7 +49,7 @@ Once a pallet has been brought up to date it needs to be tested, something like
 
 If it passes, bump its version in the pallets `pallets/doas/Cargo.toml` push it into it's own PR, then into the **integration** branch
 
-## Runtime
+### Runtime
 
 We now need to test that the upgraded dependencies work for the runtime including our newly upgraded pallets.  So firstly replace all the pallet versions in the runtime's `runtime/Cargo.toml` and then we need to test a runtime build, we do this by
 `cargo build --release -p dscp-node-runtime`
@@ -63,7 +63,7 @@ We should now run the tests for the runtime, which we can do using:
 
 If the tests pass create a PR from the **integration** branch.
 
-## Node
+### Node
 
 The last item to upgrade is the `dscp-node` itself.
 
