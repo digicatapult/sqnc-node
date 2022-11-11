@@ -22,6 +22,8 @@ To build the Node:
 cargo build --release
 ```
 
+# Pallets
+
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
 If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available. It may also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading.
@@ -29,8 +31,6 @@ If there are errors you will need to investigate, some may be obvious but it wil
 For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
 `RuntimeOrigin`. This information was
 obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.30). Checking the branch will help with renaming and syntax changes.
-
-# Pallets
 
 [Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial, or minor, changes (depending on the update).
 
