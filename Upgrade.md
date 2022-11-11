@@ -42,7 +42,7 @@ Once a pallet has been bought up to date it needs to be tested, something like `
 
 ## Runtime
 
-In the Runtime file, lib.rs the version must be changed there as a set of numbers, so instead of `5.6.8` it would be `568`, for example `spec_version: 444`
+In the Runtime file, lib.rs, the `spec_version` must be changed to a set of numbers formatted as three digits rather than `5.6.8`, so instead of `5.6.8` it would be `568`, for example `spec_version: 444`.
 
 If the tests pass create a PR from the **integration** branch.
 
