@@ -1,16 +1,3 @@
-##Code Changes
-...
-
-### Pallets
-
-...
-
-### Runtime
-
-...
-
-### Node
-
 # Description
 
 This guide will hopefully help upgrade Substrate in the future.
