@@ -1,4 +1,4 @@
-## Description
+# Description
 
 This guide will hopefully provide help to upgrade Substrate in the future.
 
