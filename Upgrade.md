@@ -1,20 +1,20 @@
-# Description
+## Description
 
 This guide will hopefully provide help to upgrade Substrate in the future.
 
 This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
 
-# Prerequisities
+## Prerequisities
 
 Make sure **main** is up to date and create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
 
 You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
 
-# Upgrade Substrate
+## Upgrade Substrate
 
 This [diener tool](https://crates.io/crates/diener) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path.
 
-# Build the Node
+## Build the Node
 
 To build the Node:
 
@@ -22,7 +22,7 @@ To build the Node:
 cargo build --release
 ```
 
-# Pallets
+## Pallets
 
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
