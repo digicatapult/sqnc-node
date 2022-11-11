@@ -12,7 +12,7 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 
 ## Upgrade Substrate
 
-This [diener tool](https://crates.io/crates/diener) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path.
+This [diener tool](https://crates.io/crates/diener) (which needs to be in the dependencies) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path.
 
 ## Build the Node
 
