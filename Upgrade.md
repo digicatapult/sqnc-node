@@ -26,6 +26,8 @@ cargo build --release
 
 After the version updates have been made, depending on the length of time between version releases, there may be a **lot** of changes.
 
+If a file has errors run `cargo check` and it will only check that one file.
+
 If there are errors you will need to investigate, some may be obvious but it will also be useful to look at the latest version of the branch or use any documentation if available. It may also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading.
 
 For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
