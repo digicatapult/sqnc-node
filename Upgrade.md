@@ -4,7 +4,7 @@ This guide will hopefully help upgrade Substrate in the future.
 
 This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
 
-# First Thing
+# Prerequisities
 
 Create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
 
