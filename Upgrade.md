@@ -15,7 +15,8 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 This [diener tool](https://crates.io/crates/diener) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path
 
 `cargo install diener`
-and in the root of the `dscp-node` directory run `diener update --substrate --branch polkadot-v0.9.30`
+and in the root of the `dscp-node` directory run `diener update --substrate --branch polkadot-v0.9.{version}`
+
 ### Test Building the Node
 
 To build the Node:
@@ -38,20 +39,20 @@ obtained from checking the [Polkadot `0.9.30` branch](https://github.com/parityt
 
 [Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial, or minor, changes (depending on the update).
 
-After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests.   If there are any compilation errors Rust is very good at highlighting issues and suggesting looking error codes e.g. `rustc --explain E0152 `.
+After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests. If there are any compilation errors Rust is very good at highlighting issues and suggesting looking error codes e.g. `rustc --explain E0152 `.
 
 ```bash
 cargo build --release pallet-doas
 ```
 
-Once a pallet has been brought up to date it needs to be tested, something like 
+Once a pallet has been brought up to date it needs to be tested, something like
 `cargo test -p pallet-doas`
 
 If it passes, bump its version in the pallets `pallets/doas/Cargo.toml` push it into it's own PR, then into the **integration** branch
 
 ### Runtime
 
-We now need to test that the upgraded dependencies work for the runtime including our newly upgraded pallets.  So firstly replace all the pallet versions in the runtime's `runtime/Cargo.toml` and then we need to test a runtime build, we do this by
+We now need to test that the upgraded dependencies work for the runtime including our newly upgraded pallets. So firstly replace all the pallet versions in the runtime's `runtime/Cargo.toml` and then we need to test a runtime build, we do this by
 `cargo build --release -p dscp-node-runtime`
 
 We will need to increment the runtimes `spec_version` to a higher value, note spec_version does not recognize semver, so we treat it as a whole number. e.g. In place of `5.6.8` the `spec_version` would be `568`.
@@ -67,7 +68,7 @@ If the tests pass create a PR from the **integration** branch.
 
 The last item to upgrade is the `dscp-node` itself.
 
-There are two steps to undertake, the dscp-node's and dscp-node-runtime's versions should be bumped in `node/Cargo.toml`  and then  we should try to build with the runtime-benchmarks feature enabled.
+There are two steps to undertake, the dscp-node's and dscp-node-runtime's versions should be bumped in `node/Cargo.toml` and then we should try to build with the runtime-benchmarks feature enabled.
 
 ```bash
 cargo build --release --features runtime-benchmarks
