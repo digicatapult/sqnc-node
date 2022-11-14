@@ -19,6 +19,8 @@ and in the root of the `dscp-node` directory run `diener update --substrate --br
 
 ### Test Building the Node
 
+We are test building the Node having only upgraded the dependencies, this includes no code changes to any of the pallets, runtime or node. We include features runtime benchmarks to fully tests all deps.
+
 To build the Node:
 
 ```bash
