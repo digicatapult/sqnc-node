@@ -15,7 +15,7 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 This [diener tool](https://crates.io/crates/diener) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path
 
 `cargo install diener`
-and in the root of the `dscp-node` directory run `diener update --substrate --branch polkadot-v0.9.<var>`
+and in the root of the `dscp-node` directory run `diener update --substrate --branch polkadot-v<version>`
 
 ### Test Building the Node
 
