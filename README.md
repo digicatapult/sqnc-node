@@ -315,7 +315,7 @@ There are several files in the `node` directory - take special note of the follo
   [GRANDPA](https://substrate.dev/docs/en/knowledgebase/advanced/consensus#grandpa) finality
   gadget.
 
-  [Updarading Node](Upgrade.md)
+  [Updrading Node](Upgrade.md)
 
 ### Runtime
 
