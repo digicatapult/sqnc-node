@@ -48,7 +48,7 @@ cargo build --release pallet-doas
 ```
 
 Once a pallet has been brought up to date it needs to be tested, something like
-`cargo test -p pallet-doas`
+`cargo test --release -p pallet-doas`
 
 If it passes, bump its version in the pallets `pallets/doas/Cargo.toml` push it into it's own PR, then into the **integration** branch
 
