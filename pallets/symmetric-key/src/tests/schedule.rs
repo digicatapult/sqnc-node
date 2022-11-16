@@ -40,7 +40,8 @@ fn schedule_after_schedule_period() {
         SymmetricKey::update_key(RuntimeOrigin::root(), init_key).unwrap();
 
         for _bn in 1..5 {
-            System::set_block_number(System::block_number() + 1);
+            Scheduler::on_finalize(System::block_number());
+            System::set_block_number(System::block_number() + 100);
             Scheduler::on_initialize(System::block_number());
         }
 
