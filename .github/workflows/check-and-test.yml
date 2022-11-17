@@ -113,9 +113,12 @@ jobs:
             For a guide on running benchmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
 
   check:
-    name: Check and test
+    name: Check and test - ${{ matrix.architectures.arch }}
     runs-on: ubuntu-latest
     needs: [get-version]
+    strategy:
+      matrix:
+        architectures: [ {arch: x86_64, target-tupl: x86_64-unknown-linux-gnu}, {arch: aarch64, target-tupl: aarch64-unknown-linux-gnu}]
 
     steps:
       - uses: actions/checkout@v3
@@ -124,6 +127,11 @@ jobs:
         with:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
           target: wasm32-unknown-unknown
+      - name: Install arch ${{ matrix.architectures.arch }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ needs.get-version.outputs.toolchain }}
+          target: ${{ matrix.architectures.target-tupl }}
       - name: install protobuf compiler
         run: sudo apt-get install protobuf-compiler
       - name: Install sccache
@@ -178,6 +186,7 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: check
+          args: --target ${{ matrix.architectures.target-tupl }}
       - name: Cargo test
         uses: actions-rs/cargo@v1
         env:
@@ -185,3 +194,4 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: test
+          args: --target ${{ matrix.architectures.target-tupl }}
