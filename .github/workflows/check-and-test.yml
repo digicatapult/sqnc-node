@@ -174,26 +174,26 @@ jobs:
       #       ${{ runner.os }}-cargo-build-cache-debug-
       - name: Cargo format
         uses: actions-rs/cargo@v1
-        env:
-          # RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-          # SCCACHE_DIR: ${{ runner.temp }}/cache
+        # env:
+        #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+        #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: fmt
           args: --check
       - name: Cargo check
         uses: actions-rs/cargo@v1
-        env:
-          # RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-          # SCCACHE_DIR: ${{ runner.temp }}/cache
+        # env:
+        #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+        #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: check
           use-cross: true
           args: --target ${{ matrix.architectures.target-tupl }}
       - name: Cargo test
         uses: actions-rs/cargo@v1
-        env:
-          # RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-          # SCCACHE_DIR: ${{ runner.temp }}/cache
+        # env:
+        #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+        #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: test
           use-cross: true
