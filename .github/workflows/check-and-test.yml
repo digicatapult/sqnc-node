@@ -132,19 +132,20 @@ jobs:
         with:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
           target: ${{ matrix.architectures.target-tupl }}
+          override: true
       - name: install protobuf compiler
         run: sudo apt-get install protobuf-compiler
-      - name: Install sccache
-        env:
-          TEMP: ${{ runner.temp }}
-        run: |
-          curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.3.7/fetch_linux_amd64 --output $TEMP/fetch
-          chmod +x $TEMP/fetch
-          $TEMP/fetch --repo="https://github.com/mozilla/sccache" --tag="~>0.2.15" --release-asset="^sccache-v[0-9.]*-x86_64-unknown-linux-musl.tar.gz$" $TEMP
-          tar -xvf $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz -C $TEMP
-          mv $TEMP/sccache-v*-x86_64-unknown-linux-musl/sccache $TEMP/sccache
-          rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
-          chmod +x $TEMP/sccache
+      # - name: Install sccache
+      #   env:
+      #     TEMP: ${{ runner.temp }}
+      #   run: |
+      #     curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.3.7/fetch_linux_amd64 --output $TEMP/fetch
+      #     chmod +x $TEMP/fetch
+      #     $TEMP/fetch --repo="https://github.com/mozilla/sccache" --tag="~>0.2.15" --release-asset="^sccache-v[0-9.]*-x86_64-unknown-linux-musl.tar.gz$" $TEMP
+      #     tar -xvf $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz -C $TEMP
+      #     mv $TEMP/sccache-v*-x86_64-unknown-linux-musl/sccache $TEMP/sccache
+      #     rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
+      #     chmod +x $TEMP/sccache
       - name: Install rustfmt
         run: rustup component add rustfmt
       - name: Cache cargo registry
@@ -163,35 +164,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-index-
-      - name: Cache sccache
-        uses: actions/cache@v3
-        with:
-          path: ${{ runner.temp }}/cache
-          key: ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}
-            ${{ runner.os }}-cargo-build-cache-debug-
+      # - name: Cache sccache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ runner.temp }}/cache
+      #     key: ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-cargo-build-cache-debug-${{ hashFiles('**/Cargo.lock') }}
+      #       ${{ runner.os }}-cargo-build-cache-debug-
       - name: Cargo format
         uses: actions-rs/cargo@v1
         env:
-          RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-          SCCACHE_DIR: ${{ runner.temp }}/cache
+          # RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+          # SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: fmt
           args: --check
       - name: Cargo check
         uses: actions-rs/cargo@v1
         env:
-          RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-          SCCACHE_DIR: ${{ runner.temp }}/cache
+          # RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+          # SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: check
+          use-cross: true
           args: --target ${{ matrix.architectures.target-tupl }}
       - name: Cargo test
         uses: actions-rs/cargo@v1
         env:
-          RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-          SCCACHE_DIR: ${{ runner.temp }}/cache
+          # RUSTC_WRAPPER: ${{ runner.temp }}/sccache
+          # SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: test
+          use-cross: true
           args: --target ${{ matrix.architectures.target-tupl }}
