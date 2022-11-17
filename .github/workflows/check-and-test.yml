@@ -187,7 +187,6 @@ jobs:
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: check
-          use-cross: true
           args: --target ${{ matrix.architectures.target-tupl }}
       - name: Cargo test
         uses: actions-rs/cargo@v1
@@ -196,5 +195,4 @@ jobs:
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: test
-          use-cross: true
           args: --target ${{ matrix.architectures.target-tupl }}
