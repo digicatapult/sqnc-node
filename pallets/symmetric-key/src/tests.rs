@@ -36,7 +36,6 @@ frame_support::construct_runtime!(
     {
         System: system::{Pallet, Call, Config, Storage, Event<T>},
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
-        Preimage: pallet_preimage,
         SymmetricKey: pallet_symmetric_key::{Pallet, Call, Storage, Event<T>},
     }
 );
@@ -77,15 +76,6 @@ impl system::Config for Test {
 }
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
-}
-
-impl pallet_preimage::Config for Test {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = ();
-    type Currency = ();
-    type ManagerOrigin = system::EnsureRoot<u64>;
-    type BaseDeposit = ();
-    type ByteDeposit = ();
 }
 
 impl pallet_scheduler::Config for Test {
