@@ -4222,6 +4222,7 @@ dependencies = [
  "frame-support",
  "frame-support-test",
  "frame-system",
+ "pallet-preimage",
  "pallet-scheduler",
  "parity-scale-codec",
  "scale-info",
