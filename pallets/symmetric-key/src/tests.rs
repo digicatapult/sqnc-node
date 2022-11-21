@@ -3,7 +3,7 @@
 use crate as pallet_symmetric_key;
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, EqualPrivilegeOnly, OnInitialize, OnFinalize},
+    traits::{ConstU32, EqualPrivilegeOnly, OnFinalize, OnInitialize},
     weights::Weight,
     BoundedVec
 };

@@ -27,12 +27,7 @@ fn transaction_payment_fails_for_account_with_no_balance() {
         let user = 2;
         assert_eq!(Balances::free_balance(user), 0);
         assert_err!(
-            ChargeTransactionPayment::<Test>::from(0).pre_dispatch(
-                &user,
-                CALL,
-                &info_from_weight(Weight::zero()),
-                0
-            ),
+            ChargeTransactionPayment::<Test>::from(0).pre_dispatch(&user, CALL, &info_from_weight(Weight::zero()), 0),
             InvalidTransaction::Payment
         );
         // No events for such a scenario
