@@ -3,7 +3,7 @@
 use crate as pallet_symmetric_key;
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, EqualPrivilegeOnly, OnInitialize},
+    traits::{ConstU32, EqualPrivilegeOnly, OnInitialize, OnFinalize},
     weights::Weight,
     BoundedVec
 };
@@ -43,7 +43,7 @@ parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
     pub BlockWeights: frame_system::limits::BlockWeights =
-        frame_system::limits::BlockWeights::simple_max(Weight::from_ref_time(1_000_000));
+        frame_system::limits::BlockWeights::simple_max(Weight::from_ref_time(1_000_000).set_proof_size(u64::MAX));
 }
 
 impl system::Config for Test {
@@ -85,8 +85,7 @@ impl pallet_scheduler::Config for Test {
     type MaxScheduledPerBlock = ();
     type WeightInfo = ();
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
-    type PreimageProvider = ();
-    type NoPreimagePostponement = ();
+    type Preimages = ();
 }
 
 parameter_types! {
