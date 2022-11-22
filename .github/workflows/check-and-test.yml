@@ -134,7 +134,7 @@ jobs:
           target: ${{ matrix.architectures.target-tupl }}
           override: true
       - name: install protobuf compiler
-        run: sudo apt-get install protobuf-compiler gcc-multilib
+        run: sudo apt-get install protobuf-compiler gcc-aarch64-linux-gnu
       # - name: Install sccache
       #   env:
       #     TEMP: ${{ runner.temp }}
