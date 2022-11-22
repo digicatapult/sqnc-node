@@ -137,7 +137,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
       - name: install cross-compilation tools
         run: |
-          sudo apt-get install -y ${{ matrix.architectures.gcc_package }} gcc-multilib g++-multilib
+          sudo apt-get install -y ${{ matrix.architectures.gcc_package }}
           upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
           echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
         if: matrix.architectures.gcc_package != ''
@@ -186,9 +186,12 @@ jobs:
         with:
           command: fmt
           args: --check
+      - name: printenv
+        run: env
       - name: Cargo check
         uses: actions-rs/cargo@v1
-        # env:
+        env:
+          RUST_BACKTRACE: 1
         #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
