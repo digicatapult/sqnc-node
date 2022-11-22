@@ -143,7 +143,7 @@ parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
     /// We allow for 2 seconds of compute with a 6 second average block time.
     pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
-        ::with_sensible_defaults(2u64 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
+        ::with_sensible_defaults((2u64 * WEIGHT_PER_SECOND).set_proof_size(u64::MAX), NORMAL_DISPATCH_RATIO);
     pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
         ::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
     pub const SS58Prefix: u8 = 42;
@@ -281,10 +281,10 @@ impl pallet_node_authorization::Config for Runtime {
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
         BlockWeights::get().max_block;
-    pub const NoPreimagePostponement: Option<u32> = Some(10);
 }
 
 impl pallet_scheduler::Config for Runtime {
+    type Preimages = Preimage;
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
     type PalletsOrigin = OriginCaller;
@@ -294,12 +294,9 @@ impl pallet_scheduler::Config for Runtime {
     type MaxScheduledPerBlock = ConstU32<50>;
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
-    type PreimageProvider = Preimage;
-    type NoPreimagePostponement = NoPreimagePostponement;
 }
 
 parameter_types! {
-    pub const PreimageMaxSize: u32 = 4096 * 1024;
     pub const PreimageBaseDeposit: Balance = 0;
     pub const PreimageByteDeposit: Balance = 0;
 }
@@ -309,7 +306,6 @@ impl pallet_preimage::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
-    type MaxSize = PreimageMaxSize;
     type BaseDeposit = PreimageBaseDeposit;
     type ByteDeposit = PreimageByteDeposit;
 }
