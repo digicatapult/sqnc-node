@@ -42,7 +42,7 @@ function check_version_greater () {
 
 # Get published git tags that match semver regex with a "v" prefix then remove the "v" character
 PUBLISHED_VERSIONS=$(git tag | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+\(\-[a-zA-Z-]\+\(\.[0-9]\+\)*\)\{0,1\}$" | sed 's/^v\(.*\)$/\1/')
-# Get the current version from node Cargo.toml
+# Get the current version from package.json
 CURRENT_VERSION=$(yq '.version' ./api/package.json)
 
 if check_version_greater "$CURRENT_VERSION" "$PUBLISHED_VERSIONS"; then
