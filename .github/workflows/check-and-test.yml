@@ -138,9 +138,9 @@ jobs:
       - name: install cross-compilation tools
         run: |
           sudo apt-get install -y ${{ matrix.architectures.gcc_package }}
-          upcase=$(echo ${{ matrix.architecture.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
-          echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architecture.gcc }} >> $GITHUB_ENV
-        if: matrix.architecture.gcc_package != '' && matrix.os == 'ubuntu-latest'
+          upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+          echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
+        if: matrix.architectures.gcc_package != '' && matrix.os == 'ubuntu-latest'
       # - name: Install sccache
       #   env:
       #     TEMP: ${{ runner.temp }}
