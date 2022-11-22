@@ -86,14 +86,14 @@ pub mod pallet {
                     .is_err()
                     {
                         frame_support::print("Error initialising symmetric key rotation schedule");
-                        return Weight::from_ref_time(0);
+                        return Weight::zero();
                     }
 
                     <KeyScheduleId<T>>::put(Some(BoundedVec::<_, _>::truncate_from(id)));
 
-                    Weight::from_ref_time(0)
+                    Weight::zero()
                 }
-                Some(_) => Weight::from_ref_time(0)
+                Some(_) => Weight::zero()
             }
         }
     }
