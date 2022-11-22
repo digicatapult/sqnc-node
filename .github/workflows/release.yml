@@ -41,23 +41,6 @@ jobs:
         run: |
           echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
 
-  check-helm-version:
-    name: Check helm version
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: git fetch --depth=1 --tags origin
-      - name: Install yq
-        run: sudo snap install yq
-      - name: Check Helm Version
-        id: get_version
-        run: ./scripts/check-helm-version.sh
-        shell: bash
-      - name: Error if version is not increased
-        shell: bash
-        run: |
-          exit $([[ "${{steps.get_version.outputs.IS_NEW_VERSION}}" = "true" ]] && echo 0 || echo 1)
-
   # Github releases are only performed when the release version changes
   build-release:
     name: Build release
