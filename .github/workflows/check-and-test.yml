@@ -137,7 +137,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
       - name: install cross-compilation tools
         run: |
-          sudo apt-get install -y ${{ matrix.architectures.gcc_package }}
+          sudo apt-get install -y ${{ matrix.architectures.gcc_package }} gcc-multilib g++-multilib
           upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
           echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
         if: matrix.architectures.gcc_package != ''
