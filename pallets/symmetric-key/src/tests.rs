@@ -3,7 +3,7 @@
 use crate as pallet_symmetric_key;
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, EqualPrivilegeOnly, OnInitialize},
+    traits::{ConstU32, EqualPrivilegeOnly, OnFinalize, OnInitialize},
     weights::Weight,
     BoundedVec
 };
@@ -43,7 +43,9 @@ parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
     pub BlockWeights: frame_system::limits::BlockWeights =
-        frame_system::limits::BlockWeights::simple_max(Weight::from_ref_time(1_000_000));
+        frame_system::limits::BlockWeights::simple_max(
+            frame_support::weights::constants::WEIGHT_PER_SECOND.set_proof_size(u64::MAX)
+        );
 }
 
 impl system::Config for Test {
@@ -75,6 +77,7 @@ impl system::Config for Test {
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
 }
+
 impl pallet_scheduler::Config for Test {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
@@ -82,11 +85,10 @@ impl pallet_scheduler::Config for Test {
     type RuntimeCall = RuntimeCall;
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = system::EnsureRoot<u64>;
-    type MaxScheduledPerBlock = ();
+    type MaxScheduledPerBlock = ConstU32<100>;
     type WeightInfo = ();
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
-    type PreimageProvider = ();
-    type NoPreimagePostponement = ();
+    type Preimages = ();
 }
 
 parameter_types! {

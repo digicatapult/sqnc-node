@@ -36,12 +36,12 @@ pub struct BlockWeights;
 impl Get<frame_system::limits::BlockWeights> for BlockWeights {
     fn get() -> frame_system::limits::BlockWeights {
         frame_system::limits::BlockWeights::builder()
-            .base_block(Weight::from_ref_time(0))
+            .base_block(Weight::zero())
             .for_class(DispatchClass::all(), |weights| {
-                weights.base_extrinsic = Weight::from_ref_time(0u64);
+                weights.base_extrinsic = Weight::zero();
             })
             .for_class(DispatchClass::non_mandatory(), |weights| {
-                weights.max_total = Some(Weight::from_ref_time(1024u64));
+                weights.max_total = Some(Weight::from_ref_time(1024u64).set_proof_size(u64::MAX));
             })
             .build_or_panic()
     }

@@ -89,6 +89,12 @@ Then you can run the benchmark tool with for example
 
 The generated weights implementation should then be integrated into the `pallet_simple_nft` module.
 
+### Upgrading Substrate
+
+We aim to keep our substrate codebase in lockstep with the latest released `Polkadot-v<version>` branches on the [Parity Substrate](https://github.com/paritytech/substrate) repository.
+
+See our upgrade documentation [here](./Upgrade.md)
+
 ### Run in Docker
 
 First, install [Docker](https://docs.docker.com/get-docker/) and

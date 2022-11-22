@@ -16,6 +16,7 @@ fn schedule_before_first_call() {
         SymmetricKey::update_key(RuntimeOrigin::root(), init_key.clone()).unwrap();
 
         for _bn in 1..2 {
+            Scheduler::on_finalize(System::block_number());
             System::set_block_number(System::block_number() + 1);
             Scheduler::on_initialize(System::block_number());
         }
@@ -40,13 +41,14 @@ fn schedule_after_schedule_period() {
         SymmetricKey::update_key(RuntimeOrigin::root(), init_key).unwrap();
 
         for _bn in 1..5 {
+            Scheduler::on_finalize(System::block_number());
             System::set_block_number(System::block_number() + 1);
             Scheduler::on_initialize(System::block_number());
         }
 
         assert_eq!(SymmetricKey::key(), new_key);
         assert_eq!(
-            System::events().iter().rev().nth(1).unwrap().event,
+            System::events().iter().rev().nth(2).unwrap().event,
             TestEvent::SymmetricKey(Event::UpdateKey(new_key)),
         )
     });
