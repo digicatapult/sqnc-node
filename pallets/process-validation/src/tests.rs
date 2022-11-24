@@ -8,6 +8,8 @@ use frame_support::{
 };
 use frame_system as system;
 use scale_info::TypeInfo;
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -69,6 +71,7 @@ impl system::Config for Test {
 }
 
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum ProcessIdentifier {
     A,
     B
@@ -81,6 +84,7 @@ impl Default for ProcessIdentifier {
 }
 
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Default, Eq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct TokenMetadataValueDiscriminator {
     value: u8
 }

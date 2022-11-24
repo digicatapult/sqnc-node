@@ -13,6 +13,8 @@ use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use scale_info::TypeInfo;
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -68,6 +70,8 @@ pub type Index = u32;
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
 
+pub mod types;
+
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -97,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 448,
+    spec_version: 450,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -311,6 +315,7 @@ impl pallet_preimage::Config for Runtime {
 }
 
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq, Ord, PartialOrd)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Role {
     Owner = 0,
     Customer = 1,
@@ -330,6 +335,8 @@ impl Default for Role {
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq, EnumDiscriminants)]
 #[strum_discriminants(derive(Encode, Decode, MaxEncodedLen, TypeInfo))]
 #[strum_discriminants(name(MetadataValueType))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "std", strum_discriminants(derive(Serialize, Deserialize)))]
 pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal(BoundedVec<u8, ConstU32<32>>),

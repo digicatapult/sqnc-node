@@ -97,9 +97,9 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
 fn for_existing_process_it_mutates_an_existing_version() {
     new_test_ext().execute_with(|| {
         System::set_block_number(1);
-        assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
-        assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
-        assert_ok!(ProcessValidation::update_version(PROCESS_ID1));
+        assert_ok!(ProcessValidation::update_version(&PROCESS_ID1));
+        assert_ok!(ProcessValidation::update_version(&PROCESS_ID1));
+        assert_ok!(ProcessValidation::update_version(&PROCESS_ID1));
 
         let items: Vec<u32> = <VersionModel<Test>>::iter().map(|item| item.1.clone()).collect();
 
@@ -116,7 +116,7 @@ fn sets_versions_correctly_for_multiple_processes() {
         let mut ids = [PROCESS_ID2; 10].to_vec();
         ids.extend([PROCESS_ID1; 15].to_vec());
         ids.iter().for_each(|id| -> () {
-            assert_ok!(ProcessValidation::update_version(id.clone()));
+            assert_ok!(ProcessValidation::update_version(&id));
         });
 
         let id1_expected = TestEvent::ProcessValidation(ProcessCreated(

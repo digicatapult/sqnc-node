@@ -1,13 +1,16 @@
 use dscp_node_runtime::{
     AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
-    Signature, SudoConfig, SystemConfig, WASM_BINARY
+    ProcessValidationConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY, types::{BooleanExpressionSymbol, Restriction}
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::OpaquePeerId; // A struct wraps Vec<u8>, represents as our `PeerId`.
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::{
+    bounded_vec,
+    traits::{IdentifyAccount, Verify}
+};
 const DEFAULT_PROTOCOL_ID: &str = "dscp";
 
 // The URL for the telemetry server.
@@ -220,6 +223,12 @@ fn testnet_genesis(
             members: technical_committee_accounts.try_into().unwrap(),
             ..Default::default()
         },
-        technical_committee: Default::default()
+        technical_committee: Default::default(),
+        process_validation: ProcessValidationConfig {
+            processes: vec![(
+                "default".as_bytes().to_vec().try_into().unwrap(),
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
+            )]
+        }
     }
 }
