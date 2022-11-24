@@ -70,6 +70,8 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_initialize(_block_number: T::BlockNumber) -> frame_support::weights::Weight {
+            use sp_runtime::traits::Zero;
+
             let existing_schedule = <KeyScheduleId<T>>::get();
 
             match existing_schedule {
@@ -77,7 +79,7 @@ pub mod pallet {
                     let id: Vec<u8> = KEY_ROTATE_ID.encode();
                     if T::Scheduler::schedule_named(
                         id.clone(),
-                        DispatchTime::After(T::BlockNumber::from(1u32)),
+                        DispatchTime::After(T::BlockNumber::zero()),
                         Some((T::RefreshPeriod::get(), u32::max_value())),
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),
