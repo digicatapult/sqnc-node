@@ -9,10 +9,10 @@ use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
 #[test]
 fn update_key_as_root() {
     new_test_ext().execute_with(|| {
+        run_to_block(1);
         let new_key: BoundedVec<u8, _> = bounded_vec![
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ];
-        System::set_block_number(1);
 
         assert_ok!(SymmetricKey::update_key(RuntimeOrigin::root(), new_key.clone()));
         assert_eq!(SymmetricKey::key(), new_key);
@@ -26,6 +26,8 @@ fn update_key_as_root() {
 #[test]
 fn update_key_not_as_root() {
     new_test_ext().execute_with(|| {
+        run_to_block(1);
+
         let init_key: BoundedVec<u8, _> = bounded_vec![
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ];
@@ -45,6 +47,8 @@ fn update_key_not_as_root() {
 #[test]
 fn update_key_incorrect_key_length() {
     new_test_ext().execute_with(|| {
+        run_to_block(1);
+
         let init_key: BoundedVec<u8, _> = bounded_vec![
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ];

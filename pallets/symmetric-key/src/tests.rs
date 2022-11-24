@@ -7,7 +7,6 @@ use frame_support::{
     weights::Weight,
     BoundedVec
 };
-use frame_support_test::TestRandomness;
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
@@ -91,6 +90,26 @@ impl pallet_scheduler::Config for Test {
     type Preimages = ();
 }
 
+pub struct TestRandomness<Test>(sp_std::marker::PhantomData<Test>);
+
+impl<Output: codec::Decode + Default, Test> frame_support::traits::Randomness<Output, Test::BlockNumber>
+    for TestRandomness<Test>
+where
+    Test: frame_system::Config
+{
+    fn random(_subject: &[u8]) -> (Output, Test::BlockNumber) {
+        use sp_runtime::traits::TrailingZeroInput;
+        let bn = frame_system::Pallet::<Test>::block_number();
+        let bn_u8: u8 = bn.try_into().unwrap_or_default();
+        let arr: [u8; 8] = core::array::from_fn(|i| 8 * bn_u8 + i as u8);
+
+        (
+            Output::decode(&mut TrailingZeroInput::new(&arr)).unwrap_or_default(),
+            frame_system::Pallet::<Test>::block_number()
+        )
+    }
+}
+
 parameter_types! {
     pub const RefreshPeriod: u32 = 5;
 }
@@ -111,4 +130,12 @@ impl pallet_symmetric_key::Config for Test {
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+}
+
+pub fn run_to_block(n: u64) {
+    while System::block_number() < n {
+        Scheduler::on_finalize(System::block_number());
+        System::set_block_number(System::block_number() + 1);
+        Scheduler::on_initialize(System::block_number());
+    }
 }
