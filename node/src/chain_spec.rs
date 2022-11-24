@@ -1,6 +1,7 @@
 use dscp_node_runtime::{
+    types::{BooleanExpressionSymbol, Restriction},
     AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
-    ProcessValidationConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY, types::{BooleanExpressionSymbol, Restriction}
+    ProcessValidationConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
