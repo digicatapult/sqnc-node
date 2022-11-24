@@ -183,6 +183,9 @@ pub mod pallet {
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
             for (process_id, program) in self.processes.iter() {
+                if !Pallet::<T>::validate_program(&program) {
+                    panic!("Invalid program detected in genesis!")
+                }
                 let version = Pallet::<T>::update_version(process_id).unwrap();
                 Pallet::<T>::persist_process(process_id, &version, program).unwrap();
             }
@@ -245,7 +248,7 @@ pub mod pallet {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
             ensure!(
-                Pallet::<T>::validate_program(program.clone()),
+                Pallet::<T>::validate_program(&program),
                 Error::<T>::InvalidProgram
             );
 
@@ -280,7 +283,7 @@ pub mod pallet {
     // helper methods
     impl<T: Config> Pallet<T> {
         pub fn validate_program(
-            program: BoundedVec<
+            program: &BoundedVec<
                 BooleanExpressionSymbol<
                     T::RoleKey,
                     T::TokenMetadataKey,

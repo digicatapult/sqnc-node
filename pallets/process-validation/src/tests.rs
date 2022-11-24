@@ -4,7 +4,7 @@ use crate as pallet_process_validation;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, ConstU64}
+    traits::{ConstU32, ConstU64, GenesisBuild}
 };
 use frame_system as system;
 use scale_info::TypeInfo;
@@ -19,6 +19,7 @@ use sp_runtime::{
 mod create_process;
 mod disable_process;
 mod validate_process;
+mod genesis;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -114,4 +115,10 @@ impl pallet_process_validation::Config for Test {
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+}
+
+pub fn new_test_ext_with_genesis(genesis: pallet_process_validation::GenesisConfig::<Test>) -> sp_io::TestExternalities {
+    let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap().into();
+    genesis.assimilate_storage(&mut t).unwrap();
+    t.into()
 }
