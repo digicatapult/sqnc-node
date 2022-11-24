@@ -18,8 +18,8 @@ use sp_runtime::{
 
 mod create_process;
 mod disable_process;
-mod validate_process;
 mod genesis;
+mod validate_process;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -117,7 +117,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 }
 
-pub fn new_test_ext_with_genesis(genesis: pallet_process_validation::GenesisConfig::<Test>) -> sp_io::TestExternalities {
+pub fn new_test_ext_with_genesis(genesis: pallet_process_validation::GenesisConfig<Test>) -> sp_io::TestExternalities {
     let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap().into();
     genesis.assimilate_storage(&mut t).unwrap();
     t.into()

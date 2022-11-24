@@ -247,10 +247,7 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
-            ensure!(
-                Pallet::<T>::validate_program(&program),
-                Error::<T>::InvalidProgram
-            );
+            ensure!(Pallet::<T>::validate_program(&program), Error::<T>::InvalidProgram);
 
             let version: T::ProcessVersion = Pallet::<T>::update_version(&id).unwrap();
             Pallet::<T>::persist_process(&id, &version, &program)?;

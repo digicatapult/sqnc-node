@@ -15,23 +15,33 @@ use crate::GenesisConfig;
 #[test]
 fn genesis_with_valid_processes() {
     new_test_ext_with_genesis(GenesisConfig::<Test> {
-      processes: vec![(
-        PROCESS_ID1,
-        bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
-      ), (
-        PROCESS_ID2,
-        bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
-      )]
-    }).execute_with(|| {
+        processes: vec![
+            (
+                PROCESS_ID1,
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
+            ),
+            (
+                PROCESS_ID2,
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
+            ),
+        ]
+    })
+    .execute_with(|| {
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1u32);
-        assert_eq!(<ProcessModel<Test>>::get(PROCESS_ID1, 1u32), Process {
-          status: ProcessStatus::Enabled,
-          program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
-        });
-        assert_eq!(<ProcessModel<Test>>::get(PROCESS_ID2, 1u32), Process {
-          status: ProcessStatus::Enabled,
-          program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
-        });
+        assert_eq!(
+            <ProcessModel<Test>>::get(PROCESS_ID1, 1u32),
+            Process {
+                status: ProcessStatus::Enabled,
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
+            }
+        );
+        assert_eq!(
+            <ProcessModel<Test>>::get(PROCESS_ID2, 1u32),
+            Process {
+                status: ProcessStatus::Enabled,
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
+            }
+        );
     });
 }
 
@@ -39,12 +49,19 @@ fn genesis_with_valid_processes() {
 #[should_panic]
 fn genesis_with_invalid_process() {
     new_test_ext_with_genesis(GenesisConfig::<Test> {
-      processes: vec![(
-        PROCESS_ID1,
-        bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
-      ), (
-        PROCESS_ID2,
-        bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None), BooleanExpressionSymbol::Op(BooleanOperator::And)]
-      )]
-    }).execute_with(|| {});
+        processes: vec![
+            (
+                PROCESS_ID1,
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
+            ),
+            (
+                PROCESS_ID2,
+                bounded_vec![
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
+                    BooleanExpressionSymbol::Op(BooleanOperator::And)
+                ]
+            ),
+        ]
+    })
+    .execute_with(|| {});
 }
