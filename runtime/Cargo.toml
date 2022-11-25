@@ -1,6 +1,6 @@
 [package]
 name = "dscp-node-runtime"
-version = "4.4.8"
+version = "4.5.0"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -59,11 +59,13 @@ frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, g
 hex-literal = { version = "0.3.4", optional = true }
 
 # Local Dependencies
-pallet-doas = { version = '2.0.0', default-features = false, package = 'pallet-doas', path = '../pallets/doas' }
-pallet-simple-nft = { version = '4.0.0', default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
-pallet-process-validation = { version = '3.1.1', default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
-pallet-symmetric-key = { version = '2.0.1', default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
-pallet-transaction-payment-free = { default-features = false, version = '2.0.0', package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
+pallet-doas = { default-features = false, package = 'pallet-doas', path = '../pallets/doas' }
+pallet-simple-nft = { default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
+pallet-process-validation = { default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
+pallet-symmetric-key = { default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
+pallet-transaction-payment-free = { default-features = false, package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
+
+serde = { version = "1.0.137" }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.32" }

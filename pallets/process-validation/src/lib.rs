@@ -17,10 +17,10 @@ mod benchmarking;
 
 // import the restrictions module where all our restriction types are defined
 mod restrictions;
-use restrictions::*;
+pub use restrictions::*;
 
 mod binary_expression_tree;
-use binary_expression_tree::*;
+pub use binary_expression_tree::*;
 
 #[derive(Encode, Debug, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 pub enum ProcessStatus {
@@ -105,7 +105,7 @@ pub mod pallet {
         /// The overarching event type.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
         // The primary identifier for a process (i.e. it's name, and version)
-        type ProcessIdentifier: Parameter + Default + MaxEncodedLen;
+        type ProcessIdentifier: Parameter + Default + MaxEncodedLen + MaybeSerializeDeserialize;
         type ProcessVersion: Parameter + AtLeast32Bit + Default + MaxEncodedLen;
 
         #[pallet::constant]
@@ -115,10 +115,14 @@ pub mod pallet {
         type CreateProcessOrigin: EnsureOrigin<Self::RuntimeOrigin>;
         type DisableProcessOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-        type RoleKey: Parameter + Default + Ord + MaxEncodedLen;
-        type TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen;
-        type TokenMetadataValue: Parameter + Default + MaxEncodedLen;
-        type TokenMetadataValueDiscriminator: Parameter + Default + From<Self::TokenMetadataValue> + MaxEncodedLen;
+        type RoleKey: Parameter + Default + Ord + MaxEncodedLen + MaybeSerializeDeserialize;
+        type TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen + MaybeSerializeDeserialize;
+        type TokenMetadataValue: Parameter + Default + MaxEncodedLen + MaybeSerializeDeserialize;
+        type TokenMetadataValueDiscriminator: Parameter
+            + Default
+            + From<Self::TokenMetadataValue>
+            + MaxEncodedLen
+            + MaybeSerializeDeserialize;
 
         // Origin for overriding weight calculation implementation
         type WeightInfo: WeightInfo;
@@ -151,6 +155,42 @@ pub mod pallet {
     #[pallet::getter(fn version_model)]
     pub(super) type VersionModel<T: Config> =
         StorageMap<_, Blake2_128Concat, T::ProcessIdentifier, T::ProcessVersion, ValueQuery>;
+
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config> {
+        pub processes: Vec<(
+            T::ProcessIdentifier,
+            BoundedVec<
+                BooleanExpressionSymbol<
+                    T::RoleKey,
+                    T::TokenMetadataKey,
+                    T::TokenMetadataValue,
+                    T::TokenMetadataValueDiscriminator
+                >,
+                T::MaxProcessProgramLength
+            >
+        )>
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self { processes: Vec::new() }
+        }
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+            for (process_id, program) in self.processes.iter() {
+                if !Pallet::<T>::validate_program(&program) {
+                    panic!("Invalid program detected in genesis!")
+                }
+                let version = Pallet::<T>::update_version(process_id).unwrap();
+                Pallet::<T>::persist_process(process_id, &version, program).unwrap();
+            }
+        }
+    }
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -207,12 +247,9 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
-            ensure!(
-                Pallet::<T>::validate_program(program.clone()),
-                Error::<T>::InvalidProgram
-            );
+            ensure!(Pallet::<T>::validate_program(&program), Error::<T>::InvalidProgram);
 
-            let version: T::ProcessVersion = Pallet::<T>::update_version(id.clone()).unwrap();
+            let version: T::ProcessVersion = Pallet::<T>::update_version(&id).unwrap();
             Pallet::<T>::persist_process(&id, &version, &program)?;
 
             Self::deposit_event(Event::ProcessCreated(
@@ -243,7 +280,7 @@ pub mod pallet {
     // helper methods
     impl<T: Config> Pallet<T> {
         pub fn validate_program(
-            program: BoundedVec<
+            program: &BoundedVec<
                 BooleanExpressionSymbol<
                     T::RoleKey,
                     T::TokenMetadataKey,
@@ -271,11 +308,11 @@ pub mod pallet {
             };
         }
 
-        pub fn update_version(id: T::ProcessIdentifier) -> Result<T::ProcessVersion, Error<T>> {
-            let version: T::ProcessVersion = Pallet::<T>::get_next_version(&id);
+        pub fn update_version(id: &T::ProcessIdentifier) -> Result<T::ProcessVersion, Error<T>> {
+            let version: T::ProcessVersion = Pallet::<T>::get_next_version(id);
             match version == One::one() {
-                true => <VersionModel<T>>::insert(&id, version.clone()),
-                false => <VersionModel<T>>::mutate(&id, |v| *v = version.clone())
+                true => <VersionModel<T>>::insert(id, version.clone()),
+                false => <VersionModel<T>>::mutate(id, |v| *v = version.clone())
             };
 
             return Ok(version);
