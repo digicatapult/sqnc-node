@@ -15,7 +15,7 @@ You will need to run `rustup` which is [documented here](https://github.com/digi
 This [diener tool](https://crates.io/crates/diener) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path
 
 `cargo install diener`
-and in the root of the `dscp-node` directory run `diener update --substrate --branch polkadot-v<version>`
+and in the root of the `veritable-node` directory run `diener update --substrate --branch polkadot-v<version>`
 
 ### Test Building the Node
 
@@ -68,9 +68,9 @@ If the tests pass create a PR from the **integration** branch.
 
 ### Node
 
-The last item to upgrade is the `dscp-node` itself.
+The last item to upgrade is the `veritable-node` itself.
 
-There are two steps to undertake, the dscp-node's and dscp-node-runtime's versions should be bumped in `node/Cargo.toml` and then we should try to build with the runtime-benchmarks feature enabled.
+There are two steps to undertake, the veritable-node's and veritable-node-runtime's versions should be bumped in `node/Cargo.toml` and then we should try to build with the runtime-benchmarks feature enabled.
 
 ```bash
 cargo build --release --features runtime-benchmarks
