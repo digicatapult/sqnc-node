@@ -118,7 +118,7 @@ jobs:
     needs: [get-version]
     strategy:
       matrix:
-        architectures: [ {arch: x86_64, target-tupl: x86_64-unknown-linux-gnu}, {arch: aarch64, target-tupl: aarch64-unknown-linux-gnu, gcc_package: gcc-aarch64-linux-gnu, gcc: aarch64-linux-gnu-gcc}]
+        architectures: [ {arch: x86_64, target-tupl: x86_64-unknown-linux-gnu}, {arch: aarch64, target-tupl: aarch64-unknown-linux-gnu, gcc_package: gcc-aarch64-linux-gnu, gcc: aarch64-linux-gnu-gcc, g++_package: g++-aarch64-linux-gnu, g++: aarch64-linux-gnu-g++}]
 
     steps:
       - uses: actions/checkout@v3
@@ -137,9 +137,11 @@ jobs:
         run: sudo apt-get install protobuf-compiler
       - name: install cross-compilation tools
         run: |
-          sudo apt-get install -y ${{ matrix.architectures.gcc_package }}
+          sudo apt-get install -y ${{ matrix.architectures.gcc_package }} ${{ matrix.architectures.g++_package }}
           upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
           echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
+          echo CC_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
+          echo CXX_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.g++ }} >> $GITHUB_ENV
         if: matrix.architectures.gcc_package != ''
       # - name: Install sccache
       #   env:
