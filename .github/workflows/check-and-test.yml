@@ -137,12 +137,19 @@ jobs:
         run: sudo apt-get install protobuf-compiler
       - name: install cross-compilation tools
         run: |
+          sudo dpkg --add-architecture aarch64
+          sudo apt-get update
+          sudo apt-get upgrade -y
           sudo apt-get install -y ${{ matrix.architectures.gcc_package }} ${{ matrix.architectures.gpp_package }}
           upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
           echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
           echo CC_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
           echo CXX_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gpp }} >> $GITHUB_ENV
+          echo PKG_CONFIG_ALLOW_CROSS=1 >> $GITHUB_ENV
+          echo PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig/
         if: matrix.architectures.gcc_package != ''
+      - name: check dir contents
+        run: ls -al /usr/
       # - name: Install sccache
       #   env:
       #     TEMP: ${{ runner.temp }}
