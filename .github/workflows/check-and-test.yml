@@ -113,12 +113,13 @@ jobs:
             For a guide on running benchmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
 
   check:
-    name: Check and test - ${{ matrix.architectures.arch }}
+    name: ${{ matrix.commands }} - ${{ matrix.architectures.arch }}
     runs-on: ubuntu-latest
     needs: [get-version]
     strategy:
       matrix:
         architectures: [ {arch: x86_64, target-tupl: x86_64-unknown-linux-gnu}, {arch: aarch64, target-tupl: aarch64-unknown-linux-gnu, gcc_package: gcc-aarch64-linux-gnu, gcc: aarch64-linux-gnu-gcc, gpp_package: g++-aarch64-linux-gnu, gpp: aarch64-linux-gnu-g++}]
+        commands: [check, test]
 
     steps:
       - uses: actions/checkout@v3
@@ -195,19 +196,11 @@ jobs:
         with:
           command: fmt
           args: --check
-      - name: Cargo check
+      - name: Cargo ${{ matrix.commands }}
         uses: actions-rs/cargo@v1
         # env:
         #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
-          command: check
+          command: ${{ matrix.commands }}
           args: --target ${{ matrix.architectures.target-tupl }}
-      - name: Cargo test
-        uses: actions-rs/cargo@v1
-        # env:
-        #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
-        #   SCCACHE_DIR: ${{ runner.temp }}/cache
-        with:
-          command: test
-          args: --target ${{ matrix.architectures.target-tupl }} --verbose
