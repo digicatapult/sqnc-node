@@ -198,7 +198,7 @@ jobs:
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: check
-          args: --target ${{ matrix.architectures.target-tupl }}
+          args: --target ${{ matrix.architectures.target-tupl }} --verbose
       - name: Cargo test
         uses: actions-rs/cargo@v1
         # env:
