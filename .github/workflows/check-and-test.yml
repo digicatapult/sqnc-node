@@ -140,7 +140,7 @@ jobs:
           sudo dpkg --add-architecture aarch64
           sudo apt-get update
           sudo apt-get upgrade -y
-          sudo apt-get install -y ${{ matrix.architectures.gcc_package }} ${{ matrix.architectures.gpp_package }} pkg-config libclang-dev
+          sudo apt-get install -y ${{ matrix.architectures.gcc_package }} ${{ matrix.architectures.gpp_package }} pkg-config libclang-dev libz-dev libssl-dev
           upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
           echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
           echo CC_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
@@ -149,8 +149,6 @@ jobs:
           echo PKG_CONFIG_ALLOW_CROSS=1 >> $GITHUB_ENV
           echo PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig/ >> $GITHUB_ENV
         if: matrix.architectures.gcc_package != ''
-      - name: check dir contents
-        run: ls -al /usr/
       # - name: Install sccache
       #   env:
       #     TEMP: ${{ runner.temp }}
@@ -196,17 +194,14 @@ jobs:
         with:
           command: fmt
           args: --check
-      - name: printenv
-        run: env
       - name: Cargo check
         uses: actions-rs/cargo@v1
-        env:
-          RUST_BACKTRACE: 1
+        # env:
         #   RUSTC_WRAPPER: ${{ runner.temp }}/sccache
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: check
-          args: --target ${{ matrix.architectures.target-tupl }} --verbose
+          args: --target ${{ matrix.architectures.target-tupl }}
       - name: Cargo test
         uses: actions-rs/cargo@v1
         # env:
@@ -214,4 +209,4 @@ jobs:
         #   SCCACHE_DIR: ${{ runner.temp }}/cache
         with:
           command: test
-          args: --target ${{ matrix.architectures.target-tupl }}
+          args: --target ${{ matrix.architectures.target-tupl }} --verbose
