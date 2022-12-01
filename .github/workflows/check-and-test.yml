@@ -204,4 +204,4 @@ jobs:
         with:
           command: ${{ matrix.commands }}
           args: --target ${{ matrix.architectures.target-tupl }}
-          use-cross: {{ matrix.architectures.cross }}
+          use-cross: ${{ matrix.architectures.cross }}
