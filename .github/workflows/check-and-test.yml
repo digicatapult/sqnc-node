@@ -118,7 +118,7 @@ jobs:
     needs: [get-version]
     strategy:
       matrix:
-        architectures: [ {arch: x86_64, target-tupl: x86_64-unknown-linux-gnu}, {arch: aarch64, target-tupl: aarch64-unknown-linux-gnu, gcc_package: gcc-aarch64-linux-gnu, gcc: aarch64-linux-gnu-gcc, gpp_package: g++-aarch64-linux-gnu, gpp: aarch64-linux-gnu-g++}]
+        architectures: [ {arch: x86_64, target-tupl: x86_64-unknown-linux-gnu, cross: false }, {arch: aarch64, target-tupl: aarch64-unknown-linux-gnu, gcc_package: gcc-aarch64-linux-gnu, gcc: aarch64-linux-gnu-gcc, gpp_package: g++-aarch64-linux-gnu, gpp: aarch64-linux-gnu-g++, cross: true}]
         commands: [check, test]
 
     steps:
@@ -134,23 +134,23 @@ jobs:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
           target: ${{ matrix.architectures.target-tupl }}
           override: true
-      - name: install protobuf compiler
-        run: sudo apt-get install protobuf-compiler
-      - name: install cross-compilation tools
-        run: |
-          sudo dpkg --add-architecture aarch64
-          sudo apt-get update
-          sudo apt-get upgrade -y
-          sudo apt-get install -y ${{ matrix.architectures.gcc_package }} ${{ matrix.architectures.gpp_package }} pkg-config libclang-dev libz-dev libssl-dev
-          upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
-          echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
-          echo CC_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
-          echo CXX_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gpp }} >> $GITHUB_ENV
-          echo BINDGEN_EXTRA_CLANG_ARGS="--sysroot=/usr/aarch64-linux-gnu -mfloat-abi=hard" >> $GITHUB_ENV
-          echo PKG_CONFIG_ALLOW_CROSS=1 >> $GITHUB_ENV
-          echo PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig/ >> $GITHUB_ENV
-          echo ZLIB_NO_PKG_CONFIG=1 >> $GITHUB_ENV
-        if: matrix.architectures.gcc_package != ''
+      # - name: install protobuf compiler
+      #   run: sudo apt-get install protobuf-compiler
+      # - name: install cross-compilation tools
+      #   run: |
+      #     sudo dpkg --add-architecture aarch64
+      #     sudo apt-get update
+      #     sudo apt-get upgrade -y
+      #     sudo apt-get install -y ${{ matrix.architectures.gcc_package }} ${{ matrix.architectures.gpp_package }} pkg-config libclang-dev libz-dev libssl-dev
+      #     upcase=$(echo ${{ matrix.architectures.target-tupl }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
+      #     echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
+      #     echo CC_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gcc }} >> $GITHUB_ENV
+      #     echo CXX_${{ matrix.architectures.target-tupl }}=${{ matrix.architectures.gpp }} >> $GITHUB_ENV
+      #     echo BINDGEN_EXTRA_CLANG_ARGS="--sysroot=/usr/aarch64-linux-gnu -mfloat-abi=hard" >> $GITHUB_ENV
+      #     echo PKG_CONFIG_ALLOW_CROSS=1 >> $GITHUB_ENV
+      #     echo PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig/ >> $GITHUB_ENV
+      #     echo ZLIB_NO_PKG_CONFIG=1 >> $GITHUB_ENV
+      #   if: matrix.architectures.gcc_package != ''
       # - name: Install sccache
       #   env:
       #     TEMP: ${{ runner.temp }}
@@ -204,3 +204,4 @@ jobs:
         with:
           command: ${{ matrix.commands }}
           args: --target ${{ matrix.architectures.target-tupl }}
+          use-cross: {{ matrix.architectures.cross }}
