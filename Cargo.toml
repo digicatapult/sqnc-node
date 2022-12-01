@@ -5,5 +5,4 @@ panic = 'unwind'
 members = ['node', 'pallets/*', 'runtime']
 
 [target.aarch64-unknown-linux-gnu]
-xargo = false
-dockerfile =  "./docker/cross.dockerfile"
+pre-build = ["apt-get update && apt-get install --assume-yes protobuf-compiler"]
