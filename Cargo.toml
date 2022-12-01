@@ -3,6 +3,3 @@ panic = 'unwind'
 
 [workspace]
 members = ['node', 'pallets/*', 'runtime']
-
-[target.aarch64-unknown-linux-gnu]
-pre-build = ["apt-get update && apt-get install --assume-yes protobuf-compiler"]
