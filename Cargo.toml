@@ -4,6 +4,6 @@ panic = 'unwind'
 [workspace]
 members = ['node', 'pallets/*', 'runtime']
 
-[package.metadata.cross.target.aarch64-unknown-linux-gnu]
+[dscp-node.metadata.cross.target.aarch64-unknown-linux-gnu]
 xargo = false
 dockerfile =  "./docker/cross.dockerfile"
