@@ -1,4 +1,4 @@
-# dscp-node helm chart
+# veritable-node helm chart
 
 Forked from https://paritytech.github.io/helm-charts/
 ## Installing the chart
