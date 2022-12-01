@@ -134,8 +134,9 @@ jobs:
           toolchain: ${{ needs.get-version.outputs.toolchain }}
           target: ${{ matrix.architectures.target-tupl }}
           override: true
-      # - name: install protobuf compiler
-      #   run: sudo apt-get install protobuf-compiler
+      - name: install protobuf compiler
+        run: sudo apt-get install protobuf-compiler
+        if: matrix.architectures.cross = 'false'
       # - name: install cross-compilation tools
       #   run: |
       #     sudo dpkg --add-architecture aarch64
