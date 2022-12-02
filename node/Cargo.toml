@@ -11,9 +11,6 @@ version = '4.4.7'
 [[bin]]
 name = 'dscp-node'
 
-[package.metadata.cross.target.aarch64-unknown-linux-gnu]
-pre-build = ["apt-get update && apt-get install --assume-yes protobuf-compiler"]
-
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
