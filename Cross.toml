@@ -1,2 +1,2 @@
 [target.aarch64-unknown-linux-gnu]
-pre-build = ["apt update && apt install -y unzip", "curl -Lo protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.10/protoc-21.10-linux-x86_64.zip", "unzip -q protoc.zip bin/protoc -d /usr/local && chmod a+x /usr/local/bin/protoc", "rm -rf protoc.zip" ]
+pre-build = ["apt update && apt install -y unzip clang llvm-dev libclang-dev", "curl -Lo protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.10/protoc-21.10-linux-x86_64.zip", "unzip -q protoc.zip bin/protoc -d /usr/local && chmod a+x /usr/local/bin/protoc", "rm -rf protoc.zip" ]
