@@ -58,6 +58,7 @@ pub mod pallet {
         /// - One DB write (event).
         /// - Weight of derivative `call` execution + 10,000.
         /// # </weight>
+        #[pallet::call_index(0)]
         #[pallet::weight({
           let dispatch_info = call.get_dispatch_info();
           (dispatch_info.weight, dispatch_info.class)
@@ -88,6 +89,7 @@ pub mod pallet {
         /// - O(1).
         /// - The weight of this call is defined by the caller.
         /// # </weight>
+        #[pallet::call_index(1)]
         #[pallet::weight((*_weight, call.get_dispatch_info().class))]
         pub fn doas_root_unchecked_weight(
             origin: OriginFor<T>,
@@ -114,6 +116,7 @@ pub mod pallet {
         /// - One DB write (event).
         /// - Weight of derivative `call` execution + 10,000.
         /// # </weight>
+        #[pallet::call_index(2)]
         #[pallet::weight({
           let dispatch_info = call.get_dispatch_info();
           (

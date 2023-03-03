@@ -126,6 +126,7 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
+        #[pallet::call_index(0)]
         #[pallet::weight(T::WeightInfo::update_key())]
         pub fn update_key(origin: OriginFor<T>, new_key: BoundedVec<u8, T::KeyLength>) -> DispatchResultWithPostInfo {
             T::UpdateOrigin::ensure_origin(origin)?;
@@ -140,6 +141,7 @@ pub mod pallet {
             Ok(().into())
         }
 
+        #[pallet::call_index(1)]
         #[pallet::weight(T::WeightInfo::rotate_key())]
         pub fn rotate_key(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::RotateOrigin::ensure_origin(origin)?;

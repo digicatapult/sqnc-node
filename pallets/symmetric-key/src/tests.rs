@@ -43,7 +43,7 @@ parameter_types! {
     pub const SS58Prefix: u8 = 42;
     pub BlockWeights: frame_system::limits::BlockWeights =
         frame_system::limits::BlockWeights::simple_max(
-            frame_support::weights::constants::WEIGHT_PER_SECOND.set_proof_size(u64::MAX)
+            Weight::from_parts(frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND, u64::MAX), 
         );
 }
 
