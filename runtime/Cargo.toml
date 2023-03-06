@@ -119,6 +119,7 @@ runtime-benchmarks = [
     "frame-system/runtime-benchmarks",
     "hex-literal",
     "pallet-balances/runtime-benchmarks",
+    "pallet-collective/runtime-benchmarks",
     "pallet-grandpa/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
     "pallet-scheduler/runtime-benchmarks",
