@@ -1,6 +1,6 @@
 [package]
 name = "pallet-doas"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>", "Parity Technologies <admin@parity.io>"]
 edition = "2021"
 license = "Apache-2.0"
