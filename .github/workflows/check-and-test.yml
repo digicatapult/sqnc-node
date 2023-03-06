@@ -27,42 +27,6 @@ jobs:
         run: |
           echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
 
-  check-helm-version:
-    name: Check helm version
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: git fetch --depth=1 --tags origin
-      - name: Install yq
-        run: sudo snap install yq
-      - name: Check Helm Version
-        id: get_version
-        run: ./scripts/check-helm-version.sh
-        shell: bash
-      - name: Error if version is not increased
-        shell: bash
-        run: |
-          exit $([[ "${{steps.get_version.outputs.IS_NEW_VERSION}}" = "true" ]] && echo 0 || echo 1)
-
-  helm-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.4.0
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.7
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.0.1
-      - name: Run chart-testing (lint)
-        run: ct lint --validate-maintainers false --charts helm/dscp-node/
-
   check-weights-have-changes:
     name: Check Weights
     runs-on: ubuntu-latest
@@ -88,7 +52,7 @@ jobs:
             if [[ -z "$weights" ]]; then pallets_requiring_weights+=($(basename $pallet_dir)); fi
           done
 
-          echo "pallets=${pallets_requiring_weights[*]}" >> $GITHUB_OUTPUT     
+          echo "pallets=${pallets_requiring_weights[*]}" >> $GITHUB_OUTPUT
       - name: Find Comment
         id: find
         uses: peter-evans/find-comment@v2
@@ -109,7 +73,7 @@ jobs:
             For the author and any reviewers:
               - consider whether the changes could significantly affect the weight of any extrinsics
               - consider whether benchmarks need updating to correctly cover weight variations over inputs
-            
+
             For a guide on running benchmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
 
   check:

@@ -231,6 +231,7 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
+        #[pallet::call_index(0)]
         #[pallet::weight(T::WeightInfo::create_process(program.len() as u32))]
         pub fn create_process(
             origin: OriginFor<T>,
@@ -262,6 +263,7 @@ pub mod pallet {
             return Ok(().into());
         }
 
+        #[pallet::call_index(1)]
         #[pallet::weight(T::WeightInfo::disable_process())]
         pub fn disable_process(
             origin: OriginFor<T>,

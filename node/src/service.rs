@@ -6,7 +6,7 @@ use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager, WarpSyncParams};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
@@ -122,7 +122,8 @@ pub fn new_partial(
         spawner: &task_manager.spawn_essential_handle(),
         registry: config.prometheus_registry(),
         check_for_equivocation: Default::default(),
-        telemetry: telemetry.as_ref().map(|x| x.handle())
+        telemetry: telemetry.as_ref().map(|x| x.handle()),
+        compatibility_mode: Default::default()
     })?;
 
     Ok(sc_service::PartialComponents {
@@ -193,7 +194,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
             block_announce_validator_builder: None,
-            warp_sync: Some(warp_sync)
+            warp_sync_params: Some(WarpSyncParams::WithProvider(warp_sync))
         })?;
 
     if config.offchain_worker.enabled {
@@ -269,7 +270,8 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             justification_sync_link: network.clone(),
             block_proposal_slot_portion: SlotProportion::new(2f32 / 3f32),
             max_block_proposal_slot_portion: None,
-            telemetry: telemetry.as_ref().map(|x| x.handle())
+            telemetry: telemetry.as_ref().map(|x| x.handle()),
+            compatibility_mode: Default::default()
         })?;
 
         // the AURA authoring task is considered essential, i.e. if it
@@ -279,27 +281,27 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             .spawn_blocking("aura", Some("block-authoring"), aura);
     }
 
-    // if the node isn't actively participating in consensus then it doesn't
-    // need a keystore, regardless of which protocol we use below.
-    let keystore = if role.is_authority() {
-        Some(keystore_container.sync_keystore())
-    } else {
-        None
-    };
-
-    let grandpa_config = sc_finality_grandpa::Config {
-        // FIXME #1578 make this available through chainspec
-        gossip_duration: Duration::from_millis(333),
-        justification_period: 512,
-        name: Some(name),
-        observer_enabled: false,
-        keystore,
-        local_role: role,
-        telemetry: telemetry.as_ref().map(|x| x.handle()),
-        protocol_name: grandpa_protocol_name
-    };
-
     if enable_grandpa {
+        // if the node isn't actively participating in consensus then it doesn't
+        // need a keystore, regardless of which protocol we use below.
+        let keystore = if role.is_authority() {
+            Some(keystore_container.sync_keystore())
+        } else {
+            None
+        };
+
+        let grandpa_config = sc_finality_grandpa::Config {
+            // FIXME #1578 make this available through chainspec
+            gossip_duration: Duration::from_millis(333),
+            justification_period: 512,
+            name: Some(name),
+            observer_enabled: false,
+            keystore,
+            local_role: role,
+            telemetry: telemetry.as_ref().map(|x| x.handle()),
+            protocol_name: grandpa_protocol_name
+        };
+
         // start the full GRANDPA voter
         // NOTE: non-authorities could run the GRANDPA observer protocol, but at
         // this point the full voter should provide better guarantees of block

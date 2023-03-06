@@ -179,6 +179,7 @@ pub mod pallet {
     // The pallet's dispatchable functions.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
+        #[pallet::call_index(0)]
         #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
         pub fn run_process(
             origin: OriginFor<T>,
