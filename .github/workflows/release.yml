@@ -193,7 +193,7 @@ jobs:
           else
             echo "GHCR_VERSION_TAG=" >> $GITHUB_OUTPUT
             echo "GHCR_LATEST_TAG=" >> $GITHUB_OUTPUT
-            echo "DOCKERHUB_VERSION_TAG=" >> $GITHUB_OUTPUT       
+            echo "DOCKERHUB_VERSION_TAG=" >> $GITHUB_OUTPUT
             echo "DOCKERHUB_LATEST_TAG=" >> $GITHUB_OUTPUT
           fi;
       - name: Login to GitHub Container Registry
@@ -208,7 +208,7 @@ jobs:
           username: ${{ secrets.DSCP_DOCKERHUB_USERNAME }}
           password: ${{ secrets.DSCP_DOCKERHUB_TOKEN }}
       - name: Build image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .

@@ -1,6 +1,0 @@
-image:
-  repository: dscp-node
-  tag: latest
-  PullPolicy: Never
-node:
-  dataVolumeSize: 1Gi
