@@ -14,9 +14,6 @@ name = 'dscp-node'
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
-[target.aarch64-unknown-linux-gnu]
-linker = "aarch64-linux-gnu-gcc"
-
 [dependencies]
 clap = { version = "4.1.8", features = ["derive"] }
 futures = { version = "0.3.21", features = ["thread-pool"]}
