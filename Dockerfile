@@ -10,7 +10,15 @@ EOF
 
 WORKDIR /tmp/
 
-RUN curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_amd64 --output ./fetch && chmod +x ./fetch
+RUN <<EOF
+if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+  curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_amd64 --output ./fetch;
+  chmod +x ./fetch;
+elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+  curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_arm64 --output ./fetch;
+  chmod +x ./fetch;
+fi
+EOF
 
 ARG DSCP_VERSION=latest
 ARG DSCP_REPO=https://github.com/digicatapult/dscp-node
