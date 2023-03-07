@@ -148,6 +148,7 @@ jobs:
           pushd ./x86_64
           echo $BUILD_VERSION | tee ./VERSION.txt
           mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
+          chmod +x ./dscp-node
           shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
           shasum -a 256 ./dscp_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./dscp_node_runtime.compact.wasm.sha256
           tar -czvf ../dscp-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
@@ -156,6 +157,7 @@ jobs:
           pushd ./aarch64
           echo $BUILD_VERSION | tee ./VERSION.txt
           mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
+          chmod +x ./dscp-node
           shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
           tar -czvf ../dscp-node-${BUILD_VERSION}-aarch64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
           popd;
