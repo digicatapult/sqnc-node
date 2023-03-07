@@ -65,6 +65,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: install toolchains
         run: |
+          rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
           rustup target add ${{ matrix.architectures.target-tupl }} --toolchain ${{ needs.get-version.outputs.toolchain }}
           rustup target add wasm32-unknown-unknown --toolchain nightly
       - name: install deps
