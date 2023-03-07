@@ -23,7 +23,7 @@ FROM ubuntu:jammy AS runtime
 
 RUN <<EOF
 apt-get update
-apt-get install -y libgcc-11-dev binutils
+apt-get install -y libgcc-11-dev
 rm -rf /var/lib/apt/lists/*
 EOF
 
