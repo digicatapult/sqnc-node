@@ -1,6 +1,6 @@
-FROM bitnami/minideb:bullseye AS setup
+FROM ubuntu:jammy AS setup
 
-RUN install_packages curl ca-certificates
+RUN apt-get update && apt-get install -y curl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/
 
@@ -13,9 +13,9 @@ RUN ./fetch --repo="${DSCP_REPO}" --tag="${DSCP_VERSION}" --release-asset="dscp-
   && mkdir ./dscp-node \
   && tar -xzf ./dscp-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./dscp-node
 
-FROM bitnami/minideb:bullseye AS runtime
+FROM ubuntu:jammy AS runtime
 
-RUN install_packages libgcc-10-dev
+RUN apt-get update && apt-get install -y libgcc-11-dev binutils && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /dscp-node /data
 
