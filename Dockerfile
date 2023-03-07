@@ -1,6 +1,12 @@
+# syntax=docker/dockerfile:1.5
+
 FROM ubuntu:jammy AS setup
 
-RUN apt-get update && apt-get install -y curl ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN <<EOF
+apt-get update
+apt-get install -y curl ca-certificates
+rm -rf /var/lib/apt/lists/*
+EOF
 
 WORKDIR /tmp/
 
@@ -15,7 +21,11 @@ RUN ./fetch --repo="${DSCP_REPO}" --tag="${DSCP_VERSION}" --release-asset="dscp-
 
 FROM ubuntu:jammy AS runtime
 
-RUN apt-get update && apt-get install -y libgcc-11-dev binutils && rm -rf /var/lib/apt/lists/*
+RUN <<EOF
+apt-get update
+apt-get install -y libgcc-11-dev binutils
+rm -rf /var/lib/apt/lists/*
+EOF
 
 RUN mkdir /dscp-node /data
 
