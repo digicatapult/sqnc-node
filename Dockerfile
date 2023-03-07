@@ -10,6 +10,8 @@ EOF
 
 WORKDIR /tmp/
 
+ARG TARGETPLATFORM
+
 RUN <<EOF
 if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
   curl -L https://github.com/gruntwork-io/fetch/releases/download/v0.4.2/fetch_linux_amd64 --output ./fetch;
@@ -22,7 +24,6 @@ EOF
 
 ARG DSCP_VERSION=latest
 ARG DSCP_REPO=https://github.com/digicatapult/dscp-node
-ARG TARGETPLATFORM
 
 RUN <<EOF
 if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
