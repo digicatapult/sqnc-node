@@ -118,7 +118,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dscp-node-${{ matrix.architectures.name }}
+          name: dscp-node-${{ matrix.architectures.arch }}
           path: |
             ./target/${{ matrix.architectures.target-tupl }}/release/dscp-node
             ./target/${{ matrix.architectures.target-tupl }}/release/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
@@ -147,6 +147,7 @@ jobs:
           ls -R .
           pushd ./x86_64
           echo $BUILD_VERSION | tee ./VERSION.txt
+          mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
           shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
           shasum -a 256 ./dscp_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./dscp_node_runtime.compact.wasm.sha256
           tar -czvf ../dscp-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
@@ -154,6 +155,7 @@ jobs:
           popd;
           pushd ./aarch64
           echo $BUILD_VERSION | tee ./VERSION.txt
+          mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
           shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
           tar -czvf ../dscp-node-${BUILD_VERSION}-aarch64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
           popd;
