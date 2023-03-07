@@ -111,16 +111,16 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
-          BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.architecture.bindgenExtraClangArgs }}
+          BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.architectures.bindgenExtraClangArgs }}
         run: |
           cargo build --release --target ${{ matrix.architectures.target-tupl }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: dscp-node-${{ matrix.architecture.name }}
+          name: dscp-node-${{ matrix.architectures.name }}
           path: |
-            ${{ matrix.architecture.artifactDir }}/dscp-node
-            ${{ matrix.architecture.artifactDir }}/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
+            ${{ matrix.architectures.artifactDir }}/dscp-node
+            ${{ matrix.architectures.artifactDir }}/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
 
   build-release:
     name: Build release
