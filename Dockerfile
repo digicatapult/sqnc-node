@@ -1,6 +1,12 @@
-FROM bitnami/minideb:bullseye AS setup
+# syntax=docker/dockerfile:1.5
 
-RUN install_packages curl ca-certificates
+FROM ubuntu:jammy AS setup
+
+RUN <<EOF
+apt-get update
+apt-get install -y curl ca-certificates
+rm -rf /var/lib/apt/lists/*
+EOF
 
 WORKDIR /tmp/
 
@@ -13,9 +19,13 @@ RUN ./fetch --repo="${DSCP_REPO}" --tag="${DSCP_VERSION}" --release-asset="dscp-
   && mkdir ./dscp-node \
   && tar -xzf ./dscp-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./dscp-node
 
-FROM bitnami/minideb:bullseye AS runtime
+FROM ubuntu:jammy AS runtime
 
-RUN install_packages libgcc-10-dev
+RUN <<EOF
+apt-get update
+apt-get install -y libgcc-11-dev
+rm -rf /var/lib/apt/lists/*
+EOF
 
 RUN mkdir /dscp-node /data
 
