@@ -13,6 +13,10 @@ permissions:
   packages: write
   pull-requests: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Gets the build version and information about if this is a new version
   get-version:
@@ -42,21 +46,32 @@ jobs:
           echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
 
   # Github releases are only performed when the release version changes
-  build-release:
-    name: Build release
+  build-binary:
+    name: Build binary
     runs-on: ubuntu-latest
     needs: [get-version]
     if: ${{ needs.get-version.outputs.is_new_version == 'true' ||  needs.get-version.outputs.is_prerelease == 'true'}}
+    strategy:
+      matrix:
+        architectures:
+          - arch: x86_64
+            target-tupl: x86_64-unknown-linux-gnu
+            dependencies: protobuf-compiler
+            bindgenExtraClangArgs: ""
+          - arch: aarch64
+            target-tupl: aarch64-unknown-linux-gnu
+            dependencies: gcc-aarch64-linux-gnu protobuf-compiler libclang-dev g++-aarch64-linux-gnu
+            bindgenExtraClangArgs: "--sysroot=/usr/aarch64-linux-gnu -mfloat-abi=hard"
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ needs.get-version.outputs.toolchain }}
-          target: wasm32-unknown-unknown
-      - name: install protobuf compiler
-        run: sudo apt-get install protobuf-compiler
+      - name: install toolchains
+        run: |
+          rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
+          rustup target add ${{ matrix.architectures.target-tupl }} --toolchain ${{ needs.get-version.outputs.toolchain }}
+          rustup target add wasm32-unknown-unknown --toolchain nightly
+      - name: install deps
+        run: sudo apt-get install ${{ matrix.architectures.dependencies }}
       - name: Install sccache
         env:
           TEMP: ${{ runner.temp }}
@@ -88,33 +103,65 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/cache
-          key: ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
+          key: ${{ runner.os }}-cargo-build-cache-release-${{ matrix.architectures.arch }}-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}
-            ${{ runner.os }}-cargo-build-cache-release-${{ needs.get-version.outputs.toolchain }}-
+            ${{ runner.os }}-cargo-build-cache-release-${{ matrix.architectures.arch }}-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}
+            ${{ runner.os }}-cargo-build-cache-release-${{ matrix.architectures.arch }}-${{ needs.get-version.outputs.toolchain }}-
+            ${{ runner.os }}-cargo-build-cache-release-${{ matrix.architectures.arch }}-
             ${{ runner.os }}-cargo-build-cache-release-
       - name: Cargo build
-        uses: actions-rs/cargo@v1
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
+          SCCACHE_CACHE_SIZE: "1G"
+          BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.architectures.bindgenExtraClangArgs }}
+        run: |
+          cargo build --release --target ${{ matrix.architectures.target-tupl }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          command: build
-          args: --release
+          name: dscp-node-${{ matrix.architectures.arch }}
+          path: |
+            ./target/${{ matrix.architectures.target-tupl }}/release/dscp-node
+            ./target/${{ matrix.architectures.target-tupl }}/release/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
+
+  build-release:
+    name: Build release
+    runs-on: ubuntu-latest
+    needs: [get-version, build-binary]
+    if: ${{ needs.get-version.outputs.is_new_version == 'true' ||  needs.get-version.outputs.is_prerelease == 'true'}}
+
+    steps:
+      - name: Download x86_64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dscp-node-x86_64
+          path: x86_64
+      - name: Download aarch64 Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dscp-node-aarch64
+          path: aarch64
       - name: Prepare artefacts
         env:
           BUILD_VERSION: ${{ needs.get-version.outputs.version }}
-          TEMP: ${{ runner.temp }}
         run: |
-          mkdir $TEMP/artefacts
-          cp ./target/release/dscp-node $TEMP/artefacts/dscp-node
-          cp ./target/release/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm $TEMP/artefacts/dscp_node_runtime.compact.wasm
-          echo $BUILD_VERSION | tee $TEMP/artefacts/VERSION.txt
-          shasum -a 256 $TEMP/artefacts/dscp-node | cut -d ' ' -f 1 | tee $TEMP/artefacts/dscp-node.sha256
-          shasum -a 256 $TEMP/artefacts/dscp_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee $TEMP/artefacts/dscp_node_runtime.compact.wasm.sha256
-          pushd $TEMP/artefacts/
-          tar -czvf dscp-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
-          tar -czvf dscp-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm.sha256
+          ls -R .
+          pushd ./x86_64
+          echo $BUILD_VERSION | tee ./VERSION.txt
+          mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
+          chmod +x ./dscp-node
+          shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
+          shasum -a 256 ./dscp_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./dscp_node_runtime.compact.wasm.sha256
+          tar -czvf ../dscp-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
+          tar -czvf ../dscp-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm.sha256
+          popd;
+          pushd ./aarch64
+          echo $BUILD_VERSION | tee ./VERSION.txt
+          mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
+          chmod +x ./dscp-node
+          shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
+          tar -czvf ../dscp-node-${BUILD_VERSION}-aarch64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
           popd;
 
       - name: Build release version
@@ -126,8 +173,9 @@ jobs:
           prerelease: ${{ needs.get-version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
           files: |
-            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
-            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
+            ./dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ./dscp-node-${{ needs.get-version.outputs.version }}-aarch64-unknown-linux-gnu.tar.gz
+            ./dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
       - name: Delete release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
         uses: actions/github-script@v6
@@ -151,8 +199,9 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
-            ${{ runner.temp }}/artefacts/dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
+            ./dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ./dscp-node-${{ needs.get-version.outputs.version }}-aarch64-unknown-linux-gnu.tar.gz
+            ./dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
 
   # Docker build are always performed but are only version tagged on new version
   build-docker:
@@ -216,7 +265,7 @@ jobs:
             RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
             DSCP_VERSION=${{ needs.get-version.outputs.version }}
           file: ./Dockerfile
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: |
             ghcr.io/digicatapult/dscp-node:${{ github.sha }}
