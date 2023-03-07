@@ -111,6 +111,7 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
+          SCCACHE_CACHE_SIZE: "1G"
           BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.architectures.bindgenExtraClangArgs }}
         run: |
           cargo build --release --target ${{ matrix.architectures.target-tupl }}
@@ -119,8 +120,8 @@ jobs:
         with:
           name: dscp-node-${{ matrix.architectures.name }}
           path: |
-            ${{ matrix.architectures.artifactDir }}/dscp-node
-            ${{ matrix.architectures.artifactDir }}/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
+            ./target/${{ matrix.architectures.target-tupl }}/release/dscp-node
+            ./target/${{ matrix.architectures.target-tupl }}/release/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
 
   build-release:
     name: Build release

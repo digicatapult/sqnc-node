@@ -132,6 +132,7 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
+          SCCACHE_CACHE_SIZE: "1G"
         with:
           command: fmt
           args: --check
@@ -140,6 +141,7 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
+          SCCACHE_CACHE_SIZE: "1G"
         with:
           command: check
       - name: Cargo test
@@ -147,5 +149,6 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
+          SCCACHE_CACHE_SIZE: "1G"
         with:
           command: test
