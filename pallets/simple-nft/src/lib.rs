@@ -50,6 +50,7 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
 
         type ProcessValidator: ProcessValidator<
+            Self::TokenId,
             Self::AccountId,
             Self::RoleKey,
             Self::TokenMetadataKey,
@@ -77,6 +78,7 @@ pub mod pallet {
 
     // ProcessIdentifier can be pulled off of the configured ProcessValidator
     type ProcessIdentifier<T> = <<T as Config>::ProcessValidator as ProcessValidator<
+        <T as Config>::TokenId,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
@@ -85,6 +87,7 @@ pub mod pallet {
 
     // ProcessVersion can be pulled off of the configured ProcessValidator
     type ProcessVersion<T> = <<T as Config>::ProcessValidator as ProcessValidator<
+        <T as Config>::TokenId,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
@@ -120,6 +123,7 @@ pub mod pallet {
 
     // The specific ProcessIO type can be derived from Config
     type ProcessIO<T> = traits::ProcessIO<
+        <T as Config>::TokenId,
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
@@ -200,6 +204,7 @@ pub mod pallet {
                     .map(|i| {
                         let token = Self::tokens_by_id(i);
                         token.map(|t| ProcessIO::<T> {
+                            id: t.id,
                             roles: t.roles.into(),
                             metadata: t.metadata.into(),
                             parent_index: None
@@ -218,14 +223,23 @@ pub mod pallet {
                 );
 
                 let inputs = inputs.into_iter().map(|t| t.unwrap()).collect();
-                let outputs = outputs
-                    .iter()
-                    .map(|o| ProcessIO::<T> {
-                        roles: o.roles.clone().into(),
-                        metadata: o.metadata.clone().into(),
-                        parent_index: o.parent_index.clone()
-                    })
-                    .collect();
+                let (_, outputs) = outputs.iter().fold(
+                    (
+                        LastToken::<T>::get(),
+                        BoundedVec::<ProcessIO<T>, T::MaxOutputCount>::default()
+                    ),
+                    |(last, mut outputs), output| {
+                        let next = _next_token(last);
+                        let output = ProcessIO::<T> {
+                            id: next.clone(),
+                            roles: output.roles.clone().into(),
+                            metadata: output.metadata.clone().into(),
+                            parent_index: output.parent_index
+                        };
+                        outputs.force_push(output);
+                        (next, outputs)
+                    }
+                );
 
                 let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &inputs, &outputs);
                 ensure!(process_is_valid, Error::<T>::ProcessInvalid);
@@ -264,9 +278,9 @@ pub mod pallet {
             let last = LastToken::<T>::get();
 
             // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) = outputs.iter().fold(
+            let (last, children) = outputs.into_iter().fold(
                 (last, BoundedVec::<T::TokenId, T::MaxOutputCount>::default()),
-                |(last, children), output| {
+                |(last, mut children), output| {
                     let next = _next_token(last);
                     let original_id = if output.parent_index.is_some() {
                         let parent_id = inputs.get(output.parent_index.unwrap() as usize).unwrap();
@@ -288,9 +302,8 @@ pub mod pallet {
                             children: None
                         }
                     );
-                    let mut next_children = children.clone();
-                    next_children.force_push(next);
-                    (next, next_children)
+                    children.force_push(next);
+                    (next, children)
                 }
             );
 

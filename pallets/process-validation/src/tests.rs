@@ -103,6 +103,7 @@ impl pallet_process_validation::Config for Test {
     type DisableProcessOrigin = system::EnsureRoot<u64>;
     type WeightInfo = ();
 
+    type TokenId = u128;
     type RoleKey = u32;
     type TokenMetadataKey = u32;
     type TokenMetadataValue = u128;

@@ -108,9 +108,9 @@ impl Default for ProcessIdentifier {
 pub struct MockProcessValidator {}
 
 type TestProcessId = ProcessFullyQualifiedId<ProcessIdentifier, u32>;
-type TestProcessIO = ProcessIO<u64, Role, u64, MetadataValue<u64>>;
+type TestProcessIO = ProcessIO<u64, u64, Role, u64, MetadataValue<u64>>;
 
-impl ProcessValidator<u64, Role, u64, MetadataValue<u64>> for MockProcessValidator {
+impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessValidator {
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = u32;
 

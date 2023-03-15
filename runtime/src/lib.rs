@@ -101,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 453,
+    spec_version: 454,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -359,6 +359,15 @@ impl Default for MetadataValueType {
     }
 }
 
+impl<T: PartialEq> PartialEq<T> for MetadataValue<T> {
+    fn eq(&self, rhs: &T) -> bool {
+        match self {
+            MetadataValue::<T>::TokenId(v) => v == rhs,
+            _ => false
+        }
+    }
+}
+
 type TokenId = u128;
 type TokenMetadataKey = BoundedVec<u8, ConstU32<32>>;
 type TokenMetadataValue = MetadataValue<TokenId>;
@@ -387,6 +396,7 @@ impl pallet_process_validation::Config for Runtime {
     type CreateProcessOrigin = MoreThanTwoMembers;
     type DisableProcessOrigin = MoreThanTwoMembers;
     type WeightInfo = pallet_process_validation::weights::SubstrateWeight<Runtime>;
+    type TokenId = TokenId;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
