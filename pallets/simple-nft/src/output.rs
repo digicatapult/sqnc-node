@@ -16,8 +16,7 @@ pub struct Output<
     TokenMetadataValue
 > {
     pub roles: BoundedBTreeMap<RoleKey, AccountId, MaxRoleCount>,
-    pub metadata: BoundedBTreeMap<TokenMetadataKey, TokenMetadataValue, MaxMetadataCount>,
-    pub parent_index: Option<u32>
+    pub metadata: BoundedBTreeMap<TokenMetadataKey, TokenMetadataValue, MaxMetadataCount>
 }
 
 impl<MR, A, R, MM, TK, TV> Clone for Output<MR, A, R, MM, TK, TV>
@@ -32,8 +31,7 @@ where
     fn clone(&self) -> Self {
         Output {
             roles: self.roles.clone(),
-            metadata: self.metadata.clone(),
-            parent_index: self.parent_index.clone()
+            metadata: self.metadata.clone()
         }
     }
 }
@@ -51,7 +49,6 @@ where
         f.debug_struct("Output")
             .field("roles", &self.roles)
             .field("metadata", &self.metadata)
-            .field("parent_index", &self.parent_index)
             .finish()
     }
 }
@@ -66,6 +63,6 @@ where
     MM: Get<u32>
 {
     fn eq(&self, other: &Output<MR, A, R, MM, TK, TV>) -> bool {
-        self.roles == other.roles && self.metadata == other.metadata && self.parent_index == other.parent_index
+        self.roles == other.roles && self.metadata == other.metadata
     }
 }

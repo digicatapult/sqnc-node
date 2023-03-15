@@ -12,8 +12,7 @@ use sp_std::prelude::*;
 pub struct ProcessIO<IoIdentifier, AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
     pub id: IoIdentifier,
     pub roles: BTreeMap<RoleKey, AccountId>,
-    pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
-    pub parent_index: Option<u32>
+    pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>
 }
 
 #[derive(Encode, Decode, Default, RuntimeDebug, MaxEncodedLen, TypeInfo, Clone, PartialEq)]

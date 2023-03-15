@@ -27,8 +27,7 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
     let outputs: BoundedVec<_, T::MaxOutputCount> = (0..r)
         .map(|_| Output {
             roles: roles.clone(),
-            metadata: metadata.clone(),
-            parent_index: None
+            metadata: metadata.clone()
         })
         .collect::<Vec<_>>()
         .try_into()
@@ -83,22 +82,13 @@ fn mk_outputs<T: Config>(
     let outputs = (0..o)
         .map(|output_index| Output {
             roles: roles.clone(),
-            metadata: metadata.clone(),
-            parent_index: valid_parent_index(inputs_len, output_index)
+            metadata: metadata.clone()
         })
         .collect::<Vec<_>>()
         .try_into()
         .unwrap();
 
     Ok(outputs)
-}
-
-fn valid_parent_index(input_len: u32, output_count: u32) -> Option<u32> {
-    if input_len > 0 && output_count < input_len {
-        Some(output_count)
-    } else {
-        None
-    }
 }
 
 fn nth_token_id<T: Config>(iteration: u32) -> Result<T::TokenId, &'static str> {

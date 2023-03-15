@@ -222,26 +222,22 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -261,14 +257,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -288,14 +282,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -315,14 +307,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -344,20 +334,17 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: real_metadata,
-                parent_index: None
+                metadata: real_metadata
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -383,20 +370,17 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: real_metadata,
-                parent_index: None
+                metadata: real_metadata
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -422,20 +406,17 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: real_metadata,
-                parent_index: None
+                metadata: real_metadata
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -463,20 +444,17 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: real_metadata,
-                parent_index: None
+                metadata: real_metadata
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -504,20 +482,17 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: is_owner.clone(),
-                metadata: real_metadata,
-                parent_index: None
+                metadata: real_metadata
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -540,14 +515,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, 100)])
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -570,14 +543,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, 100)])
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -600,14 +571,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, 100)])
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -630,14 +599,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, 100)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, 100)])
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -697,14 +664,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)])
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
@@ -727,14 +692,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)])
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
@@ -757,14 +720,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)])
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
@@ -787,14 +748,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)])
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
@@ -816,8 +775,7 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
@@ -837,8 +795,7 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole {
@@ -860,14 +817,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles0.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles1.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -888,8 +843,7 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::SenderHasInputRole { index: 0, role_key: 1 },
@@ -906,8 +860,7 @@ mod tests {
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole {
@@ -927,8 +880,7 @@ mod tests {
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole {
@@ -950,14 +902,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles0.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles1.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -978,8 +928,7 @@ mod tests {
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::SenderHasOutputRole { index: 0, role_key: 1 },
@@ -996,8 +945,7 @@ mod tests {
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 0, role_key: 1 },
@@ -1014,8 +962,7 @@ mod tests {
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::OutputHasRole { index: 0, role_key: 2 },
@@ -1034,14 +981,12 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles0.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles1.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -1059,14 +1004,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: input_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: output_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
@@ -1089,14 +1032,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: input_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: output_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
@@ -1119,14 +1060,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: input_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: output_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
@@ -1149,14 +1088,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: input_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: output_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
@@ -1181,21 +1118,18 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: input_roles0.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 0u64,
                 roles: input_roles1.clone(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: output_roles.clone(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputRole {
@@ -1219,14 +1153,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: input_metadata.clone(),
-            parent_index: None
+            metadata: input_metadata.clone()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: output_metadata.clone(),
-            parent_index: None
+            metadata: output_metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
@@ -1250,14 +1182,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: input_metadata.clone(),
-            parent_index: None
+            metadata: input_metadata.clone()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: output_metadata.clone(),
-            parent_index: None
+            metadata: output_metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
@@ -1281,14 +1211,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: input_metadata.clone(),
-            parent_index: None
+            metadata: input_metadata.clone()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: output_metadata.clone(),
-            parent_index: None
+            metadata: output_metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
@@ -1312,14 +1240,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: input_metadata.clone(),
-            parent_index: None
+            metadata: input_metadata.clone()
         }];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: output_metadata.clone(),
-            parent_index: None
+            metadata: output_metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
@@ -1345,21 +1271,18 @@ mod tests {
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: input_metadata0.clone(),
-                parent_index: None
+                metadata: input_metadata0.clone()
             },
             ProcessIO {
                 id: 0u64,
                 roles: roles.clone(),
-                metadata: input_metadata1.clone(),
-                parent_index: None
+                metadata: input_metadata1.clone()
             },
         ];
         let outputs = vec![ProcessIO {
             id: 0u64,
             roles: roles.clone(),
-            metadata: output_metadata.clone(),
-            parent_index: None
+            metadata: output_metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputOutputMetadataValue {
@@ -1380,14 +1303,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 42u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 43u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::from_iter(vec![(1, 42)]),
-            parent_index: None
+            metadata: BTreeMap::from_iter(vec![(1, 42)])
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputIdOutputMetadataValue {
@@ -1407,14 +1328,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 42u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 43u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::from_iter(vec![(2, 42)]),
-            parent_index: None
+            metadata: BTreeMap::from_iter(vec![(2, 42)])
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputIdOutputMetadataValue {
@@ -1434,14 +1353,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 42u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 43u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::from_iter(vec![(1, 40)]),
-            parent_index: None
+            metadata: BTreeMap::from_iter(vec![(1, 40)])
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputIdOutputMetadataValue {
@@ -1462,21 +1379,18 @@ mod tests {
             ProcessIO {
                 id: 42u64,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
             ProcessIO {
                 id: 41u64,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::new(),
-                parent_index: None
+                metadata: BTreeMap::new()
             },
         ];
         let outputs = vec![ProcessIO {
             id: 43u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::from_iter(vec![(1, 42)]),
-            parent_index: None
+            metadata: BTreeMap::from_iter(vec![(1, 42)])
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputIdOutputMetadataValue {
@@ -1496,21 +1410,18 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 42u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![
             ProcessIO {
                 id: 43u64,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::from_iter(vec![(1, 42)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, 42)])
             },
             ProcessIO {
                 id: 43u64,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::from_iter(vec![(1, 41)]),
-                parent_index: None
+                metadata: BTreeMap::from_iter(vec![(1, 41)])
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
@@ -1531,14 +1442,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 42u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 43u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::from_iter(vec![(1, 42)]),
-            parent_index: None
+            metadata: BTreeMap::from_iter(vec![(1, 42)])
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputIdOutputMetadataValue {
@@ -1558,14 +1467,12 @@ mod tests {
         let inputs = vec![ProcessIO {
             id: 42u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::new(),
-            parent_index: None
+            metadata: BTreeMap::new()
         }];
         let outputs = vec![ProcessIO {
             id: 43u64,
             roles: BTreeMap::new(),
-            metadata: BTreeMap::from_iter(vec![(1, 42)]),
-            parent_index: None
+            metadata: BTreeMap::from_iter(vec![(1, 42)])
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
             Restriction::MatchInputIdOutputMetadataValue {

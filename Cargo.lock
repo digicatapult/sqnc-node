@@ -1579,7 +1579,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-node"
-version = "4.6.1"
+version = "5.0.0"
 dependencies = [
  "bs58",
  "clap",
@@ -1623,7 +1623,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "4.5.4"
+version = "5.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -1671,7 +1671,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-pallet-traits"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -4718,7 +4718,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-simple-nft"
-version = "4.0.2"
+version = "5.0.0"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
