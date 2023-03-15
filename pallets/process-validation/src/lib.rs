@@ -115,9 +115,14 @@ pub mod pallet {
         type CreateProcessOrigin: EnsureOrigin<Self::RuntimeOrigin>;
         type DisableProcessOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
+        type TokenId: Parameter + Default + MaxEncodedLen + MaybeSerializeDeserialize;
         type RoleKey: Parameter + Default + Ord + MaxEncodedLen + MaybeSerializeDeserialize;
         type TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen + MaybeSerializeDeserialize;
-        type TokenMetadataValue: Parameter + Default + MaxEncodedLen + MaybeSerializeDeserialize;
+        type TokenMetadataValue: Parameter
+            + Default
+            + MaxEncodedLen
+            + MaybeSerializeDeserialize
+            + PartialEq<Self::TokenId>;
         type TokenMetadataValueDiscriminator: Parameter
             + Default
             + From<Self::TokenMetadataValue>
@@ -379,15 +384,17 @@ pub mod pallet {
     }
 }
 
-impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue> for Pallet<T> {
+impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>
+    for Pallet<T>
+{
     type ProcessIdentifier = T::ProcessIdentifier;
     type ProcessVersion = T::ProcessVersion;
 
     fn validate_process(
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &T::AccountId,
-        inputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        outputs: &Vec<ProcessIO<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
+        inputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+        outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
     ) -> bool {
         let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
 
@@ -409,6 +416,7 @@ impl<T: Config> ProcessValidator<T::AccountId, T::RoleKey, T::TokenMetadataKey, 
                         }
                         BooleanExpressionSymbol::Restriction(r) => {
                             stack.push(validate_restriction::<
+                                T::TokenId,
                                 T::AccountId,
                                 T::RoleKey,
                                 T::TokenMetadataKey,

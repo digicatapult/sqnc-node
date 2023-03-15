@@ -9,7 +9,8 @@ use scale_info::TypeInfo;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::prelude::*;
 
-pub struct ProcessIO<AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
+pub struct ProcessIO<IoIdentifier, AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
+    pub id: IoIdentifier,
     pub roles: BTreeMap<RoleKey, AccountId>,
     pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
     pub parent_index: Option<u32>
@@ -24,8 +25,9 @@ pub struct ProcessFullyQualifiedId<
     pub version: ProcessVersion
 }
 
-pub trait ProcessValidator<A, R, T, V>
+pub trait ProcessValidator<I, A, R, T, V>
 where
+    I: Parameter,
     A: Parameter,
     R: Parameter + Ord,
     T: Parameter + Ord,
@@ -37,13 +39,14 @@ where
     fn validate_process(
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &A,
-        inputs: &Vec<ProcessIO<A, R, T, V>>,
-        outputs: &Vec<ProcessIO<A, R, T, V>>
+        inputs: &Vec<ProcessIO<I, A, R, T, V>>,
+        outputs: &Vec<ProcessIO<I, A, R, T, V>>
     ) -> bool;
 }
 
-impl<A, R, T, V> ProcessValidator<A, R, T, V> for ()
+impl<I, A, R, T, V> ProcessValidator<I, A, R, T, V> for ()
 where
+    I: Parameter,
     A: Parameter,
     R: Parameter + Ord,
     T: Parameter + Ord,
@@ -55,8 +58,8 @@ where
     fn validate_process(
         _id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         _sender: &A,
-        _inputs: &Vec<ProcessIO<A, R, T, V>>,
-        _outputs: &Vec<ProcessIO<A, R, T, V>>
+        _inputs: &Vec<ProcessIO<I, A, R, T, V>>,
+        _outputs: &Vec<ProcessIO<I, A, R, T, V>>
     ) -> bool {
         true
     }

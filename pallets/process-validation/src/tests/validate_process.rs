@@ -130,6 +130,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
             },
             &0u64,
             &vec![ProcessIO {
+                id: 1u128,
                 roles: token_roles,
                 metadata: BTreeMap::new(),
                 parent_index: None
@@ -165,6 +166,7 @@ fn it_fails_when_one_restrictions_fails() {
             },
             &0u64,
             &vec![ProcessIO {
+                id: 1u128,
                 roles: token_roles,
                 metadata: BTreeMap::new(),
                 parent_index: None
@@ -202,6 +204,7 @@ fn it_succeeds_wth_complex_tree() {
             },
             &1u64,
             &vec![ProcessIO {
+                id: 1u128,
                 roles: token_roles,
                 metadata: BTreeMap::new(),
                 parent_index: None
@@ -239,6 +242,7 @@ fn it_fails_wth_complex_tree() {
             },
             &1u64,
             &vec![ProcessIO {
+                id: 1u128,
                 roles: token_roles,
                 metadata: BTreeMap::new(),
                 parent_index: None
