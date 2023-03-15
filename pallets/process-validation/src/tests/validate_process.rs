@@ -114,7 +114,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
                 status: ProcessStatus::Enabled,
                 program: bounded_vec![
                     BooleanExpressionSymbol::Restriction(Restriction::None),
-                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
                 ]
             }
@@ -150,7 +150,7 @@ fn it_fails_when_one_restrictions_fails() {
                 status: ProcessStatus::Enabled,
                 program: bounded_vec![
                     BooleanExpressionSymbol::Restriction(Restriction::None),
-                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
                 ]
             }
@@ -188,7 +188,7 @@ fn it_succeeds_wth_complex_tree() {
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Op(BooleanOperator::Or),
-                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
                 ]
             }
@@ -226,7 +226,7 @@ fn it_fails_wth_complex_tree() {
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Op(BooleanOperator::Or),
-                    BooleanExpressionSymbol::Restriction(Restriction::SenderOwnsAllInputs),
+                    BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::Xor)
                 ]
             }
