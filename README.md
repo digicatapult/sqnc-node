@@ -222,22 +222,23 @@ A complete truth table set of binary operators is available when writing a proce
 
 The pallet defines various type of process restrictions that can be applied to a process. These include:
 
-| Restriction                     |                                                                                  description                                                                                   |
-| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| `None`                          |                                                                Default `Restriction` value that always succeeds                                                                |
-| `Fail`                          |                                                                     `Restriction` value that always fails                                                                      |
-| `Combined`                      |                            Requires two specified restrictions combined via a specified operator [`AND`, `OR`, `XOR`, `NAND`, `NOR`] returns `true`                            |
-| `SenderOwnsAllInputs`           |                                             Requires that the process `sender` is assigned the `default` role on all input tokens                                              |
-| `SenderHasInputRole`            |                                    Requires that the process `sender` is assigned to a specified role on a specified (by index) input token                                    |
-| `SenderHasOutputRole`           |                                   Requires that the process `sender` is assigned to a specified role on a specified (by index) output token                                    |
-| `OutputHasRole`                 |                                                          Requires that a specified (by index) output token has a role                                                          |
-| `MatchInputOutputRole`          |       Requires that the account of a specified role on a specified (by index) output token matches the account of a specified role on a specified (by index) input token       |
-| `MatchInputOutputMetadataValue` | Requires that the metadata value of a specified key on a specified (by index) output token matches the metadata value of a specified key on a specified (by index) input token |
-| `FixedNumberOfInputs`           |                                                         Requires that the number of inputs must be a specified integer                                                         |
-| `FixedNumberOfOutputs`          |                                                        Requires that the number of outputs must be a specified integer                                                         |
-| `FixedInputMetadataValue`       |                              Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token                               |
-| `FixedOutputMetadataValue`      |                              Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token                              |
-| `FixedOutputMetadataValueType`  |                         Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) output token                         |
+| Restriction                       |                                                                                  description                                                                                   |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| `None`                            |                                                                Default `Restriction` value that always succeeds                                                                |
+| `Fail`                            |                                                                     `Restriction` value that always fails                                                                      |
+| `Combined`                        |                            Requires two specified restrictions combined via a specified operator [`AND`, `OR`, `XOR`, `NAND`, `NOR`] returns `true`                            |
+| `SenderOwnsAllInputs`             |                                             Requires that the process `sender` is assigned the `default` role on all input tokens                                              |
+| `SenderHasInputRole`              |                                    Requires that the process `sender` is assigned to a specified role on a specified (by index) input token                                    |
+| `SenderHasOutputRole`             |                                   Requires that the process `sender` is assigned to a specified role on a specified (by index) output token                                    |
+| `OutputHasRole`                   |                                                          Requires that a specified (by index) output token has a role                                                          |
+| `MatchInputOutputRole`            |       Requires that the account of a specified role on a specified (by index) output token matches the account of a specified role on a specified (by index) input token       |
+| `MatchInputOutputMetadataValue`   | Requires that the metadata value of a specified key on a specified (by index) output token matches the metadata value of a specified key on a specified (by index) input token |
+| `MatchInputIdOutputMetadataValue` |                Requires that the metadata value of a specified key on a specified (by index) output token matches the id of a specified (by index) input token                 |
+| `FixedNumberOfInputs`             |                                                         Requires that the number of inputs must be a specified integer                                                         |
+| `FixedNumberOfOutputs`            |                                                        Requires that the number of outputs must be a specified integer                                                         |
+| `FixedInputMetadataValue`         |                              Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token                               |
+| `FixedOutputMetadataValue`        |                              Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token                              |
+| `FixedOutputMetadataValueType`    |                         Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) output token                         |
 
 ### IPFSKey pallet
 
