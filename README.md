@@ -12,7 +12,7 @@ You will need a Rust environment, including targets for WASM builds. The former 
 curl https://sh.rustup.rs -sSf | sh
 ```
 
-The latter by running a bundled script:
+The latter by running a bundled script from the root of this repository:
 
 ```bash
 ./scripts/init.sh
