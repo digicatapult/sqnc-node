@@ -1,6 +1,6 @@
 use super::*;
 
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
 use frame_support::bounded_vec;
 use sp_std::collections::btree_map::BTreeMap;
 
@@ -20,15 +20,23 @@ fn it_succeeds_when_process_exists() {
             }
         );
 
-        assert!(ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
             &0u64,
             &Vec::new(),
-            &Vec::new(),
-        ));
+            &Vec::new()
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: true,
+                executed_len: 1u32
+            }
+        );
     });
 }
 
@@ -44,15 +52,23 @@ fn it_fails_when_process_id_doesnt_exist() {
             }
         );
 
-        assert!(!ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::B,
                 version: 1u32
             },
             &0u64,
             &bounded_vec![],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: false,
+                executed_len: 0u32
+            }
+        );
     });
 }
 
@@ -68,15 +84,23 @@ fn it_fails_when_process_version_doesnt_exist() {
             }
         );
 
-        assert!(!ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 2u32
             },
             &0u64,
             &bounded_vec![],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: false,
+                executed_len: 0u32
+            }
+        );
     });
 }
 
@@ -92,15 +116,23 @@ fn it_fails_when_process_disabled() {
             }
         );
 
-        assert!(!ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
             &0u64,
             &bounded_vec![],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: false,
+                executed_len: 0u32
+            }
+        );
     });
 }
 
@@ -123,7 +155,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
         token_roles.insert(Default::default(), 0u64);
 
-        assert!(ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
@@ -134,8 +166,16 @@ fn it_succeeds_when_all_restrictions_succeed() {
                 roles: token_roles,
                 metadata: BTreeMap::new()
             }],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: true,
+                executed_len: 3u32
+            }
+        );
     });
 }
 
@@ -158,7 +198,7 @@ fn it_fails_when_one_restrictions_fails() {
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
         token_roles.insert(Default::default(), 1u64);
 
-        assert!(!ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
@@ -169,8 +209,16 @@ fn it_fails_when_one_restrictions_fails() {
                 roles: token_roles,
                 metadata: BTreeMap::new()
             }],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: false,
+                executed_len: 3u32
+            }
+        );
     });
 }
 
@@ -195,7 +243,7 @@ fn it_succeeds_wth_complex_tree() {
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
         token_roles.insert(Default::default(), 1u64);
 
-        assert!(ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
@@ -206,8 +254,16 @@ fn it_succeeds_wth_complex_tree() {
                 roles: token_roles,
                 metadata: BTreeMap::new()
             }],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: true,
+                executed_len: 5u32
+            }
+        );
     });
 }
 
@@ -232,7 +288,7 @@ fn it_fails_wth_complex_tree() {
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
         token_roles.insert(Default::default(), 1u64);
 
-        assert!(!ProcessValidation::validate_process(
+        let result = ProcessValidation::validate_process(
             ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
@@ -243,7 +299,15 @@ fn it_fails_wth_complex_tree() {
                 roles: token_roles,
                 metadata: BTreeMap::new()
             }],
-            &bounded_vec![],
-        ));
+            &bounded_vec![]
+        );
+
+        assert_eq!(
+            result,
+            ValidationResult::<u32> {
+                success: false,
+                executed_len: 5u32
+            }
+        );
     });
 }

@@ -21,28 +21,34 @@ use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
 pub trait WeightInfo {
-    fn run_process(i: usize, o: usize) -> Weight;
+    fn run_process(i: u32, o: u32) -> Weight;
 }
 
 /// Weight functions for pallet_simple_nft.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-    fn run_process(i: usize, o: usize) -> Weight {
-        Weight::from_ref_time(0 as u64)
-            // Standard Error: 7_000
-            .saturating_add((Weight::from_ref_time(14_228_228)).saturating_mul(i as u64))
-            // Standard Error: 7_000
-            .saturating_add((Weight::from_ref_time(8_026_000)).saturating_mul(o as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().reads((1 as u64).saturating_mul(i as u64)))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-            .saturating_add(T::DbWeight::get().writes((1 as u64).saturating_mul(i as u64)))
-            .saturating_add(T::DbWeight::get().writes((1 as u64).saturating_mul(o as u64)))
+    fn run_process(i: u32, o: u32) -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `176 + i * (165 ±0)`
+        //  Estimated: `18334 + i * (9436 ±0)`
+        // Minimum execution time: 77_000 nanoseconds.
+        Weight::from_ref_time(16_749_333)
+            .saturating_add(Weight::from_proof_size(18334))
+            // Standard Error: 6_416
+            .saturating_add(Weight::from_ref_time(9_289_111).saturating_mul(i.into()))
+            // Standard Error: 6_416
+            .saturating_add(Weight::from_ref_time(5_575_555).saturating_mul(o.into()))
+            .saturating_add(T::DbWeight::get().reads(2))
+            .saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i.into())))
+            .saturating_add(T::DbWeight::get().writes(1))
+            .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i.into())))
+            .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(o.into())))
+            .saturating_add(Weight::from_proof_size(9436).saturating_mul(i.into()))
     }
 }
 
 impl WeightInfo for () {
-    fn run_process(_: usize, _: usize) -> Weight {
+    fn run_process(_: u32, _: u32) -> Weight {
         Weight::from_ref_time(0 as u64)
     }
 }

@@ -3,11 +3,13 @@ Benchmarking setup for pallet-template
 */
 use super::*;
 
-use core::convert::TryInto;
+use core::convert::TryFrom;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
-use frame_support::{BoundedBTreeMap, BoundedVec};
+use frame_support::{traits::ConstU32, BoundedBTreeMap, BoundedVec};
 use frame_system::RawOrigin;
 use sp_std::vec::Vec;
+
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
 
 use crate::output::Output;
 #[allow(unused)]
@@ -15,7 +17,27 @@ use crate::Pallet as SimpleNFT;
 
 const SEED: u32 = 0;
 
-fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
+type ProcessIdentifier<T> = <<T as Config>::ProcessValidator as ProcessValidator<
+    <T as Config>::TokenId,
+    <T as frame_system::Config>::AccountId,
+    <T as Config>::RoleKey,
+    <T as Config>::TokenMetadataKey,
+    <T as Config>::TokenMetadataValue
+>>::ProcessIdentifier;
+
+type ProcessVersion<T> = <<T as Config>::ProcessValidator as ProcessValidator<
+    <T as Config>::TokenId,
+    <T as frame_system::Config>::AccountId,
+    <T as Config>::RoleKey,
+    <T as Config>::TokenMetadataKey,
+    <T as Config>::TokenMetadataValue
+>>::ProcessVersion;
+
+fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str>
+where
+    ProcessIdentifier<T>: From<BoundedVec<u8, ConstU32<32>>>,
+    ProcessVersion<T>: From<u32>
+{
     let account_id: T::AccountId = account("owner", 0, SEED);
     let mut roles = BoundedBTreeMap::<_, _, _>::new();
     let mut metadata = BoundedBTreeMap::<_, _, _>::new();
@@ -32,9 +54,14 @@ fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str> {
         .collect::<Vec<_>>()
         .try_into()
         .unwrap();
+
+    let default_process = BoundedVec::<u8, ConstU32<32>>::try_from("default".as_bytes().to_vec()).unwrap();
     SimpleNFT::<T>::run_process(
         RawOrigin::Signed(account_id.clone()).into(),
-        None,
+        ProcessFullyQualifiedId {
+            id: default_process.into(),
+            version: 1u32.into()
+        },
         BoundedVec::<_, _>::with_max_capacity(),
         outputs
     )?;
@@ -56,8 +83,7 @@ fn mk_inputs<T: Config>(i: u32) -> Result<BoundedVec<T::TokenId, T::MaxInputCoun
 }
 
 fn mk_outputs<T: Config>(
-    o: u32,
-    inputs_len: u32
+    o: u32
 ) -> Result<
     BoundedVec<
         Output<
@@ -80,7 +106,7 @@ fn mk_outputs<T: Config>(
         .try_insert(T::TokenMetadataKey::default(), T::TokenMetadataValue::default())
         .unwrap();
     let outputs = (0..o)
-        .map(|output_index| Output {
+        .map(|_| Output {
             roles: roles.clone(),
             metadata: metadata.clone()
         })
@@ -97,18 +123,29 @@ fn nth_token_id<T: Config>(iteration: u32) -> Result<T::TokenId, &'static str> {
 }
 
 benchmarks! {
-  run_process {
-    let i in 1..10;
-    let o in 1..10;
+    where_clause { where
+        ProcessIdentifier::<T>: From<BoundedVec<u8, ConstU32<32>>>,
+        ProcessVersion::<T>: From<u32>
+    }
 
-    add_nfts::<T>(i)?;
-    let inputs = mk_inputs::<T>(i)?;
-    let outputs = mk_outputs::<T>(o, inputs.len().try_into().unwrap())?;
-    let caller: T::AccountId = account("owner", 0, SEED);
-  }: _(RawOrigin::Signed(caller), None, inputs, outputs)
-  verify {
-    assert_eq!(LastToken::<T>::get(), nth_token_id::<T>(i + o)?);
-  }
+    run_process {
+        let i in 1..10;
+        let o in 1..10;
+
+        let default_process = BoundedVec::<u8, ConstU32<32>>::try_from("default".as_bytes().to_vec()).unwrap();
+        let process = ProcessFullyQualifiedId {
+            id: default_process.into(),
+            version: 1u32.into()
+        };
+
+        add_nfts::<T>(i)?;
+        let inputs = mk_inputs::<T>(i)?;
+        let outputs = mk_outputs::<T>(o)?;
+        let caller: T::AccountId = account("owner", 0, SEED);
+    }: _(RawOrigin::Signed(caller), process, inputs, outputs)
+    verify {
+        assert_eq!(LastToken::<T>::get(), nth_token_id::<T>(i + o)?);
+    }
 }
 
 impl_benchmark_test_suite!(SimpleNFT, crate::mock::new_test_ext(), crate::mock::Test,);

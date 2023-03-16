@@ -2,7 +2,7 @@
 
 use codec::{Codec, MaxEncodedLen};
 use dscp_pallet_traits as traits;
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
 use frame_support::{
     traits::{Get, TryCollect},
     BoundedVec
@@ -132,6 +132,14 @@ pub mod pallet {
         <T as Config>::TokenMetadataValue
     >;
 
+    type ProcessValidatorWeights<T> = <<T as Config>::ProcessValidator as ProcessValidator<
+        <T as Config>::TokenId,
+        <T as frame_system::Config>::AccountId,
+        <T as Config>::RoleKey,
+        <T as Config>::TokenMetadataKey,
+        <T as Config>::TokenMetadataValue
+    >>::Weights;
+
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
@@ -186,7 +194,11 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
+        #[pallet::weight(
+            T::WeightInfo::run_process(inputs.len() as u32, outputs.len() as u32) +
+            ProcessValidatorWeights::<T>::validate_process_max() -
+            ProcessValidatorWeights::<T>::validate_process_min()
+        )]
         pub fn run_process(
             origin: OriginFor<T>,
             process: ProcessId<T>,
@@ -219,10 +231,7 @@ pub mod pallet {
             ensure!(io_inputs.len() == inputs.len(), Error::<T>::AlreadyBurnt);
 
             let (last, io_outputs) = outputs.iter().fold(
-                (
-                    LastToken::<T>::get(),
-                    Vec::<ProcessIO<T>>::new()
-                ),
+                (LastToken::<T>::get(), Vec::<ProcessIO<T>>::new()),
                 |(last, mut outputs), output| {
                     let next = _next_token(last);
                     let output = ProcessIO::<T> {
@@ -236,7 +245,7 @@ pub mod pallet {
             );
 
             let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &io_inputs, &io_outputs);
-            ensure!(process_is_valid, Error::<T>::ProcessInvalid);
+            ensure!(process_is_valid.success, Error::<T>::ProcessInvalid);
 
             // STORAGE MUTATIONS
 
@@ -281,7 +290,11 @@ pub mod pallet {
                 Self::deposit_event(Event::Burnt(*token_id, sender.clone(), children.clone()));
             }
 
-            Ok(().into())
+            let actual_weight = T::WeightInfo::run_process(inputs.len() as u32, outputs.len() as u32)
+                + ProcessValidatorWeights::<T>::validate_process(process_is_valid.executed_len)
+                - ProcessValidatorWeights::<T>::validate_process_min();
+
+            Ok(Some(actual_weight).into())
         }
     }
 }
