@@ -24,7 +24,7 @@ sp-std = { default-features = false, version = "5.0.0", git = "https://github.co
 
 
 [dev-dependencies]
-serde = { version = "1.0.152" }
+serde = { version = "1.0.156" }
 sp-core = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 
 
