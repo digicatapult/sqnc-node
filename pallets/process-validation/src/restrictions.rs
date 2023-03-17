@@ -26,7 +26,7 @@ pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadat
         index: u32,
         role_key: RoleKey
     },
-    OutputHasMetadataValue {
+    OutputHasMetadata {
         index: u32,
         metadata_key: TokenMetadataKey
     },
@@ -34,7 +34,7 @@ pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadat
         index: u32,
         role_key: RoleKey
     },
-    InputHasMetadataValue {
+    InputHasMetadata {
         index: u32,
         metadata_key: TokenMetadataKey
     },
@@ -219,7 +219,7 @@ where
             };
             selected_output.roles.get(&role_key).is_some()
         }
-        Restriction::OutputHasMetadataValue { index, metadata_key } => {
+        Restriction::OutputHasMetadata { index, metadata_key } => {
             let Some(selected_output) = outputs.get(index as usize) else {
                 return false;
             };
@@ -231,7 +231,7 @@ where
             };
             selected_input.roles.get(&role_key).is_some()
         }
-        Restriction::InputHasMetadataValue { index, metadata_key } => {
+        Restriction::InputHasMetadata { index, metadata_key } => {
             let Some(selected_input) = inputs.get(index as usize) else {
                 return false;
             };
@@ -1802,7 +1802,7 @@ mod tests {
             metadata: metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadataValue {
+            Restriction::OutputHasMetadata {
                 index: 0,
                 metadata_key: 1
             },
@@ -1822,7 +1822,7 @@ mod tests {
             metadata: metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadataValue {
+            Restriction::OutputHasMetadata {
                 index: 0,
                 metadata_key: 2
             },
@@ -1850,7 +1850,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadataValue {
+            Restriction::OutputHasMetadata {
                 index: 1,
                 metadata_key: 1
             },
@@ -1870,7 +1870,7 @@ mod tests {
             metadata: metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadataValue {
+            Restriction::OutputHasMetadata {
                 index: 1,
                 metadata_key: 1
             },
@@ -1966,7 +1966,7 @@ mod tests {
             metadata: metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadataValue {
+            Restriction::InputHasMetadata {
                 index: 0,
                 metadata_key: 1
             },
@@ -1986,7 +1986,7 @@ mod tests {
             metadata: metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadataValue {
+            Restriction::InputHasMetadata {
                 index: 0,
                 metadata_key: 2
             },
@@ -2014,7 +2014,7 @@ mod tests {
             },
         ];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadataValue {
+            Restriction::InputHasMetadata {
                 index: 1,
                 metadata_key: 1
             },
@@ -2034,7 +2034,7 @@ mod tests {
             metadata: metadata.clone()
         }];
         let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadataValue {
+            Restriction::InputHasMetadata {
                 index: 1,
                 metadata_key: 1
             },
