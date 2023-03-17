@@ -32,17 +32,13 @@ pub struct ValidationResult<W> {
     pub executed_len: W
 }
 
-pub trait ValidateProcessWeights {
-    type ProcessWeight;
-
-    fn validate_process(p: Self::ProcessWeight) -> Weight;
+pub trait ValidateProcessWeights<WeightArg> {
+    fn validate_process(p: WeightArg) -> Weight;
     fn validate_process_min() -> Weight;
     fn validate_process_max() -> Weight;
 }
 
-impl ValidateProcessWeights for () {
-    type ProcessWeight = u32;
-
+impl ValidateProcessWeights<u32> for () {
     fn validate_process(_: u32) -> Weight {
         Weight::from_ref_time(0 as u64)
     }
@@ -64,14 +60,15 @@ where
 {
     type ProcessIdentifier: Parameter + MaxEncodedLen + Encode + Decode;
     type ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen + Encode + Decode;
-    type Weights: ValidateProcessWeights;
+    type WeightArg;
+    type Weights: ValidateProcessWeights<Self::WeightArg>;
 
     fn validate_process(
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &A,
         inputs: &Vec<ProcessIO<I, A, R, T, V>>,
         outputs: &Vec<ProcessIO<I, A, R, T, V>>
-    ) -> ValidationResult<<Self::Weights as ValidateProcessWeights>::ProcessWeight>;
+    ) -> ValidationResult<Self::WeightArg>;
 }
 
 impl<I, A, R, T, V> ProcessValidator<I, A, R, T, V> for ()
@@ -84,6 +81,7 @@ where
 {
     type ProcessIdentifier = ();
     type ProcessVersion = u32;
+    type WeightArg = u32;
     type Weights = ();
 
     fn validate_process(

@@ -113,6 +113,7 @@ type TestProcessIO = ProcessIO<u64, u64, Role, u64, MetadataValue<u64>>;
 impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessValidator {
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = u32;
+    type WeightArg = u32;
     type Weights = ();
 
     fn validate_process(

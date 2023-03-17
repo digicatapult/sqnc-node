@@ -10,9 +10,7 @@ pub trait WeightInfo {
 }
 
 pub struct SubstrateWeight<T>(PhantomData<T>);
-impl<T: frame_system::Config + Config> ValidateProcessWeights for SubstrateWeight<T> {
-    type ProcessWeight = u32;
-
+impl<T: frame_system::Config + Config> ValidateProcessWeights<u32> for SubstrateWeight<T> {
     /// Storage: ProcessValidation ProcessModel (r:1 w:0)
     /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
     /// The range of component `r` is `[1, 101]`.

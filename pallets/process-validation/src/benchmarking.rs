@@ -64,10 +64,6 @@ fn create_process_fixture<T: Config>(
 }
 
 benchmarks! {
-    where_clause { where
-        <<T as Config>::WeightInfo as ValidateProcessWeights>::ProcessWeight: From<u32>
-    }
-
     create_process {
       // valid programs have x Restrictions and (x-1) Ops, therefore number of BooleanExpressionSymbol to add is always odd
       let r in 1 .. (1 + T::MaxProcessProgramLength::get() / 2);

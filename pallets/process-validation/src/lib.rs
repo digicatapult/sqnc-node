@@ -132,7 +132,7 @@ pub mod pallet {
             + MaybeSerializeDeserialize;
 
         // Origin for overriding weight calculation implementation
-        type WeightInfo: WeightInfo + ValidateProcessWeights;
+        type WeightInfo: WeightInfo + ValidateProcessWeights<u32>;
     }
 
     #[pallet::pallet]
@@ -388,11 +388,10 @@ pub mod pallet {
 
 impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>
     for Pallet<T>
-where
-    <T::WeightInfo as ValidateProcessWeights>::ProcessWeight: From<u32>
 {
     type ProcessIdentifier = T::ProcessIdentifier;
     type ProcessVersion = T::ProcessVersion;
+    type WeightArg = u32;
     type Weights = T::WeightInfo;
 
     fn validate_process(
@@ -400,7 +399,7 @@ where
         sender: &T::AccountId,
         inputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
-    ) -> ValidationResult<<<T as pallet::Config>::WeightInfo as ValidateProcessWeights>::ProcessWeight> {
+    ) -> ValidationResult<u32> {
         let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
 
         match maybe_process {
@@ -408,7 +407,7 @@ where
                 if process.status == ProcessStatus::Disabled {
                     return ValidationResult {
                         success: false,
-                        executed_len: 0.into()
+                        executed_len: 0
                     };
                 }
 
@@ -423,7 +422,7 @@ where
                             } else {
                                 return ValidationResult {
                                     success: false,
-                                    executed_len: executed_len.into()
+                                    executed_len: executed_len
                                 };
                             }
                         }
@@ -442,12 +441,12 @@ where
 
                 ValidationResult {
                     success: stack.pop().unwrap_or(false),
-                    executed_len: executed_len.into()
+                    executed_len: executed_len
                 }
             }
             Err(_) => ValidationResult {
                 success: false,
-                executed_len: 0.into()
+                executed_len: 0
             }
         }
     }
