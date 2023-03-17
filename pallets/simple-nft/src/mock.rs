@@ -16,7 +16,7 @@ use sp_runtime::{
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
@@ -113,14 +113,19 @@ type TestProcessIO = ProcessIO<u64, u64, Role, u64, MetadataValue<u64>>;
 impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessValidator {
     type ProcessIdentifier = ProcessIdentifier;
     type ProcessVersion = u32;
+    type WeightArg = u32;
+    type Weights = ();
 
     fn validate_process(
         id: TestProcessId,
         _sender: &u64,
         _inputs: &Vec<TestProcessIO>,
         _outputs: &Vec<TestProcessIO>
-    ) -> bool {
-        id.id == ProcessIdentifier::ShouldSucceed
+    ) -> ValidationResult<u32> {
+        ValidationResult {
+            success: id.id == ProcessIdentifier::ShouldSucceed,
+            executed_len: 0u32
+        }
     }
 }
 

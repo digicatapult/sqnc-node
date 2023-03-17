@@ -22,7 +22,6 @@ pub struct Token<
     MaxChildCount: Get<u32>
 > {
     pub(crate) id: TokenId,
-    pub(crate) original_id: TokenId,
     pub(crate) roles: BoundedBTreeMap<RoleKey, AccountId, MaxRoleCount>,
     pub(crate) creator: AccountId,
     pub(crate) created_at: BlockNumber,
@@ -51,7 +50,6 @@ where
 {
     fn eq(&self, other: &Token<MR, A, RK, TID, BN, MM, TK, TV, MP, MC>) -> bool {
         self.id == other.id
-            && self.original_id == other.original_id
             && self.roles == other.roles
             && self.creator == other.creator
             && self.created_at == other.created_at

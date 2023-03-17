@@ -5,7 +5,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'pallet-simple-nft'
-version = "4.0.2"
+version = "5.0.0"
 
 
 [package.metadata.docs.rs]

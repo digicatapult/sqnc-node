@@ -69,7 +69,7 @@ jobs:
         run: |
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
           rustup target add ${{ matrix.architectures.target-tupl }} --toolchain ${{ needs.get-version.outputs.toolchain }}
-          rustup target add wasm32-unknown-unknown --toolchain nightly
+          rustup target add wasm32-unknown-unknown --toolchain ${{ needs.get-version.outputs.toolchain }}
       - name: install deps
         run: sudo apt-get install ${{ matrix.architectures.dependencies }}
       - name: Install sccache

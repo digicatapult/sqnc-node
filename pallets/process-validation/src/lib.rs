@@ -7,7 +7,9 @@ use scale_info::TypeInfo;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::prelude::*;
 
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator};
+use dscp_pallet_traits::{
+    ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidateProcessWeights, ValidationResult
+};
 
 #[cfg(test)]
 mod tests;
@@ -130,7 +132,7 @@ pub mod pallet {
             + MaybeSerializeDeserialize;
 
         // Origin for overriding weight calculation implementation
-        type WeightInfo: WeightInfo;
+        type WeightInfo: WeightInfo + ValidateProcessWeights<u32>;
     }
 
     #[pallet::pallet]
@@ -389,29 +391,39 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
 {
     type ProcessIdentifier = T::ProcessIdentifier;
     type ProcessVersion = T::ProcessVersion;
+    type WeightArg = u32;
+    type Weights = T::WeightInfo;
 
     fn validate_process(
         id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &T::AccountId,
         inputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
-    ) -> bool {
+    ) -> ValidationResult<u32> {
         let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
 
         match maybe_process {
             Ok(process) => {
                 if process.status == ProcessStatus::Disabled {
-                    return false;
+                    return ValidationResult {
+                        success: false,
+                        executed_len: 0
+                    };
                 }
 
                 let mut stack: Vec<bool> = Vec::with_capacity(T::MaxProcessProgramLength::get() as usize);
+                let mut executed_len: u32 = 0;
                 for symbol in process.program {
+                    executed_len = executed_len + 1;
                     match symbol {
                         BooleanExpressionSymbol::Op(op) => {
                             if let (Some(a), Some(b)) = (stack.pop(), stack.pop()) {
                                 stack.push(op.eval(a, b));
                             } else {
-                                return false;
+                                return ValidationResult {
+                                    success: false,
+                                    executed_len: executed_len
+                                };
                             }
                         }
                         BooleanExpressionSymbol::Restriction(r) => {
@@ -426,9 +438,16 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
                         }
                     }
                 }
-                stack.pop().unwrap_or(false)
+
+                ValidationResult {
+                    success: stack.pop().unwrap_or(false),
+                    executed_len: executed_len
+                }
             }
-            Err(_) => false
+            Err(_) => ValidationResult {
+                success: false,
+                executed_len: 0
+            }
         }
     }
 }

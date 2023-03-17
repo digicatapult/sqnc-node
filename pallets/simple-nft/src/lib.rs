@@ -2,12 +2,14 @@
 
 use codec::{Codec, MaxEncodedLen};
 use dscp_pallet_traits as traits;
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
-use frame_support::{traits::Get, BoundedVec};
+use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
+use frame_support::{
+    traits::{Get, TryCollect},
+    BoundedVec
+};
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, One};
 
-use sp_std::collections::btree_set::BTreeSet;
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
 
@@ -130,6 +132,14 @@ pub mod pallet {
         <T as Config>::TokenMetadataValue
     >;
 
+    type ProcessValidatorWeights<T> = <<T as Config>::ProcessValidator as ProcessValidator<
+        <T as Config>::TokenId,
+        <T as frame_system::Config>::AccountId,
+        <T as Config>::RoleKey,
+        <T as Config>::TokenMetadataKey,
+        <T as Config>::TokenMetadataValue
+    >>::Weights;
+
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
@@ -184,10 +194,14 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::call_index(0)]
-        #[pallet::weight(T::WeightInfo::run_process(inputs.len(), outputs.len()))]
+        #[pallet::weight(
+            T::WeightInfo::run_process(inputs.len() as u32, outputs.len() as u32) +
+            ProcessValidatorWeights::<T>::validate_process_max() -
+            ProcessValidatorWeights::<T>::validate_process_min()
+        )]
         pub fn run_process(
             origin: OriginFor<T>,
-            process: Option<ProcessId<T>>,
+            process: ProcessId<T>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
             outputs: BoundedVec<Output<T>, T::MaxOutputCount>
         ) -> DispatchResultWithPostInfo {
@@ -198,124 +212,72 @@ pub mod pallet {
             // Helper closures function
             let _next_token = |id: T::TokenId| -> T::TokenId { id + One::one() };
 
-            if let Some(process) = process {
-                let inputs: Vec<Option<ProcessIO<T>>> = inputs
-                    .iter()
-                    .map(|i| {
-                        let token = Self::tokens_by_id(i);
-                        token.map(|t| ProcessIO::<T> {
-                            id: t.id,
-                            roles: t.roles.into(),
-                            metadata: t.metadata.into(),
-                            parent_index: None
-                        })
+            // Fetch all valid inputs and ensure all inputs provided exist
+            let storage_inputs = inputs.iter().map_while(|i| Self::tokens_by_id(i)).collect::<Vec<_>>();
+            ensure!(storage_inputs.len() == inputs.len(), Error::<T>::InvalidInput);
+
+            // Map storage inputs to ProcessIO for validation and ensure all inputs are not burnt
+            let io_inputs = storage_inputs
+                .into_iter()
+                .map_while(|token| match token.children {
+                    Some(_) => None,
+                    None => Some(ProcessIO::<T> {
+                        id: token.id,
+                        roles: token.roles.into(),
+                        metadata: token.metadata.into()
                     })
-                    .collect();
+                })
+                .collect::<Vec<_>>();
+            ensure!(io_inputs.len() == inputs.len(), Error::<T>::AlreadyBurnt);
 
-                ensure!(
-                    inputs.iter().all(|opt_t| {
-                        match opt_t {
-                            None => false,
-                            Some(_) => true
-                        }
-                    }),
-                    Error::<T>::InvalidInput
-                );
-
-                let inputs = inputs.into_iter().map(|t| t.unwrap()).collect();
-                let (_, outputs) = outputs.iter().fold(
-                    (
-                        LastToken::<T>::get(),
-                        BoundedVec::<ProcessIO<T>, T::MaxOutputCount>::default()
-                    ),
-                    |(last, mut outputs), output| {
-                        let next = _next_token(last);
-                        let output = ProcessIO::<T> {
-                            id: next.clone(),
-                            roles: output.roles.clone().into(),
-                            metadata: output.metadata.clone().into(),
-                            parent_index: output.parent_index
-                        };
-                        outputs.force_push(output);
-                        (next, outputs)
-                    }
-                );
-
-                let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &inputs, &outputs);
-                ensure!(process_is_valid, Error::<T>::ProcessInvalid);
-            } else {
-                // check multiple tokens are not trying to have the same parent
-                let mut parent_indices = BTreeSet::new();
-
-                for output in outputs.iter() {
-                    // check at least a default role has been set
-                    ensure!(
-                        output.roles.contains_key(&T::RoleKey::default()),
-                        Error::<T>::NoDefaultRole
-                    );
-
-                    // check parent index
-                    if output.parent_index.is_some() {
-                        let index = output.parent_index.unwrap() as usize;
-                        ensure!(inputs.get(index).is_some(), Error::<T>::OutOfBoundsParent);
-                        ensure!(parent_indices.insert(index), Error::<T>::DuplicateParents);
-                    }
-                }
-
-                // check origin owns inputs and that inputs have not been burnt
-                for id in inputs.iter() {
-                    let token = <TokensById<T>>::get(id);
-                    ensure!(token != None, Error::<T>::InvalidInput);
-                    let token = token.unwrap();
-                    ensure!(token.roles[&T::RoleKey::default()] == sender, Error::<T>::NotOwned);
-                    ensure!(token.children == None, Error::<T>::AlreadyBurnt);
-                }
-            }
-
-            // STORAGE MUTATIONS
-
-            // Get the last token to be created so we can iterate the new tokens
-            let last = LastToken::<T>::get();
-
-            // Create new tokens getting a tuple of the last token created and the complete Vec of tokens created
-            let (last, children) = outputs.into_iter().fold(
-                (last, BoundedVec::<T::TokenId, T::MaxOutputCount>::default()),
-                |(last, mut children), output| {
+            let (last, io_outputs) = outputs.iter().fold(
+                (LastToken::<T>::get(), Vec::<ProcessIO<T>>::new()),
+                |(last, mut outputs), output| {
                     let next = _next_token(last);
-                    let original_id = if output.parent_index.is_some() {
-                        let parent_id = inputs.get(output.parent_index.unwrap() as usize).unwrap();
-                        <TokensById<T>>::get(parent_id).unwrap().original_id.clone()
-                    } else {
-                        next
+                    let output = ProcessIO::<T> {
+                        id: next.clone(),
+                        roles: output.roles.clone().into(),
+                        metadata: output.metadata.clone().into()
                     };
-                    <TokensById<T>>::insert(
-                        next,
-                        Token::<T> {
-                            id: next,
-                            original_id: original_id,
-                            roles: output.roles.clone(),
-                            creator: sender.clone(),
-                            created_at: now,
-                            destroyed_at: None,
-                            metadata: output.metadata.clone(),
-                            parents: inputs.clone(),
-                            children: None
-                        }
-                    );
-                    children.force_push(next);
-                    (next, children)
+                    outputs.push(output);
+                    (next, outputs)
                 }
             );
 
+            let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &io_inputs, &io_outputs);
+            ensure!(process_is_valid.success, Error::<T>::ProcessInvalid);
+
+            // STORAGE MUTATIONS
+
             // Burn inputs
-            inputs.iter().for_each(|id| {
-                <TokensById<T>>::mutate(id, |token| {
+            let children: BoundedVec<T::TokenId, T::MaxOutputCount> =
+                io_outputs.iter().map(|output| output.id.clone()).try_collect().unwrap();
+            io_inputs.iter().for_each(|input| {
+                <TokensById<T>>::mutate(input.id, |token| {
                     let mut token = token.as_mut().unwrap();
                     token.children = Some(children.clone());
                     token.destroyed_at = Some(now);
                 });
             });
 
+            // Mint outputs
+            io_outputs.into_iter().for_each(|output| {
+                <TokensById<T>>::insert(
+                    output.id.clone(),
+                    Token::<T> {
+                        id: output.id,
+                        roles: output.roles.try_into().unwrap(),
+                        creator: sender.clone(),
+                        created_at: now,
+                        destroyed_at: None,
+                        metadata: output.metadata.try_into().unwrap(),
+                        parents: inputs.clone().try_into().unwrap(),
+                        children: None
+                    }
+                );
+            });
+
+            // Update last token
             <LastToken<T>>::put(last);
 
             // EVENTS
@@ -328,7 +290,11 @@ pub mod pallet {
                 Self::deposit_event(Event::Burnt(*token_id, sender.clone(), children.clone()));
             }
 
-            Ok(().into())
+            let actual_weight = T::WeightInfo::run_process(inputs.len() as u32, outputs.len() as u32)
+                + ProcessValidatorWeights::<T>::validate_process(process_is_valid.executed_len)
+                - ProcessValidatorWeights::<T>::validate_process_min();
+
+            Ok(Some(actual_weight).into())
         }
     }
 }

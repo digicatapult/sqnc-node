@@ -90,7 +90,7 @@ jobs:
       - name: Install toolchains
         run: |
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
-          rustup target add wasm32-unknown-unknown --toolchain nightly
+          rustup target add wasm32-unknown-unknown --toolchain ${{ needs.get-version.outputs.toolchain }}
       - name: install protobuf compiler
         run: sudo apt-get install protobuf-compiler
       - name: Install sccache
