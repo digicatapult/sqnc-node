@@ -21,7 +21,7 @@ sp-io = { default-features = false, version = "7.0.0", git = "https://github.com
 sp-std = { default-features = false, version = "5.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 
 [dev-dependencies]
-serde = { version = "1.0.156" }
+serde = { version = "1.0.157" }
 frame-support-test = { version = "3.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 pallet-scheduler = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 sp-core = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
