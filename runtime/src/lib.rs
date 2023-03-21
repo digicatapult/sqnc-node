@@ -101,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 454,
+    spec_version: 501,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -327,7 +327,10 @@ pub enum Role {
     Laboratory = 3,
     Buyer = 4,
     Supplier = 5,
-    Reviewer = 6
+    Reviewer = 6,
+    Optimiser = 7,
+    MemberA = 8,
+    MemberB = 9
 }
 
 impl Default for Role {

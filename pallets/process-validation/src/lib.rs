@@ -417,7 +417,7 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
                     executed_len = executed_len + 1;
                     match symbol {
                         BooleanExpressionSymbol::Op(op) => {
-                            if let (Some(a), Some(b)) = (stack.pop(), stack.pop()) {
+                            if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
                                 stack.push(op.eval(a, b));
                             } else {
                                 return ValidationResult {
