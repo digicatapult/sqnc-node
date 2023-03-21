@@ -1,6 +1,6 @@
 [package]
 name = "dscp-node-runtime"
-version = "5.0.0"
+version = "5.0.1"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -65,7 +65,7 @@ pallet-process-validation = { default-features = false, package = 'pallet-proces
 pallet-symmetric-key = { default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
 
-serde = { version = "1.0.157" }
+serde = { version = "1.0.158" }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
