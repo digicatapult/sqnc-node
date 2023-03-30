@@ -30,20 +30,20 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     fn run_process(i: u32, o: u32) -> Weight {
         // Proof Size summary in bytes:
         //  Measured:  `176 + i * (165 ±0)`
-        //  Estimated: `18334 + i * (9436 ±0)`
-        // Minimum execution time: 77_000 nanoseconds.
-        Weight::from_ref_time(16_749_333)
-            .saturating_add(Weight::from_proof_size(18334))
-            // Standard Error: 6_416
-            .saturating_add(Weight::from_ref_time(9_289_111).saturating_mul(i.into()))
-            // Standard Error: 6_416
-            .saturating_add(Weight::from_ref_time(5_575_555).saturating_mul(o.into()))
-            .saturating_add(T::DbWeight::get().reads(2))
+        //  Estimated: `25936 + i * (9601 ±0)`
+        // Minimum execution time: 67_000 nanoseconds.
+        Weight::from_ref_time(32_372_888)
+            .saturating_add(Weight::from_proof_size(25936))
+            // Standard Error: 7_804
+            .saturating_add(Weight::from_ref_time(7_291_111).saturating_mul(i.into()))
+            // Standard Error: 7_804
+            .saturating_add(Weight::from_ref_time(2_888_000).saturating_mul(o.into()))
+            .saturating_add(T::DbWeight::get().reads(5))
             .saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i.into())))
-            .saturating_add(T::DbWeight::get().writes(1))
+            .saturating_add(T::DbWeight::get().writes(4))
             .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i.into())))
             .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(o.into())))
-            .saturating_add(Weight::from_proof_size(9436).saturating_mul(i.into()))
+            .saturating_add(Weight::from_proof_size(9601).saturating_mul(i.into()))
     }
 }
 

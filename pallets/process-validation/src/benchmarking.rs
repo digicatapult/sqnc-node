@@ -105,7 +105,7 @@ benchmarks! {
             metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
         }; 10];
     }: {
-        let _ = ProcessValidation::<T>::validate_process(process, &account_id, &inputs, &outputs);
+        let _ = ProcessValidation::<T>::validate_process(&process, &account_id, &inputs, &outputs);
     }
 
     validate_process_min {
@@ -124,7 +124,7 @@ benchmarks! {
             metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
         }; 10];
     }: {
-        let _ = ProcessValidation::<T>::validate_process(process, &account_id, &inputs, &outputs);
+        let _ = ProcessValidation::<T>::validate_process(&process, &account_id, &inputs, &outputs);
     }
 
     validate_process_max {
@@ -143,7 +143,7 @@ benchmarks! {
             metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
         }; 10];
     }: {
-        let _ = ProcessValidation::<T>::validate_process(process, &account_id, &inputs, &outputs);
+        let _ = ProcessValidation::<T>::validate_process(&process, &account_id, &inputs, &outputs);
     }
 }
 

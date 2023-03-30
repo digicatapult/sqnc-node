@@ -8,7 +8,7 @@ use frame_support::{
     BoundedVec
 };
 pub use pallet::*;
-use sp_runtime::traits::{AtLeast32Bit, One, Hash};
+use sp_runtime::traits::{AtLeast32Bit, Hash, One};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -168,7 +168,7 @@ pub mod pallet {
             sender: T::AccountId,
             process: ProcessId<T>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-            outputs: BoundedVec<T::TokenId, T::MaxOutputCount>,
+            outputs: BoundedVec<T::TokenId, T::MaxOutputCount>
         }
     }
 
@@ -289,16 +289,19 @@ pub mod pallet {
             // EVENTS
             let process_id = &process.id;
             let process_version = &process.version;
-            Self::deposit_event(vec![
-                T::Hashing::hash_of(&b"simpleNFT.ProcessRan"),
-                T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id)),
-                T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id, process_version)),
-            ], Event::ProcessRan {
-                sender,
-                process,
-                inputs,
-                outputs: children,
-            });
+            Self::deposit_event(
+                vec![
+                    T::Hashing::hash_of(&b"simpleNFT.ProcessRan"),
+                    T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id)),
+                    T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id, process_version)),
+                ],
+                Event::ProcessRan {
+                    sender,
+                    process,
+                    inputs,
+                    outputs: children
+                }
+            );
 
             Ok(Some(actual_weight).into())
         }
@@ -307,9 +310,6 @@ pub mod pallet {
 
 impl<T: Config> Pallet<T> {
     fn deposit_event(topics: Vec<T::Hash>, event: Event<T>) {
-		<frame_system::Pallet<T>>::deposit_event_indexed(
-			&topics,
-			<T as Config>::RuntimeEvent::from(event).into(),
-		)
-	}
+        <frame_system::Pallet<T>>::deposit_event_indexed(&topics, <T as Config>::RuntimeEvent::from(event).into())
+    }
 }
