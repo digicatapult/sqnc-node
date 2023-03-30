@@ -14,7 +14,7 @@ use sp_runtime::traits::{AtLeast32Bit, Hash, One};
 use sp_std::prelude::*;
 
 mod token;
-// mod event;
+
 mod output;
 
 #[cfg(test)]
