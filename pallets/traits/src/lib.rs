@@ -64,7 +64,7 @@ where
     type Weights: ValidateProcessWeights<Self::WeightArg>;
 
     fn validate_process(
-        id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &A,
         inputs: &Vec<ProcessIO<I, A, R, T, V>>,
         outputs: &Vec<ProcessIO<I, A, R, T, V>>
@@ -85,7 +85,7 @@ where
     type Weights = ();
 
     fn validate_process(
-        _id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        _id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         _sender: &A,
         _inputs: &Vec<ProcessIO<I, A, R, T, V>>,
         _outputs: &Vec<ProcessIO<I, A, R, T, V>>

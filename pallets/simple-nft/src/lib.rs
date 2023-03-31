@@ -8,7 +8,7 @@ use frame_support::{
     BoundedVec
 };
 pub use pallet::*;
-use sp_runtime::traits::{AtLeast32Bit, One};
+use sp_runtime::traits::{AtLeast32Bit, Hash, One};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;
@@ -162,12 +162,14 @@ pub mod pallet {
     >;
 
     #[pallet::event]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// A token was issued.
-        Minted(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxInputCount>),
-        /// A token was burnt.
-        Burnt(T::TokenId, T::AccountId, BoundedVec<T::TokenId, T::MaxOutputCount>)
+        /// A process was successfully run
+        ProcessRan {
+            sender: T::AccountId,
+            process: ProcessId<T>,
+            inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
+            outputs: BoundedVec<T::TokenId, T::MaxOutputCount>
+        }
     }
 
     #[pallet::error]
@@ -244,7 +246,7 @@ pub mod pallet {
                 }
             );
 
-            let process_is_valid = T::ProcessValidator::validate_process(process, &sender, &io_inputs, &io_outputs);
+            let process_is_valid = T::ProcessValidator::validate_process(&process, &sender, &io_inputs, &io_outputs);
             ensure!(process_is_valid.success, Error::<T>::ProcessInvalid);
 
             // STORAGE MUTATIONS
@@ -280,21 +282,34 @@ pub mod pallet {
             // Update last token
             <LastToken<T>>::put(last);
 
-            // EVENTS
-
-            // Emit events
-            for token_id in children.iter() {
-                Self::deposit_event(Event::Minted(*token_id, sender.clone(), inputs.clone()));
-            }
-            for token_id in inputs.iter() {
-                Self::deposit_event(Event::Burnt(*token_id, sender.clone(), children.clone()));
-            }
-
             let actual_weight = T::WeightInfo::run_process(inputs.len() as u32, outputs.len() as u32)
                 + ProcessValidatorWeights::<T>::validate_process(process_is_valid.executed_len)
                 - ProcessValidatorWeights::<T>::validate_process_min();
 
+            // EVENTS
+            let process_id = &process.id;
+            let process_version = &process.version;
+            Self::deposit_event(
+                vec![
+                    T::Hashing::hash_of(&b"simpleNFT.ProcessRan"),
+                    T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id)),
+                    T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id, process_version)),
+                ],
+                Event::ProcessRan {
+                    sender,
+                    process,
+                    inputs,
+                    outputs: children
+                }
+            );
+
             Ok(Some(actual_weight).into())
         }
+    }
+}
+
+impl<T: Config> Pallet<T> {
+    fn deposit_event(topics: Vec<T::Hash>, event: Event<T>) {
+        <frame_system::Pallet<T>>::deposit_event_indexed(&topics, <T as Config>::RuntimeEvent::from(event).into())
     }
 }

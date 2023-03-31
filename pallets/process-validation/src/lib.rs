@@ -395,12 +395,12 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
     type Weights = T::WeightInfo;
 
     fn validate_process(
-        id: ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &T::AccountId,
         inputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
         outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
     ) -> ValidationResult<u32> {
-        let maybe_process = <ProcessModel<T>>::try_get(id.id, id.version);
+        let maybe_process = <ProcessModel<T>>::try_get(id.id.clone(), id.version.clone());
 
         match maybe_process {
             Ok(process) => {

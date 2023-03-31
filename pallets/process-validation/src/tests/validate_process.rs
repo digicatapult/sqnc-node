@@ -21,7 +21,7 @@ fn it_succeeds_when_process_exists() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -53,7 +53,7 @@ fn it_fails_when_process_id_doesnt_exist() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::B,
                 version: 1u32
             },
@@ -85,7 +85,7 @@ fn it_fails_when_process_version_doesnt_exist() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 2u32
             },
@@ -117,7 +117,7 @@ fn it_fails_when_process_disabled() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -156,7 +156,7 @@ fn it_succeeds_when_all_restrictions_succeed() {
         token_roles.insert(Default::default(), 0u64);
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -199,7 +199,7 @@ fn it_fails_when_one_restrictions_fails() {
         token_roles.insert(Default::default(), 1u64);
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -244,7 +244,7 @@ fn it_succeeds_with_complex_tree() {
         token_roles.insert(Default::default(), 1u64);
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -289,7 +289,7 @@ fn it_fails_with_complex_tree() {
         token_roles.insert(Default::default(), 1u64);
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -329,7 +329,7 @@ fn it_succeeds_with_handed_expressions_r() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -369,7 +369,7 @@ fn it_succeeds_with_handed_expressions_l() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -409,7 +409,7 @@ fn it_fails_with_handed_expressions_r() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },
@@ -449,7 +449,7 @@ fn it_fails_with_handed_expressions_l() {
         );
 
         let result = ProcessValidation::validate_process(
-            ProcessFullyQualifiedId {
+            &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
                 version: 1u32
             },

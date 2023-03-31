@@ -1,6 +1,6 @@
 // Tests to be written here
 
-use crate::{mock::*, output::Output, token::Token, Error};
+use crate::{mock::*, output::Output, token::Token, Error, Event};
 use dscp_pallet_traits::ProcessFullyQualifiedId;
 use frame_support::{assert_err, assert_ok, bounded_btree_map, bounded_vec};
 use sp_core::H256;
@@ -665,6 +665,61 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                 children: None
             }
         );
+    });
+}
+
+#[test]
+fn it_produces_process_ran_events_when_success() {
+    new_test_ext().execute_with(|| {
+        run_to_block(1);
+
+        let roles0 = bounded_btree_map!(Default::default() => 1);
+        let roles1 = bounded_btree_map!(Default::default() => 2);
+        let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
+        let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
+        let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
+        let metadata3 = bounded_btree_map!(0 => MetadataValue::None);
+        SimpleNFT::run_process(
+            RuntimeOrigin::signed(1),
+            SUCCEED_PROCESS,
+            bounded_vec![],
+            bounded_vec![
+                Output {
+                    roles: roles0.clone(),
+                    metadata: metadata0.clone()
+                },
+                Output {
+                    roles: roles0.clone(),
+                    metadata: metadata1.clone()
+                },
+            ]
+        )
+        .unwrap();
+        // create 2 tokens with 2 parents
+        assert_ok!(SimpleNFT::run_process(
+            RuntimeOrigin::signed(1),
+            SUCCEED_PROCESS,
+            bounded_vec![1, 2],
+            bounded_vec![
+                Output {
+                    roles: roles0.clone(),
+                    metadata: metadata2.clone()
+                },
+                Output {
+                    roles: roles1.clone(),
+                    metadata: metadata3.clone()
+                },
+            ]
+        ));
+        assert_eq!(
+            System::events().iter().last().unwrap().event,
+            RuntimeEvent::SimpleNFT(Event::ProcessRan {
+                sender: 1,
+                process: SUCCEED_PROCESS,
+                inputs: bounded_vec![1, 2],
+                outputs: bounded_vec![3, 4]
+            }),
+        )
     });
 }
 

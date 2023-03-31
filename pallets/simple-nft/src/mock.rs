@@ -117,13 +117,13 @@ impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessVa
     type Weights = ();
 
     fn validate_process(
-        id: TestProcessId,
+        id: &TestProcessId,
         _sender: &u64,
         _inputs: &Vec<TestProcessIO>,
         _outputs: &Vec<TestProcessIO>
     ) -> ValidationResult<u32> {
         ValidationResult {
-            success: id.id == ProcessIdentifier::ShouldSucceed,
+            success: id.id.clone() == ProcessIdentifier::ShouldSucceed,
             executed_len: 0u32
         }
     }
@@ -150,4 +150,9 @@ impl pallet_simple_nft::Config for Test {
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+}
+pub fn run_to_block(n: u64) {
+    while System::block_number() < n {
+        System::set_block_number(System::block_number() + 1);
+    }
 }
