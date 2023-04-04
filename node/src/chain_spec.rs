@@ -98,6 +98,10 @@ pub fn development_config() -> Result<ChainSpec, String> {
     ))
 }
 
+pub fn l3_prod_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/prod-l3-azure.json")[..])
+}
+
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
     let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm binary not available".to_string())?;
 
