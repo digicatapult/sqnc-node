@@ -4,20 +4,24 @@ description = 'A FRAME pallet for handling non-fungible tokens'
 edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
-name = 'pallet-simple-nft'
-version = "5.0.1"
+name = 'pallet-utxo-nft'
+version = "5.1.0"
 
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
 [dependencies]
-scale-info = { version = "2.5.0", default-features = false, features = ["derive"] }
-codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false, features = ["derive"] }
+scale-info = { version = "2.5.0", default-features = false, features = [
+    "derive",
+] }
+codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false, features = [
+    "derive",
+] }
 dscp-pallet-traits = { default-features = false, path = '../traits' }
 frame-support = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 frame-system = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
-frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v0.9.39" }
+frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", optional = true, branch = "polkadot-v0.9.39" }
 sp-runtime = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 sp-io = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }
 sp-std = { default-features = false, version = "5.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.39" }

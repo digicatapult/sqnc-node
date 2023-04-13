@@ -291,9 +291,9 @@ pub mod pallet {
             let process_version = &process.version;
             Self::deposit_event(
                 vec![
-                    T::Hashing::hash_of(&b"simpleNFT.ProcessRan"),
-                    T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id)),
-                    T::Hashing::hash_of(&(b"simpleNFT.ProcessRan", process_id, process_version)),
+                    T::Hashing::hash_of(&b"utxoNFT.ProcessRan"),
+                    T::Hashing::hash_of(&(b"utxoNFT.ProcessRan", process_id)),
+                    T::Hashing::hash_of(&(b"utxoNFT.ProcessRan", process_id, process_version)),
                 ],
                 Event::ProcessRan {
                     sender,

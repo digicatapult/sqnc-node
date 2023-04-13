@@ -101,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 502,
+    spec_version: 510,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -377,15 +377,14 @@ type TokenMetadataValue = MetadataValue<TokenId>;
 type ProcessIdentifier = BoundedVec<u8, ConstU32<32>>;
 type ProcessVersion = u32;
 
-/// Configure the template pallet in pallets/simple-nft.
-impl pallet_simple_nft::Config for Runtime {
+impl pallet_utxo_nft::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type TokenId = TokenId;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type ProcessValidator = ProcessValidation;
-    type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_utxo_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = ConstU32<64>;
     type MaxRoleCount = ConstU32<16>;
     type MaxInputCount = ConstU32<64>;
@@ -474,7 +473,7 @@ construct_runtime!(
         Balances: pallet_balances,
         TransactionPaymentFree: pallet_transaction_payment_free,
         Sudo: pallet_sudo,
-        SimpleNFT: pallet_simple_nft,
+        UtxoNFT: pallet_utxo_nft,
         ProcessValidation: pallet_process_validation,
         NodeAuthorization: pallet_node_authorization,
         Preimage: pallet_preimage,
@@ -524,7 +523,7 @@ mod benches {
         [pallet_timestamp, Timestamp]
         [pallet_grandpa, Grandpa]
         [pallet_balances, Balances]
-        [pallet_simple_nft, SimpleNFT]
+        [pallet_utxo_nft, UtxoNFT]
         [pallet_process_validation, ProcessValidation]
         [pallet_scheduler, Scheduler]
         [pallet_symmetric_key, IpfsKey]

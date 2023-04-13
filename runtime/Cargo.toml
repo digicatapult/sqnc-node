@@ -1,6 +1,6 @@
 [package]
 name = "dscp-node-runtime"
-version = "5.0.2"
+version = "5.1.0"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -60,7 +60,7 @@ hex-literal = { version = "0.3.4", optional = true }
 
 # Local Dependencies
 pallet-doas = { default-features = false, package = 'pallet-doas', path = '../pallets/doas' }
-pallet-simple-nft = { default-features = false, package = 'pallet-simple-nft', path = '../pallets/simple-nft' }
+pallet-utxo-nft = { default-features = false, package = 'pallet-utxo-nft', path = '../pallets/utxo-nft' }
 pallet-process-validation = { default-features = false, package = 'pallet-process-validation', path = '../pallets/process-validation' }
 pallet-symmetric-key = { default-features = false, package = 'pallet-symmetric-key', path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, package = 'pallet-transaction-payment-free', path = '../pallets/transaction-payment-free' }
@@ -108,7 +108,7 @@ std = [
     "sp-std/std",
     "sp-transaction-pool/std",
     "sp-version/std",
-    "pallet-simple-nft/std",
+    "pallet-utxo-nft/std",
     "pallet-scheduler/std",
     "pallet-symmetric-key/std",
 ]
@@ -123,7 +123,7 @@ runtime-benchmarks = [
     "pallet-grandpa/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
     "pallet-scheduler/runtime-benchmarks",
-    "pallet-simple-nft/runtime-benchmarks",
+    "pallet-utxo-nft/runtime-benchmarks",
     "pallet-symmetric-key/runtime-benchmarks",
     "pallet-process-validation/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
@@ -144,7 +144,7 @@ try-runtime = [
     "pallet-process-validation/try-runtime",
     "pallet-insecure-randomness-collective-flip/try-runtime",
     "pallet-scheduler/try-runtime",
-    "pallet-simple-nft/try-runtime",
+    "pallet-utxo-nft/try-runtime",
     "pallet-sudo/try-runtime",
     "pallet-symmetric-key/try-runtime",
     "pallet-timestamp/try-runtime",

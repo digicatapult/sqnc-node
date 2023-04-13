@@ -13,7 +13,7 @@ use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
 
 use crate::output::Output;
 #[allow(unused)]
-use crate::Pallet as SimpleNFT;
+use crate::Pallet as UtxoNFT;
 
 const SEED: u32 = 0;
 
@@ -56,7 +56,7 @@ where
         .unwrap();
 
     let default_process = BoundedVec::<u8, ConstU32<32>>::try_from("default".as_bytes().to_vec()).unwrap();
-    SimpleNFT::<T>::run_process(
+    UtxoNFT::<T>::run_process(
         RawOrigin::Signed(account_id.clone()).into(),
         ProcessFullyQualifiedId {
             id: default_process.into(),
@@ -148,4 +148,4 @@ benchmarks! {
     }
 }
 
-impl_benchmark_test_suite!(SimpleNFT, crate::mock::new_test_ext(), crate::mock::Test,);
+impl_benchmark_test_suite!(UtxoNFT, crate::mock::new_test_ext(), crate::mock::Test,);
