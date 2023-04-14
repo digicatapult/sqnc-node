@@ -1683,7 +1683,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "5.1.0"
+version = "6.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -4883,7 +4883,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-utxo-nft"
-version = "5.1.0"
+version = "6.0.0"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
