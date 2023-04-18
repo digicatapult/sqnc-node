@@ -1,7 +1,7 @@
 use dscp_node_runtime::{
     types::{BooleanExpressionSymbol, Restriction},
-    AccountId, BabeConfig, BalancesConfig, GenesisConfig,BABE_GENESIS_EPOCH_CONFIG, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
-    ProcessValidationConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY
+    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
+    ProcessValidationConfig, Signature, SudoConfig, SystemConfig, BABE_GENESIS_EPOCH_CONFIG, WASM_BINARY
 };
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
@@ -215,9 +215,9 @@ fn testnet_genesis(
         },
         babe: BabeConfig {
             authorities: initial_authorities
-            .iter()
-            .map(|(babe_id, _grandpa_id)| (babe_id.clone().into(), 1))
-            .collect(),
+                .iter()
+                .map(|(babe_id, _grandpa_id)| (babe_id.clone().into(), 1))
+                .collect(),
             epoch_config: Some(BABE_GENESIS_EPOCH_CONFIG)
         },
         grandpa: GrandpaConfig {
