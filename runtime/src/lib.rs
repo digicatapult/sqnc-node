@@ -227,8 +227,6 @@ impl frame_system::Config for Runtime {
     type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
-impl pallet_insecure_randomness_collective_flip::Config for Runtime {}
-
 impl pallet_babe::Config for Runtime {
     type DisabledValidators = ();
     type MaxAuthorities = ConstU32<32>;
@@ -481,7 +479,7 @@ impl pallet_symmetric_key::Config for Runtime {
     type ScheduleCall = RuntimeCall;
     type UpdateOrigin = MoreThanHalfMembers;
     type RotateOrigin = MoreThanTwoMembers;
-    type Randomness = RandomnessCollectiveFlip;
+    type Randomness = pallet_babe::RandomnessFromOneEpochAgo<Runtime>;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
     type WeightInfo = pallet_symmetric_key::weights::SubstrateWeight<Runtime>;
@@ -496,7 +494,6 @@ construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system,
-        RandomnessCollectiveFlip: pallet_insecure_randomness_collective_flip,
         Timestamp: pallet_timestamp,
         Babe: pallet_babe,
         Grandpa: pallet_grandpa,
