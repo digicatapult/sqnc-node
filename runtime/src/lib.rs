@@ -7,7 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly};
+use frame_support::traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, OnRuntimeUpgrade};
 use frame_support::BoundedVec;
 use frame_system::EnsureRoot;
 use pallet_grandpa::fg_primitives;
@@ -103,7 +103,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 502,
+    spec_version: 600,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -404,15 +404,14 @@ type TokenMetadataValue = MetadataValue<TokenId>;
 type ProcessIdentifier = BoundedVec<u8, ConstU32<32>>;
 type ProcessVersion = u32;
 
-/// Configure the template pallet in pallets/simple-nft.
-impl pallet_simple_nft::Config for Runtime {
+impl pallet_utxo_nft::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type TokenId = TokenId;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type ProcessValidator = ProcessValidation;
-    type WeightInfo = pallet_simple_nft::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_utxo_nft::weights::SubstrateWeight<Runtime>;
     type MaxMetadataCount = ConstU32<64>;
     type MaxRoleCount = ConstU32<16>;
     type MaxInputCount = ConstU32<64>;
@@ -500,7 +499,7 @@ construct_runtime!(
         Balances: pallet_balances,
         TransactionPaymentFree: pallet_transaction_payment_free,
         Sudo: pallet_sudo,
-        SimpleNFT: pallet_simple_nft,
+        UtxoNFT: pallet_utxo_nft,
         ProcessValidation: pallet_process_validation,
         NodeAuthorization: pallet_node_authorization,
         Preimage: pallet_preimage,
@@ -534,8 +533,14 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-    frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+    Runtime,
+    Block,
+    frame_system::ChainContext<Runtime>,
+    Runtime,
+    AllPalletsWithSystem,
+    UtxoNftStoragePrefixMigration
+>;
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
@@ -550,11 +555,33 @@ mod benches {
         [pallet_timestamp, Timestamp]
         [pallet_grandpa, Grandpa]
         [pallet_balances, Balances]
-        [pallet_simple_nft, SimpleNFT]
+        [pallet_utxo_nft, UtxoNFT]
         [pallet_process_validation, ProcessValidation]
         [pallet_scheduler, Scheduler]
         [pallet_symmetric_key, IpfsKey]
     );
+}
+
+const UTXO_NFT_OLD_PREFIX: &str = "SimpleNFT";
+/// Migrate from `SimpleNFT` to the new pallet prefix `UtxoNFT`
+pub struct UtxoNftStoragePrefixMigration;
+
+impl OnRuntimeUpgrade for UtxoNftStoragePrefixMigration {
+    fn on_runtime_upgrade() -> frame_support::weights::Weight {
+        pallet_collective::migrations::v4::migrate::<Runtime, UtxoNFT, _>(UTXO_NFT_OLD_PREFIX)
+    }
+
+    #[cfg(feature = "try-runtime")]
+    fn pre_upgrade() -> Result<(), &'static str> {
+        pallet_collective::migrations::v4::pre_migrate::<UtxoNFT, _>(UTXO_NFT_OLD_PREFIX);
+        Ok(())
+    }
+
+    #[cfg(feature = "try-runtime")]
+    fn post_upgrade() -> Result<(), &'static str> {
+        pallet_collective::migrations::v4::post_migrate::<UtxoNFT, _>(UTXO_NFT_OLD_PREFIX);
+        Ok(())
+    }
 }
 
 impl_runtime_apis! {

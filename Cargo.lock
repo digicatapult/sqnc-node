@@ -1639,7 +1639,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-node"
-version = "5.0.5"
+version = "6.0.0"
 dependencies = [
  "bs58",
  "clap",
@@ -1683,7 +1683,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "5.0.2"
+version = "6.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -1704,12 +1704,12 @@ dependencies = [
  "pallet-preimage",
  "pallet-process-validation",
  "pallet-scheduler",
- "pallet-simple-nft",
  "pallet-sudo",
  "pallet-symmetric-key",
  "pallet-timestamp",
  "pallet-transaction-payment-free",
  "pallet-transaction-payment-rpc-runtime-api",
+ "pallet-utxo-nft",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -4779,23 +4779,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-simple-nft"
-version = "5.0.1"
-dependencies = [
- "dscp-pallet-traits",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
 name = "pallet-sudo"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.39#1837f423b494254e1d27834b1c9da34b2c0c2375"
@@ -4904,6 +4887,23 @@ dependencies = [
  "sp-api",
  "sp-runtime",
  "sp-weights",
+]
+
+[[package]]
+name = "pallet-utxo-nft"
+version = "6.0.0"
+dependencies = [
+ "dscp-pallet-traits",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]

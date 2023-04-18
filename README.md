@@ -81,13 +81,13 @@ Then you can run the benchmark tool with for example
 
 ```bash
 ./target/release/dscp-node benchmark pallet \
-    --pallet 'pallet_simple_nft' \
+    --pallet 'pallet_utxo_nft' \
     --extrinsic '*' \
     --repeat 1000 \
     --output ./weights/
 ```
 
-The generated weights implementation should then be integrated into the `pallet_simple_nft` module.
+The generated weights implementation should then be integrated into the `pallet_utxo_nft` module.
 
 ### Upgrading Substrate
 
@@ -106,20 +106,20 @@ Then follow the instructions at the top of [`docker-compose.yaml`](docker-compos
 
 The node can be interacted with using [`@polkadot/api`](https://www.npmjs.com/package/@polkadot/api). [For example](https://github.com/digicatapult/dscp-api/blob/main/app/util/substrateApi.js).
 
-### SimpleNFT pallet
+### UtxoNFT pallet
 
-The `SimpleNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval.
+The `UtxoNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval.
 
 Note: The json object with types, described above, has been upgraded from `"Address": "AccountId", "LookupSource": "AccountId"` to `"Address": "MultiAddress", "LookupSource": "MultiAddress"` and it also needs to be used in conjunction with the new version of _PolkaDot JS_, **v4.7.2** or higher.
 
-Two storage endpoints are then exposed under `SimpleNFT` for the id of the last token issued (`LastToken`) and a mapping of tokens by id (`TokensById`):
+Two storage endpoints are then exposed under `UtxoNFT` for the id of the last token issued (`LastToken`) and a mapping of tokens by id (`TokensById`):
 
 ```rust
 LastToken get(fn last_token): T::TokenId;
 TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::RoleKey, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>;
 ```
 
-Tokens can be minted/burnt by calling the following extrinsic under `SimpleNFT`:
+Tokens can be minted/burnt by calling the following extrinsic under `UtxoNFT`:
 
 ```rust
 pub fn run_process(
@@ -137,12 +137,12 @@ All of this functionality can be easily accessed using [https://polkadot.js.org/
 Pallet tests can be run with:
 
 ```bash
-cargo test -p pallet-simple-nft
+cargo test -p pallet-utxo-nft
 ```
 
 ### ProcessValidation pallet
 
-Pallet for defining process restrictions. Intended for use with `pallet-simple-nft`. Processes can be defined using the extrinsic `create_process`:
+Pallet for defining process restrictions. Intended for use with `pallet-utxo-nft`. Processes can be defined using the extrinsic `create_process`:
 
 ```rust
 pub fn create_process(
@@ -343,7 +343,7 @@ the following:
 
 - This file configures several pallets to include in the runtime. Each pallet configuration is
   defined by a code block that begins with `impl $PALLET_NAME::Config for Runtime`.
-- [`pallet_simple_nft`](#SimpleNFT-pallet) is custom to this project.
+- [`pallet_utxo_nft`](#UtxoNFT-pallet) is custom to this project.
 - The pallets are composed into a single runtime by way of the
   [`construct_runtime!`](https://crates.parity.io/frame_support/macro.construct_runtime.html)
   macro, which is part of the core

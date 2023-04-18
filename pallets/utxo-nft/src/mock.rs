@@ -1,6 +1,6 @@
 // Creating mock runtime here
 
-use crate as pallet_simple_nft;
+use crate as pallet_utxo_nft;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
@@ -33,7 +33,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        SimpleNFT: pallet_simple_nft::{Pallet, Call, Storage, Event<T>},
+        UtxoNFT: pallet_utxo_nft::{Pallet, Call, Storage, Event<T>},
     }
 );
 parameter_types! {
@@ -129,7 +129,7 @@ impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessVa
     }
 }
 
-impl pallet_simple_nft::Config for Test {
+impl pallet_utxo_nft::Config for Test {
     type RuntimeEvent = RuntimeEvent;
 
     type TokenId = u64;
