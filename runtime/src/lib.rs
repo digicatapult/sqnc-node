@@ -101,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 600,
+    spec_version: 800,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
