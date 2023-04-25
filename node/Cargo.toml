@@ -6,7 +6,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-node'
-version = '7.0.0'
+version = '7.0.1'
 
 [[bin]]
 name = 'dscp-node'
