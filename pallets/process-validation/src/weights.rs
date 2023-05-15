@@ -39,76 +39,76 @@ pub trait WeightInfo {
 /// Weight functions for `pallet_process_validation`.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config + Config> ValidateProcessWeights<u32> for SubstrateWeight<T> {
-	/// Storage: ProcessValidation ProcessModel (r:1 w:0)
-	/// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
-	/// The range of component `r` is `[1, 101]`.
-	fn validate_process(r: u32, ) -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `131 + r * (14 ±0)`
-		//  Estimated: `18813`
-		// Minimum execution time: 5_000_000 picoseconds.
-		Weight::from_parts(5_837_220, 0)
-			.saturating_add(Weight::from_parts(0, 18813))
-			// Standard Error: 126
-			.saturating_add(Weight::from_parts(80_780, 0).saturating_mul(r.into()))
-			.saturating_add(T::DbWeight::get().reads(1))
-	}
-	/// Storage: ProcessValidation ProcessModel (r:1 w:0)
-	/// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
-	fn validate_process_min() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `146`
-		//  Estimated: `18813`
-		// Minimum execution time: 5_000_000 picoseconds.
-		Weight::from_parts(6_000_000, 0)
-			.saturating_add(Weight::from_parts(0, 18813))
-			.saturating_add(T::DbWeight::get().reads(1))
-	}
-	/// Storage: ProcessValidation ProcessModel (r:1 w:0)
-	/// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
-	fn validate_process_max() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `1550`
-		//  Estimated: `18813`
-		// Minimum execution time: 13_000_000 picoseconds.
-		Weight::from_parts(14_000_000, 0)
-			.saturating_add(Weight::from_parts(0, 18813))
-			.saturating_add(T::DbWeight::get().reads(1))
-	}
+    /// Storage: ProcessValidation ProcessModel (r:1 w:0)
+    /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
+    /// The range of component `r` is `[1, 101]`.
+    fn validate_process(r: u32, ) -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `131 + r * (14 ±0)`
+        //  Estimated: `18813`
+        // Minimum execution time: 5_000_000 picoseconds.
+        Weight::from_parts(5_837_220, 0)
+            .saturating_add(Weight::from_parts(0, 18813))
+            // Standard Error: 126
+            .saturating_add(Weight::from_parts(80_780, 0).saturating_mul(r.into()))
+            .saturating_add(T::DbWeight::get().reads(1))
+    }
+    /// Storage: ProcessValidation ProcessModel (r:1 w:0)
+    /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
+    fn validate_process_min() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `146`
+        //  Estimated: `18813`
+        // Minimum execution time: 5_000_000 picoseconds.
+        Weight::from_parts(6_000_000, 0)
+            .saturating_add(Weight::from_parts(0, 18813))
+            .saturating_add(T::DbWeight::get().reads(1))
+    }
+    /// Storage: ProcessValidation ProcessModel (r:1 w:0)
+    /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
+    fn validate_process_max() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `1550`
+        //  Estimated: `18813`
+        // Minimum execution time: 13_000_000 picoseconds.
+        Weight::from_parts(14_000_000, 0)
+            .saturating_add(Weight::from_parts(0, 18813))
+            .saturating_add(T::DbWeight::get().reads(1))
+    }
 }
 
 impl<T: frame_system::Config + Config> WeightInfo for SubstrateWeight<T> {
-	/// Storage: ProcessValidation VersionModel (r:1 w:1)
-	/// Proof: ProcessValidation VersionModel (max_values: None, max_size: Some(53), added: 2528, mode: MaxEncodedLen)
-	/// Storage: ProcessValidation ProcessModel (r:1 w:1)
-	/// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
-	/// The range of component `r` is `[1, 101]`.
-	fn create_process(r: u32, ) -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `131`
-		//  Estimated: `18813`
-		// Minimum execution time: 9_000_000 picoseconds.
-		Weight::from_parts(9_870_000, 0)
-			.saturating_add(Weight::from_parts(0, 18813))
-			// Standard Error: 0
-			.saturating_add(Weight::from_parts(130_000, 0).saturating_mul(r.into()))
-			.saturating_add(T::DbWeight::get().reads(2))
-			.saturating_add(T::DbWeight::get().writes(2))
-	}
-	/// Storage: ProcessValidation ProcessModel (r:1 w:1)
-	/// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
-	/// Storage: ProcessValidation VersionModel (r:1 w:0)
-	/// Proof: ProcessValidation VersionModel (max_values: None, max_size: Some(53), added: 2528, mode: MaxEncodedLen)
-	fn disable_process() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `189`
-		//  Estimated: `18813`
-		// Minimum execution time: 13_000_000 picoseconds.
-		Weight::from_parts(14_000_000, 0)
-			.saturating_add(Weight::from_parts(0, 18813))
-			.saturating_add(T::DbWeight::get().reads(2))
-			.saturating_add(T::DbWeight::get().writes(1))
-	}
+    /// Storage: ProcessValidation VersionModel (r:1 w:1)
+    /// Proof: ProcessValidation VersionModel (max_values: None, max_size: Some(53), added: 2528, mode: MaxEncodedLen)
+    /// Storage: ProcessValidation ProcessModel (r:1 w:1)
+    /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
+    /// The range of component `r` is `[1, 101]`.
+    fn create_process(r: u32, ) -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `131`
+        //  Estimated: `18813`
+        // Minimum execution time: 9_000_000 picoseconds.
+        Weight::from_parts(9_870_000, 0)
+            .saturating_add(Weight::from_parts(0, 18813))
+            // Standard Error: 0
+            .saturating_add(Weight::from_parts(130_000, 0).saturating_mul(r.into()))
+            .saturating_add(T::DbWeight::get().reads(2))
+            .saturating_add(T::DbWeight::get().writes(2))
+    }
+    /// Storage: ProcessValidation ProcessModel (r:1 w:1)
+    /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
+    /// Storage: ProcessValidation VersionModel (r:1 w:0)
+    /// Proof: ProcessValidation VersionModel (max_values: None, max_size: Some(53), added: 2528, mode: MaxEncodedLen)
+    fn disable_process() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `189`
+        //  Estimated: `18813`
+        // Minimum execution time: 13_000_000 picoseconds.
+        Weight::from_parts(14_000_000, 0)
+            .saturating_add(Weight::from_parts(0, 18813))
+            .saturating_add(T::DbWeight::get().reads(2))
+            .saturating_add(T::DbWeight::get().writes(1))
+    }
 }
 
 impl WeightInfo for () {

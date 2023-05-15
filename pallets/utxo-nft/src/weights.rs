@@ -35,34 +35,34 @@ pub trait WeightInfo {
 /// Weight functions for `pallet_utxo_nft`.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	/// Storage: UtxoNFT TokensById (r:10 w:20)
-	/// Proof: UtxoNFT TokensById (max_values: None, max_size: Some(6961), added: 9436, mode: MaxEncodedLen)
-	/// Storage: UtxoNFT LastToken (r:1 w:1)
-	/// Proof: UtxoNFT LastToken (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
-	/// Storage: ProcessValidation ProcessModel (r:1 w:0)
-	/// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
-	/// Storage: System EventTopics (r:3 w:3)
-	/// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
-	/// The range of component `i` is `[1, 10]`.
-	/// The range of component `o` is `[1, 10]`.
-	fn run_process(i: u32, o: u32, ) -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `250 + i * (132 ±0)`
-		//  Estimated: `18813 + i * (9436 ±0)`
-		// Minimum execution time: 36_000_000 picoseconds.
-		Weight::from_parts(18_093_555, 0)
-			.saturating_add(Weight::from_parts(0, 18813))
-			// Standard Error: 8_352
-			.saturating_add(Weight::from_parts(4_982_666, 0).saturating_mul(i.into()))
-			// Standard Error: 8_352
-			.saturating_add(Weight::from_parts(1_561_777, 0).saturating_mul(o.into()))
-			.saturating_add(T::DbWeight::get().reads(5))
-			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i.into())))
-			.saturating_add(T::DbWeight::get().writes(4))
-			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i.into())))
-			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(o.into())))
-			.saturating_add(Weight::from_parts(0, 9436).saturating_mul(i.into()))
-	}
+    /// Storage: UtxoNFT TokensById (r:10 w:20)
+    /// Proof: UtxoNFT TokensById (max_values: None, max_size: Some(6961), added: 9436, mode: MaxEncodedLen)
+    /// Storage: UtxoNFT LastToken (r:1 w:1)
+    /// Proof: UtxoNFT LastToken (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
+    /// Storage: ProcessValidation ProcessModel (r:1 w:0)
+    /// Proof: ProcessValidation ProcessModel (max_values: None, max_size: Some(15348), added: 17823, mode: MaxEncodedLen)
+    /// Storage: System EventTopics (r:3 w:3)
+    /// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
+    /// The range of component `i` is `[1, 10]`.
+    /// The range of component `o` is `[1, 10]`.
+    fn run_process(i: u32, o: u32, ) -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `250 + i * (132 ±0)`
+        //  Estimated: `18813 + i * (9436 ±0)`
+        // Minimum execution time: 36_000_000 picoseconds.
+        Weight::from_parts(18_093_555, 0)
+            .saturating_add(Weight::from_parts(0, 18813))
+            // Standard Error: 8_352
+            .saturating_add(Weight::from_parts(4_982_666, 0).saturating_mul(i.into()))
+            // Standard Error: 8_352
+            .saturating_add(Weight::from_parts(1_561_777, 0).saturating_mul(o.into()))
+            .saturating_add(T::DbWeight::get().reads(5))
+            .saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i.into())))
+            .saturating_add(T::DbWeight::get().writes(4))
+            .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i.into())))
+            .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(o.into())))
+            .saturating_add(Weight::from_parts(0, 9436).saturating_mul(i.into()))
+    }
 }
 
 impl WeightInfo for () {
