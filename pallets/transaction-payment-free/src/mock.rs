@@ -41,7 +41,7 @@ impl Get<frame_system::limits::BlockWeights> for BlockWeights {
                 weights.base_extrinsic = Weight::zero();
             })
             .for_class(DispatchClass::non_mandatory(), |weights| {
-                weights.max_total = Some(Weight::from_ref_time(1024u64).set_proof_size(u64::MAX));
+                weights.max_total = Some(Weight::from_parts(1024u64, u64::MAX));
             })
             .build_or_panic()
     }
