@@ -1,4 +1,11 @@
 {
-	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["github>digicatapult/renovate-config"]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>digicatapult/renovate-config"],
+  "cargo": {
+    "packageRules": [
+      {
+        "excludePackageNames": ["jsonrpsee"]
+      }
+    ]
+  }
 }
