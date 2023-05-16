@@ -40,13 +40,13 @@ pub trait ValidateProcessWeights<WeightArg> {
 
 impl ValidateProcessWeights<u32> for () {
     fn validate_process(_: u32) -> Weight {
-        Weight::from_ref_time(0 as u64)
+        Weight::from_parts(0, 0)
     }
     fn validate_process_min() -> Weight {
-        Weight::from_ref_time(0 as u64)
+        Weight::from_parts(0, 0)
     }
     fn validate_process_max() -> Weight {
-        Weight::from_ref_time(0 as u64)
+        Weight::from_parts(0, 0)
     }
 }
 

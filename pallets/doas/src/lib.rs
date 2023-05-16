@@ -65,7 +65,7 @@ pub mod pallet {
         pub fn doas_root(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
             let dispatch_info = call.get_dispatch_info();
             (
-                dispatch_info.weight.saturating_add(Weight::from_ref_time(10_000)),
+                dispatch_info.weight.saturating_add(Weight::from_parts(10_000, 0)),
                 dispatch_info.class
             );
 
@@ -120,7 +120,7 @@ pub mod pallet {
           let dispatch_info = call.get_dispatch_info();
           (
             dispatch_info.weight
-                .saturating_add(Weight::from_ref_time(10_000))
+                .saturating_add(Weight::from_parts(10_000, 0))
                 // AccountData for inner call origin accountdata.
                 .saturating_add(T::DbWeight::get().reads_writes(1, 1)),
                 dispatch_info.class,
