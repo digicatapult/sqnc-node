@@ -6,16 +6,10 @@ For more on governance visit [veritable-documentation](https://github.com/digica
 
 ## Getting started
 
-You will need a Rust environment, including targets for WASM builds. The former can be easily achieved using `rustup`:
+You will need a Rust environment:
 
 ```bash
 curl https://sh.rustup.rs -sSf | sh
-```
-
-The latter by running a bundled script from the root of this repository:
-
-```bash
-./scripts/init.sh
 ```
 
 ### Building the Node
@@ -25,6 +19,8 @@ To build the node with optimisations, you can run from the project root director
 ```bash
 cargo build --release
 ```
+
+The build uses the specific Rust release and WASM target configured in `rust-toolchain.toml`.
 
 ### Running a dev chain node
 
