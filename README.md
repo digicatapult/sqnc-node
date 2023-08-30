@@ -1,8 +1,8 @@
-# Veritable node
+# DSCP node
 
-This repository contains the source code for the blockchain nodes used in the Veritable project. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
+This repository contains the source code for the blockchain nodes used in a number of Digital Catapult projects that address Distributed System challenges. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
 
-For more on governance visit [veritable-documentation](https://github.com/digicatapult/dscp-documentation/blob/main/docs/governance.md).
+For more on governance visit [dscp-documentation](https://github.com/digicatapult/dscp-documentation/blob/main/docs/governance.md).
 
 ## Getting started
 
