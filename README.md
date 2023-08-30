@@ -1,21 +1,15 @@
-# Veritable node
+# DSCP node
 
-This repository contains the source code for the blockchain nodes used in the Veritable project. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
+This repository contains the source code for the blockchain nodes used in a number of Digital Catapult projects that address Distributed System challenges. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
 
-For more on governance visit [veritable-documentation](https://github.com/digicatapult/dscp-documentation/blob/main/docs/governance.md).
+For more on governance visit [dscp-documentation](https://github.com/digicatapult/dscp-documentation/blob/main/docs/governance.md).
 
 ## Getting started
 
-You will need a Rust environment, including targets for WASM builds. The former can be easily achieved using `rustup`:
+You will need a Rust environment:
 
 ```bash
 curl https://sh.rustup.rs -sSf | sh
-```
-
-The latter by running a bundled script from the root of this repository:
-
-```bash
-./scripts/init.sh
 ```
 
 ### Building the Node
@@ -25,6 +19,8 @@ To build the node with optimisations, you can run from the project root director
 ```bash
 cargo build --release
 ```
+
+The build uses the specific Rust release and WASM target configured in `rust-toolchain.toml`.
 
 ### Running a dev chain node
 

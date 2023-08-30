@@ -43,7 +43,7 @@ jobs:
       - name: Get Toolchain Version
         id: get_toolchain
         run: |
-          echo "TOOLCHAIN=$(cat rust-toolchain)" >> $GITHUB_OUTPUT
+          echo "TOOLCHAIN=$(cat rust-toolchain.toml | tomlq .toolchain.channel)" >> $GITHUB_OUTPUT
 
   # Github releases are only performed when the release version changes
   build-binary:
