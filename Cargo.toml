@@ -3,3 +3,8 @@ panic = 'unwind'
 
 [workspace]
 members = ['node', 'pallets/*', 'runtime']
+
+[profile.production]
+inherits = "release"
+lto = true
+codegen-units = 1
