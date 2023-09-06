@@ -17,7 +17,7 @@ jobs:
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: git fetch --tags
@@ -39,7 +39,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: check
@@ -86,7 +86,7 @@ jobs:
     needs: [get-version]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install toolchains
         run: |
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
