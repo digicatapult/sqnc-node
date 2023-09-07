@@ -31,8 +31,14 @@ use frame_support::{traits::Get, weights::Weight};
 use core::marker::PhantomData;
 
 /// Weight functions for `pallet_symmetric_key`.
-pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_symmetric_key::WeightInfo for WeightInfo<T> {
+pub trait WeightInfo {
+    fn update_key() -> Weight;
+    fn rotate_key() -> Weight;
+}
+
+/// Weight functions for `pallet_symmetric_key`.
+pub struct SubstrateWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: IpfsKey Key (r:0 w:1)
 	/// Proof: IpfsKey Key (max_values: Some(1), max_size: Some(33), added: 528, mode: MaxEncodedLen)
 	fn update_key() -> Weight {

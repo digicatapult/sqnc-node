@@ -30,9 +30,13 @@
 use frame_support::{traits::Get, weights::Weight};
 use core::marker::PhantomData;
 
+pub trait WeightInfo {
+    fn run_process(i: u32, o: u32) -> Weight;
+}
+
 /// Weight functions for `pallet_utxo_nft`.
-pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_utxo_nft::WeightInfo for WeightInfo<T> {
+pub struct SubstrateWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: UtxoNFT TokensById (r:10 w:20)
 	/// Proof: UtxoNFT TokensById (max_values: None, max_size: Some(6961), added: 9436, mode: MaxEncodedLen)
 	/// Storage: UtxoNFT LastToken (r:1 w:1)
