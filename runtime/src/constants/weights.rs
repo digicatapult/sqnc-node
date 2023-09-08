@@ -2,9 +2,9 @@ use frame_support::weights::{constants, RuntimeDbWeight};
 use sp_core::parameter_types;
 
 parameter_types! {
-  /// By default, Substrate uses `RocksDB`, so this will be the weight used throughout
-  /// the runtime.
-  pub const RocksDbWeight: RuntimeDbWeight = RuntimeDbWeight {
+    /// By default, Substrate uses `RocksDB`, so this will be the weight used throughout
+    /// the runtime.
+    pub const RocksDbWeight: RuntimeDbWeight = RuntimeDbWeight {
     /// Time to read one storage item.
     /// Calculated by multiplying the *Average* of all values with `1.0` and adding `0`.
     ///
@@ -34,7 +34,7 @@ parameter_types! {
     ///   95th: 126_782
     ///   75th: 35_410
     write: 87_849 * constants::WEIGHT_REF_TIME_PER_NANOS,
-  };
+    };
 }
 
 #[cfg(test)]

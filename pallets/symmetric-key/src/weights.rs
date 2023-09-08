@@ -39,38 +39,38 @@ pub trait WeightInfo {
 /// Weight functions for `pallet_symmetric_key`.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	/// Storage: IpfsKey Key (r:0 w:1)
-	/// Proof: IpfsKey Key (max_values: Some(1), max_size: Some(33), added: 528, mode: MaxEncodedLen)
-	fn update_key() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `0`
-		//  Estimated: `0`
-		// Minimum execution time: 8_440_000 picoseconds.
-		Weight::from_parts(9_000_000, 0)
-			.saturating_add(Weight::from_parts(0, 0))
-			.saturating_add(T::DbWeight::get().writes(1))
-	}
-	/// Storage: RandomnessCollectiveFlip RandomMaterial (r:1 w:0)
-	/// Proof: RandomnessCollectiveFlip RandomMaterial (max_values: Some(1), max_size: Some(2594), added: 3089, mode: MaxEncodedLen)
-	/// Storage: IpfsKey Key (r:0 w:1)
-	/// Proof: IpfsKey Key (max_values: Some(1), max_size: Some(33), added: 528, mode: MaxEncodedLen)
-	fn rotate_key() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `6`
-		//  Estimated: `4079`
-		// Minimum execution time: 11_340_000 picoseconds.
-		Weight::from_parts(11_910_000, 0)
-			.saturating_add(Weight::from_parts(0, 4079))
-			.saturating_add(T::DbWeight::get().reads(1))
-			.saturating_add(T::DbWeight::get().writes(1))
+    /// Storage: IpfsKey Key (r:0 w:1)
+    /// Proof: IpfsKey Key (max_values: Some(1), max_size: Some(33), added: 528, mode: MaxEncodedLen)
+    fn update_key() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `0`
+        //  Estimated: `0`
+        // Minimum execution time: 8_440_000 picoseconds.
+        Weight::from_parts(9_000_000, 0)
+            .saturating_add(Weight::from_parts(0, 0))
+            .saturating_add(T::DbWeight::get().writes(1))
+    }
+    /// Storage: RandomnessCollectiveFlip RandomMaterial (r:1 w:0)
+    /// Proof: RandomnessCollectiveFlip RandomMaterial (max_values: Some(1), max_size: Some(2594), added: 3089, mode: MaxEncodedLen)
+    /// Storage: IpfsKey Key (r:0 w:1)
+    /// Proof: IpfsKey Key (max_values: Some(1), max_size: Some(33), added: 528, mode: MaxEncodedLen)
+    fn rotate_key() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `6`
+        //  Estimated: `4079`
+        // Minimum execution time: 11_340_000 picoseconds.
+        Weight::from_parts(11_910_000, 0)
+            .saturating_add(Weight::from_parts(0, 4079))
+            .saturating_add(T::DbWeight::get().reads(1))
+            .saturating_add(T::DbWeight::get().writes(1))
 	}
 }
 
 impl WeightInfo for () {
-	fn update_key() -> Weight {
-			Weight::from_parts(0, 0)
-	}
-	fn rotate_key() -> Weight {
-			Weight::from_parts(0, 0)
-	}
+    fn update_key() -> Weight {
+        Weight::from_parts(0, 0)
+    }
+    fn rotate_key() -> Weight {
+        Weight::from_parts(0, 0)
+    }
 }
