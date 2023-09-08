@@ -116,14 +116,14 @@ jobs:
           SCCACHE_CACHE_SIZE: "1G"
           BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.architectures.bindgenExtraClangArgs }}
         run: |
-          cargo build --profile production --target ${{ matrix.architectures.target-tupl }}
+          cargo build --profile=production --target ${{ matrix.architectures.target-tupl }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dscp-node-${{ matrix.architectures.arch }}
           path: |
-            ./target/${{ matrix.architectures.target-tupl }}/release/dscp-node
-            ./target/${{ matrix.architectures.target-tupl }}/release/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
+            ./target/${{ matrix.architectures.target-tupl }}/production/dscp-node
+            ./target/${{ matrix.architectures.target-tupl }}/production/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
 
   build-release:
     name: Build release
