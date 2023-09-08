@@ -1,4 +1,3 @@
-
 use crate::{BlockNumber, Moment};
 
 /// Since BABE is probabilistic this is the average expected block time that
