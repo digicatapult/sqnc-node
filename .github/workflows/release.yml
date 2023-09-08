@@ -31,7 +31,7 @@ jobs:
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: git fetch --tags
@@ -64,7 +64,7 @@ jobs:
             bindgenExtraClangArgs: "--sysroot=/usr/aarch64-linux-gnu -mfloat-abi=hard"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: install toolchains
         run: |
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
@@ -209,7 +209,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-version, build-release]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v2
         with:

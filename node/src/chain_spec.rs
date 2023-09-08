@@ -1,10 +1,10 @@
 use dscp_node_runtime::{
     types::{BooleanExpressionSymbol, Restriction},
-    AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
+    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
     ProcessValidationConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY
 };
 use sc_service::ChainType;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::OpaquePeerId; // A struct wraps Vec<u8>, represents as our `PeerId`.
 use sp_core::{sr25519, Pair, Public};
@@ -37,9 +37,9 @@ where
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
-    (get_from_seed::<AuraId>(s), get_from_seed::<GrandpaId>(s))
+/// Generate an authority key.
+pub fn authority_keys_from_seed(s: &str) -> (BabeId, GrandpaId) {
+    (get_from_seed::<BabeId>(s), get_from_seed::<GrandpaId>(s))
 }
 
 pub fn development_config() -> Result<ChainSpec, String> {
@@ -197,7 +197,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
     wasm_binary: &[u8],
-    initial_authorities: Vec<(AuraId, GrandpaId)>,
+    initial_authorities: Vec<(BabeId, GrandpaId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
     technical_committee_accounts: Vec<AccountId>,
@@ -213,8 +213,9 @@ fn testnet_genesis(
             // Configure endowed accounts with initial balance of 1 << 60.
             balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect()
         },
-        aura: AuraConfig {
-            authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect()
+        babe: BabeConfig {
+            authorities: initial_authorities.iter().map(|x| (x.0.clone(), 1)).collect(),
+            epoch_config: Some(dscp_node_runtime::BABE_GENESIS_EPOCH_CONFIG)
         },
         grandpa: GrandpaConfig {
             authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect()
