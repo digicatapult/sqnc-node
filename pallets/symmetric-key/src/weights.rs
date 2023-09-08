@@ -65,3 +65,12 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
 }
+
+impl WeightInfo for () {
+	fn update_key() -> Weight {
+			Weight::from_parts(0, 0)
+	}
+	fn rotate_key() -> Weight {
+			Weight::from_parts(0, 0)
+	}
+}
