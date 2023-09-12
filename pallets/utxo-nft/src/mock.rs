@@ -144,6 +144,7 @@ impl pallet_utxo_nft::Config for Test {
     type MaxRoleCount = ConstU32<2>;
     type MaxInputCount = ConstU32<5>;
     type MaxOutputCount = ConstU32<5>;
+    type TokenTombstoneDuration = ConstU64<100u64>;
 }
 
 // This function basically just builds a genesis storage key/value store according to
@@ -151,6 +152,7 @@ impl pallet_utxo_nft::Config for Test {
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 }
+
 pub fn run_to_block(n: u64) {
     while System::block_number() < n {
         System::set_block_number(System::block_number() + 1);

@@ -5,7 +5,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'pallet-utxo-nft'
-version = "6.0.1"
+version = "6.1.0"
 
 
 [package.metadata.docs.rs]
@@ -25,7 +25,7 @@ frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "h
 sp-runtime = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
 sp-io = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
 sp-std = { default-features = false, version = "5.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
-
+sp-core = { default-features = false, version = "7.0.0", git = "https://github.com/paritytech/substrate.git", optional = true, branch = "polkadot-v0.9.42" }
 
 [dev-dependencies]
 serde = { version = "1.0.159" }
@@ -42,5 +42,5 @@ std = [
     'sp-std/std',
     'dscp-pallet-traits/std',
 ]
-runtime-benchmarks = ['frame-benchmarking']
+runtime-benchmarks = ['frame-benchmarking', 'sp-core']
 try-runtime = ["frame-support/try-runtime"]

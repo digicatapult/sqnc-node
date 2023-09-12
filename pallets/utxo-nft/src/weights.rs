@@ -30,6 +30,7 @@ use core::marker::PhantomData;
 
 pub trait WeightInfo {
     fn run_process(i: u32, o: u32) -> Weight;
+    fn delete_token() -> Weight;
 }
 
 /// Weight functions for `pallet_utxo_nft`.
@@ -63,10 +64,26 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
             .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(o.into())))
             .saturating_add(Weight::from_parts(0, 9436).saturating_mul(i.into()))
     }
+
+    /// Storage: UtxoNFT TokensById (r:1 w:1)
+	/// Proof: UtxoNFT TokensById (max_values: None, max_size: Some(6961), added: 9436, mode: MaxEncodedLen)
+	fn delete_token() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `312`
+		//  Estimated: `10426`
+		// Minimum execution time: 126_000_000 picoseconds.
+		Weight::from_parts(132_000_000, 0)
+			.saturating_add(Weight::from_parts(0, 10426))
+			.saturating_add(T::DbWeight::get().reads(1))
+			.saturating_add(T::DbWeight::get().writes(1))
+	}
 }
 
 impl WeightInfo for () {
     fn run_process(_: u32, _: u32) -> Weight {
         Weight::from_parts(0, 0)
+    }
+    fn delete_token() -> Weight {
+        Weight::zero()
     }
 }

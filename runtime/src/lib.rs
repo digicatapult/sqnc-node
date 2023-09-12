@@ -105,7 +105,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 900,
+    spec_version: 910,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -383,6 +383,10 @@ type TokenMetadataValue = MetadataValue<TokenId>;
 type ProcessIdentifier = BoundedVec<u8, ConstU32<32>>;
 type ProcessVersion = u32;
 
+parameter_types! {
+    pub const TokenTombstoneDuration: BlockNumber = 7 * DAYS;
+}
+
 impl pallet_utxo_nft::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type TokenId = TokenId;
@@ -395,6 +399,7 @@ impl pallet_utxo_nft::Config for Runtime {
     type MaxRoleCount = ConstU32<16>;
     type MaxInputCount = ConstU32<64>;
     type MaxOutputCount = ConstU32<64>;
+    type TokenTombstoneDuration = TokenTombstoneDuration;
 }
 
 impl pallet_process_validation::Config for Runtime {

@@ -67,10 +67,12 @@ For `dev` chain, the network only contains a node for `Alice` so other nodes wil
 
 ### Calculating weights
 
+Extrinsic calls in `dscp-node` are weighted to ensure blocks are filled appropriately. For production weight calculations please run benchmarks on an AWS `t3a.2xlarge` instance.
+
 To calculate the weights for a pallet you first must ensure the node is built with the benchmarking feature enabled:
 
 ```bash
-cargo build --release --features runtime-benchmarks
+cargo build --profile=production --features runtime-benchmarks
 ```
 
 Then you can run the benchmark tool with for example
@@ -83,7 +85,7 @@ Then you can run the benchmark tool with for example
     --output ./weights/
 ```
 
-The generated weights implementation should then be integrated into the `pallet_utxo_nft` module.
+The generated weights implementation should then be integrated into the relevant pallet.
 
 ### Upgrading Substrate
 
