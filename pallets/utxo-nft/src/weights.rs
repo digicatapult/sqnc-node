@@ -49,10 +49,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     /// The range of component `i` is `[1, 10]`.
     /// The range of component `o` is `[1, 10]`.
     fn run_process(i: u32, o: u32, ) -> Weight {
-	    // Proof Size summary in bytes:
-	    //  Measured:  `254 + i * (132 ±0)`
-	    //  Estimated: `18813 + i * (9436 ±0)`
-	    // Minimum execution time: 77_721_000 picoseconds.
+        // Proof Size summary in bytes:
+        //  Measured:  `254 + i * (132 ±0)`
+        //  Estimated: `18813 + i * (9436 ±0)`
+        // Minimum execution time: 77_721_000 picoseconds.
         Weight::from_parts(39_519_277, 0)
             .saturating_add(Weight::from_parts(0, 18813))
             // Standard Error: 2_272
@@ -66,19 +66,20 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
             .saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(o.into())))
             .saturating_add(Weight::from_parts(0, 9436).saturating_mul(i.into()))
     }
-
     /// Storage: UtxoNFT TokensById (r:1 w:1)
-	/// Proof: UtxoNFT TokensById (max_values: None, max_size: Some(6961), added: 9436, mode: MaxEncodedLen)
-	fn delete_token() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `312`
-		//  Estimated: `10426`
-		// Minimum execution time: 126_000_000 picoseconds.
-		Weight::from_parts(132_000_000, 0)
-			.saturating_add(Weight::from_parts(0, 10426))
-			.saturating_add(T::DbWeight::get().reads(1))
-			.saturating_add(T::DbWeight::get().writes(1))
-	}
+    /// Proof: UtxoNFT TokensById (max_values: None, max_size: Some(6961), added: 9436, mode: MaxEncodedLen)
+    /// Storage: System EventTopics (r:2 w:2)
+    /// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
+    fn delete_token() -> Weight {
+        // Proof Size summary in bytes:
+        //  Measured:  `312`
+        //  Estimated: `10426`
+        // Minimum execution time: 23_991_000 picoseconds.
+        Weight::from_parts(25_130_000, 0)
+            .saturating_add(Weight::from_parts(0, 10426))
+            .saturating_add(T::DbWeight::get().reads(3))
+            .saturating_add(T::DbWeight::get().writes(3))
+    }
 }
 
 impl WeightInfo for () {

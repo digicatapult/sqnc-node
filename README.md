@@ -78,7 +78,7 @@ cargo build --profile=production --features runtime-benchmarks
 Then you can run the benchmark tool with for example
 
 ```bash
-./target/release/dscp-node benchmark pallet \
+./target/production/dscp-node benchmark pallet \
     --pallet 'pallet_utxo_nft' \
     --extrinsic '*' \
     --repeat 1000 \
@@ -108,27 +108,36 @@ The node can be interacted with using [`@polkadot/api`](https://www.npmjs.com/pa
 
 The `UtxoNFT` pallet exposes an extrinsic for minting/burning tokens and a storage format that allows their retrieval.
 
-Note: The json object with types, described above, has been upgraded from `"Address": "AccountId", "LookupSource": "AccountId"` to `"Address": "MultiAddress", "LookupSource": "MultiAddress"` and it also needs to be used in conjunction with the new version of _PolkaDot JS_, **v4.7.2** or higher.
-
-Two storage endpoints are then exposed under `UtxoNFT` for the id of the last token issued (`LastToken`) and a mapping of tokens by id (`TokensById`):
+Four storage endpoints are then exposed under `UtxoNFT` for: the id of the last token issued (`LastToken`), a mapping of tokens by id (`TokensById`), a map of burnt tokens to be cleaned up (`Graveyard`) and the current status of the graveyard describing where it starts and ends (`CurrentGraveyardState`):
 
 ```rust
-LastToken get(fn last_token): T::TokenId;
-TokensById get(fn tokens_by_id): map T::TokenId => Token<T::AccountId, T::RoleKey, T::TokenId, T::BlockNumber, T::TokenMetadataKey, T::TokenMetadataValue>;
+LastToken<T: Config> = StorageValue<_, T::TokenId, ValueQuery>;
+TokensById<T: Config> = StorageMap<_, Blake2_128Concat, T::TokenId, Token<T>, OptionQuery>;
+Graveyard<T: Config> = StorageMap<_, Blake2_128Concat, u64, T::TokenId, OptionQuery>;
+CurrentGraveyardState<T: Config> = StorageValue<_, GraveyardState, ValueQuery>;
 ```
 
 Tokens can be minted/burnt by calling the following extrinsic under `UtxoNFT`:
 
 ```rust
 pub fn run_process(
-            origin: OriginFor<T>,
-            process: Option<ProcessId<T>>
-            inputs: Vec<T::TokenId>,
-            outputs: Vec<
-              Output<T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>
-            >,
-        ) -> dispatch::DispatchResult { ... }
+    origin: OriginFor<T>,
+    process: ProcessId<T>,
+    inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
+    outputs: BoundedVec<Output<T>, T::MaxOutputCount>
+) -> DispatchResultWithPostInfo { ... }
 ```
+
+And tokens that have been burnt from the system a sufficiently long time ago (runtime specifies 7 days) can be permanently deleted with:
+
+```rust
+pub fn delete_token(
+    origin: OriginFor<T>,
+    token_id: <T as Config>::TokenId
+) -> DispatchResultWithPostInfo { ... }
+```
+
+Note that deletion of tokens will occur automatically in idle block time after the configured time as well.
 
 All of this functionality can be easily accessed using [https://polkadot.js.org/apps](https://polkadot.js.org/apps) against a running `dev` node. You will need to add a network endpoint of `ws://localhost:9944` under `Settings` and apply the above type configurations in the `Settings/Developer` tab.
 

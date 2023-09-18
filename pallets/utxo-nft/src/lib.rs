@@ -166,14 +166,7 @@ pub mod pallet {
     // Storage map definition
     #[pallet::storage]
     #[pallet::getter(fn graveyard)]
-    pub(super) type Graveyard<T: Config> = StorageMap<
-        _,
-        Blake2_128Concat,
-        u64,
-        T::TokenId,
-        // We need to use OptionQuery as AccountId is held in the Config trait but doesn't guarantee Copy trait
-        OptionQuery
-    >;
+    pub(super) type Graveyard<T: Config> = StorageMap<_, Blake2_128Concat, u64, T::TokenId, OptionQuery>;
 
     // Storage map definition
     #[pallet::storage]
