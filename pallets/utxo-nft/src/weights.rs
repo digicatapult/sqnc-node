@@ -81,9 +81,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 
 impl WeightInfo for () {
     fn run_process(_: u32, _: u32) -> Weight {
-        Weight::from_parts(0, 0)
+        Weight::from_parts(1, 1)
     }
     fn delete_token() -> Weight {
-        Weight::zero()
+        Weight::from_parts(1, 1)
     }
 }

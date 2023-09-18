@@ -21,9 +21,6 @@ mod graveyard;
 pub use graveyard::GraveyardState;
 
 #[cfg(test)]
-mod mock;
-
-#[cfg(test)]
 mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -191,6 +188,9 @@ pub mod pallet {
             process: ProcessId<T>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
             outputs: BoundedVec<T::TokenId, T::MaxOutputCount>
+        },
+        TokenDeleted {
+            token_id: T::TokenId
         }
     }
 
@@ -338,7 +338,7 @@ pub mod pallet {
                     token.children = Some(children.clone());
                     token.destroyed_at = Some(now);
                 });
-                let graveyard_insert_index = graveyard_state.start_index + (index as u64);
+                let graveyard_insert_index = graveyard_state.end_index + (index as u64);
                 <Graveyard<T>>::insert(graveyard_insert_index, input.id);
             });
 
@@ -431,6 +431,13 @@ impl<T: Config> Pallet<T> {
         );
 
         <TokensById<T>>::remove(token_id);
+        Self::deposit_event(
+            vec![
+                T::Hashing::hash_of(&b"utxoNFT.DeleteToken"),
+                T::Hashing::hash_of(&(b"utxoNFT.DeleteToken", token_id)),
+            ],
+            Event::TokenDeleted { token_id }
+        );
 
         Ok(())
     }

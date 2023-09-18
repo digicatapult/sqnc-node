@@ -1,6 +1,4 @@
-// Tests to be written here
-
-use crate::{mock::*, output::Output, token::Token, Error, Event};
+use crate::{graveyard::GraveyardState, output::Output, tests::mock::*, token::Token, Error, Event};
 use dscp_pallet_traits::ProcessFullyQualifiedId;
 use frame_support::{assert_err, assert_ok, bounded_btree_map, bounded_vec};
 use sp_core::H256;
@@ -301,6 +299,14 @@ fn it_works_for_creating_many_token() {
                 children: None
             }
         );
+        assert_eq!(
+            UtxoNFT::current_graveyard_state(),
+            GraveyardState {
+                start_index: 0,
+                end_index: 0
+            }
+        );
+        assert_eq!(UtxoNFT::graveyard(0), None);
     });
 }
 
@@ -418,6 +424,14 @@ fn it_works_for_destroying_single_token() {
                 children: Some(bounded_vec![])
             }
         );
+        assert_eq!(
+            UtxoNFT::current_graveyard_state(),
+            GraveyardState {
+                start_index: 0,
+                end_index: 1
+            }
+        );
+        assert_eq!(UtxoNFT::graveyard(0), Some(1));
     });
 }
 
@@ -500,6 +514,114 @@ fn it_works_for_destroying_many_tokens() {
                 children: Some(bounded_vec![])
             }
         );
+        assert_eq!(
+            UtxoNFT::current_graveyard_state(),
+            GraveyardState {
+                start_index: 0,
+                end_index: 3
+            }
+        );
+        assert_eq!(UtxoNFT::graveyard(0), Some(1));
+        assert_eq!(UtxoNFT::graveyard(1), Some(2));
+        assert_eq!(UtxoNFT::graveyard(2), Some(3));
+    });
+}
+
+#[test]
+fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
+    new_test_ext().execute_with(|| {
+        let roles = bounded_btree_map!(Default::default() => 1);
+        let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
+        let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
+        let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
+        UtxoNFT::run_process(
+            RuntimeOrigin::signed(1),
+            SUCCEED_PROCESS,
+            bounded_vec![],
+            bounded_vec![
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata0.clone()
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata1.clone()
+                },
+                Output {
+                    roles: roles.clone(),
+                    metadata: metadata2.clone()
+                },
+            ]
+        )
+        .unwrap();
+        // create a token with no parents
+        assert_ok!(UtxoNFT::run_process(
+            RuntimeOrigin::signed(1),
+            SUCCEED_PROCESS,
+            bounded_vec![1],
+            bounded_vec![]
+        ));
+        assert_ok!(UtxoNFT::run_process(
+            RuntimeOrigin::signed(1),
+            SUCCEED_PROCESS,
+            bounded_vec![2, 3],
+            bounded_vec![]
+        ));
+        // assert no more tokens were created
+        assert_eq!(UtxoNFT::last_token(), 3);
+        // get the old token
+        let token = UtxoNFT::tokens_by_id(1).unwrap();
+        assert_eq!(
+            token,
+            Token {
+                id: 1,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: Some(0),
+                metadata: metadata0.clone(),
+                parents: bounded_vec![],
+                children: Some(bounded_vec![])
+            }
+        );
+        let token = UtxoNFT::tokens_by_id(2).unwrap();
+        assert_eq!(
+            token,
+            Token {
+                id: 2,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: Some(0),
+                metadata: metadata1.clone(),
+                parents: bounded_vec![],
+                children: Some(bounded_vec![])
+            }
+        );
+        let token = UtxoNFT::tokens_by_id(3).unwrap();
+        assert_eq!(
+            token,
+            Token {
+                id: 3,
+                roles: roles.clone(),
+                creator: 1,
+                created_at: 0,
+                destroyed_at: Some(0),
+                metadata: metadata2.clone(),
+                parents: bounded_vec![],
+                children: Some(bounded_vec![])
+            }
+        );
+        assert_eq!(
+            UtxoNFT::current_graveyard_state(),
+            GraveyardState {
+                start_index: 0,
+                end_index: 3
+            }
+        );
+        assert_eq!(UtxoNFT::graveyard(0), Some(1));
+        assert_eq!(UtxoNFT::graveyard(1), Some(2));
+        assert_eq!(UtxoNFT::graveyard(2), Some(3));
     });
 }
 
@@ -671,7 +793,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
 #[test]
 fn it_produces_process_ran_events_when_success() {
     new_test_ext().execute_with(|| {
-        run_to_block(1);
+        run_to_block(1, false);
 
         let roles0 = bounded_btree_map!(Default::default() => 1);
         let roles1 = bounded_btree_map!(Default::default() => 2);

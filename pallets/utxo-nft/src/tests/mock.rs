@@ -4,7 +4,8 @@ use crate as pallet_utxo_nft;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
-    traits::{ConstU32, ConstU64}
+    traits::{ConstU32, ConstU64, Hooks},
+    weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight}
 };
 use frame_system as system;
 use scale_info::TypeInfo;
@@ -32,17 +33,21 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        UtxoNFT: pallet_utxo_nft::{Pallet, Call, Storage, Event<T>},
+        System: frame_system,
+        UtxoNFT: pallet_utxo_nft,
     }
 );
 parameter_types! {
     pub const SS58Prefix: u8 = 42;
+    pub BlockWeights: frame_system::limits::BlockWeights =
+      frame_system::limits::BlockWeights::simple_max(
+        Weight::from_parts(2u64 * WEIGHT_REF_TIME_PER_SECOND, u64::MAX),
+      );
 }
 
 impl system::Config for Test {
     type BaseCallFilter = frame_support::traits::Everything;
-    type BlockWeights = ();
+    type BlockWeights = BlockWeights;
     type BlockLength = ();
     type DbWeight = ();
     type RuntimeOrigin = RuntimeOrigin;
@@ -153,8 +158,11 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 }
 
-pub fn run_to_block(n: u64) {
+pub fn run_to_block(n: u64, on_idle: bool) {
     while System::block_number() < n {
         System::set_block_number(System::block_number() + 1);
+        if on_idle {
+            UtxoNFT::on_idle(System::block_number(), BlockWeights::get().max_block);
+        }
     }
 }
