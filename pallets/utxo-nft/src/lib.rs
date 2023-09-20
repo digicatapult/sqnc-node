@@ -209,20 +209,22 @@ pub mod pallet {
         ) -> frame_support::weights::Weight {
             // 1 read and 1 write to get/set the graveyard state
             let base_weight = T::DbWeight::get().reads(1) + T::DbWeight::get().writes(1);
-            let remaining_weight = remaining_weight.checked_sub(&base_weight);
+            let available_iter_weight = remaining_weight.checked_sub(&base_weight);
+
+            // for each delete operation we fetch the graveyard entry, delete the token, then delete the graveyard entry
+            let weight_per_iter = T::WeightInfo::delete_token()
+                .saturating_add(T::DbWeight::get().reads(1))
+                .saturating_add(T::DbWeight::get().writes(1));
 
             // count how many deletes we can afford
-            let iter_count = match remaining_weight {
-                Some(weight) => weight
-                    .checked_div_per_component(
-                        // for each delete operation we fetch the graveyard entry, delete the token, then delete the graveyard entry
-                        &T::WeightInfo::delete_token()
-                            .saturating_add(T::DbWeight::get().reads(1))
-                            .saturating_add(T::DbWeight::get().writes(1))
-                    )
-                    .unwrap_or(0),
+            let iter_count = match available_iter_weight {
+                Some(weight) => weight.checked_div_per_component(&weight_per_iter).unwrap_or(0),
                 None => 0
             };
+
+            if iter_count == 0 {
+                return remaining_weight;
+            }
 
             // read graveyard state (base_weight)
             let graveyard_state = Self::current_graveyard_state();
@@ -256,7 +258,7 @@ pub mod pallet {
                 end_index
             });
 
-            let spent_weight = base_weight.saturating_add(T::WeightInfo::delete_token().mul(delete_op_count));
+            let spent_weight = base_weight.saturating_add(weight_per_iter.mul(delete_op_count));
             spent_weight
         }
     }
