@@ -3,10 +3,11 @@ Benchmarking setup for pallet-template
 */
 use super::*;
 
-use core::convert::TryFrom;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_support::{traits::ConstU32, BoundedBTreeMap, BoundedVec};
-use frame_system::RawOrigin;
+use frame_system::{Pallet as System, RawOrigin};
+use sp_runtime::traits::Bounded;
+use sp_std::convert::TryFrom;
 use sp_std::vec::Vec;
 
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
@@ -146,6 +147,32 @@ benchmarks! {
     verify {
         assert_eq!(LastToken::<T>::get(), nth_token_id::<T>(i + o)?);
     }
+
+    delete_token {
+        let token_id: T::TokenId = 1u32.into();
+        let caller: T::AccountId = account("owner", 0, SEED);
+
+        add_nfts::<T>(1)?;
+        let inputs = mk_inputs::<T>(1)?;
+        let outputs = mk_outputs::<T>(0)?;
+        let default_process = BoundedVec::<u8, ConstU32<32>>::try_from("default".as_bytes().to_vec()).unwrap();
+        let process = ProcessFullyQualifiedId {
+            id: default_process.into(),
+            version: 1u32.into()
+        };
+        UtxoNFT::<T>::run_process(
+            RawOrigin::Signed(caller.clone()).into(),
+            process,
+            inputs,
+            outputs
+        )?;
+
+        System::<T>::set_block_number(T::BlockNumber::max_value());
+        assert_eq!(TokensById::<T>::get(token_id).is_none(), false);
+    }: _(RawOrigin::Signed(caller), token_id)
+    verify {
+        assert_eq!(TokensById::<T>::get(token_id).is_none(), true);
+    }
 }
 
-impl_benchmark_test_suite!(UtxoNFT, crate::mock::new_test_ext(), crate::mock::Test,);
+impl_benchmark_test_suite!(UtxoNFT, crate::tests::mock::new_test_ext(), crate::tests::mock::Test,);

@@ -17,8 +17,8 @@ mod token;
 
 mod output;
 
-#[cfg(test)]
-mod mock;
+mod graveyard;
+pub use graveyard::GraveyardState;
 
 #[cfg(test)]
 mod tests;
@@ -27,7 +27,6 @@ mod tests;
 mod benchmarking;
 
 pub mod weights;
-
 pub use weights::WeightInfo;
 
 #[frame_support::pallet]
@@ -74,6 +73,10 @@ pub mod pallet {
         // Maximum number of process outputs
         #[pallet::constant]
         type MaxOutputCount: Get<u32>;
+
+        // Maximum number of process outputs
+        #[pallet::constant]
+        type TokenTombstoneDuration: Get<<Self as frame_system::Config>::BlockNumber>;
     }
 
     // Define some derived types off of the Config trait to clean up declarations later
@@ -160,6 +163,16 @@ pub mod pallet {
         OptionQuery
     >;
 
+    // Storage map definition
+    #[pallet::storage]
+    #[pallet::getter(fn graveyard)]
+    pub(super) type Graveyard<T: Config> = StorageMap<_, Blake2_128Concat, u64, T::TokenId, OptionQuery>;
+
+    // Storage map definition
+    #[pallet::storage]
+    #[pallet::getter(fn current_graveyard_state)]
+    pub(super) type CurrentGraveyardState<T: Config> = StorageValue<_, GraveyardState, ValueQuery>;
+
     #[pallet::event]
     pub enum Event<T: Config> {
         /// A process was successfully run
@@ -168,27 +181,86 @@ pub mod pallet {
             process: ProcessId<T>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
             outputs: BoundedVec<T::TokenId, T::MaxOutputCount>
+        },
+        TokenDeleted {
+            token_id: T::TokenId
         }
     }
 
     #[pallet::error]
     pub enum Error<T> {
-        /// Mutation was attempted on token not owned by origin
-        NotOwned,
         /// Mutation was attempted on token that has already been burnt
         AlreadyBurnt,
-        /// Token mint was attempted with too many metadata items
-        TooManyMetadataItems,
-        /// Token mint was attempted without setting a default role
-        NoDefaultRole,
-        /// Index for the consumed token to set as parent is out of bounds
-        OutOfBoundsParent,
-        /// Attempted to set the same parent on multiple tokens to mint
-        DuplicateParents,
         /// Process failed validation checks
         ProcessInvalid,
         /// An invalid input token id was provided
-        InvalidInput
+        InvalidInput,
+        /// A token cannot be deleted if it hasn't been burnt
+        NotBurnt,
+        /// A token was burnt too recently to be deleted perminantly
+        BurntTooRecently
+    }
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn on_idle(
+            _block_number: T::BlockNumber,
+            remaining_weight: frame_support::weights::Weight
+        ) -> frame_support::weights::Weight {
+            // 1 read and 1 write to get/set the graveyard state
+            let base_weight = T::DbWeight::get().reads(1) + T::DbWeight::get().writes(1);
+            let available_iter_weight = remaining_weight.checked_sub(&base_weight);
+
+            // for each delete operation we fetch the graveyard entry, delete the token, then delete the graveyard entry
+            let weight_per_iter = T::WeightInfo::delete_token()
+                .saturating_add(T::DbWeight::get().reads(1))
+                .saturating_add(T::DbWeight::get().writes(1));
+
+            // count how many deletes we can afford
+            let iter_count = match available_iter_weight {
+                Some(weight) => weight.checked_div_per_component(&weight_per_iter).unwrap_or(0),
+                None => 0
+            };
+
+            if iter_count == 0 {
+                return remaining_weight;
+            }
+
+            // read graveyard state (base_weight)
+            let graveyard_state = Self::current_graveyard_state();
+            let GraveyardState { start_index, end_index } = graveyard_state;
+            let iter_count = sp_std::cmp::min(iter_count, end_index - start_index);
+
+            let (delete_count, delete_op_count) = (0..iter_count)
+                .find_map(|i| {
+                    let index = start_index + i;
+                    // read graveyard for each delete
+                    let token_id = Self::graveyard(index).unwrap();
+
+                    // do the delete
+                    let delete_result = Self::delete_token_internal(token_id);
+
+                    match delete_result {
+                        Ok(_) => {
+                            // write to the graveyard
+                            <Graveyard<T>>::remove(index);
+                            None
+                        }
+                        Err(Error::<T>::BurntTooRecently) => Some((i, i + 1)),
+                        Err(_) => panic!("Unexpected error")
+                    }
+                })
+                .unwrap_or((iter_count, iter_count));
+
+            // write graveyard state (base_weight)
+            <CurrentGraveyardState<T>>::put(GraveyardState {
+                start_index: start_index + delete_count,
+                end_index
+            });
+
+            let spent_weight = base_weight.saturating_add(weight_per_iter.mul(delete_op_count));
+            spent_weight
+        }
     }
 
     // The pallet's dispatchable functions.
@@ -248,18 +320,29 @@ pub mod pallet {
             let process_is_valid = T::ProcessValidator::validate_process(&process, &sender, &io_inputs, &io_outputs);
             ensure!(process_is_valid.success, Error::<T>::ProcessInvalid);
 
+            let graveyard_state = Self::current_graveyard_state();
+
             // STORAGE MUTATIONS
 
             // Burn inputs
             let children: BoundedVec<T::TokenId, T::MaxOutputCount> =
                 io_outputs.iter().map(|output| output.id.clone()).try_collect().unwrap();
-            io_inputs.iter().for_each(|input| {
+            io_inputs.iter().enumerate().for_each(|(index, input)| {
                 <TokensById<T>>::mutate(input.id, |token| {
                     let mut token = token.as_mut().unwrap();
                     token.children = Some(children.clone());
                     token.destroyed_at = Some(now);
                 });
+                let graveyard_insert_index = graveyard_state.end_index + (index as u64);
+                <Graveyard<T>>::insert(graveyard_insert_index, input.id);
             });
+
+            // update graveyard state
+            let graveyard_state = GraveyardState {
+                start_index: graveyard_state.start_index,
+                end_index: graveyard_state.end_index + (io_inputs.len() as u64)
+            };
+            <CurrentGraveyardState<T>>::put(graveyard_state);
 
             // Mint outputs
             io_outputs.into_iter().for_each(|output| {
@@ -304,11 +387,53 @@ pub mod pallet {
 
             Ok(Some(actual_weight).into())
         }
+
+        #[pallet::call_index(1)]
+        #[pallet::weight(T::WeightInfo::delete_token())]
+        pub fn delete_token(origin: OriginFor<T>, token_id: <T as Config>::TokenId) -> DispatchResultWithPostInfo {
+            // Check it was signed and get the signer
+            ensure_signed(origin)?;
+            Self::delete_token_internal(token_id)
+                .map(|r| r.into())
+                .map_err(|e| e.into())
+        }
     }
 }
 
 impl<T: Config> Pallet<T> {
     fn deposit_event(topics: Vec<T::Hash>, event: Event<T>) {
         <frame_system::Pallet<T>>::deposit_event_indexed(&topics, <T as Config>::RuntimeEvent::from(event).into())
+    }
+
+    pub(crate) fn delete_token_internal(token_id: <T as Config>::TokenId) -> Result<(), Error<T>> {
+        use frame_support::ensure;
+
+        let token = Self::tokens_by_id(token_id);
+
+        if token.is_none() {
+            return Ok(());
+        }
+        let destroyed_at = token.unwrap().destroyed_at;
+
+        ensure!(destroyed_at.is_some(), Error::<T>::NotBurnt);
+        let destroyed_at = destroyed_at.unwrap();
+
+        let now = <frame_system::Pallet<T>>::block_number();
+
+        ensure!(
+            now - destroyed_at >= T::TokenTombstoneDuration::get(),
+            Error::<T>::BurntTooRecently
+        );
+
+        <TokensById<T>>::remove(token_id);
+        Self::deposit_event(
+            vec![
+                T::Hashing::hash_of(&b"utxoNFT.DeleteToken"),
+                T::Hashing::hash_of(&(b"utxoNFT.DeleteToken", token_id)),
+            ],
+            Event::TokenDeleted { token_id }
+        );
+
+        Ok(())
     }
 }

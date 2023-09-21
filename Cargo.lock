@@ -1706,7 +1706,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-node"
-version = "9.0.0"
+version = "9.1.0"
 dependencies = [
  "bs58",
  "clap",
@@ -1752,7 +1752,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "8.0.2"
+version = "9.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -5094,7 +5094,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-utxo-nft"
-version = "6.0.1"
+version = "6.1.0"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
