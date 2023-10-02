@@ -1,7 +1,9 @@
-pub mod errors;
-pub mod nodes;
-pub mod types;
+mod errors;
+mod parse;
+mod types;
 
-pub use errors::*;
-pub use nodes::*;
-pub use types::*;
+pub(crate) use errors::*;
+
+pub use parse::parse_ast;
+
+pub(crate) use types::*;

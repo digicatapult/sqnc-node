@@ -33,26 +33,26 @@ properties = { (field ~ ",")* ~ (field)? }
 
 struct_decl = { "struct" ~ ident ~ "{" ~ properties ~ "}" }
 
-prop_lit_cmp = { ident_prop ~ cmp_op ~ (sender | literal_value) }
+prop_lit_cmp = { ident_prop ~ cmp_op ~ literal_value }
+prop_sender_cmp = { ident_prop ~ cmp_op ~ sender }
 ident_ident_cmp = { ident ~ cmp_op ~ ident }
 prop_ident_cmp = { ident_prop ~ cmp_op ~ ident }
 prop_prop_cmp = { ident_prop ~ cmp_op ~ ident_prop }
 prop_type_cmp = { ident_prop ~ cmp_type_op ~ cmp_type }
 
-val = { ident_prop | ident }
-fn_args = { "|" ~ (val ~ ",")* ~ val? ~ "|" }
+fn_args = { "|" ~ (ident ~ ",")* ~ ident? ~ "|" }
 fn_cmp = { ident ~ fn_args ~ "=>" ~ fn_args }
 
-cmp = { fn_cmp | prop_prop_cmp | prop_lit_cmp | prop_ident_cmp | ident_ident_cmp | prop_type_cmp }
+cmp = _{ fn_cmp | prop_prop_cmp | prop_lit_cmp | prop_sender_cmp | prop_ident_cmp | ident_ident_cmp | prop_type_cmp }
 
-cmp_op = @{ eq | neq }
+cmp_op = _{ eq | neq }
     eq = { "==" }
     neq = { "!=" }
-cmp_type_op = @{ is | isnt }
+cmp_type_op = _{ is | isnt }
     is = { ":" }
     isnt = { "!:" }
 
-bool_op = { bool_op_and | bool_op_or | bool_op_xor }
+bool_op = _{ bool_op_and | bool_op_or | bool_op_xor }
     bool_op_and = { "&" | ^"and" }
     bool_op_or = { "|" | ^"or" }
     bool_op_xor = { "^" | ^"xor" }
@@ -65,8 +65,9 @@ expr = { atom ~ (bool_op ~ atom)* }
 expr_list = { "{" ~ (expr ~ ",")* ~ expr? ~ "}" }
 
 vis = { (pub | priv)? }
-arg_list = { "|" ~ properties? ~ "|" }
-fn_decl = { vis ~ fn ~ ident ~ arg_list ~ "=>" ~ arg_list ~ where ~ expr_list }
+fn_decl_arg = { ident ~ ":" ~ ident }
+fn_decl_arg_list = { "|" ~ (fn_decl_arg ~ ",")* ~ (fn_decl_arg)? ~ "|" }
+fn_decl = { vis ~ fn ~ ident ~ fn_decl_arg_list ~ "=>" ~ fn_decl_arg_list ~ where ~ expr_list }
 
 decl = _{ struct_decl | fn_decl }
 program = _{ decl+ }
