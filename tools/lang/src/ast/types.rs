@@ -4,15 +4,15 @@ use pest::Span;
 
 pub struct AstNode<'a, V>
 where
-    V: 'a
+    V: 'a,
 {
     pub(crate) value: V,
-    pub(crate) span: Span<'a>
+    pub(crate) span: Span<'a>,
 }
 
 impl<'a, V> Display for AstNode<'a, V>
 where
-    V: Display
+    V: Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
@@ -21,7 +21,7 @@ where
 
 impl<'a, V> Debug for AstNode<'a, V>
 where
-    V: Debug
+    V: Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AstNode")
@@ -38,7 +38,7 @@ pub enum TokenFieldType<'a> {
     Role,
     Literal,
     LiteralValue(AstNode<'a, &'a str>),
-    Token(AstNode<'a, &'a str>)
+    Token(AstNode<'a, &'a str>),
 }
 
 impl<'a> Display for TokenFieldType<'a> {
@@ -49,7 +49,7 @@ impl<'a> Display for TokenFieldType<'a> {
             TokenFieldType::Role => write!(f, "Role"),
             TokenFieldType::Literal => write!(f, "Literal"),
             TokenFieldType::LiteralValue(s) => write!(f, "\"{}\"", s.value),
-            TokenFieldType::Token(s) => write!(f, "{}", s.value)
+            TokenFieldType::Token(s) => write!(f, "{}", s.value),
         }
     }
 }
@@ -57,7 +57,7 @@ impl<'a> Display for TokenFieldType<'a> {
 #[derive(Debug)]
 pub struct TokenPropDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
-    pub(crate) types: Vec<AstNode<'a, TokenFieldType<'a>>>
+    pub(crate) types: Vec<AstNode<'a, TokenFieldType<'a>>>,
 }
 
 impl<'a> Display for TokenPropDecl<'a> {
@@ -78,7 +78,7 @@ impl<'a> Display for TokenPropDecl<'a> {
 #[derive(Debug)]
 pub struct TokenDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
-    pub(crate) props: AstNode<'a, Vec<AstNode<'a, TokenPropDecl<'a>>>>
+    pub(crate) props: AstNode<'a, Vec<AstNode<'a, TokenPropDecl<'a>>>>,
 }
 
 impl<'a> Display for TokenDecl<'a> {
@@ -100,14 +100,14 @@ impl<'a> Display for TokenDecl<'a> {
 #[derive(Debug)]
 pub enum FnVis {
     Private,
-    Public
+    Public,
 }
 
 impl Display for FnVis {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             &FnVis::Public => write!(f, "pub"),
-            &FnVis::Private => write!(f, "priv")
+            &FnVis::Private => write!(f, "priv"),
         }
     }
 }
@@ -115,7 +115,7 @@ impl Display for FnVis {
 #[derive(Debug)]
 pub struct FnArg<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
-    pub(crate) token_type: AstNode<'a, &'a str>
+    pub(crate) token_type: AstNode<'a, &'a str>,
 }
 
 impl<'a> Display for FnArg<'a> {
@@ -128,61 +128,61 @@ impl<'a> Display for FnArg<'a> {
 pub enum BoolOp {
     And,
     Or,
-    Xor
+    Xor,
 }
 #[derive(Debug)]
 pub enum BoolCmp {
     Eq,
-    Neq
+    Neq,
 }
 #[derive(Debug)]
 pub enum TypeCmp {
     Is,
-    Isnt
+    Isnt,
 }
 
 #[derive(Debug)]
 pub struct TokenProp<'a> {
-    pub(crate) token: &'a str,
-    pub(crate) prop: &'a str
+    pub(crate) token: AstNode<'a, &'a str>,
+    pub(crate) prop: AstNode<'a, &'a str>,
 }
 
 #[derive(Debug)]
 pub enum Comparison<'a> {
     Fn {
-        name: &'a str,
+        name: AstNode<'a, &'a str>,
         inputs: AstNode<'a, Vec<AstNode<'a, &'a str>>>,
-        outputs: AstNode<'a, Vec<AstNode<'a, &'a str>>>
+        outputs: AstNode<'a, Vec<AstNode<'a, &'a str>>>,
     },
     PropLit {
         left: AstNode<'a, TokenProp<'a>>,
         op: AstNode<'a, BoolCmp>,
-        right: &'a str
+        right: AstNode<'a, &'a str>,
     },
     PropSender {
         left: AstNode<'a, TokenProp<'a>>,
-        op: AstNode<'a, BoolCmp>
+        op: AstNode<'a, BoolCmp>,
     },
     TokenToken {
-        left: &'a str,
+        left: AstNode<'a, &'a str>,
         op: AstNode<'a, BoolCmp>,
-        right: &'a str
+        right: AstNode<'a, &'a str>,
     },
     PropToken {
         left: AstNode<'a, TokenProp<'a>>,
         op: AstNode<'a, BoolCmp>,
-        right: &'a str
+        right: AstNode<'a, &'a str>,
     },
     PropProp {
         left: AstNode<'a, TokenProp<'a>>,
         op: AstNode<'a, BoolCmp>,
-        right: AstNode<'a, TokenProp<'a>>
+        right: AstNode<'a, TokenProp<'a>>,
     },
     PropType {
         left: AstNode<'a, TokenProp<'a>>,
         op: AstNode<'a, TypeCmp>,
-        right: &'a str
-    }
+        right: AstNode<'a, &'a str>,
+    },
 }
 
 impl<'a> Display for Comparison<'a> {
@@ -196,35 +196,35 @@ impl<'a> Display for Comparison<'a> {
             Comparison::PropLit { left, op, right } => {
                 let op = match op.value {
                     BoolCmp::Eq => "==",
-                    BoolCmp::Neq => "!="
+                    BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} \"{}\"", left.value.token, left.value.prop, op, right)
             }
             Comparison::PropSender { left, op } => {
                 let op = match op.value {
                     BoolCmp::Eq => "==",
-                    BoolCmp::Neq => "!="
+                    BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} sender", left.value.token, left.value.prop, op)
             }
             Comparison::TokenToken { left, op, right } => {
                 let op = match op.value {
                     BoolCmp::Eq => "==",
-                    BoolCmp::Neq => "!="
+                    BoolCmp::Neq => "!=",
                 };
                 write!(f, "{} {} {}", left, op, right)
             }
             Comparison::PropToken { left, op, right } => {
                 let op = match op.value {
                     BoolCmp::Eq => "==",
-                    BoolCmp::Neq => "!="
+                    BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} {}", left.value.token, left.value.prop, op, right)
             }
             Comparison::PropProp { left, op, right } => {
                 let op = match op.value {
                     BoolCmp::Eq => "==",
-                    BoolCmp::Neq => "!="
+                    BoolCmp::Neq => "!=",
                 };
                 write!(
                     f,
@@ -235,7 +235,7 @@ impl<'a> Display for Comparison<'a> {
             Comparison::PropType { left, op, right } => {
                 let op = match op.value {
                     TypeCmp::Is => ":",
-                    TypeCmp::Isnt => "!:"
+                    TypeCmp::Isnt => "!:",
                 };
                 write!(f, "{}.{}{} {}", left.value.token, left.value.prop, op, right)
             }
@@ -249,9 +249,9 @@ pub enum ExpressionTree<'a> {
     Not(Box<ExpressionTree<'a>>),
     Node {
         left: Box<ExpressionTree<'a>>,
-        op: BoolOp,
-        right: Box<ExpressionTree<'a>>
-    }
+        op: AstNode<'a, BoolOp>,
+        right: Box<ExpressionTree<'a>>,
+    },
 }
 
 impl<'a> Display for ExpressionTree<'a> {
@@ -260,10 +260,10 @@ impl<'a> Display for ExpressionTree<'a> {
             ExpressionTree::Leaf(c) => write!(f, "{}", c),
             ExpressionTree::Not(e) => write!(f, "!({})", e),
             ExpressionTree::Node { left, op, right } => {
-                let op_symbol = match op {
+                let op_symbol = match op.value {
                     BoolOp::And => "&",
                     BoolOp::Xor => "^",
-                    BoolOp::Or => "|"
+                    BoolOp::Or => "|",
                 };
                 write!(f, "({} {} {})", left, op_symbol, right)
             }
@@ -277,7 +277,7 @@ pub struct FnDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) inputs: AstNode<'a, Vec<AstNode<'a, FnArg<'a>>>>,
     pub(crate) outputs: AstNode<'a, Vec<AstNode<'a, FnArg<'a>>>>,
-    pub(crate) conditions: AstNode<'a, Vec<ExpressionTree<'a>>>
+    pub(crate) conditions: AstNode<'a, Vec<ExpressionTree<'a>>>,
 }
 
 fn format_fn_args(args: Vec<&FnArg>) -> String {
@@ -289,7 +289,7 @@ fn format_fn_args(args: Vec<&FnArg>) -> String {
         false => format!(
             "|\n{}\n|",
             args.iter().map(|v| format!("\t{}", v)).collect::<Vec<_>>().join("\n")
-        )
+        ),
     }
 }
 
@@ -321,5 +321,7 @@ impl<'a> Display for FnDecl<'a> {
 #[derive(Debug)]
 pub enum AstRoot<'a> {
     TokenDecl(AstNode<'a, TokenDecl<'a>>),
-    FnDecl(AstNode<'a, FnDecl<'a>>)
+    FnDecl(AstNode<'a, FnDecl<'a>>),
 }
+
+pub type Ast<'a> = Vec<AstNode<'a, AstRoot<'a>>>;

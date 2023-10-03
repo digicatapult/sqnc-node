@@ -20,7 +20,7 @@ use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, Identify
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature
+    ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -36,9 +36,9 @@ pub use frame_support::{
     traits::{ChangeMembers, InitializeMembers, KeyOwnerProofSystem, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
-        IdentityFee, Weight
+        IdentityFee, Weight,
     },
-    StorageValue
+    StorageValue,
 };
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
@@ -105,18 +105,18 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("dscp"),
     impl_name: create_runtime_str!("dscp"),
     authoring_version: 1,
-    spec_version: 910,
+    spec_version: 911,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
-    state_version: 1
+    state_version: 1,
 };
 
 /// The BABE epoch configuration at genesis.
 pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
     sp_consensus_babe::BabeEpochConfiguration {
         c: PRIMARY_PROBABILITY,
-        allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots
+        allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
     };
 
 /// The version information used to identify this runtime when compiled natively.
@@ -124,7 +124,7 @@ pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
 pub fn native_version() -> NativeVersion {
     NativeVersion {
         runtime_version: VERSION,
-        can_author_with: Default::default()
+        can_author_with: Default::default(),
     }
 }
 
@@ -132,7 +132,7 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
 type MoreThanHalfMembers = EitherOfDiverse<
     EnsureRoot<AccountId>,
-    pallet_collective::EnsureProportionMoreThan<AccountId, GovernanceCollective, 1, 2>
+    pallet_collective::EnsureProportionMoreThan<AccountId, GovernanceCollective, 1, 2>,
 >;
 
 type MoreThanTwoMembers =
@@ -336,7 +336,7 @@ pub enum Role {
     Reviewer = 6,
     Optimiser = 7,
     MemberA = 8,
-    MemberB = 9
+    MemberB = 9,
 }
 
 impl Default for Role {
@@ -354,7 +354,7 @@ pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal(BoundedVec<u8, ConstU32<32>>),
     TokenId(TokenId),
-    None
+    None,
 }
 
 impl<T> Default for MetadataValue<T> {
@@ -372,7 +372,7 @@ impl<T: PartialEq> PartialEq<T> for MetadataValue<T> {
     fn eq(&self, rhs: &T) -> bool {
         match self {
             MetadataValue::<T>::TokenId(v) => v == rhs,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -512,7 +512,7 @@ pub type SignedExtra = (
     frame_system::CheckEra<Runtime>,
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment_free::ChargeTransactionPayment<Runtime>
+    pallet_transaction_payment_free::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
@@ -525,7 +525,7 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllPalletsWithSystem,
-    UtxoNftStoragePrefixMigration
+    UtxoNftStoragePrefixMigration,
 >;
 
 #[cfg(feature = "runtime-benchmarks")]

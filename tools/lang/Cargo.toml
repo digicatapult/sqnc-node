@@ -1,11 +1,12 @@
 [package]
 name = "dscp-lang"
+authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+clap = { version = "4.4.6", features = ["derive"] }
+exitcode = "1.1.2"
 lazy_static = "1.4.0"
 pest = "2.6"
 pest_derive = "2.6"

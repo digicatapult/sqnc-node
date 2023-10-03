@@ -1,65 +1,73 @@
 use super::*;
 
-use crate::parser::Rule;
+use crate::{
+    errors::{produce_unexpected_pair_error, CompilationError, ErrorVariant, PestError},
+    parser::Rule,
+};
 
-fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenFieldType>, AstBuildError> {
+fn parse_ident<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, &'a str>, CompilationError> {
+    Ok(AstNode {
+        value: pair.as_str(),
+        span: pair.as_span(),
+    })
+}
+
+fn parse_literal<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, &'a str>, CompilationError> {
+    let string = pair.into_inner().next().unwrap(); // string
+    let inner = string.into_inner().next().unwrap(); // inner
+    Ok(AstNode {
+        value: inner.as_str(),
+        span: inner.as_span(),
+    })
+}
+
+fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenFieldType>, CompilationError> {
     let span = pair.as_span();
     let field_type = match pair.as_rule() {
         Rule::file => Ok(TokenFieldType::File),
         Rule::literal => Ok(TokenFieldType::Literal),
         Rule::role => Ok(TokenFieldType::Role),
         Rule::none => Ok(TokenFieldType::None),
-        Rule::literal_value => {
-            let literal_string = pair.into_inner().next().unwrap();
-            let span = literal_string.as_span();
-            let literal_val = literal_string.into_inner();
-            Ok(TokenFieldType::LiteralValue(AstNode {
-                value: literal_val.as_str(),
-                span
-            }))
-        }
+        Rule::literal_value => Ok(TokenFieldType::LiteralValue(parse_literal(pair)?)),
         Rule::ident => Ok(TokenFieldType::Token(AstNode {
             span: pair.as_span(),
-            value: pair.as_str()
+            value: pair.as_str(),
         })),
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }?;
 
     Ok(AstNode {
         span,
-        value: field_type
+        value: field_type,
     })
 }
 
-fn parse_token_prop_field(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenPropDecl>, AstBuildError> {
+fn parse_token_prop_field(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenPropDecl>, CompilationError> {
     match pair.as_rule() {
         Rule::field => {
             let span = pair.as_span();
-            let mut pair = pair.into_inner();
-            let name = pair.next().unwrap();
-            let valid_types = pair
-                .next()
-                .unwrap()
-                .into_inner()
-                .into_iter()
-                .map(parse_token_prop_type)
-                .collect::<Result<Vec<_>, _>>()?;
+            let mut pairs = pair.into_inner();
             Ok(AstNode {
                 span,
                 value: TokenPropDecl {
-                    name: AstNode {
-                        value: name.as_str(),
-                        span: name.as_span()
-                    },
-                    types: valid_types
-                }
+                    name: parse_ident(pairs.next().unwrap())?,
+                    types: pairs
+                        .next()
+                        .unwrap()
+                        .into_inner()
+                        .into_iter()
+                        .map(parse_token_prop_type)
+                        .collect::<Result<Vec<_>, _>>()?,
+                },
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_token_props(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<AstNode<TokenPropDecl>>>, AstBuildError> {
+fn parse_token_props(
+    pair: pest::iterators::Pair<Rule>,
+) -> Result<AstNode<Vec<AstNode<TokenPropDecl>>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::properties => Ok(AstNode {
@@ -68,75 +76,61 @@ fn parse_token_props(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<As
                 .into_inner()
                 .into_iter()
                 .map(parse_token_prop_field)
-                .collect::<Result<Vec<_>, _>>()?
+                .collect::<Result<Vec<_>, _>>()?,
         }),
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDecl>, AstBuildError> {
+fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDecl>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::struct_decl => {
-            let mut pair = pair.into_inner();
-            let name = pair.next().unwrap();
-            let props = parse_token_props(pair.next().unwrap())?;
-
+            let mut pairs = pair.into_inner();
             Ok(AstNode {
                 span,
                 value: TokenDecl {
-                    name: AstNode {
-                        value: name.as_str(),
-                        span: name.as_span()
-                    },
-                    props
-                }
+                    name: parse_ident(pairs.next().unwrap())?,
+                    props: parse_token_props(pairs.next().unwrap())?,
+                },
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, AstBuildError> {
+fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
     match pair.as_rule() {
         Rule::fn_decl_arg => {
             let span = pair.as_span();
             let mut pairs = pair.into_inner();
-            let name = pairs.next().unwrap();
-            let token_type = pairs.next().unwrap();
             Ok(AstNode {
                 value: FnArg {
-                    name: AstNode {
-                        value: name.as_str(),
-                        span: name.as_span()
-                    },
-                    token_type: AstNode {
-                        value: token_type.as_str(),
-                        span: token_type.as_span()
-                    }
+                    name: parse_ident(pairs.next().unwrap())?,
+                    token_type: parse_ident(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<AstNode<FnArg>>>, AstBuildError> {
+fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<AstNode<FnArg>>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::fn_decl_arg_list => {
             let args = pair.into_inner();
             Ok(AstNode {
                 value: args.into_iter().map(parse_fn_arg).collect::<Result<Vec<_>, _>>()?,
-                span
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, AstBuildError> {
+fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::vis => Ok(AstNode {
@@ -145,105 +139,100 @@ fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, Ast
                 "priv" => FnVis::Private,
                 "pub" => FnVis::Public,
                 _ => {
-                    return Err(AstBuildError {
-                        stage: crate::CompilationStage::BuildAst,
-                        inner: PestError::new_from_span(
+                    return Err(CompilationError {
+                        stage: crate::compiler::CompilationStage::BuildAst,
+                        exit_code: exitcode::DATAERR,
+                        inner: Box::new(PestError::new_from_span(
                             ErrorVariant::CustomError {
-                                message: "visibility if specified must be pub/priv".into()
+                                message: "visibility if specified must be pub/priv".into(),
                             },
-                            span
-                        )
+                            span,
+                        )),
                     })
                 }
             },
-            span
+            span,
         }),
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_bool_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<BoolCmp>, AstBuildError> {
+fn parse_bool_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<BoolCmp>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::eq => Ok(AstNode {
             value: BoolCmp::Eq,
-            span
+            span,
         }),
         Rule::neq => Ok(AstNode {
             value: BoolCmp::Neq,
-            span
+            span,
         }),
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_type_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TypeCmp>, AstBuildError> {
+fn parse_type_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TypeCmp>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::is => Ok(AstNode {
             value: TypeCmp::Is,
-            span
+            span,
         }),
         Rule::isnt => Ok(AstNode {
             value: TypeCmp::Isnt,
-            span
+            span,
         }),
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_ident_prop<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<TokenProp<'a>>, AstBuildError> {
+fn parse_ident_prop<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<TokenProp<'a>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::ident_prop => {
             let mut pairs = pair.into_inner();
             Ok(AstNode {
                 value: TokenProp {
-                    token: pairs.next().unwrap().as_str(),
-                    prop: pairs.next().unwrap().as_str()
+                    token: parse_ident(pairs.next().unwrap())?,
+                    prop: parse_ident(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
 fn parse_fn_inv_args<'a>(
-    pair: pest::iterators::Pair<Rule>
-) -> Result<AstNode<'a, Vec<AstNode<&'a str>>>, AstBuildError> {
+    pair: pest::iterators::Pair<Rule>,
+) -> Result<AstNode<'a, Vec<AstNode<&'a str>>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::fn_args => {
             let args = pair.into_inner();
             Ok(AstNode {
-                value: args
-                    .into_iter()
-                    .map(|p| AstNode {
-                        value: p.as_str(),
-                        span: p.as_span()
-                    })
-                    .collect::<Vec<_>>(),
-                span
+                value: args.into_iter().map(parse_ident).collect::<Result<Vec<_>, _>>()?,
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Comparison>, AstBuildError> {
-    let cmp_type = pair.as_rule();
+fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Comparison>, CompilationError> {
+    let pair_cmp_type = pair.as_rule();
     let span = pair.as_span();
-    match cmp_type {
+    match pair_cmp_type {
         Rule::fn_cmp => {
             let mut pairs = pair.into_inner();
             Ok(AstNode {
                 value: Comparison::Fn {
-                    name: pairs.next().unwrap().as_str(),
+                    name: parse_ident(pairs.next().unwrap())?,
                     inputs: parse_fn_inv_args(pairs.next().unwrap())?,
-                    outputs: parse_fn_inv_args(pairs.next().unwrap())?
+                    outputs: parse_fn_inv_args(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
         Rule::prop_prop_cmp => {
@@ -252,9 +241,9 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
                 value: Comparison::PropProp {
                     left: parse_ident_prop(pairs.next().unwrap())?,
                     op: parse_bool_cmp_op(pairs.next().unwrap())?,
-                    right: parse_ident_prop(pairs.next().unwrap())?
+                    right: parse_ident_prop(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
         Rule::prop_lit_cmp => {
@@ -262,13 +251,11 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
 
             let left = parse_ident_prop(pairs.next().unwrap())?;
             let op = parse_bool_cmp_op(pairs.next().unwrap())?;
-            let right = pairs.next().unwrap(); // literal_value
-            let right = right.into_inner().next().unwrap(); // string
-            let right = right.into_inner().next().unwrap().as_str(); // inner
+            let right = parse_literal(pairs.next().unwrap())?; // literal_value
 
             Ok(AstNode {
                 value: Comparison::PropLit { left, op, right },
-                span
+                span,
             })
         }
         Rule::prop_sender_cmp => {
@@ -276,9 +263,9 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
             Ok(AstNode {
                 value: Comparison::PropSender {
                     left: parse_ident_prop(pairs.next().unwrap())?,
-                    op: parse_bool_cmp_op(pairs.next().unwrap())?
+                    op: parse_bool_cmp_op(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
         Rule::prop_ident_cmp => {
@@ -287,20 +274,20 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
                 value: Comparison::PropToken {
                     left: parse_ident_prop(pairs.next().unwrap())?,
                     op: parse_bool_cmp_op(pairs.next().unwrap())?,
-                    right: pairs.next().unwrap().as_str()
+                    right: parse_ident(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
         Rule::ident_ident_cmp => {
             let mut pairs = pair.into_inner();
             Ok(AstNode {
                 value: Comparison::TokenToken {
-                    left: pairs.next().unwrap().as_str(),
+                    left: parse_ident(pairs.next().unwrap())?,
                     op: parse_bool_cmp_op(pairs.next().unwrap())?,
-                    right: pairs.next().unwrap().as_str()
+                    right: parse_ident(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
         Rule::prop_type_cmp => {
@@ -309,40 +296,51 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
                 value: Comparison::PropType {
                     left: parse_ident_prop(pairs.next().unwrap())?,
                     op: parse_type_cmp_op(pairs.next().unwrap())?,
-                    right: pairs.next().unwrap().as_str()
+                    right: parse_ident(pairs.next().unwrap())?,
                 },
-                span
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn partition_pairs_by_op<'a, I>(pairs: I, rule: Rule, op: BoolOp) -> Result<Option<ExpressionTree<'a>>, AstBuildError>
+fn partition_pairs_by_op<'a, I>(
+    pairs: I,
+    rule: Rule,
+    op: BoolOp,
+) -> Result<Option<ExpressionTree<'a>>, CompilationError>
 where
     I: IntoIterator<Item = pest::iterators::Pair<'a, Rule>>,
     <I as IntoIterator>::Item: Clone,
-    <I as IntoIterator>::IntoIter: Clone
+    <I as IntoIterator>::IntoIter: Clone,
 {
-    let mut pairs = pairs.into_iter();
-    let left: Vec<_> = pairs.by_ref().take_while(|p| p.as_rule() != rule.clone()).collect();
-    let right: Vec<_> = pairs.collect();
+    let pairs = pairs.into_iter();
+    let mut iter = pairs.clone();
+    let left: Vec<_> = iter.by_ref().take_while(|p| p.as_rule() != rule.clone()).collect();
+    let right: Vec<_> = iter.collect();
 
     match right.len() != 0 {
-        true => Ok(Some(ExpressionTree::Node {
-            left: Box::new(parse_exp_tree(left)?),
-            op,
-            right: Box::new(parse_exp_tree(right)?)
-        })),
-        false => Ok(None)
+        true => {
+            let left_count = left.len();
+            Ok(Some(ExpressionTree::Node {
+                left: Box::new(parse_exp_tree(left)?),
+                op: AstNode {
+                    value: op,
+                    span: pairs.skip(left_count).next().unwrap().as_span(),
+                },
+                right: Box::new(parse_exp_tree(right)?),
+            }))
+        }
+        false => Ok(None),
     }
 }
 
-fn parse_exp_tree<'a, I>(pairs: I) -> Result<ExpressionTree<'a>, AstBuildError>
+fn parse_exp_tree<'a, I>(pairs: I) -> Result<ExpressionTree<'a>, CompilationError>
 where
     I: IntoIterator<Item = pest::iterators::Pair<'a, Rule>>,
     <I as IntoIterator>::Item: Clone,
-    <I as IntoIterator>::IntoIter: Clone
+    <I as IntoIterator>::IntoIter: Clone,
 {
     let mut pairs = pairs.into_iter();
     let split = partition_pairs_by_op(pairs.clone(), Rule::bool_op_and, BoolOp::And)?;
@@ -361,14 +359,14 @@ where
     let pair = pairs.next().unwrap();
     match pair.as_rule() {
         Rule::unary_not => Ok(ExpressionTree::Not(Box::new(parse_exp_tree(
-            pairs.next().unwrap().into_inner()
+            pairs.next().unwrap().into_inner(),
         )?))),
         Rule::expr => parse_exp_tree(pair.into_inner()),
-        _ => Ok(ExpressionTree::Leaf(parse_bool_cmp(pair)?))
+        _ => Ok(ExpressionTree::Leaf(parse_bool_cmp(pair)?)),
     }
 }
 
-fn parse_fn_conditions(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<ExpressionTree>>, AstBuildError> {
+fn parse_fn_conditions(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<ExpressionTree>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::expr_list => {
@@ -378,14 +376,14 @@ fn parse_fn_conditions(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<
                     .into_iter()
                     .map(|pair| parse_exp_tree(Box::new(pair.into_inner())))
                     .collect::<Result<Vec<_>, _>>()?,
-                span
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, AstBuildError> {
+fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::fn_decl => {
@@ -400,20 +398,20 @@ fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, A
                     visibility: parse_fn_vis(vis)?,
                     name: AstNode {
                         value: name.as_str(),
-                        span: name.as_span()
+                        span: name.as_span(),
                     },
                     inputs: parse_fn_decl_args(inputs)?,
                     outputs: parse_fn_decl_args(outputs)?,
-                    conditions: parse_fn_conditions(conditions)?
+                    conditions: parse_fn_conditions(conditions)?,
                 },
-                span
+                span,
             })
         }
-        _ => produce_unexpected_pair_error(pair)
+        _ => produce_unexpected_pair_error(pair),
     }
 }
 
-pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstRoot>>, AstBuildError> {
+pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstRoot>>, CompilationError> {
     pairs
         .into_iter()
         .filter_map(|pair| match pair.as_rule() {
@@ -421,7 +419,7 @@ pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstR
                 let span = pair.as_span();
                 let node = parse_token_decl(pair).map(|token_decl| AstNode {
                     span,
-                    value: AstRoot::TokenDecl(token_decl)
+                    value: AstRoot::TokenDecl(token_decl),
                 });
                 Some(node)
             }
@@ -429,12 +427,12 @@ pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstR
                 let fn_span = pair.as_span();
                 let node = parse_fn_decl(pair).map(|fn_decl| AstNode {
                     span: fn_span,
-                    value: AstRoot::FnDecl(fn_decl)
+                    value: AstRoot::FnDecl(fn_decl),
                 });
                 Some(node)
             }
             Rule::EOI => None,
-            _ => panic!()
+            _ => panic!(),
         })
         .collect()
 }
