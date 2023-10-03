@@ -74,7 +74,7 @@ fn schedule_after_schedule_period() {
             .rev()
             .find(|&x| match x.event {
                 TestEvent::SymmetricKey(Event::UpdateKey(_)) => true,
-                _ => false
+                _ => false,
             })
             .unwrap()
             .event;

@@ -19,7 +19,7 @@ pub struct Token<
     TokenMetadataKey: Ord,
     TokenMetadataValue,
     MaxParentCount: Get<u32>,
-    MaxChildCount: Get<u32>
+    MaxChildCount: Get<u32>,
 > {
     pub(crate) id: TokenId,
     pub(crate) roles: BoundedBTreeMap<RoleKey, AccountId, MaxRoleCount>,
@@ -28,7 +28,7 @@ pub struct Token<
     pub(crate) destroyed_at: Option<BlockNumber>,
     pub(crate) metadata: BoundedBTreeMap<TokenMetadataKey, TokenMetadataValue, MaxMetadataCount>,
     pub(crate) parents: BoundedVec<TokenId, MaxParentCount>,
-    pub(crate) children: Option<BoundedVec<TokenId, MaxChildCount>> // children is the only mutable component of the token
+    pub(crate) children: Option<BoundedVec<TokenId, MaxChildCount>>, // children is the only mutable component of the token
 }
 
 impl<MR, A, RK, TID, BN, MM, TK, TV, MP, MC> PartialEq<Token<MR, A, RK, TID, BN, MM, TK, TV, MP, MC>>
@@ -46,7 +46,7 @@ where
     MR: Get<u32>,
     MM: Get<u32>,
     MP: Get<u32>,
-    MC: Get<u32>
+    MC: Get<u32>,
 {
     fn eq(&self, other: &Token<MR, A, RK, TID, BN, MM, TK, TV, MP, MC>) -> bool {
         self.id == other.id

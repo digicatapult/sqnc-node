@@ -5,14 +5,14 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
     traits::{ConstU32, ConstU64, Hooks},
-    weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight}
+    weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system as system;
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup}
+    traits::{BlakeTwo256, IdentityLookup},
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -75,7 +75,7 @@ impl system::Config for Test {
 #[derive(Encode, Decode, Clone, PartialEq, MaxEncodedLen, TypeInfo, Debug, Eq, Ord, PartialOrd)]
 pub enum Role {
     Owner,
-    NotOwner
+    NotOwner,
 }
 
 impl Default for Role {
@@ -89,7 +89,7 @@ pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal([u8; 1]),
     TokenId(TokenId),
-    None
+    None,
 }
 
 impl<T> Default for MetadataValue<T> {
@@ -101,7 +101,7 @@ impl<T> Default for MetadataValue<T> {
 #[derive(Encode, Decode, Clone, PartialEq, MaxEncodedLen, TypeInfo, Debug, Eq)]
 pub enum ProcessIdentifier {
     ShouldSucceed,
-    ShouldFail
+    ShouldFail,
 }
 
 impl Default for ProcessIdentifier {
@@ -125,11 +125,11 @@ impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessVa
         id: &TestProcessId,
         _sender: &u64,
         _inputs: &Vec<TestProcessIO>,
-        _outputs: &Vec<TestProcessIO>
+        _outputs: &Vec<TestProcessIO>,
     ) -> ValidationResult<u32> {
         ValidationResult {
             success: id.id.clone() == ProcessIdentifier::ShouldSucceed,
-            executed_len: 0u32
+            executed_len: 0u32,
         }
     }
 }

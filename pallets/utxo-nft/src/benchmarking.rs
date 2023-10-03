@@ -23,7 +23,7 @@ type ProcessIdentifier<T> = <<T as Config>::ProcessValidator as ProcessValidator
     <T as frame_system::Config>::AccountId,
     <T as Config>::RoleKey,
     <T as Config>::TokenMetadataKey,
-    <T as Config>::TokenMetadataValue
+    <T as Config>::TokenMetadataValue,
 >>::ProcessIdentifier;
 
 type ProcessVersion<T> = <<T as Config>::ProcessValidator as ProcessValidator<
@@ -31,13 +31,13 @@ type ProcessVersion<T> = <<T as Config>::ProcessValidator as ProcessValidator<
     <T as frame_system::Config>::AccountId,
     <T as Config>::RoleKey,
     <T as Config>::TokenMetadataKey,
-    <T as Config>::TokenMetadataValue
+    <T as Config>::TokenMetadataValue,
 >>::ProcessVersion;
 
 fn add_nfts<T: Config>(r: u32) -> Result<(), &'static str>
 where
     ProcessIdentifier<T>: From<BoundedVec<u8, ConstU32<32>>>,
-    ProcessVersion<T>: From<u32>
+    ProcessVersion<T>: From<u32>,
 {
     let account_id: T::AccountId = account("owner", 0, SEED);
     let mut roles = BoundedBTreeMap::<_, _, _>::new();
@@ -50,7 +50,7 @@ where
     let outputs: BoundedVec<_, T::MaxOutputCount> = (0..r)
         .map(|_| Output {
             roles: roles.clone(),
-            metadata: metadata.clone()
+            metadata: metadata.clone(),
         })
         .collect::<Vec<_>>()
         .try_into()
@@ -61,10 +61,10 @@ where
         RawOrigin::Signed(account_id.clone()).into(),
         ProcessFullyQualifiedId {
             id: default_process.into(),
-            version: 1u32.into()
+            version: 1u32.into(),
         },
         BoundedVec::<_, _>::with_max_capacity(),
-        outputs
+        outputs,
     )?;
 
     let expected_last_token = nth_token_id::<T>(r)?;
@@ -84,7 +84,7 @@ fn mk_inputs<T: Config>(i: u32) -> Result<BoundedVec<T::TokenId, T::MaxInputCoun
 }
 
 fn mk_outputs<T: Config>(
-    o: u32
+    o: u32,
 ) -> Result<
     BoundedVec<
         Output<
@@ -93,11 +93,11 @@ fn mk_outputs<T: Config>(
             T::RoleKey,
             T::MaxMetadataCount,
             T::TokenMetadataKey,
-            T::TokenMetadataValue
+            T::TokenMetadataValue,
         >,
-        T::MaxOutputCount
+        T::MaxOutputCount,
     >,
-    &'static str
+    &'static str,
 > {
     let account_id: T::AccountId = account("owner", 0, SEED);
     let mut roles = BoundedBTreeMap::<_, _, _>::new();
@@ -109,7 +109,7 @@ fn mk_outputs<T: Config>(
     let outputs = (0..o)
         .map(|_| Output {
             roles: roles.clone(),
-            metadata: metadata.clone()
+            metadata: metadata.clone(),
         })
         .collect::<Vec<_>>()
         .try_into()

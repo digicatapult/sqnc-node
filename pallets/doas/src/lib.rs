@@ -41,7 +41,7 @@ pub mod pallet {
         /// A doas_root just took place. \[result\]
         DidAsRoot(DispatchResult),
         /// A doas just took place. \[result\]
-        DidAs(DispatchResult)
+        DidAs(DispatchResult),
     }
 
     // The pallet's dispatchable functions.
@@ -66,7 +66,7 @@ pub mod pallet {
             let dispatch_info = call.get_dispatch_info();
             (
                 dispatch_info.weight.saturating_add(Weight::from_parts(10_000, 0)),
-                dispatch_info.class
+                dispatch_info.class,
             );
 
             // This is a public call, so we ensure that the origin is some signed account.
@@ -93,7 +93,7 @@ pub mod pallet {
         pub fn doas_root_unchecked_weight(
             origin: OriginFor<T>,
             call: Box<<T as Config>::Call>,
-            _weight: Weight
+            _weight: Weight,
         ) -> DispatchResultWithPostInfo {
             // This is a public call, so we ensure that the origin is some signed account.
             T::DoasOrigin::ensure_origin(origin)?;
@@ -129,7 +129,7 @@ pub mod pallet {
         pub fn doas(
             origin: OriginFor<T>,
             who: <T::Lookup as StaticLookup>::Source,
-            call: Box<<T as Config>::Call>
+            call: Box<<T as Config>::Call>,
         ) -> DispatchResultWithPostInfo {
             // This is a public call, so we ensure that the origin is some signed account.
             T::DoasOrigin::ensure_origin(origin)?;

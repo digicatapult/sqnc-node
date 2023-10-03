@@ -4,14 +4,14 @@ use frame_support::dispatch::{DispatchClass, DispatchInfo};
 use frame_support::{
     parameter_types,
     traits::{ConstU32, ConstU64, Get},
-    weights::Weight
+    weights::Weight,
 };
 use frame_system as system;
 use pallet_balances::Call as BalancesCall;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, IdentityLookup}
+    traits::{BlakeTwo256, IdentityLookup},
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -109,7 +109,7 @@ pub fn info_from_weight(w: Weight) -> DispatchInfo {
 pub fn new_test_ext() -> sp_io::TestExternalities {
     let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
     pallet_balances::GenesisConfig::<Test> {
-        balances: vec![(1, 10)]
+        balances: vec![(1, 10)],
     }
     .assimilate_storage(&mut t)
     .unwrap();

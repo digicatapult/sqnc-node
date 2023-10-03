@@ -12,7 +12,7 @@ type BooleanExpressionSymbol<T> = crate::BooleanExpressionSymbol<
     <T as Config>::RoleKey,
     <T as Config>::TokenMetadataKey,
     <T as Config>::TokenMetadataValue,
-    <T as Config>::TokenMetadataValueDiscriminator
+    <T as Config>::TokenMetadataValueDiscriminator,
 >;
 
 type ProcessIO<T> = dscp_pallet_traits::ProcessIO<
@@ -20,7 +20,7 @@ type ProcessIO<T> = dscp_pallet_traits::ProcessIO<
     <T as frame_system::Config>::AccountId,
     <T as Config>::RoleKey,
     <T as Config>::TokenMetadataKey,
-    <T as Config>::TokenMetadataValue
+    <T as Config>::TokenMetadataValue,
 >;
 
 type ProcessFullyQualifiedId<T> =
@@ -31,7 +31,7 @@ fn prepare_program<T: Config>(l: u32) -> BoundedVec<BooleanExpressionSymbol<T>, 
         input_index: 0u32,
         input_metadata_key: Default::default(),
         output_index: 0u32,
-        output_metadata_key: Default::default()
+        output_metadata_key: Default::default(),
     };
 
     let mut program = BoundedVec::<_, _>::with_bounded_capacity(T::MaxProcessProgramLength::get() as usize);
@@ -52,14 +52,14 @@ fn prepare_program<T: Config>(l: u32) -> BoundedVec<BooleanExpressionSymbol<T>, 
 }
 
 fn create_process_fixture<T: Config>(
-    program: &BoundedVec<BooleanExpressionSymbol<T>, T::MaxProcessProgramLength>
+    program: &BoundedVec<BooleanExpressionSymbol<T>, T::MaxProcessProgramLength>,
 ) -> ProcessFullyQualifiedId<T> {
     ProcessValidation::<T>::create_process(RawOrigin::Root.into(), T::ProcessIdentifier::default(), program.clone())
         .unwrap();
 
     ProcessFullyQualifiedId::<T> {
         id: T::ProcessIdentifier::default(),
-        version: VersionModel::<T>::get(T::ProcessIdentifier::default())
+        version: VersionModel::<T>::get(T::ProcessIdentifier::default()),
     }
 }
 
