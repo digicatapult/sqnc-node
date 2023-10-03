@@ -372,3 +372,9 @@ A FRAME pallet is compromised of a number of blockchain primitives:
 - Errors: When a dispatchable fails, it returns an error.
 - Config: The `Config` configuration interface is used to define the types and parameters upon
   which a FRAME pallet depends.
+
+### Tools
+
+Contains additional tools used in conjunction with the `dscp-node`. These include:
+
+- [dscp-lang](./tools/lang/README.md) - A tool for writing and validating token models for use with [`pallet_process_management`](#processvalidation-pallet)
