@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display};
 
 use pest::Span;
 
+#[derive(PartialEq)]
 pub struct AstNode<'a, V>
 where
     V: 'a,
@@ -31,7 +32,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenFieldType<'a> {
     None,
     File,
@@ -54,7 +55,7 @@ impl<'a> Display for TokenFieldType<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TokenPropDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) types: Vec<AstNode<'a, TokenFieldType<'a>>>,
@@ -75,7 +76,7 @@ impl<'a> Display for TokenPropDecl<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TokenDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) props: AstNode<'a, Vec<AstNode<'a, TokenPropDecl<'a>>>>,
@@ -97,7 +98,7 @@ impl<'a> Display for TokenDecl<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum FnVis {
     Private,
     Public,
@@ -112,7 +113,7 @@ impl Display for FnVis {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct FnArg<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) token_type: AstNode<'a, &'a str>,
@@ -124,30 +125,30 @@ impl<'a> Display for FnArg<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BoolOp {
     And,
     Or,
     Xor,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BoolCmp {
     Eq,
     Neq,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TypeCmp {
     Is,
     Isnt,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TokenProp<'a> {
     pub(crate) token: AstNode<'a, &'a str>,
     pub(crate) prop: AstNode<'a, &'a str>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Comparison<'a> {
     Fn {
         name: AstNode<'a, &'a str>,
@@ -243,7 +244,7 @@ impl<'a> Display for Comparison<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ExpressionTree<'a> {
     Leaf(AstNode<'a, Comparison<'a>>),
     Not(Box<ExpressionTree<'a>>),
@@ -271,7 +272,7 @@ impl<'a> Display for ExpressionTree<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct FnDecl<'a> {
     pub(crate) visibility: AstNode<'a, FnVis>,
     pub(crate) name: AstNode<'a, &'a str>,
@@ -318,10 +319,19 @@ impl<'a> Display for FnDecl<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum AstRoot<'a> {
     TokenDecl(AstNode<'a, TokenDecl<'a>>),
     FnDecl(AstNode<'a, FnDecl<'a>>),
+}
+
+impl<'a> Display for AstRoot<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AstRoot::TokenDecl(d) => write!(f, "{}", d),
+            AstRoot::FnDecl(d) => write!(f, "{}", d),
+        }
+    }
 }
 
 pub type Ast<'a> = Vec<AstNode<'a, AstRoot<'a>>>;
