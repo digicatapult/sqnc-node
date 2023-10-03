@@ -75,3 +75,4 @@ program = _{ decl+ }
 main = _{ SOI ~ program ~ EOI }
 
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ (!"\n" ~ ANY)* ~ "\n" }

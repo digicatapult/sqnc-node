@@ -1,4 +1,10 @@
+/*
+Token specification example from l3. See https://github.com/digicatapult/dscp-documentation/blob/main/docs/l3/index.md for details
+*/
+
+// `struct`s define token formats that should be persisted in transitions
 struct Demand {
+  // fields can be of type Role, File, Literal, a specific literal, a struct type or a union of any of these
   owner: Role,
   subtype: "demand_a" | "demand_b",
   state: "created" | "allocated" | "cancelled",
@@ -14,6 +20,9 @@ struct Match2 {
   replaces: Match2 | None,
 }
 
+// `fn`s define process flow restrictions and consist of a set of inputs, a set of outputs and a set of additional conditions
+// A `fn` can be private in which case it will not be published as a flow itself but can be referred to in the conditions of
+// other flows
 fn clone_demand_partial | a: Demand | => | b: Demand | where {
   a == b,
   a.owner == b.owner,
@@ -46,6 +55,7 @@ pub fn demand_create || => | out: Demand | where {
   out.parameters: File
 }
 
+// public `fn` will be published as a process flow
 pub fn match2_propose |
   demand_a_in: Demand,
   demand_b_in: Demand,
