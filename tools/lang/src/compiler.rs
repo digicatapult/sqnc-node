@@ -318,7 +318,45 @@ mod test {
     }
 
     #[test]
-    fn valid_where_eq() {
+    fn valid_where_eq_prop_token() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+            fn Test |
+                foo: Bar,
+            | => |
+                biz: Baz,
+            | where {
+                foo.a == biz
+            }
+        "##
+            )
+            .is_ok(),
+            true
+        );
+    }
+
+    #[test]
+    fn valid_where_eq_token_token() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+            fn Test |
+                foo: Bar,
+            | => |
+                biz: Baz,
+            | where {
+                foo == biz
+            }
+        "##
+            )
+            .is_ok(),
+            true
+        );
+    }
+
+    #[test]
+    fn valid_where_eq_prop_prop() {
         assert_eq!(
             parse_str_to_ast(
                 r##"
@@ -352,6 +390,44 @@ mod test {
             )
             .is_ok(),
             true
+        );
+    }
+
+    #[test]
+    fn valid_where_eq_prop_is() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+            fn Test |
+                foo: Bar,
+            | => |
+                biz: Baz,
+            | where {
+                foo.b: File
+            }
+        "##
+            )
+            .is_ok(),
+            true,
+        );
+    }
+
+    #[test]
+    fn valid_where_eq_prop_isnt() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+            fn Test |
+                foo: Bar,
+            | => |
+                biz: Baz,
+            | where {
+                foo.b !: File
+            }
+        "##
+            )
+            .is_ok(),
+            true,
         );
     }
 
