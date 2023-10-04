@@ -36,17 +36,17 @@ fn clone_demand | a: Demand | => | b: Demand | where {
 
 fn clone_match_partial | a: Match2 | => | b: Match2 | where {
   a == b,
-  a.optimiser == optimiser,
-  a.member_a == member_a,
-  a.demand_a == demand_a,
-  a.member_b == member_b,
-  a.demand_b == demand_b,
-  a.replaces == replaces,
+  a.optimiser == b.optimiser,
+  a.member_a == b.member_a,
+  a.demand_a == b.demand_a,
+  a.member_b == b.member_b,
+  a.demand_b == b.demand_b,
+  a.replaces == b.replaces,
 }
 
-fn clone_match | a: Match2 | => | b: Match2 | where {
-  clone_match | a | => | b |,
-  a.state == b.state,
+fn clone_match | foo: Match2 | => | bar: Match2 | where {
+  clone_match_partial | foo | => | bar |,
+  foo.state == bar.state,
 }
 
 pub fn demand_create || => | out: Demand | where {
@@ -69,7 +69,7 @@ pub fn match2_propose |
   clone_demand |demand_b_in | => |demand_b_out|,
   demand_b_in.subtype == "demand_b",
   match2_out.optimiser == sender,
-  (match2_out.demand_a == demand_a_in & match2_out.member_a == demand_a_in.owner) |
+  (match2_out.demand_a == demand_a_in & match2_out.member_a == demand_a_in.owner) &
   (match2_out.demand_b == demand_b_in & match2_out.member_b == demand_b_in.owner),
   match2_out.state == "proposed",
   match2_out.replaces: None
