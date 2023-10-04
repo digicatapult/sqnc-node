@@ -2,15 +2,15 @@
 Token specification example from l3. See https://github.com/digicatapult/dscp-documentation/blob/main/docs/l3/index.md for details
 */
 
-// `struct`s define token formats that should be persisted in transitions
-struct Demand {
-  // fields can be of type Role, File, Literal, a specific literal, a struct type or a union of any of these
+// `token`s define token formats that should be persisted in transitions
+token Demand {
+  // fields can be of type Role, File, Literal, a specific literal, a token type or a union of any of these
   owner: Role,
   subtype: "demand_a" | "demand_b",
   state: "created" | "allocated" | "cancelled",
 }
 
-struct Match2 {
+token Match2 {
   optimiser: Role,
   member_a: Role,
   demand_a: Demand,

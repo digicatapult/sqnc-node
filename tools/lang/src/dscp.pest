@@ -6,14 +6,14 @@ char = {
     | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
 }
 
-ident = @{ !(keyword) ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+ident = @{ !(keyword ~ !(ASCII_ALPHANUMERIC | "_")) ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 ident_prop = { ident ~ "." ~ ident }
 
-keyword = _{ pub | priv | fn | struct | where | sender | bool_op | cmp_op }
+keyword = _{ pub | priv | fn | token | where | sender | bool_op | cmp_op }
     pub = _{ "pub" }
     priv = _{ "priv" }
     fn = _{ "fn" }
-    struct = _{ "struct" }
+    token = _{ "token" }
     where = _{ "where" }
 
 file = { "File" }
@@ -31,7 +31,7 @@ type = { partial_type ~ ("|" ~ partial_type)* }
 field = { ident ~ ":" ~ type }
 properties = { (field ~ ",")* ~ (field)? }
 
-struct_decl = { "struct" ~ ident ~ "{" ~ properties ~ "}" }
+token_decl = { token ~ ident ~ "{" ~ properties ~ "}" }
 
 prop_lit_cmp = { ident_prop ~ cmp_op ~ literal_value }
 prop_sender_cmp = { ident_prop ~ cmp_op ~ sender }
@@ -69,7 +69,7 @@ fn_decl_arg = { ident ~ ":" ~ ident }
 fn_decl_arg_list = { "|" ~ (fn_decl_arg ~ ",")* ~ (fn_decl_arg)? ~ "|" }
 fn_decl = { vis ~ fn ~ ident ~ fn_decl_arg_list ~ "=>" ~ fn_decl_arg_list ~ where ~ expr_list }
 
-decl = _{ struct_decl | fn_decl }
+decl = _{ token_decl | fn_decl }
 program = _{ decl+ }
 
 main = _{ SOI ~ program ~ EOI }

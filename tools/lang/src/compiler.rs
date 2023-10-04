@@ -44,7 +44,7 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            struct TestToken {}
+            token TestToken {}
         "##
             )
             .is_ok(),
@@ -57,7 +57,7 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            struct TestToken {
+            token TestToken {
                 role_field: Role,
                 token_field: Test,
                 literal_field: Literal,
@@ -78,7 +78,7 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            struct TestToken {
+            token TestToken {
                 role_field: Role,
                 token_field: Test,
                 literal_field: Literal,
@@ -99,7 +99,20 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            struct Test-Token {}
+            token Test-Token {}
+        "##
+            )
+            .is_ok(),
+            false
+        );
+    }
+
+    #[test]
+    fn invalid_token_name_keyword() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+            token token {}
         "##
             )
             .is_ok(),
@@ -112,8 +125,23 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            struct TestToken {
+            token TestToken {
                 invalid-name: Role
+            }
+        "##
+            )
+            .is_ok(),
+            false
+        );
+    }
+
+    #[test]
+    fn invalid_field_name_keyword() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+            token TestToken {
+                where: Role
             }
         "##
             )
@@ -127,7 +155,7 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            struct TestToken {
+            token TestToken {
                 name: Ro-le
             }
         "##
@@ -331,7 +359,7 @@ mod test {
     fn valid_end_to_end() {
         let result = parse_str_to_ast(
             r##"
-            struct TestToken {
+            token TestToken {
                 role_field: Role,
                 token_field: TestToken,
                 literal_field: Literal,

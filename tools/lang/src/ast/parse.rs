@@ -85,7 +85,7 @@ fn parse_token_props(
 fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDecl>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
-        Rule::struct_decl => {
+        Rule::token_decl => {
             let mut pairs = pair.into_inner();
             Ok(AstNode {
                 span,
@@ -415,7 +415,7 @@ pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstR
     pairs
         .into_iter()
         .filter_map(|pair| match pair.as_rule() {
-            Rule::struct_decl => {
+            Rule::token_decl => {
                 let span = pair.as_span();
                 let node = parse_token_decl(pair).map(|token_decl| AstNode {
                     span,
