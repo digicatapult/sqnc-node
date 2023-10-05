@@ -44,9 +44,9 @@ fn clone_match_partial | a: Match2 | => | b: Match2 | where {
   a.replaces == b.replaces,
 }
 
-fn clone_match | foo: Match2 | => | bar: Match2 | where {
-  clone_match_partial | foo | => | bar |,
-  foo.state == bar.state,
+fn clone_match | a: Match2 | => | b: Match2 | where {
+  clone_match_partial | a | => | b |,
+  a.state == b.state,
 }
 
 pub fn demand_create || => | out: Demand | where {
