@@ -2,11 +2,11 @@ use crate::Config;
 use codec::FullCodec;
 use frame_support::{
     traits::{Currency, Imbalance, OnUnbalanced},
-    unsigned::TransactionValidityError
+    unsigned::TransactionValidityError,
 };
 use sp_runtime::{
     traits::{AtLeast32BitUnsigned, DispatchInfoOf, MaybeSerializeDeserialize, Zero},
-    transaction_validity::InvalidTransaction
+    transaction_validity::InvalidTransaction,
 };
 use sp_std::{fmt::Debug, marker::PhantomData};
 
@@ -28,7 +28,7 @@ pub trait OnFreeTransaction<T: Config> {
         call: &T::RuntimeCall,
         dispatch_info: &DispatchInfoOf<T::RuntimeCall>,
         fee: Self::Balance,
-        tip: Self::Balance
+        tip: Self::Balance,
     ) -> Result<Self::LiquidityInfo, TransactionValidityError>;
 }
 
@@ -46,7 +46,7 @@ where
         Imbalance<<C as Currency<<T as frame_system::Config>::AccountId>>::Balance, Opposite = C::NegativeImbalance>,
     C::NegativeImbalance:
         Imbalance<<C as Currency<<T as frame_system::Config>::AccountId>>::Balance, Opposite = C::PositiveImbalance>,
-    OU: OnUnbalanced<NegativeImbalanceOf<C, T>>
+    OU: OnUnbalanced<NegativeImbalanceOf<C, T>>,
 {
     type LiquidityInfo = Option<NegativeImbalanceOf<C, T>>;
     type Balance = <C as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -57,7 +57,7 @@ where
         _call: &T::RuntimeCall,
         _info: &DispatchInfoOf<T::RuntimeCall>,
         _fee: Self::Balance,
-        _tip: Self::Balance
+        _tip: Self::Balance,
     ) -> Result<Self::LiquidityInfo, TransactionValidityError> {
         let balance = C::total_balance(who);
 

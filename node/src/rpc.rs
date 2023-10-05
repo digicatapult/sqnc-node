@@ -18,7 +18,7 @@ pub struct BabeDeps {
     /// A handle to the BABE worker for issuing requests.
     pub babe_worker_handle: BabeWorkerHandle<Block>,
     /// The keystore that manages the keys of the node.
-    pub keystore: KeystorePtr
+    pub keystore: KeystorePtr,
 }
 
 /// Full client dependencies.
@@ -32,12 +32,12 @@ pub struct FullDeps<C, P, SC> {
     /// Whether to deny unsafe calls
     pub deny_unsafe: DenyUnsafe,
     /// BABE specific dependencies.
-    pub babe: BabeDeps
+    pub babe: BabeDeps,
 }
 
 /// Instantiate all full RPC extensions.
 pub fn create_full<C, P, SC>(
-    deps: FullDeps<C, P, SC>
+    deps: FullDeps<C, P, SC>,
 ) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
     C: ProvideRuntimeApi<Block>,
@@ -48,7 +48,7 @@ where
     C::Api: BabeApi<Block>,
     C::Api: BlockBuilder<Block>,
     P: TransactionPool + 'static,
-    SC: SelectChain<Block> + 'static
+    SC: SelectChain<Block> + 'static,
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
     use sc_consensus_babe_rpc::{Babe, BabeApiServer};
@@ -60,12 +60,12 @@ where
         pool,
         select_chain,
         deny_unsafe,
-        babe
+        babe,
     } = deps;
 
     let BabeDeps {
         keystore,
-        babe_worker_handle
+        babe_worker_handle,
     } = babe;
 
     module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;

@@ -23,14 +23,14 @@ pub enum BooleanOperator {
     ImplicationL, // if(A) then B else true
     ImplicationR, // if(B) then A else true
     InhibitionL,  // A and !B
-    InhibitionR   // B and !A
+    InhibitionR,  // B and !A
 }
 
 #[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum BooleanExpressionSymbol<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     Op(BooleanOperator),
-    Restriction(Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>)
+    Restriction(Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>),
 }
 
 impl BooleanOperator {
@@ -63,7 +63,7 @@ impl BooleanOperator {
                 }
             }
             Self::InhibitionL => a & !b,
-            Self::InhibitionR => b & !a
+            Self::InhibitionR => b & !a,
         }
     }
 }

@@ -14,22 +14,22 @@ use sp_std::prelude::*;
 pub struct ProcessIO<IoIdentifier, AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
     pub id: IoIdentifier,
     pub roles: BTreeMap<RoleKey, AccountId>,
-    pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>
+    pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
 }
 
 #[derive(Encode, Decode, Default, RuntimeDebug, MaxEncodedLen, TypeInfo, Clone, PartialEq)]
 pub struct ProcessFullyQualifiedId<
     ProcessIdentifier: Parameter + MaxEncodedLen,
-    ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen
+    ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen,
 > {
     pub id: ProcessIdentifier,
-    pub version: ProcessVersion
+    pub version: ProcessVersion,
 }
 
 #[derive(PartialEq, RuntimeDebug)]
 pub struct ValidationResult<W> {
     pub success: bool,
-    pub executed_len: W
+    pub executed_len: W,
 }
 
 pub trait ValidateProcessWeights<WeightArg> {
@@ -56,7 +56,7 @@ where
     A: Parameter,
     R: Parameter + Ord,
     T: Parameter + Ord,
-    V: Parameter
+    V: Parameter,
 {
     type ProcessIdentifier: Parameter + MaxEncodedLen + Encode + Decode;
     type ProcessVersion: Parameter + AtLeast32Bit + MaxEncodedLen + Encode + Decode;
@@ -67,7 +67,7 @@ where
         id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &A,
         inputs: &Vec<ProcessIO<I, A, R, T, V>>,
-        outputs: &Vec<ProcessIO<I, A, R, T, V>>
+        outputs: &Vec<ProcessIO<I, A, R, T, V>>,
     ) -> ValidationResult<Self::WeightArg>;
 }
 
@@ -77,7 +77,7 @@ where
     A: Parameter,
     R: Parameter + Ord,
     T: Parameter + Ord,
-    V: Parameter
+    V: Parameter,
 {
     type ProcessIdentifier = ();
     type ProcessVersion = u32;
@@ -88,11 +88,11 @@ where
         _id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         _sender: &A,
         _inputs: &Vec<ProcessIO<I, A, R, T, V>>,
-        _outputs: &Vec<ProcessIO<I, A, R, T, V>>
+        _outputs: &Vec<ProcessIO<I, A, R, T, V>>,
     ) -> ValidationResult<u32> {
         ValidationResult::<u32> {
             success: true,
-            executed_len: 0u32
+            executed_len: 0u32,
         }
     }
 }

@@ -16,18 +16,18 @@ fn it_succeeds_when_process_exists() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
-            }
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &0u64,
             &Vec::new(),
-            &Vec::new()
+            &Vec::new(),
         );
 
         assert_eq!(
@@ -48,18 +48,18 @@ fn it_fails_when_process_id_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
-            }
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::B,
-                version: 1u32
+                version: 1u32,
             },
             &0u64,
             &bounded_vec![],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -80,18 +80,18 @@ fn it_fails_when_process_version_doesnt_exist() {
             1u32,
             Process {
                 status: ProcessStatus::Enabled,
-                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
-            }
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 2u32
+                version: 2u32,
             },
             &0u64,
             &bounded_vec![],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -112,18 +112,18 @@ fn it_fails_when_process_disabled() {
             1u32,
             Process {
                 status: ProcessStatus::Disabled,
-                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
-            }
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &0u64,
             &bounded_vec![],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -148,8 +148,8 @@ fn it_succeeds_when_all_restrictions_succeed() {
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
-                ]
-            }
+                ],
+            },
         );
 
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
@@ -158,15 +158,15 @@ fn it_succeeds_when_all_restrictions_succeed() {
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &0u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -191,8 +191,8 @@ fn it_fails_when_one_restrictions_fails() {
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
-                ]
-            }
+                ],
+            },
         );
 
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
@@ -201,15 +201,15 @@ fn it_fails_when_one_restrictions_fails() {
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &0u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -236,8 +236,8 @@ fn it_succeeds_with_complex_tree() {
                     BooleanExpressionSymbol::Op(BooleanOperator::Or),
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
-                ]
-            }
+                ],
+            },
         );
 
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
@@ -246,15 +246,15 @@ fn it_succeeds_with_complex_tree() {
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &1u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -281,8 +281,8 @@ fn it_fails_with_complex_tree() {
                     BooleanExpressionSymbol::Op(BooleanOperator::Or),
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::Xor)
-                ]
-            }
+                ],
+            },
         );
 
         let mut token_roles: BTreeMap<u32, u64> = BTreeMap::new();
@@ -291,15 +291,15 @@ fn it_fails_with_complex_tree() {
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &1u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -324,22 +324,22 @@ fn it_succeeds_with_handed_expressions_r() {
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Op(BooleanOperator::NotR),
-                ]
-            }
+                ],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &1u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -364,22 +364,22 @@ fn it_succeeds_with_handed_expressions_l() {
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::NotL),
-                ]
-            }
+                ],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &1u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -404,22 +404,22 @@ fn it_fails_with_handed_expressions_r() {
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::NotR),
-                ]
-            }
+                ],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &1u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(
@@ -444,22 +444,22 @@ fn it_fails_with_handed_expressions_l() {
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Restriction(Restriction::Fail),
                     BooleanExpressionSymbol::Op(BooleanOperator::NotL),
-                ]
-            }
+                ],
+            },
         );
 
         let result = ProcessValidation::validate_process(
             &ProcessFullyQualifiedId {
                 id: ProcessIdentifier::A,
-                version: 1u32
+                version: 1u32,
             },
             &1u64,
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
-                metadata: BTreeMap::new()
+                metadata: BTreeMap::new(),
             }],
-            &bounded_vec![]
+            &bounded_vec![],
         );
 
         assert_eq!(

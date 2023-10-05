@@ -8,7 +8,7 @@ use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::prelude::*;
 
 use dscp_pallet_traits::{
-    ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidateProcessWeights, ValidationResult
+    ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidateProcessWeights, ValidationResult,
 };
 
 #[cfg(test)]
@@ -27,7 +27,7 @@ pub use binary_expression_tree::*;
 #[derive(Encode, Debug, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
 pub enum ProcessStatus {
     Disabled,
-    Enabled
+    Enabled,
 }
 
 impl Default for ProcessStatus {
@@ -43,19 +43,19 @@ pub struct Process<
     TokenMetadataKey,
     TokenMetadataValue,
     TokenMetadataValueDiscriminator,
-    MaxProcessProgramLength
+    MaxProcessProgramLength,
 > where
     RoleKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue> + MaxEncodedLen,
-    MaxProcessProgramLength: Get<u32>
+    MaxProcessProgramLength: Get<u32>,
 {
     status: ProcessStatus,
     program: BoundedVec<
         BooleanExpressionSymbol<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>,
-        MaxProcessProgramLength
-    >
+        MaxProcessProgramLength,
+    >,
 }
 
 impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator, MaxProcessProgramLength> Default
@@ -65,14 +65,14 @@ where
     TokenMetadataKey: Parameter + Default + Ord + MaxEncodedLen,
     TokenMetadataValue: Parameter + Default + MaxEncodedLen,
     TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue> + MaxEncodedLen,
-    MaxProcessProgramLength: Get<u32>
+    MaxProcessProgramLength: Get<u32>,
 {
     fn default() -> Self {
         Process {
             status: ProcessStatus::Disabled,
             program: vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
                 .try_into()
-                .unwrap()
+                .unwrap(),
         }
     }
 }
@@ -83,7 +83,7 @@ where
     K: Parameter + Default + Ord + MaxEncodedLen,
     V: Parameter + Default + MaxEncodedLen,
     D: Parameter + Default + From<V> + MaxEncodedLen,
-    MR: Get<u32>
+    MR: Get<u32>,
 {
     fn eq(&self, other: &Process<R, K, V, D, MR>) -> bool {
         self.status == other.status && self.program == other.program
@@ -152,9 +152,9 @@ pub mod pallet {
             T::TokenMetadataKey,
             T::TokenMetadataValue,
             T::TokenMetadataValueDiscriminator,
-            T::MaxProcessProgramLength
+            T::MaxProcessProgramLength,
         >,
-        ValueQuery
+        ValueQuery,
     >;
 
     #[pallet::storage]
@@ -171,11 +171,11 @@ pub mod pallet {
                     T::RoleKey,
                     T::TokenMetadataKey,
                     T::TokenMetadataValue,
-                    T::TokenMetadataValueDiscriminator
+                    T::TokenMetadataValueDiscriminator,
                 >,
-                T::MaxProcessProgramLength
-            >
-        )>
+                T::MaxProcessProgramLength,
+            >,
+        )>,
     }
 
     #[cfg(feature = "std")]
@@ -210,14 +210,14 @@ pub mod pallet {
                     T::RoleKey,
                     T::TokenMetadataKey,
                     T::TokenMetadataValue,
-                    T::TokenMetadataValueDiscriminator
+                    T::TokenMetadataValueDiscriminator,
                 >,
-                T::MaxProcessProgramLength
+                T::MaxProcessProgramLength,
             >,
-            bool
+            bool,
         ),
         //id, version
-        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion)
+        ProcessDisabled(T::ProcessIdentifier, T::ProcessVersion),
     }
 
     #[pallet::error]
@@ -231,7 +231,7 @@ pub mod pallet {
         // process not found for this version
         InvalidVersion,
         // restriction program is invalid
-        InvalidProgram
+        InvalidProgram,
     }
 
     // The pallet's dispatchable functions.
@@ -247,10 +247,10 @@ pub mod pallet {
                     T::RoleKey,
                     T::TokenMetadataKey,
                     T::TokenMetadataValue,
-                    T::TokenMetadataValueDiscriminator
+                    T::TokenMetadataValueDiscriminator,
                 >,
-                T::MaxProcessProgramLength
-            >
+                T::MaxProcessProgramLength,
+            >,
         ) -> DispatchResultWithPostInfo {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
@@ -263,7 +263,7 @@ pub mod pallet {
                 id,
                 version.clone(),
                 program,
-                version == One::one()
+                version == One::one(),
             ));
 
             return Ok(().into());
@@ -274,7 +274,7 @@ pub mod pallet {
         pub fn disable_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            version: T::ProcessVersion
+            version: T::ProcessVersion,
         ) -> DispatchResultWithPostInfo {
             T::DisableProcessOrigin::ensure_origin(origin)?;
             Pallet::<T>::validate_version_and_process(&id, &version)?;
@@ -293,17 +293,17 @@ pub mod pallet {
                     T::RoleKey,
                     T::TokenMetadataKey,
                     T::TokenMetadataValue,
-                    T::TokenMetadataValueDiscriminator
+                    T::TokenMetadataValueDiscriminator,
                 >,
-                T::MaxProcessProgramLength
-            >
+                T::MaxProcessProgramLength,
+            >,
         ) -> bool {
             let executed_stack_height = program.iter().try_fold(0u8, |stack_height, symbol| match symbol {
                 BooleanExpressionSymbol::Op(_) => {
                     let stack_height = stack_height.checked_sub(2);
                     return stack_height.and_then(|stack_height| stack_height.checked_add(1));
                 }
-                BooleanExpressionSymbol::Restriction(_) => stack_height.checked_add(1)
+                BooleanExpressionSymbol::Restriction(_) => stack_height.checked_add(1),
             });
             executed_stack_height == Some(1u8)
         }
@@ -312,7 +312,7 @@ pub mod pallet {
             let current_version = <VersionModel<T>>::try_get(&id);
             return match current_version {
                 Ok(version) => version + One::one(),
-                Err(_) => One::one()
+                Err(_) => One::one(),
             };
         }
 
@@ -320,7 +320,7 @@ pub mod pallet {
             let version: T::ProcessVersion = Pallet::<T>::get_next_version(id);
             match version == One::one() {
                 true => <VersionModel<T>>::insert(id, version.clone()),
-                false => <VersionModel<T>>::mutate(id, |v| *v = version.clone())
+                false => <VersionModel<T>>::mutate(id, |v| *v = version.clone()),
             };
 
             return Ok(version);
@@ -334,10 +334,10 @@ pub mod pallet {
                     T::RoleKey,
                     T::TokenMetadataKey,
                     T::TokenMetadataValue,
-                    T::TokenMetadataValueDiscriminator
+                    T::TokenMetadataValueDiscriminator,
                 >,
-                T::MaxProcessProgramLength
-            >
+                T::MaxProcessProgramLength,
+            >,
         ) -> Result<(), Error<T>> {
             return match <ProcessModel<T>>::contains_key(&id, &v) {
                 true => Err(Error::<T>::AlreadyExists),
@@ -347,8 +347,8 @@ pub mod pallet {
                         v,
                         Process {
                             program: p.clone(),
-                            status: ProcessStatus::Enabled
-                        }
+                            status: ProcessStatus::Enabled,
+                        },
                     );
                     return Ok(());
                 }
@@ -370,7 +370,7 @@ pub mod pallet {
 
         pub fn validate_version_and_process(
             id: &T::ProcessIdentifier,
-            version: &T::ProcessVersion
+            version: &T::ProcessVersion,
         ) -> Result<(), Error<T>> {
             ensure!(
                 <ProcessModel<T>>::contains_key(&id, version.clone()),
@@ -379,7 +379,7 @@ pub mod pallet {
             ensure!(<VersionModel<T>>::contains_key(&id), Error::<T>::InvalidVersion);
             return match *version > <VersionModel<T>>::get(&id) {
                 true => Err(Error::<T>::InvalidVersion),
-                false => Ok(())
+                false => Ok(()),
             };
         }
     }
@@ -397,7 +397,7 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
         id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
         sender: &T::AccountId,
         inputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>
+        outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
     ) -> ValidationResult<u32> {
         let maybe_process = <ProcessModel<T>>::try_get(id.id.clone(), id.version.clone());
 
@@ -406,7 +406,7 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
                 if process.status == ProcessStatus::Disabled {
                     return ValidationResult {
                         success: false,
-                        executed_len: 0
+                        executed_len: 0,
                     };
                 }
 
@@ -421,7 +421,7 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
                             } else {
                                 return ValidationResult {
                                     success: false,
-                                    executed_len: executed_len
+                                    executed_len: executed_len,
                                 };
                             }
                         }
@@ -432,7 +432,7 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
                                 T::RoleKey,
                                 T::TokenMetadataKey,
                                 T::TokenMetadataValue,
-                                T::TokenMetadataValueDiscriminator
+                                T::TokenMetadataValueDiscriminator,
                             >(r, &sender, inputs, outputs));
                         }
                     }
@@ -440,13 +440,13 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
 
                 ValidationResult {
                     success: stack.pop().unwrap_or(false),
-                    executed_len: executed_len
+                    executed_len: executed_len,
                 }
             }
             Err(_) => ValidationResult {
                 success: false,
-                executed_len: 0
-            }
+                executed_len: 0,
+            },
         }
     }
 }

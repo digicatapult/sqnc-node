@@ -15,7 +15,7 @@ use std::{sync::Arc, time::Duration};
 ///
 /// Note: Should only be used for benchmarking.
 pub struct RemarkBuilder {
-    client: Arc<FullClient>
+    client: Arc<FullClient>,
 }
 
 impl RemarkBuilder {
@@ -40,7 +40,7 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for RemarkBuilder {
             self.client.as_ref(),
             acc,
             SystemCall::remark { remark: vec![] }.into(),
-            nonce
+            nonce,
         )
         .into();
 
@@ -54,7 +54,7 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for RemarkBuilder {
 pub struct TransferKeepAliveBuilder {
     client: Arc<FullClient>,
     dest: AccountId,
-    value: Balance
+    value: Balance,
 }
 
 impl TransferKeepAliveBuilder {
@@ -80,10 +80,10 @@ impl frame_benchmarking_cli::ExtrinsicBuilder for TransferKeepAliveBuilder {
             acc,
             BalancesCall::transfer_keep_alive {
                 dest: self.dest.clone().into(),
-                value: self.value.into()
+                value: self.value.into(),
             }
             .into(),
-            nonce
+            nonce,
         )
         .into();
 
@@ -98,7 +98,7 @@ pub fn create_benchmark_extrinsic(
     client: &FullClient,
     sender: sp_core::sr25519::Pair,
     call: runtime::RuntimeCall,
-    nonce: u32
+    nonce: u32,
 ) -> runtime::UncheckedExtrinsic {
     let genesis_hash = client.block_hash(0).ok().flatten().expect("Genesis block exists; qed");
     let best_hash = client.chain_info().best_hash;
@@ -115,11 +115,11 @@ pub fn create_benchmark_extrinsic(
         frame_system::CheckGenesis::<runtime::Runtime>::new(),
         frame_system::CheckEra::<runtime::Runtime>::from(sp_runtime::generic::Era::mortal(
             period,
-            best_block.saturated_into()
+            best_block.saturated_into(),
         )),
         frame_system::CheckNonce::<runtime::Runtime>::from(nonce),
         frame_system::CheckWeight::<runtime::Runtime>::new(),
-        pallet_transaction_payment_free::ChargeTransactionPayment::<runtime::Runtime>::from(0)
+        pallet_transaction_payment_free::ChargeTransactionPayment::<runtime::Runtime>::from(0),
     );
 
     let raw_payload = runtime::SignedPayload::from_raw(
@@ -133,8 +133,8 @@ pub fn create_benchmark_extrinsic(
             best_hash,
             (),
             (),
-            ()
-        )
+            (),
+        ),
     );
     let signature = raw_payload.using_encoded(|e| sender.sign(e));
 
@@ -142,7 +142,7 @@ pub fn create_benchmark_extrinsic(
         call.clone(),
         sp_runtime::AccountId32::from(sender.public()).into(),
         runtime::Signature::Sr25519(signature.clone()),
-        extra.clone()
+        extra.clone(),
     )
 }
 

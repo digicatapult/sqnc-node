@@ -5,7 +5,7 @@ use dscp_pallet_traits as traits;
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
 use frame_support::{
     traits::{Get, TryCollect},
-    BoundedVec
+    BoundedVec,
 };
 pub use pallet::*;
 use sp_runtime::traits::{AtLeast32Bit, Hash, One};
@@ -55,7 +55,7 @@ pub mod pallet {
             Self::AccountId,
             Self::RoleKey,
             Self::TokenMetadataKey,
-            Self::TokenMetadataValue
+            Self::TokenMetadataValue,
         >;
 
         // Maximum number of metadata items allowed per token
@@ -87,7 +87,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >>::ProcessIdentifier;
 
     // ProcessVersion can be pulled off of the configured ProcessValidator
@@ -96,7 +96,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >>::ProcessVersion;
 
     // Construct ProcessId
@@ -113,7 +113,7 @@ pub mod pallet {
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue,
         <T as Config>::MaxInputCount,
-        <T as Config>::MaxOutputCount
+        <T as Config>::MaxOutputCount,
     >;
 
     // The specific ProcessIO type can be derived from Config
@@ -123,7 +123,7 @@ pub mod pallet {
         <T as Config>::RoleKey,
         <T as Config>::MaxMetadataCount,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >;
 
     // The specific ProcessIO type can be derived from Config
@@ -132,7 +132,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >;
 
     type ProcessValidatorWeights<T> = <<T as Config>::ProcessValidator as ProcessValidator<
@@ -140,7 +140,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenMetadataKey,
-        <T as Config>::TokenMetadataValue
+        <T as Config>::TokenMetadataValue,
     >>::Weights;
 
     #[pallet::pallet]
@@ -160,7 +160,7 @@ pub mod pallet {
         T::TokenId,
         Token<T>,
         // We need to use OptionQuery as AccountId is held in the Config trait but doesn't guarantee Copy trait
-        OptionQuery
+        OptionQuery,
     >;
 
     // Storage map definition
@@ -180,11 +180,11 @@ pub mod pallet {
             sender: T::AccountId,
             process: ProcessId<T>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-            outputs: BoundedVec<T::TokenId, T::MaxOutputCount>
+            outputs: BoundedVec<T::TokenId, T::MaxOutputCount>,
         },
         TokenDeleted {
-            token_id: T::TokenId
-        }
+            token_id: T::TokenId,
+        },
     }
 
     #[pallet::error]
@@ -198,14 +198,14 @@ pub mod pallet {
         /// A token cannot be deleted if it hasn't been burnt
         NotBurnt,
         /// A token was burnt too recently to be deleted perminantly
-        BurntTooRecently
+        BurntTooRecently,
     }
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_idle(
             _block_number: T::BlockNumber,
-            remaining_weight: frame_support::weights::Weight
+            remaining_weight: frame_support::weights::Weight,
         ) -> frame_support::weights::Weight {
             // 1 read and 1 write to get/set the graveyard state
             let base_weight = T::DbWeight::get().reads(1) + T::DbWeight::get().writes(1);
@@ -219,7 +219,7 @@ pub mod pallet {
             // count how many deletes we can afford
             let iter_count = match available_iter_weight {
                 Some(weight) => weight.checked_div_per_component(&weight_per_iter).unwrap_or(0),
-                None => 0
+                None => 0,
             };
 
             if iter_count == 0 {
@@ -247,7 +247,7 @@ pub mod pallet {
                             None
                         }
                         Err(Error::<T>::BurntTooRecently) => Some((i, i + 1)),
-                        Err(_) => panic!("Unexpected error")
+                        Err(_) => panic!("Unexpected error"),
                     }
                 })
                 .unwrap_or((iter_count, iter_count));
@@ -255,7 +255,7 @@ pub mod pallet {
             // write graveyard state (base_weight)
             <CurrentGraveyardState<T>>::put(GraveyardState {
                 start_index: start_index + delete_count,
-                end_index
+                end_index,
             });
 
             let spent_weight = base_weight.saturating_add(weight_per_iter.mul(delete_op_count));
@@ -276,7 +276,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             process: ProcessId<T>,
             inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-            outputs: BoundedVec<Output<T>, T::MaxOutputCount>
+            outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
         ) -> DispatchResultWithPostInfo {
             // Check it was signed and get the signer
             let sender = ensure_signed(origin)?;
@@ -297,8 +297,8 @@ pub mod pallet {
                     None => Some(ProcessIO::<T> {
                         id: token.id,
                         roles: token.roles.into(),
-                        metadata: token.metadata.into()
-                    })
+                        metadata: token.metadata.into(),
+                    }),
                 })
                 .collect::<Vec<_>>();
             ensure!(io_inputs.len() == inputs.len(), Error::<T>::AlreadyBurnt);
@@ -310,11 +310,11 @@ pub mod pallet {
                     let output = ProcessIO::<T> {
                         id: next.clone(),
                         roles: output.roles.clone().into(),
-                        metadata: output.metadata.clone().into()
+                        metadata: output.metadata.clone().into(),
                     };
                     outputs.push(output);
                     (next, outputs)
-                }
+                },
             );
 
             let process_is_valid = T::ProcessValidator::validate_process(&process, &sender, &io_inputs, &io_outputs);
@@ -329,7 +329,7 @@ pub mod pallet {
                 io_outputs.iter().map(|output| output.id.clone()).try_collect().unwrap();
             io_inputs.iter().enumerate().for_each(|(index, input)| {
                 <TokensById<T>>::mutate(input.id, |token| {
-                    let mut token = token.as_mut().unwrap();
+                    let token = token.as_mut().unwrap();
                     token.children = Some(children.clone());
                     token.destroyed_at = Some(now);
                 });
@@ -340,7 +340,7 @@ pub mod pallet {
             // update graveyard state
             let graveyard_state = GraveyardState {
                 start_index: graveyard_state.start_index,
-                end_index: graveyard_state.end_index + (io_inputs.len() as u64)
+                end_index: graveyard_state.end_index + (io_inputs.len() as u64),
             };
             <CurrentGraveyardState<T>>::put(graveyard_state);
 
@@ -356,8 +356,8 @@ pub mod pallet {
                         destroyed_at: None,
                         metadata: output.metadata.try_into().unwrap(),
                         parents: inputs.clone().try_into().unwrap(),
-                        children: None
-                    }
+                        children: None,
+                    },
                 );
             });
 
@@ -381,8 +381,8 @@ pub mod pallet {
                     sender,
                     process,
                     inputs,
-                    outputs: children
-                }
+                    outputs: children,
+                },
             );
 
             Ok(Some(actual_weight).into())
@@ -431,7 +431,7 @@ impl<T: Config> Pallet<T> {
                 T::Hashing::hash_of(&b"utxoNFT.DeleteToken"),
                 T::Hashing::hash_of(&(b"utxoNFT.DeleteToken", token_id)),
             ],
-            Event::TokenDeleted { token_id }
+            Event::TokenDeleted { token_id },
         );
 
         Ok(())

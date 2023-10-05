@@ -5,11 +5,11 @@ use sp_core::H256;
 
 const SUCCEED_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,
-    version: 0u32
+    version: 0u32,
 };
 const FAIL_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldFail,
-    version: 0u32
+    version: 0u32,
 };
 
 #[test]
@@ -397,7 +397,7 @@ fn it_works_for_destroying_single_token() {
             bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata.clone()
-            }]
+            }],
         )
         .unwrap();
         // create a token with no parents
@@ -459,7 +459,7 @@ fn it_works_for_destroying_many_tokens() {
                     roles: roles.clone(),
                     metadata: metadata2.clone()
                 },
-            ]
+            ],
         )
         .unwrap();
         // create a token with no parents
@@ -551,7 +551,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
                     roles: roles.clone(),
                     metadata: metadata2.clone()
                 },
-            ]
+            ],
         )
         .unwrap();
         // create a token with no parents
@@ -639,7 +639,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             bounded_vec![Output {
                 roles: roles0.clone(),
                 metadata: metadata0.clone()
-            }]
+            }],
         )
         .unwrap();
         // create a token with a parent
@@ -708,7 +708,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
                     roles: roles0.clone(),
                     metadata: metadata1.clone()
                 },
-            ]
+            ],
         )
         .unwrap();
         // create 2 tokens with 2 parents
@@ -814,7 +814,7 @@ fn it_produces_process_ran_events_when_success() {
                     roles: roles0.clone(),
                     metadata: metadata1.clone()
                 },
-            ]
+            ],
         )
         .unwrap();
         // create 2 tokens with 2 parents
@@ -876,14 +876,14 @@ fn it_fails_for_destroying_single_burnt_token() {
             bounded_vec![Output {
                 roles: roles.clone(),
                 metadata: metadata0.clone()
-            }]
+            }],
         )
         .unwrap();
         UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
             bounded_vec![1],
-            bounded_vec![]
+            bounded_vec![],
         )
         .unwrap();
         // get old token
@@ -928,14 +928,14 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
                     roles: roles.clone(),
                     metadata: metadata1.clone()
                 },
-            ]
+            ],
         )
         .unwrap();
         UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
             bounded_vec![1],
-            bounded_vec![]
+            bounded_vec![],
         )
         .unwrap();
         // get old token

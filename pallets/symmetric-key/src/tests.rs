@@ -5,14 +5,14 @@ use frame_support::{
     parameter_types,
     traits::{ConstU32, EqualPrivilegeOnly, OnFinalize, OnInitialize},
     weights::Weight,
-    BoundedVec
+    BoundedVec,
 };
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
-    Perbill
+    Perbill,
 };
 
 mod rotate_key;
@@ -95,7 +95,7 @@ pub struct TestRandomness<Test>(sp_std::marker::PhantomData<Test>);
 impl<Output: codec::Decode + Default, Test> frame_support::traits::Randomness<Output, Test::BlockNumber>
     for TestRandomness<Test>
 where
-    Test: frame_system::Config
+    Test: frame_system::Config,
 {
     fn random(_subject: &[u8]) -> (Output, Test::BlockNumber) {
         use sp_runtime::traits::TrailingZeroInput;
@@ -105,7 +105,7 @@ where
 
         (
             Output::decode(&mut TrailingZeroInput::new(&arr)).unwrap_or_default(),
-            frame_system::Pallet::<Test>::block_number()
+            frame_system::Pallet::<Test>::block_number(),
         )
     }
 }

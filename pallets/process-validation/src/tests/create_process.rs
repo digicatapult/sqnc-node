@@ -41,13 +41,13 @@ fn handles_if_process_exists_for_the_new_version() {
             1,
             Process {
                 status: ProcessStatus::Disabled,
-                program: bounded_vec![BooleanExpressionSymbol::Restriction(None)]
-            }
+                program: bounded_vec![BooleanExpressionSymbol::Restriction(None)],
+            },
         );
         let result = ProcessValidation::create_process(
             RuntimeOrigin::root(),
             PROCESS_ID1,
-            bounded_vec![BooleanExpressionSymbol::Restriction(None)]
+            bounded_vec![BooleanExpressionSymbol::Restriction(None)],
         );
         assert_noop!(result, Error::<Test>::AlreadyExists);
     });
@@ -76,7 +76,7 @@ fn if_no_version_found_it_should_return_default_and_insert_new_one() {
                 BooleanExpressionSymbol::Restriction(None),
                 BooleanExpressionSymbol::Op(BooleanOperator::And)
             ],
-            true
+            true,
         ));
         assert_eq!(System::events()[0].event, expected);
         assert_eq!(
@@ -123,7 +123,7 @@ fn sets_versions_correctly_for_multiple_processes() {
             PROCESS_ID1,
             16u32,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
-            false
+            false,
         ));
         assert_ok!(ProcessValidation::create_process(
             RuntimeOrigin::root(),
@@ -134,7 +134,7 @@ fn sets_versions_correctly_for_multiple_processes() {
             PROCESS_ID2,
             11u32,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
-            false
+            false,
         ));
         assert_ok!(ProcessValidation::create_process(
             RuntimeOrigin::root(),
@@ -156,7 +156,7 @@ fn updates_version_correctly_for_existing_proces_and_dispatches_event() {
             PROCESS_ID1,
             10u32,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
-            false
+            false,
         ));
         assert_ok!(ProcessValidation::create_process(
             RuntimeOrigin::root(),
@@ -181,7 +181,7 @@ fn updates_version_correctly_for_new_process_and_dispatches_event() {
             PROCESS_ID1,
             1u32,
             bounded_vec![BooleanExpressionSymbol::Restriction(None)],
-            true
+            true,
         ));
         // sets version to 1 and returns true to identify that this is a new event
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1u32);

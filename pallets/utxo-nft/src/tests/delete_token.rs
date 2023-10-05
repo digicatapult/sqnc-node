@@ -5,7 +5,7 @@ use sp_core::H256;
 
 const SUCCEED_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,
-    version: 0u32
+    version: 0u32,
 };
 
 fn create_and_burn_token() {
@@ -18,14 +18,14 @@ fn create_and_burn_token() {
         bounded_vec![Output {
             roles: roles.clone(),
             metadata: metadata.clone()
-        }]
+        }],
     )
     .unwrap();
     UtxoNFT::run_process(
         RuntimeOrigin::signed(1),
         SUCCEED_PROCESS,
         bounded_vec![UtxoNFT::last_token()],
-        bounded_vec![]
+        bounded_vec![],
     )
     .unwrap();
 }

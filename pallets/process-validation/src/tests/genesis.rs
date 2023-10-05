@@ -18,13 +18,13 @@ fn genesis_with_valid_processes() {
         processes: vec![
             (
                 PROCESS_ID1,
-                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)],
             ),
             (
                 PROCESS_ID2,
-                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)]
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::None)],
             ),
-        ]
+        ],
     })
     .execute_with(|| {
         assert_eq!(<VersionModel<Test>>::get(PROCESS_ID1), 1u32);
@@ -52,16 +52,16 @@ fn genesis_with_invalid_process() {
         processes: vec![
             (
                 PROCESS_ID1,
-                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)]
+                bounded_vec![BooleanExpressionSymbol::Restriction(Restriction::Fail)],
             ),
             (
                 PROCESS_ID2,
                 bounded_vec![
                     BooleanExpressionSymbol::Restriction(Restriction::None),
                     BooleanExpressionSymbol::Op(BooleanOperator::And)
-                ]
+                ],
             ),
-        ]
+        ],
     })
     .execute_with(|| {});
 }

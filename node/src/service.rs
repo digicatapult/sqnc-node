@@ -37,13 +37,13 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type FullGrandpaBlockImport = sc_consensus_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
 
 async fn create_inherent_data_providers(
-    slot_duration: sp_consensus_babe::SlotDuration
+    slot_duration: sp_consensus_babe::SlotDuration,
 ) -> Result<
     (
         sp_consensus_babe::inherents::InherentDataProvider,
-        sp_timestamp::InherentDataProvider
+        sp_timestamp::InherentDataProvider,
     ),
-    Box<dyn std::error::Error + Send + Sync>
+    Box<dyn std::error::Error + Send + Sync>,
 > {
     let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
     let slot =
@@ -52,7 +52,7 @@ async fn create_inherent_data_providers(
 }
 
 pub fn new_partial(
-    config: &Configuration
+    config: &Configuration,
 ) -> Result<
     sc_service::PartialComponents<
         FullClient,
@@ -63,17 +63,17 @@ pub fn new_partial(
         (
             impl Fn(
                 crate::rpc::DenyUnsafe,
-                sc_rpc::SubscriptionTaskExecutor
+                sc_rpc::SubscriptionTaskExecutor,
             ) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
             (
                 sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
                 sc_consensus_babe::BabeLink<Block>,
-                sc_consensus_grandpa::LinkHalf<Block, FullClient, FullSelectChain>
+                sc_consensus_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
             ),
-            Option<Telemetry>
-        )
+            Option<Telemetry>,
+        ),
     >,
-    ServiceError
+    ServiceError,
 > {
     let telemetry = config
         .telemetry_endpoints
@@ -91,7 +91,7 @@ pub fn new_partial(
     let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<Block, RuntimeApi, _>(
         config,
         telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-        executor
+        executor,
     )?;
     let client = Arc::new(client);
 
@@ -107,21 +107,21 @@ pub fn new_partial(
         config.role.is_authority().into(),
         config.prometheus_registry(),
         task_manager.spawn_essential_handle(),
-        client.clone()
+        client.clone(),
     );
 
     let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
         client.clone(),
         &client.clone(),
         select_chain.clone(),
-        telemetry.as_ref().map(|x| x.handle())
+        telemetry.as_ref().map(|x| x.handle()),
     )?;
     let justification_import = grandpa_block_import.clone();
 
     let (block_import, babe_link) = sc_consensus_babe::block_import(
         sc_consensus_babe::configuration(&*client)?,
         grandpa_block_import,
-        client.clone()
+        client.clone(),
     )?;
 
     let slot_duration = babe_link.config().slot_duration();
@@ -134,7 +134,7 @@ pub fn new_partial(
         move |_, _| create_inherent_data_providers(slot_duration),
         &task_manager.spawn_essential_handle(),
         config.prometheus_registry(),
-        telemetry.as_ref().map(|x| x.handle())
+        telemetry.as_ref().map(|x| x.handle()),
     )?;
 
     let rpc_extensions_builder = {
@@ -151,8 +151,8 @@ pub fn new_partial(
                 deny_unsafe,
                 babe: crate::rpc::BabeDeps {
                     babe_worker_handle: babe_worker_handle.clone(),
-                    keystore: keystore.clone()
-                }
+                    keystore: keystore.clone(),
+                },
             };
             crate::rpc::create_full(deps).map_err(Into::into)
         }
@@ -167,7 +167,7 @@ pub fn new_partial(
         select_chain,
         import_queue,
         transaction_pool,
-        other: (rpc_extensions_builder, import_setup, telemetry)
+        other: (rpc_extensions_builder, import_setup, telemetry),
     })
 }
 
@@ -181,26 +181,26 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (rpc_builder, import_setup, mut telemetry)
+        other: (rpc_builder, import_setup, mut telemetry),
     } = new_partial(&config)?;
 
     let (block_import, babe_link, grandpa_link) = import_setup;
 
     let grandpa_protocol_name = sc_consensus_grandpa::protocol_standard_name(
         &client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
-        &config.chain_spec
+        &config.chain_spec,
     );
 
     config
         .network
         .extra_sets
         .push(sc_consensus_grandpa::grandpa_peers_set_config(
-            grandpa_protocol_name.clone()
+            grandpa_protocol_name.clone(),
         ));
     let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
         backend.clone(),
         grandpa_link.shared_authority_set().clone(),
-        Vec::default()
+        Vec::default(),
     ));
 
     let (network, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
@@ -211,7 +211,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
             block_announce_validator_builder: None,
-            warp_sync_params: Some(WarpSyncParams::WithProvider(warp_sync))
+            warp_sync_params: Some(WarpSyncParams::WithProvider(warp_sync)),
         })?;
 
     if config.offchain_worker.enabled {
@@ -237,7 +237,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         system_rpc_tx,
         tx_handler_controller,
         sync_service: sync_service.clone(),
-        telemetry: telemetry.as_mut()
+        telemetry: telemetry.as_mut(),
     })?;
 
     if role.is_authority() {
@@ -246,7 +246,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             client.clone(),
             transaction_pool,
             prometheus_registry.as_ref(),
-            telemetry.as_ref().map(Telemetry::handle)
+            telemetry.as_ref().map(Telemetry::handle),
         );
 
         let slot_duration = babe_link.config().slot_duration();
@@ -264,7 +264,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             babe_link,
             block_proposal_slot_portion: SlotProportion::new(0.5),
             max_block_proposal_slot_portion: None,
-            telemetry: telemetry.as_ref().map(Telemetry::handle)
+            telemetry: telemetry.as_ref().map(Telemetry::handle),
         };
         let babe = sc_consensus_babe::start_babe(babe_config)?;
 
@@ -293,7 +293,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             keystore,
             local_role: role,
             telemetry: telemetry.as_ref().map(|x| x.handle()),
-            protocol_name: grandpa_protocol_name
+            protocol_name: grandpa_protocol_name,
         };
 
         // start the full GRANDPA voter
@@ -310,7 +310,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
             voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
             prometheus_registry,
             shared_voter_state: SharedVoterState::empty(),
-            telemetry: telemetry.as_ref().map(|x| x.handle())
+            telemetry: telemetry.as_ref().map(|x| x.handle()),
         };
 
         // the GRANDPA voter task is considered infallible, i.e.
@@ -318,7 +318,7 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
         task_manager.spawn_essential_handle().spawn_blocking(
             "grandpa-voter",
             None,
-            sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?
+            sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
         );
     }
 
