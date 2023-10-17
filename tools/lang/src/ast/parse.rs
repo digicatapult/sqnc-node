@@ -1,4 +1,6 @@
-use super::*;
+use std::sync::Arc;
+
+use super::types::*;
 
 use crate::{
     errors::{produce_unexpected_pair_error, CompilationError, ErrorVariant, PestError},
@@ -116,13 +118,13 @@ fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, Com
     }
 }
 
-fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<AstNode<FnArg>>>, CompilationError> {
+fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Arc<[AstNode<FnArg>]>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::fn_decl_arg_list => {
             let args = pair.into_inner();
             Ok(AstNode {
-                value: args.into_iter().map(parse_fn_arg).collect::<Result<Vec<_>, _>>()?,
+                value: args.into_iter().map(parse_fn_arg).collect::<Result<Arc<[_]>, _>>()?,
                 span,
             })
         }
@@ -142,12 +144,12 @@ fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, Com
                     return Err(CompilationError {
                         stage: crate::compiler::CompilationStage::BuildAst,
                         exit_code: exitcode::DATAERR,
-                        inner: Box::new(PestError::new_from_span(
+                        inner: PestError::new_from_span(
                             ErrorVariant::CustomError {
                                 message: "visibility if specified must be pub/priv".into(),
                             },
                             span,
-                        )),
+                        ),
                     })
                 }
             },
@@ -321,17 +323,11 @@ where
     let right: Vec<_> = iter.collect();
 
     match right.len() != 0 {
-        true => {
-            let left_count = left.len();
-            Ok(Some(ExpressionTree::Node {
-                left: Box::new(parse_exp_tree(left)?),
-                op: AstNode {
-                    value: op,
-                    span: pairs.skip(left_count).next().unwrap().as_span(),
-                },
-                right: Box::new(parse_exp_tree(right)?),
-            }))
-        }
+        true => Ok(Some(ExpressionTree::Node {
+            left: Box::new(parse_exp_tree(left)?),
+            op,
+            right: Box::new(parse_exp_tree(right)?),
+        })),
         false => Ok(None),
     }
 }

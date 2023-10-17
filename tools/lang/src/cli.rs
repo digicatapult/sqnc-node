@@ -3,8 +3,8 @@ use std::{fs, path::PathBuf};
 use clap::{Parser, Subcommand};
 
 use crate::{
-    ast::AstRoot,
-    compiler::{parse_str_to_ast, CompilationStage},
+    ast::types::AstRoot,
+    compiler::{flatten_fns, parse_str_to_ast},
     errors::CompilationError,
 };
 
@@ -32,6 +32,18 @@ enum Commands {
         )]
         verbose: bool,
     },
+    #[command(arg_required_else_help = true)]
+    Build {
+        #[arg(help = "Path to dscp token specification file")]
+        file_path: PathBuf,
+        #[arg(
+            short,
+            long,
+            help = "Output full token and function declaration",
+            default_value_t = false
+        )]
+        verbose: bool,
+    },
 }
 
 impl Cli {
@@ -44,13 +56,60 @@ impl Cli {
             Commands::Parse { file_path, verbose } => {
                 println!("Loading file {}", file_path.to_str().unwrap());
 
-                let contents = fs::read_to_string(file_path).map_err(|e| CompilationError {
-                    stage: CompilationStage::LoadFile,
-                    exit_code: exitcode::NOINPUT,
-                    inner: Box::new(e),
-                })?;
+                let contents = fs::read_to_string(file_path).unwrap();
 
                 let ast = parse_str_to_ast(&contents)?;
+
+                let token_decls = ast.iter().filter_map(|decl| match &decl.value {
+                    AstRoot::TokenDecl(t) => Some(&t.value),
+                    AstRoot::FnDecl(_) => None,
+                });
+
+                let fn_decls = ast.iter().filter_map(|decl| match &decl.value {
+                    AstRoot::TokenDecl(_) => None,
+                    AstRoot::FnDecl(f) => Some(&f.value),
+                });
+
+                match verbose {
+                    true => {
+                        println!("\n------------------");
+                        println!("Token Declarations");
+                        println!("------------------");
+                        println!("");
+                        token_decls.for_each(|t| println!("{}\n", t));
+                        println!("");
+                        println!("---------------------");
+                        println!("Function Declarations");
+                        println!("---------------------");
+                        println!("");
+                        fn_decls.for_each(|f| println!("{}\n", f));
+                        println!("");
+                    }
+                    false => {
+                        println!("\n------------------");
+                        println!("Token Declarations");
+                        println!("------------------");
+                        println!("");
+                        token_decls.for_each(|t| println!("{}", t.name));
+                        println!("");
+                        println!("---------------------");
+                        println!("Function Declarations");
+                        println!("---------------------");
+                        println!("");
+                        fn_decls.for_each(|f| println!("{} {}", f.visibility, f.name));
+                        println!("");
+                    }
+                }
+
+                Ok(())
+            }
+            Commands::Build { file_path, verbose } => {
+                println!("Loading file {}", file_path.to_str().unwrap());
+
+                let contents = fs::read_to_string(file_path).unwrap();
+
+                let ast = parse_str_to_ast(&contents)?;
+                let ast = flatten_fns(ast)?;
 
                 let token_decls = ast.iter().filter_map(|decl| match &decl.value {
                     AstRoot::TokenDecl(t) => Some(&t.value),

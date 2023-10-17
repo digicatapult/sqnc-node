@@ -1,33 +1,20 @@
-use std::fmt::Display;
-
 use pest::Parser;
 
-use crate::{ast::parse_ast, errors::CompilationError, parser::*};
+use crate::{
+    ast::{parse_ast, types::*},
+    errors::CompilationError,
+    parser::*,
+};
 
-#[derive(Debug)]
-pub enum CompilationStage {
-    LoadFile,
-    ParseGrammar,
-    BuildAst,
-}
+use super::CompilationStage;
 
-impl Display for CompilationStage {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CompilationStage::ParseGrammar => write!(f, "parsing grammar"),
-            CompilationStage::BuildAst => write!(f, "building ast"),
-            CompilationStage::LoadFile => write!(f, "loading input"),
-        }
-    }
-}
-
-pub fn parse_str_to_ast(input: &str) -> Result<crate::ast::Ast, CompilationError> {
+pub fn parse_str_to_ast(input: &str) -> Result<Ast, CompilationError> {
     let pairs = DscpParser::parse(Rule::main, input);
     if let Err(e) = pairs {
         return Err(CompilationError {
             stage: CompilationStage::ParseGrammar,
             exit_code: exitcode::DATAERR,
-            inner: Box::new(e),
+            inner: e,
         });
     }
     let pairs = pairs.unwrap();
@@ -44,8 +31,8 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token TestToken {}
-        "##
+          token TestToken {}
+      "##
             )
             .is_ok(),
             true
@@ -57,16 +44,16 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token TestToken {
-                role_field: Role,
-                token_field: Test,
-                literal_field: Literal,
-                file_field: File,
-                none_field: None,
-                spec_literal_field: "test",
-                union_field: "a" | "b" | "c"
-            }
-        "##
+          token TestToken {
+              role_field: Role,
+              token_field: Test,
+              literal_field: Literal,
+              file_field: File,
+              none_field: None,
+              spec_literal_field: "test",
+              union_field: "a" | "b" | "c"
+          }
+      "##
             )
             .is_ok(),
             true
@@ -78,16 +65,16 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token TestToken {
-                role_field: Role,
-                token_field: Test,
-                literal_field: Literal,
-                file_field: File,
-                none_field: None,
-                spec_literal_field: "test",
-                union_field: "a" | "b" | "c",
-            }
-        "##
+          token TestToken {
+              role_field: Role,
+              token_field: Test,
+              literal_field: Literal,
+              file_field: File,
+              none_field: None,
+              spec_literal_field: "test",
+              union_field: "a" | "b" | "c",
+          }
+      "##
             )
             .is_ok(),
             true
@@ -99,8 +86,8 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token Test-Token {}
-        "##
+          token Test-Token {}
+      "##
             )
             .is_ok(),
             false
@@ -112,8 +99,8 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token token {}
-        "##
+          token token {}
+      "##
             )
             .is_ok(),
             false
@@ -125,10 +112,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token TestToken {
-                invalid-name: Role
-            }
-        "##
+          token TestToken {
+              invalid-name: Role
+          }
+      "##
             )
             .is_ok(),
             false
@@ -140,10 +127,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token TestToken {
-                where: Role
-            }
-        "##
+          token TestToken {
+              where: Role
+          }
+      "##
             )
             .is_ok(),
             false
@@ -155,10 +142,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            token TestToken {
-                name: Ro-le
-            }
-        "##
+          token TestToken {
+              name: Ro-le
+          }
+      "##
             )
             .is_ok(),
             false
@@ -170,8 +157,8 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test || => || where {}
-        "##
+          fn Test || => || where {}
+      "##
             )
             .is_ok(),
             true
@@ -183,8 +170,8 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            pub fn Test || => || where {}
-        "##
+          pub fn Test || => || where {}
+      "##
             )
             .is_ok(),
             true
@@ -196,8 +183,8 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            priv fn Test || => || where {}
-        "##
+          priv fn Test || => || where {}
+      "##
             )
             .is_ok(),
             true
@@ -209,12 +196,12 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar
-            | => |
-                biz: Baz
-            | where {}
-        "##
+          fn Test |
+              foo: Bar
+          | => |
+              biz: Baz
+          | where {}
+      "##
             )
             .is_ok(),
             true
@@ -226,12 +213,12 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {}
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {}
+      "##
             )
             .is_ok(),
             true
@@ -243,14 +230,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-                foo2: Bar
-            | => |
-                biz: Baz,
-                biz2: Baz,
-            | where {}
-        "##
+          fn Test |
+              foo: Bar,
+              foo2: Bar
+          | => |
+              biz: Baz,
+              biz2: Baz,
+          | where {}
+      "##
             )
             .is_ok(),
             true
@@ -262,10 +249,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                fo-o: Bar,
-            | => || where {}
-        "##
+          fn Test |
+              fo-o: Bar,
+          | => || where {}
+      "##
             )
             .is_ok(),
             false
@@ -277,10 +264,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: B-ar,
-            | => || where {}
-        "##
+          fn Test |
+              foo: B-ar,
+          | => || where {}
+      "##
             )
             .is_ok(),
             false
@@ -292,10 +279,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test || => |
-                fo-o: Bar,
-            | where {}
-        "##
+          fn Test || => |
+              fo-o: Bar,
+          | where {}
+      "##
             )
             .is_ok(),
             false
@@ -307,10 +294,10 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test || => |
-                foo: B-ar,
-            | where {}
-        "##
+          fn Test || => |
+              foo: B-ar,
+          | where {}
+      "##
             )
             .is_ok(),
             false
@@ -322,14 +309,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {
-                foo.a == biz
-            }
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {
+              foo.a == biz
+          }
+      "##
             )
             .is_ok(),
             true
@@ -341,14 +328,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {
-                foo == biz
-            }
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {
+              foo == biz
+          }
+      "##
             )
             .is_ok(),
             true
@@ -360,14 +347,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {
-                foo.a == biz.b
-            }
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {
+              foo.a == biz.b
+          }
+      "##
             )
             .is_ok(),
             true
@@ -379,14 +366,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {
-                foo.a != biz.b
-            }
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {
+              foo.a != biz.b
+          }
+      "##
             )
             .is_ok(),
             true
@@ -398,14 +385,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {
-                foo.b: File
-            }
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {
+              foo.b: File
+          }
+      "##
             )
             .is_ok(),
             true,
@@ -417,14 +404,14 @@ mod test {
         assert_eq!(
             parse_str_to_ast(
                 r##"
-            fn Test |
-                foo: Bar,
-            | => |
-                biz: Baz,
-            | where {
-                foo.b !: File
-            }
-        "##
+          fn Test |
+              foo: Bar,
+          | => |
+              biz: Baz,
+          | where {
+              foo.b !: File
+          }
+      "##
             )
             .is_ok(),
             true,
@@ -435,22 +422,22 @@ mod test {
     fn valid_end_to_end() {
         let result = parse_str_to_ast(
             r##"
-            token TestToken {
-                role_field: Role,
-                token_field: TestToken,
-                literal_field: Literal,
-                file_field: File,
-                none_field: None,
-                spec_literal_field: "test",
-                union_field: "a" | "b" | "c",
-            }
+          token TestToken {
+              role_field: Role,
+              token_field: TestToken,
+              literal_field: Literal,
+              file_field: File,
+              none_field: None,
+              spec_literal_field: "test",
+              union_field: "a" | "b" | "c",
+          }
 
-            pub fn TestFn | in: TestToken | => | out: TestToken | where {
-                out.role_field == in.role_field,
-                out.literal_field == "literal",
-                (in.union_field == "a" | out.union_field == "b"),
-            }
-        "##,
+          pub fn TestFn | in: TestToken | => | out: TestToken | where {
+              out.role_field == in.role_field,
+              out.literal_field == "literal",
+              (in.union_field == "a" | out.union_field == "b"),
+          }
+      "##,
         );
         assert_eq!(result.is_ok(), true);
     }

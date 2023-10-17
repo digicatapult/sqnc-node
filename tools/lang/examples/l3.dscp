@@ -96,9 +96,11 @@ pub fn match2_acceptFinal | demand_a_in: Demand, demand_b_in: Demand, match_in: 
   clone_match_partial | match_in | => | match_out |,
   match_in.demand_a == demand_a_in,
   match_in.demand_b == demand_b_in,
-  match2_out.state == "acceptedFinal",
+  match_out.state == "acceptedFinal",
   (match_in.state == "acceptedA" & match_out.member_b == sender) |
-  (match_in.state == "acceptedB" & match_out.member_a == sender)
+  (match_in.state == "acceptedB" & match_out.member_a == sender),
+  match_in.replaces: None,
+  match_out.replaces: None
 }
 
 pub fn demand_comment | in: Demand | => | out: Demand | where {
@@ -122,11 +124,11 @@ pub fn match2_cancel | demand_a_in: Demand, demand_b_in: Demand, match_in: Match
   demand_b_in.state == "allocated",
   demand_b_out.state == "cancelled",
 
-  clone_match_partial | match2_in | => | match2_out |,
+  clone_match_partial | match_in | => | match_out |,
   match_in.demand_a == demand_a_in,
   match_in.demand_b == demand_b_in,
-  match2_in.state == "acceptedFinal",
-  match2_out.state == "cancelled",
+  match_in.state == "acceptedFinal",
+  match_out.state == "cancelled",
   match_out.member_a == sender | match_out.member_b == sender
 }
 

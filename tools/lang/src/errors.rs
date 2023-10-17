@@ -5,21 +5,28 @@ use crate::{compiler::CompilationStage, parser::Rule};
 pub(crate) type PestError = pest::error::Error<Rule>;
 pub(crate) type ErrorVariant = pest::error::ErrorVariant<Rule>;
 
+#[derive(PartialEq)]
 pub struct CompilationError {
     pub(crate) stage: CompilationStage,
     pub(crate) exit_code: i32,
-    pub(crate) inner: Box<dyn fmt::Display>,
+    pub(crate) inner: PestError,
 }
 
 impl fmt::Display for CompilationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error occurred when {}: {}", self.stage, self.inner) // user-facing output
+        write!(f, "Error occurred when {}: {}", self.stage, self.inner)
     }
 }
 
 impl fmt::Debug for CompilationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{{ file: {}, line: {} }}", file!(), line!()) // programmer-facing output
+        write!(
+            f,
+            "{{ stage: {}, exit_code: {}, message: {} }}",
+            self.stage,
+            self.exit_code,
+            self.inner.variant.message()
+        )
     }
 }
 
@@ -31,9 +38,6 @@ pub fn produce_unexpected_pair_error<R>(pair: pest::iterators::Pair<Rule>) -> Re
     Err(CompilationError {
         stage: CompilationStage::BuildAst,
         exit_code: exitcode::DATAERR,
-        inner: Box::new(PestError::new_from_span(
-            pest::error::ErrorVariant::CustomError { message },
-            span,
-        )),
+        inner: PestError::new_from_span(pest::error::ErrorVariant::CustomError { message }, span),
     })
 }
