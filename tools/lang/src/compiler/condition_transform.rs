@@ -566,6 +566,18 @@ pub fn transform_condition_to_program(
                                 metadata_value_type: MetadataValueType::Literal,
                             },
                         })],
+                        TypeCmpType::Token => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
+                            true => Restriction::FixedInputMetadataValueType {
+                                index: left.index,
+                                metadata_key: metadata_key.clone(),
+                                metadata_value_type: MetadataValueType::TokenId,
+                            },
+                            false => Restriction::FixedOutputMetadataValueType {
+                                index: left.index,
+                                metadata_key: metadata_key.clone(),
+                                metadata_value_type: MetadataValueType::TokenId,
+                            },
+                        })],
                     };
 
                     if op == TypeCmp::Isnt {

@@ -151,6 +151,7 @@ pub enum TypeCmpType {
     File,
     Role,
     Literal,
+    Token,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -254,6 +255,7 @@ impl<'a> Display for Comparison<'a> {
                     TypeCmpType::File => "File",
                     TypeCmpType::Role => "Role",
                     TypeCmpType::Literal => "Literal",
+                    TypeCmpType::Token => "Token",
                 };
                 write!(f, "{}.{}{} {}", left.value.token, left.value.prop, op, right)
             }

@@ -93,7 +93,7 @@ fn make_process_restrictions(
         .iter()
         .enumerate()
         .map(|(index, input)| {
-            Ok(BooleanExpressionSymbol::Restriction(
+            Ok(vec![BooleanExpressionSymbol::Restriction(
                 dscp_runtime_types::Restriction::FixedInputMetadataValue {
                     index: index as u32,
                     metadata_key: TokenMetadataKey::try_from(TYPE_KEY.to_vec()).unwrap(),
@@ -102,7 +102,7 @@ fn make_process_restrictions(
                         span: input.value.token_type.span,
                     })?),
                 },
-            ))
+            )])
         })
         .collect::<Result<Vec<_>, _>>()?;
 
@@ -112,7 +112,7 @@ fn make_process_restrictions(
         .iter()
         .enumerate()
         .map(|(index, output)| {
-            Ok(BooleanExpressionSymbol::Restriction(
+            Ok(vec![BooleanExpressionSymbol::Restriction(
                 dscp_runtime_types::Restriction::FixedOutputMetadataValue {
                     index: index as u32,
                     metadata_key: TokenMetadataKey::try_from(TYPE_KEY.to_vec()).unwrap(),
@@ -121,7 +121,7 @@ fn make_process_restrictions(
                         span: output.value.token_type.span,
                     })?),
                 },
-            ))
+            )])
         })
         .collect::<Result<Vec<_>, _>>()?;
 
@@ -131,15 +131,19 @@ fn make_process_restrictions(
         .map(|condition| transform_condition_to_program(&fn_decl, token_decls, condition))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let combine_ops = vec![
-        BooleanExpressionSymbol::Op(BooleanOperator::And);
-        input_arg_conditions.len() + condition_programs.len() - 1
-    ];
     let program: Vec<_> = input_arg_conditions
         .into_iter()
         .chain(output_arg_conditions)
-        .chain(condition_programs.into_iter().flatten())
-        .chain(combine_ops)
+        .chain(condition_programs)
+        .enumerate()
+        .map(|(index, mut expression)| match index {
+            0 => expression,
+            _ => {
+                expression.push(BooleanExpressionSymbol::Op(BooleanOperator::And));
+                expression
+            }
+        })
+        .flatten()
         .collect();
 
     to_bounded_vec(AstNode {
