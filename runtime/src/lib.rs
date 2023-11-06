@@ -6,27 +6,22 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, OnRuntimeUpgrade};
-use frame_support::BoundedVec;
+
 use frame_system::EnsureRoot;
 use pallet_grandpa::AuthorityId as GrandpaId;
-use scale_info::TypeInfo;
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
-use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify};
+use sp_runtime::traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, NumberFor};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use strum_macros::EnumDiscriminants;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
@@ -49,32 +44,10 @@ use pallet_transaction_payment_free::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use dscp_runtime_types::*;
+
 pub mod constants;
 use crate::constants::time::*;
-
-pub mod types;
-
-/// An index to a block.
-pub type BlockNumber = u32;
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
-
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// Balance of an account.
-pub type Balance = u128;
-
-/// Type used for expressing timestamp.
-pub type Moment = u64;
-
-/// Index of a transaction in the chain.
-pub type Index = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -324,65 +297,6 @@ impl pallet_preimage::Config for Runtime {
     type ByteDeposit = PreimageByteDeposit;
 }
 
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq, Ord, PartialOrd)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum Role {
-    Owner = 0,
-    Customer = 1,
-    AdditiveManufacturer = 2,
-    Laboratory = 3,
-    Buyer = 4,
-    Supplier = 5,
-    Reviewer = 6,
-    Optimiser = 7,
-    MemberA = 8,
-    MemberB = 9,
-}
-
-impl Default for Role {
-    fn default() -> Self {
-        Role::Owner
-    }
-}
-
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq, EnumDiscriminants)]
-#[strum_discriminants(derive(Encode, Decode, MaxEncodedLen, TypeInfo))]
-#[strum_discriminants(name(MetadataValueType))]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "std", strum_discriminants(derive(Serialize, Deserialize)))]
-pub enum MetadataValue<TokenId> {
-    File(Hash),
-    Literal(BoundedVec<u8, ConstU32<32>>),
-    TokenId(TokenId),
-    None,
-}
-
-impl<T> Default for MetadataValue<T> {
-    fn default() -> Self {
-        MetadataValue::None
-    }
-}
-impl Default for MetadataValueType {
-    fn default() -> Self {
-        MetadataValueType::None
-    }
-}
-
-impl<T: PartialEq> PartialEq<T> for MetadataValue<T> {
-    fn eq(&self, rhs: &T) -> bool {
-        match self {
-            MetadataValue::<T>::TokenId(v) => v == rhs,
-            _ => false,
-        }
-    }
-}
-
-type TokenId = u128;
-type TokenMetadataKey = BoundedVec<u8, ConstU32<32>>;
-type TokenMetadataValue = MetadataValue<TokenId>;
-type ProcessIdentifier = BoundedVec<u8, ConstU32<32>>;
-type ProcessVersion = u32;
-
 parameter_types! {
     pub const TokenTombstoneDuration: BlockNumber = 7 * DAYS;
 }
@@ -414,7 +328,7 @@ impl pallet_process_validation::Config for Runtime {
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type TokenMetadataValueDiscriminator = MetadataValueType;
-    type MaxProcessProgramLength = ConstU32<201>;
+    type MaxProcessProgramLength = MaxProcessProgramLength;
 }
 
 parameter_types! {

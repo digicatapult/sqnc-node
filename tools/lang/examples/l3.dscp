@@ -8,6 +8,8 @@ token Demand {
   owner: Role,
   subtype: "demand_a" | "demand_b",
   state: "created" | "allocated" | "cancelled",
+  parameters: None | File,
+  comment: None | File,
 }
 
 token Match2 {
@@ -18,6 +20,7 @@ token Match2 {
   demand_b: Demand,
   state: "proposed" | "acceptedA" | "acceptedB" | "acceptedFinal" | "cancelled",
   replaces: Match2 | None,
+  comment: None | File,
 }
 
 // `fn`s define process flow restrictions and consist of a set of inputs, a set of outputs and a set of additional conditions
@@ -26,7 +29,8 @@ token Match2 {
 fn clone_demand_partial | a: Demand | => | b: Demand | where {
   a == b,
   a.owner == b.owner,
-  a.subtype == b.subtype
+  a.subtype == b.subtype,
+  b.parameters: None,
 }
 
 fn clone_demand | a: Demand | => | b: Demand | where {
@@ -94,8 +98,8 @@ pub fn match2_acceptFinal | demand_a_in: Demand, demand_b_in: Demand, match_in: 
   demand_b_out.state == "allocated",
 
   clone_match_partial | match_in | => | match_out |,
-  match_in.demand_a == demand_a_in,
-  match_in.demand_b == demand_b_in,
+  match_out.demand_a == demand_a_in,
+  match_out.demand_b == demand_b_in,
   match_out.state == "acceptedFinal",
   (match_in.state == "acceptedA" & match_out.member_b == sender) |
   (match_in.state == "acceptedB" & match_out.member_a == sender),
@@ -125,8 +129,8 @@ pub fn match2_cancel | demand_a_in: Demand, demand_b_in: Demand, match_in: Match
   demand_b_out.state == "cancelled",
 
   clone_match_partial | match_in | => | match_out |,
-  match_in.demand_a == demand_a_in,
-  match_in.demand_b == demand_b_in,
+  match_out.demand_a == demand_a_in,
+  match_out.demand_b == demand_b_in,
   match_in.state == "acceptedFinal",
   match_out.state == "cancelled",
   match_out.member_a == sender | match_out.member_b == sender
@@ -142,7 +146,7 @@ pub fn rematch2_propose | demand_a_in: Demand, old_match_in: Match2, demand_b_in
   demand_b_in.state == "created",
 
   clone_match | old_match_in | => | old_match_out |,
-  old_match_in.demand_a == demand_a,
+  old_match_out.demand_a == demand_a_in,
   old_match_in.state == "acceptedFinal",
 
   new_match.optimiser == sender,
@@ -177,8 +181,8 @@ pub fn rematch2_acceptFinal |
   clone_match_partial | old_match_in | => | old_match_out |,
   old_match_in.state == "acceptedFinal",
   old_match_out.state == "cancelled",
-  old_match_in.demand_a == demand_a_in,
-  old_match_in.demand_b == old_demand_b_in,
+  old_match_out.demand_a == demand_a_in,
+  old_match_out.demand_b == old_demand_b_in,
 
   clone_demand_partial | demand_b_in | => | demand_b_out |,
   demand_b_in.subtype == "demand_b",
@@ -187,8 +191,9 @@ pub fn rematch2_acceptFinal |
 
   clone_match_partial | new_match_in | => | new_match_out |,
   new_match_out.state == "acceptedFinal",
-  new_match_in.demand_a == demand_a_in,
-  new_match_in.demand_b == demand_b_in,
+  new_match_out.demand_a == demand_a_in,
+  new_match_out.demand_b == demand_b_in,
   (new_match_in.state == "acceptedA" & new_match_out.member_b == sender) |
   (new_match_in.state == "acceptedB" & new_match_out.member_a == sender),
 }
+

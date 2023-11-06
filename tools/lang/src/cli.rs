@@ -4,7 +4,7 @@ use clap::{Parser, Subcommand};
 
 use crate::{
     ast::types::AstRoot,
-    compiler::{flatten_fns, parse_str_to_ast},
+    compiler::{compile_input_to_restrictions, parse_str_to_ast},
     errors::CompilationError,
 };
 
@@ -105,50 +105,15 @@ impl Cli {
             }
             Commands::Build { file_path, verbose } => {
                 println!("Loading file {}", file_path.to_str().unwrap());
-
                 let contents = fs::read_to_string(file_path).unwrap();
+                let programs = compile_input_to_restrictions(&contents)?;
 
-                let ast = parse_str_to_ast(&contents)?;
-                let ast = flatten_fns(ast)?;
-
-                let token_decls = ast.iter().filter_map(|decl| match &decl.value {
-                    AstRoot::TokenDecl(t) => Some(&t.value),
-                    AstRoot::FnDecl(_) => None,
-                });
-
-                let fn_decls = ast.iter().filter_map(|decl| match &decl.value {
-                    AstRoot::TokenDecl(_) => None,
-                    AstRoot::FnDecl(f) => Some(&f.value),
-                });
-
-                match verbose {
-                    true => {
-                        println!("\n------------------");
-                        println!("Token Declarations");
-                        println!("------------------");
-                        println!("");
-                        token_decls.for_each(|t| println!("{}\n", t));
-                        println!("");
-                        println!("---------------------");
-                        println!("Function Declarations");
-                        println!("---------------------");
-                        println!("");
-                        fn_decls.for_each(|f| println!("{}\n", f));
-                        println!("");
-                    }
-                    false => {
-                        println!("\n------------------");
-                        println!("Token Declarations");
-                        println!("------------------");
-                        println!("");
-                        token_decls.for_each(|t| println!("{}", t.name));
-                        println!("");
-                        println!("---------------------");
-                        println!("Function Declarations");
-                        println!("---------------------");
-                        println!("");
-                        fn_decls.for_each(|f| println!("{} {}", f.visibility, f.name));
-                        println!("");
+                println!("Successfully parsed the following programs:");
+                for program in programs {
+                    println!("{}", String::from_utf8(program.name.to_vec()).unwrap());
+                    if *verbose {
+                        let program_str = serde_json::to_string(&program).unwrap();
+                        println!("JSON: {}", program_str);
                     }
                 }
 

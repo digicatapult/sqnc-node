@@ -76,6 +76,11 @@ pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadat
         metadata_key: TokenMetadataKey,
         metadata_value_type: TokenMetadataValueDiscriminator,
     },
+    FixedInputMetadataValueType {
+        index: u32,
+        metadata_key: TokenMetadataKey,
+        metadata_value_type: TokenMetadataValueDiscriminator,
+    },
 }
 
 impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> Default
@@ -140,6 +145,19 @@ where
                 return false;
             };
             match selected_output.metadata.get(&metadata_key) {
+                Some(meta) => D::from(meta.clone()) == metadata_value_type,
+                None => false,
+            }
+        }
+        Restriction::FixedInputMetadataValueType {
+            index,
+            metadata_key,
+            metadata_value_type,
+        } => {
+            let Some(selected_input) = inputs.get(index as usize) else {
+                return false;
+            };
+            match selected_input.metadata.get(&metadata_key) {
                 Some(meta) => D::from(meta.clone()) == metadata_value_type,
                 None => false,
             }

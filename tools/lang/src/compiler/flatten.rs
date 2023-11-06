@@ -41,7 +41,7 @@ fn transform_comparison<'a>(
                 value: inputs
                     .value
                     .into_iter()
-                    .map(|i| transform_name(i, token_name_transforms.clone()))
+                    .map(|i| transform_name(i.clone(), token_name_transforms.clone()))
                     .collect::<Result<_, _>>()?,
                 span: inputs.span,
             },
@@ -49,7 +49,7 @@ fn transform_comparison<'a>(
                 value: outputs
                     .value
                     .into_iter()
-                    .map(|o| transform_name(o, token_name_transforms.clone()))
+                    .map(|o| transform_name(o.clone(), token_name_transforms.clone()))
                     .collect::<Result<_, _>>()?,
                 span: outputs.span,
             },
@@ -156,7 +156,7 @@ fn transform_conditions<'a, 'b>(
 
 fn check_args<'a>(
     decl: &AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
-    call: &AstNode<'a, Vec<AstNode<'a, FnArg<'a>>>>,
+    call: &AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
 ) -> Result<(), CompilationError> {
     if decl.value.len() != call.value.len() {
         return Err(CompilationError {
@@ -195,8 +195,8 @@ fn check_args<'a>(
 
 fn lookup_args<'a>(
     decl: AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
-    call: AstNode<'a, Vec<AstNode<'a, &str>>>,
-) -> Result<AstNode<'a, Vec<AstNode<'a, FnArg<'a>>>>, CompilationError> {
+    call: AstNode<'a, Arc<[AstNode<'a, &str>]>>,
+) -> Result<AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>, CompilationError> {
     Ok(AstNode {
         value: call
             .value
@@ -249,8 +249,8 @@ where
 
 fn flatten_expr_fn<'a>(
     name: AstNode<'a, &str>,
-    inputs: AstNode<'a, Vec<AstNode<'a, &str>>>,
-    outputs: AstNode<'a, Vec<AstNode<'a, &str>>>,
+    inputs: AstNode<'a, Arc<[AstNode<'a, &str>]>>,
+    outputs: AstNode<'a, Arc<[AstNode<'a, &str>]>>,
     input_decls: AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
     output_decls: AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
     called_fns: HashSet<&str>,
