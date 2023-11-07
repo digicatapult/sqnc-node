@@ -87,6 +87,8 @@ fn make_process_restrictions(
         .chain(fn_decl.conditions.clone().value.into_iter())
         .collect::<Vec<_>>();
 
+    // get restrictions for input arg types
+    let token_type_key = TokenMetadataKey::try_from(TYPE_KEY.to_vec()).unwrap();
     let input_arg_conditions = fn_decl
         .inputs
         .value
@@ -96,7 +98,7 @@ fn make_process_restrictions(
             Ok(vec![BooleanExpressionSymbol::Restriction(
                 dscp_runtime_types::Restriction::FixedInputMetadataValue {
                     index: index as u32,
-                    metadata_key: TokenMetadataKey::try_from(TYPE_KEY.to_vec()).unwrap(),
+                    metadata_key: token_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
                         value: input.value.token_type.value.as_bytes().to_owned(),
                         span: input.value.token_type.span,
@@ -106,6 +108,7 @@ fn make_process_restrictions(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
+    // get restrictions for output arg types
     let output_arg_conditions = fn_decl
         .outputs
         .value
@@ -115,7 +118,7 @@ fn make_process_restrictions(
             Ok(vec![BooleanExpressionSymbol::Restriction(
                 dscp_runtime_types::Restriction::FixedOutputMetadataValue {
                     index: index as u32,
-                    metadata_key: TokenMetadataKey::try_from(TYPE_KEY.to_vec()).unwrap(),
+                    metadata_key: token_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
                         value: output.value.token_type.value.as_bytes().to_owned(),
                         span: output.value.token_type.span,

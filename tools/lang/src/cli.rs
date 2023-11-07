@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
 use crate::{
     ast::types::AstRoot,
     compiler::{compile_input_to_restrictions, parse_str_to_ast},
+    convert::make_pretty_processes,
     errors::CompilationError,
 };
 
@@ -36,6 +37,10 @@ enum Commands {
     Build {
         #[arg(help = "Path to dscp token specification file")]
         file_path: PathBuf,
+
+        #[arg(short, long, help = "Path of JSON file to output programs to")]
+        output_file: Option<PathBuf>,
+
         #[arg(
             short,
             long,
@@ -103,18 +108,27 @@ impl Cli {
 
                 Ok(())
             }
-            Commands::Build { file_path, verbose } => {
+            Commands::Build {
+                file_path,
+                verbose,
+                output_file,
+                ..
+            } => {
                 println!("Loading file {}", file_path.to_str().unwrap());
                 let contents = fs::read_to_string(file_path).unwrap();
                 let programs = compile_input_to_restrictions(&contents)?;
 
                 println!("Successfully parsed the following programs:");
-                for program in programs {
-                    println!("{}", String::from_utf8(program.name.to_vec()).unwrap());
-                    if *verbose {
-                        let program_str = serde_json::to_string(&program).unwrap();
+                if *verbose {
+                    for program in &programs {
+                        println!("{}", String::from_utf8(program.name.to_vec()).unwrap());
+                        let program_str = serde_json::to_string(program).unwrap();
                         println!("JSON: {}", program_str);
                     }
+                }
+
+                if let Some(path) = output_file {
+                    fs::write(path, make_pretty_processes(&programs).unwrap()).unwrap()
                 }
 
                 Ok(())
