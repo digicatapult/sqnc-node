@@ -3,7 +3,7 @@ use std::sync::Arc;
 use super::types::*;
 
 use crate::{
-    errors::{produce_unexpected_pair_error, CompilationError, ErrorVariant, PestError},
+    errors::{produce_unexpected_pair_error, CompilationError, CompilationStage, ErrorVariant, PestError},
     parser::Rule,
 };
 
@@ -142,7 +142,7 @@ fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, Com
                 "pub" => FnVis::Public,
                 _ => {
                     return Err(CompilationError {
-                        stage: crate::compiler::CompilationStage::BuildAst,
+                        stage: CompilationStage::BuildAst,
                         exit_code: exitcode::DATAERR,
                         inner: PestError::new_from_span(
                             ErrorVariant::CustomError {

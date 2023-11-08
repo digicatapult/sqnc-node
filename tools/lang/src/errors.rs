@@ -1,9 +1,32 @@
 use std::fmt;
 
-use crate::{compiler::CompilationStage, parser::Rule};
+use crate::parser::Rule;
 
 pub(crate) type PestError = pest::error::Error<Rule>;
 pub(crate) type ErrorVariant = pest::error::ErrorVariant<Rule>;
+
+#[derive(Debug, PartialEq)]
+pub enum CompilationStage {
+    ParseGrammar,
+    BuildAst,
+    LengthValidation,
+    ReduceFns,
+    ReduceTokens,
+    GenerateRestrictions,
+}
+
+impl fmt::Display for CompilationStage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CompilationStage::ParseGrammar => write!(f, "parsing input"),
+            CompilationStage::BuildAst => write!(f, "building ast"),
+            CompilationStage::ReduceFns => write!(f, "parsing function definitions"),
+            CompilationStage::ReduceTokens => write!(f, "reducing tokens to constraints"),
+            CompilationStage::LengthValidation => write!(f, "validating length of output"),
+            CompilationStage::GenerateRestrictions => write!(f, "generating restrictions"),
+        }
+    }
+}
 
 #[derive(PartialEq)]
 pub struct CompilationError {

@@ -482,7 +482,7 @@ pub fn flatten_fns(ast: Ast) -> Result<Ast, CompilationError> {
 #[cfg(test)]
 mod tests {
     use super::flatten_fns;
-    use crate::compiler::parse_str_to_ast;
+    use crate::ast::parse_str_to_ast;
 
     #[test]
     fn duplicate_input_arg_decl() {

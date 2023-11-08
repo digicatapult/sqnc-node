@@ -3,8 +3,8 @@ use std::{fs, path::PathBuf};
 use clap::{Parser, Subcommand};
 
 use crate::{
-    ast::types::AstRoot,
-    compiler::{compile_input_to_restrictions, parse_str_to_ast},
+    ast::{parse_str_to_ast, types::AstRoot},
+    compiler::compile_ast_to_restrictions,
     convert::make_pretty_processes,
     errors::CompilationError,
 };
@@ -116,7 +116,8 @@ impl Cli {
             } => {
                 println!("Loading file {}", file_path.to_str().unwrap());
                 let contents = fs::read_to_string(file_path).unwrap();
-                let programs = compile_input_to_restrictions(&contents)?;
+                let ast = parse_str_to_ast(&contents)?;
+                let programs = compile_ast_to_restrictions(ast)?;
 
                 println!("Successfully parsed the following programs:");
                 if *verbose {

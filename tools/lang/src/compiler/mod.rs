@@ -3,13 +3,11 @@ use dscp_runtime_types::{
     TokenMetadataValue,
 };
 use serde::Serialize;
+use std::collections::HashMap;
 
-use std::{collections::HashMap, fmt::Display};
+use crate::ast::Ast;
 
 mod constants;
-
-mod parse;
-pub use parse::parse_str_to_ast;
 
 mod flatten;
 pub use flatten::flatten_fns;
@@ -22,33 +20,10 @@ pub use condition_transform::transform_condition_to_program;
 
 use crate::{
     ast::types::{AstNode, FnDecl, TokenDecl},
-    errors::{CompilationError, ErrorVariant, PestError},
+    errors::{CompilationError, CompilationStage, ErrorVariant, PestError},
 };
 
 use self::constants::TYPE_KEY;
-
-#[derive(Debug, PartialEq)]
-pub enum CompilationStage {
-    ParseGrammar,
-    BuildAst,
-    LengthValidation,
-    ReduceFns,
-    ReduceTokens,
-    GenerateRestrictions,
-}
-
-impl Display for CompilationStage {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CompilationStage::ParseGrammar => write!(f, "parsing grammar"),
-            CompilationStage::BuildAst => write!(f, "building ast"),
-            CompilationStage::ReduceFns => write!(f, "parsing function definitions"),
-            CompilationStage::ReduceTokens => write!(f, "reducing tokens to constraints"),
-            CompilationStage::LengthValidation => write!(f, "validating length of output"),
-            CompilationStage::GenerateRestrictions => write!(f, "generating restrictions"),
-        }
-    }
-}
 
 #[derive(Serialize)]
 pub struct Process {
@@ -134,20 +109,32 @@ fn make_process_restrictions(
         .map(|condition| transform_condition_to_program(&fn_decl, token_decls, condition))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let program: Vec<_> = input_arg_conditions
-        .into_iter()
-        .chain(output_arg_conditions)
-        .chain(condition_programs)
-        .enumerate()
-        .map(|(index, mut expression)| match index {
-            0 => expression,
-            _ => {
-                expression.push(BooleanExpressionSymbol::Op(BooleanOperator::And));
-                expression
-            }
-        })
-        .flatten()
-        .collect();
+    let program: Vec<_> = [
+        vec![BooleanExpressionSymbol::Restriction(
+            dscp_runtime_types::Restriction::FixedNumberOfInputs {
+                num_inputs: fn_decl.inputs.value.len() as u32,
+            },
+        )],
+        vec![BooleanExpressionSymbol::Restriction(
+            dscp_runtime_types::Restriction::FixedNumberOfOutputs {
+                num_outputs: fn_decl.outputs.value.len() as u32,
+            },
+        )],
+    ]
+    .into_iter()
+    .chain(input_arg_conditions)
+    .chain(output_arg_conditions)
+    .chain(condition_programs)
+    .enumerate()
+    .map(|(index, mut expression)| match index {
+        0 => expression,
+        _ => {
+            expression.push(BooleanExpressionSymbol::Op(BooleanOperator::And));
+            expression
+        }
+    })
+    .flatten()
+    .collect();
 
     to_bounded_vec(AstNode {
         value: program,
@@ -174,8 +161,7 @@ where
     })
 }
 
-pub fn compile_input_to_restrictions(input: &str) -> Result<Vec<Process>, CompilationError> {
-    let ast = parse_str_to_ast(input)?;
+pub fn compile_ast_to_restrictions(ast: Ast) -> Result<Vec<Process>, CompilationError> {
     let ast = flatten_fns(ast)?;
 
     let (token_nodes, fn_nodes): (Vec<_>, Vec<_>) = ast.into_iter().partition(|node| match node.value {
