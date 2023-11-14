@@ -1,7 +1,6 @@
 use dscp_node_runtime::{
-    types::{BooleanExpressionSymbol, Restriction},
-    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, MembershipConfig, NodeAuthorizationConfig,
-    ProcessValidationConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY,
+    AccountId, BabeConfig, BalancesConfig, BooleanExpressionSymbol, GenesisConfig, GrandpaConfig, MembershipConfig,
+    NodeAuthorizationConfig, ProcessValidationConfig, Restriction, Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;

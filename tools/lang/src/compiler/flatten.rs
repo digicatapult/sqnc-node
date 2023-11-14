@@ -298,7 +298,7 @@ fn flatten_expr_fn<'a>(
                 .iter()
                 .chain(fn_decl.outputs.value.iter())
                 .zip(inputs.value.iter().chain(outputs.value.iter()))
-                .map(|(a, b)| (a.value.name.value.clone(), b.value.name.value.clone()))
+                .map(|(a, b)| (a.value.name.value, b.value.name.value))
                 .collect::<HashMap<_, _>>();
 
             let conditions = transform_conditions(fn_decl.conditions.value.clone(), name_map)?;

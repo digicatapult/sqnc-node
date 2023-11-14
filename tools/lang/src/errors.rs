@@ -56,7 +56,7 @@ impl fmt::Debug for CompilationError {
 pub fn produce_unexpected_pair_error<R>(pair: pest::iterators::Pair<Rule>) -> Result<R, CompilationError> {
     let rule = pair.as_rule();
     let span = pair.as_span();
-    let pair = pair.as_str().clone();
+    let pair = pair.as_str();
     let message = format!("Unexpected rule {:?} ({})", rule, pair);
     Err(CompilationError {
         stage: CompilationStage::BuildAst,
