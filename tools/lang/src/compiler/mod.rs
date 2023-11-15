@@ -5,7 +5,13 @@ use dscp_runtime_types::{
 use serde::Serialize;
 use std::collections::HashMap;
 
-use crate::ast::Ast;
+use crate::{
+    ast::{
+        types::{AstNode, FnDecl, TokenDecl},
+        Ast,
+    },
+    errors::{CompilationError, CompilationStage, ErrorVariant, PestError},
+};
 
 mod constants;
 
@@ -18,10 +24,8 @@ pub use token_transform::token_decl_to_conditions;
 mod condition_transform;
 pub use condition_transform::transform_condition_to_program;
 
-use crate::{
-    ast::types::{AstNode, FnDecl, TokenDecl},
-    errors::{CompilationError, CompilationStage, ErrorVariant, PestError},
-};
+mod helper;
+use helper::to_bounded_vec;
 
 use self::constants::TYPE_KEY;
 
@@ -139,25 +143,6 @@ fn make_process_restrictions(
     to_bounded_vec(AstNode {
         value: program,
         span: fn_decl.conditions.span,
-    })
-}
-
-pub fn to_bounded_vec<I, O, V>(collection: AstNode<I>) -> Result<O, CompilationError>
-where
-    I: IntoIterator<Item = V>,
-    O: TryFrom<Vec<V>>,
-{
-    let foo = collection.value.into_iter().collect::<Vec<_>>();
-    let foo_len = foo.len();
-    <O as TryFrom<Vec<V>>>::try_from(foo).map_err(|_| CompilationError {
-        stage: CompilationStage::LengthValidation,
-        exit_code: exitcode::DATAERR,
-        inner: PestError::new_from_span(
-            pest::error::ErrorVariant::CustomError {
-                message: format!("too long or compiles to too many elements ({})", foo_len),
-            },
-            collection.span,
-        ),
     })
 }
 

@@ -100,14 +100,10 @@ mod tests {
 
     use super::token_decl_to_conditions;
     use crate::ast::types::{
-        AstNode, BoolCmp, BoolOp, Comparison, ExpressionTree, TokenDecl, TokenFieldType, TokenProp, TokenPropDecl,
-        TypeCmp, TypeCmpType,
+        BoolCmp, BoolOp, Comparison, ExpressionTree, TokenDecl, TokenFieldType, TokenProp, TokenPropDecl, TypeCmp,
+        TypeCmpType,
     };
-
-    fn to_ast_node<'a, V>(value: V) -> AstNode<'a, V> {
-        let span = pest::Span::new("", 0, 0).unwrap();
-        AstNode { value, span }
-    }
+    use crate::compiler::helper::tests::to_ast_node;
 
     #[test]
     fn single_prop_none() {
@@ -122,7 +118,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropType {
@@ -149,7 +145,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropType {
@@ -176,7 +172,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropType {
@@ -203,7 +199,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropType {
@@ -230,7 +226,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropType {
@@ -258,7 +254,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropLit {
@@ -290,7 +286,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Node {
@@ -347,7 +343,7 @@ mod tests {
         };
         let result = token_decl_to_conditions(token_name.clone(), &token_decl);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             vec![

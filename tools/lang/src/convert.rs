@@ -49,7 +49,7 @@ mod tests {
         }];
         let result = make_pretty_processes(&processes);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             r#"[
@@ -91,7 +91,7 @@ mod tests {
         ];
         let result = make_pretty_processes(&processes);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             r#"[
@@ -134,7 +134,7 @@ mod tests {
         }];
         let result = make_pretty_processes(&processes);
 
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
             r#"[

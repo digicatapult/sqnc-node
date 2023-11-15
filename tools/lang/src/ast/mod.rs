@@ -442,6 +442,6 @@ mod test {
           }
       "##,
         );
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
     }
 }

@@ -494,7 +494,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(result.err().unwrap().inner.variant.message(), "Duplicate argument name");
     }
 
@@ -508,7 +508,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(result.err().unwrap().inner.variant.message(), "Duplicate argument name");
     }
 
@@ -522,7 +522,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(result.err().unwrap().inner.variant.message(), "Duplicate argument name");
     }
 
@@ -538,7 +538,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Recursive function call detected in function test"
@@ -561,7 +561,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Recursive function call detected in function middle"
@@ -582,7 +582,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(result.err().unwrap().inner.variant.message(), "Undeclared token");
     }
 
@@ -602,7 +602,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(result.err().unwrap().inner.variant.message(), "Undeclared token");
     }
 
@@ -620,7 +620,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Expected 2 arguments got 1"
@@ -641,7 +641,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Expected 2 arguments got 1"
@@ -662,7 +662,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Expected argument of type Bar got Foo"
@@ -683,7 +683,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast);
-        assert_eq!(result.is_ok(), false);
+        assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Expected argument of type Bar got Foo"
@@ -702,7 +702,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast.clone());
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         assert_eq!(result.unwrap(), ast);
     }
 
@@ -723,7 +723,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast.clone());
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         let result = result.unwrap();
         assert_eq!(result.len(), 1);
         let result = match result.into_iter().next().unwrap().value {
@@ -755,7 +755,7 @@ mod tests {
         .unwrap();
 
         let result = flatten_fns(ast.clone());
-        assert_eq!(result.is_ok(), true);
+        assert!(result.is_ok());
         let result = result.unwrap();
         assert_eq!(result.len(), 1);
         let result = match result.into_iter().next().unwrap().value {
