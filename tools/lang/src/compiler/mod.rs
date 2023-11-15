@@ -27,7 +27,7 @@ pub use condition_transform::transform_condition_to_program;
 mod helper;
 use helper::to_bounded_vec;
 
-use self::constants::TYPE_KEY;
+use self::constants::{TYPE_KEY, VERSION_KEY};
 
 #[derive(Serialize)]
 pub struct Process {
@@ -68,22 +68,32 @@ fn make_process_restrictions(
 
     // get restrictions for input arg types
     let token_type_key = TokenMetadataKey::try_from(TYPE_KEY.to_vec()).unwrap();
+    let version_type_key = TokenMetadataKey::try_from(VERSION_KEY.to_vec()).unwrap();
     let input_arg_conditions = fn_decl
         .inputs
         .value
         .iter()
         .enumerate()
         .map(|(index, input)| {
-            Ok(vec![BooleanExpressionSymbol::Restriction(
-                dscp_runtime_types::Restriction::FixedInputMetadataValue {
+            Ok(vec![
+                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedInputMetadataValue {
                     index: index as u32,
                     metadata_key: token_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
                         value: input.value.token_type.value.as_bytes().to_owned(),
                         span: input.value.token_type.span,
                     })?),
-                },
-            )])
+                }),
+                BooleanExpressionSymbol::Op(BooleanOperator::And),
+                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedInputMetadataValue {
+                    index: index as u32,
+                    metadata_key: version_type_key.clone(),
+                    metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
+                        value: "1".as_bytes().to_owned(),
+                        span: input.value.token_type.span,
+                    })?),
+                }),
+            ])
         })
         .collect::<Result<Vec<_>, _>>()?;
 
@@ -94,16 +104,25 @@ fn make_process_restrictions(
         .iter()
         .enumerate()
         .map(|(index, output)| {
-            Ok(vec![BooleanExpressionSymbol::Restriction(
-                dscp_runtime_types::Restriction::FixedOutputMetadataValue {
+            Ok(vec![
+                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedOutputMetadataValue {
                     index: index as u32,
                     metadata_key: token_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
                         value: output.value.token_type.value.as_bytes().to_owned(),
                         span: output.value.token_type.span,
                     })?),
-                },
-            )])
+                }),
+                BooleanExpressionSymbol::Op(BooleanOperator::And),
+                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedOutputMetadataValue {
+                    index: index as u32,
+                    metadata_key: version_type_key.clone(),
+                    metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
+                        value: "1".as_bytes().to_owned(),
+                        span: output.value.token_type.span,
+                    })?),
+                }),
+            ])
         })
         .collect::<Result<Vec<_>, _>>()?;
 

@@ -931,6 +931,146 @@ mod tests {
     }
 
     #[test]
+    fn input_restrict_metadata_type_succeeds() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+            },
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+            },
+        ];
+        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedInputMetadataValueType {
+                index: 1,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::AA,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn input_restrict_metadata_type_incorrect_type_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+            },
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+            },
+        ];
+        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedInputMetadataValueType {
+                index: 1,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::BB,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn input_restrict_metadata_type_incorrect_index_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+            },
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+            },
+        ];
+        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedInputMetadataValueType {
+                index: 0,
+                metadata_key: 1,
+                metadata_value_type: MetadataValueDisc::AA,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn input_restrict_metadata_type_incorrect_key_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+            },
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+            },
+        ];
+        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedInputMetadataValueType {
+                index: 1,
+                metadata_key: 0,
+                metadata_value_type: MetadataValueDisc::AA,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn input_restrict_metadata_type_bad_index_fails() {
+        let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let inputs = vec![
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::new(),
+            },
+            ProcessIO {
+                id: 0u64,
+                roles: roles.clone(),
+                metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
+            },
+        ];
+        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
+            Restriction::FixedInputMetadataValueType {
+                index: 2,
+                metadata_key: 0,
+                metadata_value_type: MetadataValueDisc::AA,
+            },
+            &1u64,
+            &inputs,
+            &Vec::new(),
+        );
+        assert!(!result);
+    }
+
+    #[test]
     fn sender_has_input_role_succeeds() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let inputs = vec![ProcessIO {
