@@ -291,7 +291,7 @@ pub fn transform_condition_to_program(
                     }
 
                     let original_key = TokenMetadataKey::try_from(ORIGINAL_ID_KEY.to_vec()).unwrap();
-                    let mut result = vec![
+                    let result = vec![
                         BooleanExpressionSymbol::Restriction(Restriction::MatchInputOutputMetadataValue {
                             input_index: input.index,
                             input_metadata_key: original_key.clone(),
@@ -302,23 +302,17 @@ pub fn transform_condition_to_program(
                             index: input.index,
                             metadata_key: original_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Restriction(Restriction::None {}),
-                        BooleanExpressionSymbol::Op(BooleanOperator::NotL),
                         BooleanExpressionSymbol::Restriction(Restriction::MatchInputIdOutputMetadataValue {
                             input_index: input.index,
                             output_index: output.index,
                             output_metadata_key: original_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Op(BooleanOperator::And),
-                        BooleanExpressionSymbol::Op(BooleanOperator::Or),
+                        BooleanExpressionSymbol::Op(BooleanOperator::InhibitionR),
+                        BooleanExpressionSymbol::Op(match op == BoolCmp::Eq {
+                            true => BooleanOperator::Xor,
+                            false => BooleanOperator::Xnor,
+                        }),
                     ];
-
-                    if op == BoolCmp::Neq {
-                        result.append(&mut vec![
-                            BooleanExpressionSymbol::Restriction(Restriction::None),
-                            BooleanExpressionSymbol::Op(BooleanOperator::NotL),
-                        ]);
-                    }
 
                     Ok(result)
                 }
@@ -390,7 +384,7 @@ pub fn transform_condition_to_program(
                             ),
                         })?;
 
-                    let mut result = vec![
+                    let result = vec![
                         BooleanExpressionSymbol::Restriction(Restriction::MatchInputOutputMetadataValue {
                             input_index: input.index,
                             input_metadata_key: original_key.clone(),
@@ -401,23 +395,17 @@ pub fn transform_condition_to_program(
                             index: input.index,
                             metadata_key: output_metadata_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Restriction(Restriction::None {}),
-                        BooleanExpressionSymbol::Op(BooleanOperator::NotL),
                         BooleanExpressionSymbol::Restriction(Restriction::MatchInputIdOutputMetadataValue {
                             input_index: input.index,
                             output_index: output.index,
                             output_metadata_key: output_metadata_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Op(BooleanOperator::And),
-                        BooleanExpressionSymbol::Op(BooleanOperator::Or),
+                        BooleanExpressionSymbol::Op(BooleanOperator::InhibitionR),
+                        BooleanExpressionSymbol::Op(match op {
+                            BoolCmp::Eq => BooleanOperator::Xor,
+                            BoolCmp::Neq => BooleanOperator::Xnor,
+                        }),
                     ];
-
-                    if op == BoolCmp::Neq {
-                        result.append(&mut vec![
-                            BooleanExpressionSymbol::Restriction(Restriction::None),
-                            BooleanExpressionSymbol::Op(BooleanOperator::NotL),
-                        ]);
-                    }
 
                     Ok(result)
                 }
@@ -458,7 +446,7 @@ pub fn transform_condition_to_program(
                         });
                     }
 
-                    let input_metadata_key =
+                    let input_key =
                         TokenMetadataKey::try_from(input.prop.as_bytes().to_vec()).map_err(|_| CompilationError {
                             stage: crate::compiler::CompilationStage::GenerateRestrictions,
                             exit_code: exitcode::DATAERR,
@@ -470,7 +458,7 @@ pub fn transform_condition_to_program(
                             ),
                         })?;
 
-                    let output_metadata_key =
+                    let output_key =
                         TokenMetadataKey::try_from(output.prop.as_bytes().to_vec()).map_err(|_| CompilationError {
                             stage: crate::compiler::CompilationStage::GenerateRestrictions,
                             exit_code: exitcode::DATAERR,
@@ -482,14 +470,83 @@ pub fn transform_condition_to_program(
                             ),
                         })?;
 
-                    let mut result = vec![BooleanExpressionSymbol::Restriction(
-                        Restriction::MatchInputOutputMetadataValue {
-                            input_index: input.index,
-                            input_metadata_key: input_metadata_key.clone(),
-                            output_index: output.index,
-                            output_metadata_key: output_metadata_key.clone(),
-                        },
-                    )];
+                    // each property can be a role, metadata or not present and equality must work in each case
+                    // first check what is allowed for the input (we know types are same for output)
+                    let output_can_be_role = output.types.iter().find(|t| t.value == TokenFieldType::Role).is_some();
+                    let output_can_be_none = output.types.iter().find(|t| t.value == TokenFieldType::None).is_some();
+                    let output_can_be_metadata = output
+                        .types
+                        .iter()
+                        .find(|t| t.value != TokenFieldType::Role && t.value != TokenFieldType::None)
+                        .is_some();
+
+                    let mut result: Vec<RuntimeExpressionSymbol> = Vec::new();
+                    let mut check_count = 0;
+                    if output_can_be_role {
+                        result.push(BooleanExpressionSymbol::Restriction(
+                            Restriction::MatchInputOutputRole {
+                                input_index: input.index,
+                                input_role_key: input_key.clone(),
+                                output_index: output.index,
+                                output_role_key: output_key.clone(),
+                            },
+                        ));
+                        if output_can_be_none || output_can_be_metadata {
+                            result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasRole {
+                                index: output.index,
+                                role_key: output_key.clone(),
+                            }));
+                            result.push(BooleanExpressionSymbol::Op(BooleanOperator::ImplicationR));
+                        }
+                        check_count = check_count + 1;
+                    }
+
+                    if output_can_be_none {
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::InputHasMetadata {
+                            index: input.index,
+                            metadata_key: input_key.clone(),
+                        }));
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasMetadata {
+                            index: output.index,
+                            metadata_key: output_key.clone(),
+                        }));
+                        result.push(BooleanExpressionSymbol::Op(BooleanOperator::Xnor));
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::InputHasRole {
+                            index: input.index,
+                            role_key: input_key.clone(),
+                        }));
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasRole {
+                            index: output.index,
+                            role_key: output_key.clone(),
+                        }));
+                        result.push(BooleanExpressionSymbol::Op(BooleanOperator::Xnor));
+                        result.push(BooleanExpressionSymbol::Op(BooleanOperator::And));
+                        check_count = check_count + 1;
+                    }
+
+                    if output_can_be_metadata {
+                        result.push(BooleanExpressionSymbol::Restriction(
+                            Restriction::MatchInputOutputMetadataValue {
+                                input_index: input.index,
+                                input_metadata_key: input_key.clone(),
+                                output_index: output.index,
+                                output_metadata_key: output_key.clone(),
+                            },
+                        ));
+                        if output_can_be_none || output_can_be_role {
+                            result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasMetadata {
+                                index: output.index,
+                                metadata_key: output_key.clone(),
+                            }));
+                            result.push(BooleanExpressionSymbol::Op(BooleanOperator::ImplicationR));
+                        }
+                        check_count = check_count + 1;
+                    }
+
+                    result.append(&mut vec![
+                        BooleanExpressionSymbol::Op(BooleanOperator::And);
+                        check_count - 1
+                    ]);
 
                     if op == BoolCmp::Neq {
                         result.append(&mut vec![

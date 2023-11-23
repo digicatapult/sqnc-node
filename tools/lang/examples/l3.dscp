@@ -8,7 +8,7 @@ token Demand {
   owner: Role,
   subtype: "demand_a" | "demand_b",
   state: "created" | "allocated" | "cancelled",
-  parameters: None | File,
+  parameters: File | None,
   comment: None | File,
 }
 
@@ -196,4 +196,3 @@ pub fn rematch2_acceptFinal |
   (new_match_in.state == "acceptedA" & new_match_out.member_b == sender) |
   (new_match_in.state == "acceptedB" & new_match_out.member_a == sender),
 }
-
