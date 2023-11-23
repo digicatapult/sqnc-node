@@ -1717,7 +1717,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node"
-version = "9.1.1"
+version = "9.1.2"
 dependencies = [
  "bs58",
  "clap",
@@ -1763,7 +1763,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "9.1.1"
+version = "9.1.2"
 dependencies = [
  "dscp-runtime-types",
  "frame-benchmarking",
