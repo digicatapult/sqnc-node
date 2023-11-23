@@ -2,7 +2,7 @@
 panic = 'unwind'
 
 [workspace]
-members = ['node', 'pallets/*', 'runtime', 'tools/*']
+members = ['node', 'pallets/*', 'runtime', 'runtime/types', 'tools/*']
 resolver = "2"
 
 [profile.production]

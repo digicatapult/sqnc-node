@@ -1,8 +1,11 @@
-use std::fmt::{Debug, Display};
+use std::{
+    fmt::{Debug, Display},
+    sync::Arc,
+};
 
 use pest::Span;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct AstNode<'a, V>
 where
     V: 'a,
@@ -32,7 +35,7 @@ where
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TokenFieldType<'a> {
     None,
     File,
@@ -55,10 +58,10 @@ impl<'a> Display for TokenFieldType<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TokenPropDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
-    pub(crate) types: Vec<AstNode<'a, TokenFieldType<'a>>>,
+    pub(crate) types: Arc<[AstNode<'a, TokenFieldType<'a>>]>,
 }
 
 impl<'a> Display for TokenPropDecl<'a> {
@@ -76,10 +79,10 @@ impl<'a> Display for TokenPropDecl<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TokenDecl<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
-    pub(crate) props: AstNode<'a, Vec<AstNode<'a, TokenPropDecl<'a>>>>,
+    pub(crate) props: AstNode<'a, Arc<[AstNode<'a, TokenPropDecl<'a>>]>>,
 }
 
 impl<'a> Display for TokenDecl<'a> {
@@ -98,7 +101,7 @@ impl<'a> Display for TokenDecl<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum FnVis {
     Private,
     Public,
@@ -113,7 +116,7 @@ impl Display for FnVis {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FnArg<'a> {
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) token_type: AstNode<'a, &'a str>,
@@ -125,64 +128,73 @@ impl<'a> Display for FnArg<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BoolOp {
     And,
     Or,
     Xor,
 }
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BoolCmp {
     Eq,
     Neq,
 }
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TypeCmp {
     Is,
     Isnt,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
+pub enum TypeCmpType {
+    None,
+    File,
+    Role,
+    Literal,
+    Token,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct TokenProp<'a> {
     pub(crate) token: AstNode<'a, &'a str>,
     pub(crate) prop: AstNode<'a, &'a str>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Comparison<'a> {
     Fn {
         name: AstNode<'a, &'a str>,
-        inputs: AstNode<'a, Vec<AstNode<'a, &'a str>>>,
-        outputs: AstNode<'a, Vec<AstNode<'a, &'a str>>>,
+        inputs: AstNode<'a, Arc<[AstNode<'a, &'a str>]>>,
+        outputs: AstNode<'a, Arc<[AstNode<'a, &'a str>]>>,
     },
     PropLit {
         left: AstNode<'a, TokenProp<'a>>,
-        op: AstNode<'a, BoolCmp>,
+        op: BoolCmp,
         right: AstNode<'a, &'a str>,
     },
     PropSender {
         left: AstNode<'a, TokenProp<'a>>,
-        op: AstNode<'a, BoolCmp>,
+        op: BoolCmp,
     },
     TokenToken {
         left: AstNode<'a, &'a str>,
-        op: AstNode<'a, BoolCmp>,
+        op: BoolCmp,
         right: AstNode<'a, &'a str>,
     },
     PropToken {
         left: AstNode<'a, TokenProp<'a>>,
-        op: AstNode<'a, BoolCmp>,
+        op: BoolCmp,
         right: AstNode<'a, &'a str>,
     },
     PropProp {
         left: AstNode<'a, TokenProp<'a>>,
-        op: AstNode<'a, BoolCmp>,
+        op: BoolCmp,
         right: AstNode<'a, TokenProp<'a>>,
     },
     PropType {
         left: AstNode<'a, TokenProp<'a>>,
-        op: AstNode<'a, TypeCmp>,
-        right: AstNode<'a, &'a str>,
+        op: TypeCmp,
+        right: AstNode<'a, TypeCmpType>,
     },
 }
 
@@ -195,35 +207,35 @@ impl<'a> Display for Comparison<'a> {
                 write!(f, "{} |{}| => |{}|", name, inputs, outputs)
             }
             Comparison::PropLit { left, op, right } => {
-                let op = match op.value {
+                let op = match op {
                     BoolCmp::Eq => "==",
                     BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} \"{}\"", left.value.token, left.value.prop, op, right)
             }
             Comparison::PropSender { left, op } => {
-                let op = match op.value {
+                let op = match op {
                     BoolCmp::Eq => "==",
                     BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} sender", left.value.token, left.value.prop, op)
             }
             Comparison::TokenToken { left, op, right } => {
-                let op = match op.value {
+                let op = match op {
                     BoolCmp::Eq => "==",
                     BoolCmp::Neq => "!=",
                 };
                 write!(f, "{} {} {}", left, op, right)
             }
             Comparison::PropToken { left, op, right } => {
-                let op = match op.value {
+                let op = match op {
                     BoolCmp::Eq => "==",
                     BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} {}", left.value.token, left.value.prop, op, right)
             }
             Comparison::PropProp { left, op, right } => {
-                let op = match op.value {
+                let op = match op {
                     BoolCmp::Eq => "==",
                     BoolCmp::Neq => "!=",
                 };
@@ -234,9 +246,16 @@ impl<'a> Display for Comparison<'a> {
                 )
             }
             Comparison::PropType { left, op, right } => {
-                let op = match op.value {
+                let op = match op {
                     TypeCmp::Is => ":",
                     TypeCmp::Isnt => "!:",
+                };
+                let right = match right.value {
+                    TypeCmpType::None => "None",
+                    TypeCmpType::File => "File",
+                    TypeCmpType::Role => "Role",
+                    TypeCmpType::Literal => "Literal",
+                    TypeCmpType::Token => "Token",
                 };
                 write!(f, "{}.{}{} {}", left.value.token, left.value.prop, op, right)
             }
@@ -244,13 +263,13 @@ impl<'a> Display for Comparison<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ExpressionTree<'a> {
     Leaf(AstNode<'a, Comparison<'a>>),
     Not(Box<ExpressionTree<'a>>),
     Node {
         left: Box<ExpressionTree<'a>>,
-        op: AstNode<'a, BoolOp>,
+        op: BoolOp,
         right: Box<ExpressionTree<'a>>,
     },
 }
@@ -261,7 +280,7 @@ impl<'a> Display for ExpressionTree<'a> {
             ExpressionTree::Leaf(c) => write!(f, "{}", c),
             ExpressionTree::Not(e) => write!(f, "!({})", e),
             ExpressionTree::Node { left, op, right } => {
-                let op_symbol = match op.value {
+                let op_symbol = match op {
                     BoolOp::And => "&",
                     BoolOp::Xor => "^",
                     BoolOp::Or => "|",
@@ -272,16 +291,16 @@ impl<'a> Display for ExpressionTree<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FnDecl<'a> {
     pub(crate) visibility: AstNode<'a, FnVis>,
     pub(crate) name: AstNode<'a, &'a str>,
-    pub(crate) inputs: AstNode<'a, Vec<AstNode<'a, FnArg<'a>>>>,
-    pub(crate) outputs: AstNode<'a, Vec<AstNode<'a, FnArg<'a>>>>,
+    pub(crate) inputs: AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
+    pub(crate) outputs: AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,
     pub(crate) conditions: AstNode<'a, Vec<ExpressionTree<'a>>>,
 }
 
-fn format_fn_args(args: Vec<&FnArg>) -> String {
+fn format_fn_args(args: Arc<[&FnArg]>) -> String {
     match args.len() < 3 {
         true => format!(
             "|{}|",
@@ -319,7 +338,7 @@ impl<'a> Display for FnDecl<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum AstRoot<'a> {
     TokenDecl(AstNode<'a, TokenDecl<'a>>),
     FnDecl(AstNode<'a, FnDecl<'a>>),

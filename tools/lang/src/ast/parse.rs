@@ -1,7 +1,9 @@
-use super::*;
+use std::sync::Arc;
+
+use super::types::*;
 
 use crate::{
-    errors::{produce_unexpected_pair_error, CompilationError, ErrorVariant, PestError},
+    errors::{produce_unexpected_pair_error, CompilationError, CompilationStage, ErrorVariant, PestError},
     parser::Rule,
 };
 
@@ -57,7 +59,7 @@ fn parse_token_prop_field(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<T
                         .into_inner()
                         .into_iter()
                         .map(parse_token_prop_type)
-                        .collect::<Result<Vec<_>, _>>()?,
+                        .collect::<Result<Arc<[_]>, _>>()?,
                 },
             })
         }
@@ -67,7 +69,7 @@ fn parse_token_prop_field(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<T
 
 fn parse_token_props(
     pair: pest::iterators::Pair<Rule>,
-) -> Result<AstNode<Vec<AstNode<TokenPropDecl>>>, CompilationError> {
+) -> Result<AstNode<Arc<[AstNode<TokenPropDecl>]>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::properties => Ok(AstNode {
@@ -76,7 +78,7 @@ fn parse_token_props(
                 .into_inner()
                 .into_iter()
                 .map(parse_token_prop_field)
-                .collect::<Result<Vec<_>, _>>()?,
+                .collect::<Result<Arc<[_]>, _>>()?,
         }),
         _ => produce_unexpected_pair_error(pair),
     }
@@ -116,13 +118,13 @@ fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, Com
     }
 }
 
-fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Vec<AstNode<FnArg>>>, CompilationError> {
+fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Arc<[AstNode<FnArg>]>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::fn_decl_arg_list => {
             let args = pair.into_inner();
             Ok(AstNode {
-                value: args.into_iter().map(parse_fn_arg).collect::<Result<Vec<_>, _>>()?,
+                value: args.into_iter().map(parse_fn_arg).collect::<Result<Arc<[_]>, _>>()?,
                 span,
             })
         }
@@ -140,14 +142,14 @@ fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, Com
                 "pub" => FnVis::Public,
                 _ => {
                     return Err(CompilationError {
-                        stage: crate::compiler::CompilationStage::BuildAst,
+                        stage: CompilationStage::BuildAst,
                         exit_code: exitcode::DATAERR,
-                        inner: Box::new(PestError::new_from_span(
+                        inner: PestError::new_from_span(
                             ErrorVariant::CustomError {
                                 message: "visibility if specified must be pub/priv".into(),
                             },
                             span,
-                        )),
+                        ),
                     })
                 }
             },
@@ -157,34 +159,32 @@ fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, Com
     }
 }
 
-fn parse_bool_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<BoolCmp>, CompilationError> {
-    let span = pair.as_span();
+fn parse_bool_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<BoolCmp, CompilationError> {
     match pair.as_rule() {
-        Rule::eq => Ok(AstNode {
-            value: BoolCmp::Eq,
-            span,
-        }),
-        Rule::neq => Ok(AstNode {
-            value: BoolCmp::Neq,
-            span,
-        }),
+        Rule::eq => Ok(BoolCmp::Eq),
+        Rule::neq => Ok(BoolCmp::Neq),
         _ => produce_unexpected_pair_error(pair),
     }
 }
 
-fn parse_type_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TypeCmp>, CompilationError> {
-    let span = pair.as_span();
+fn parse_type_cmp_op(pair: pest::iterators::Pair<Rule>) -> Result<TypeCmp, CompilationError> {
     match pair.as_rule() {
-        Rule::is => Ok(AstNode {
-            value: TypeCmp::Is,
-            span,
-        }),
-        Rule::isnt => Ok(AstNode {
-            value: TypeCmp::Isnt,
-            span,
-        }),
+        Rule::is => Ok(TypeCmp::Is),
+        Rule::isnt => Ok(TypeCmp::Isnt),
         _ => produce_unexpected_pair_error(pair),
     }
+}
+
+fn parse_type_cmp_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TypeCmpType>, CompilationError> {
+    let span = pair.as_span();
+    let value = match pair.as_rule() {
+        Rule::none => Ok(TypeCmpType::None),
+        Rule::role => Ok(TypeCmpType::Role),
+        Rule::literal => Ok(TypeCmpType::Literal),
+        Rule::file => Ok(TypeCmpType::File),
+        _ => produce_unexpected_pair_error(pair),
+    }?;
+    Ok(AstNode { value, span })
 }
 
 fn parse_ident_prop<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<TokenProp<'a>>, CompilationError> {
@@ -206,13 +206,13 @@ fn parse_ident_prop<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode
 
 fn parse_fn_inv_args<'a>(
     pair: pest::iterators::Pair<Rule>,
-) -> Result<AstNode<'a, Vec<AstNode<&'a str>>>, CompilationError> {
+) -> Result<AstNode<'a, Arc<[AstNode<&'a str>]>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::fn_args => {
             let args = pair.into_inner();
             Ok(AstNode {
-                value: args.into_iter().map(parse_ident).collect::<Result<Vec<_>, _>>()?,
+                value: args.into_iter().map(parse_ident).collect::<Result<Arc<[_]>, _>>()?,
                 span,
             })
         }
@@ -296,7 +296,7 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
                 value: Comparison::PropType {
                     left: parse_ident_prop(pairs.next().unwrap())?,
                     op: parse_type_cmp_op(pairs.next().unwrap())?,
-                    right: parse_ident(pairs.next().unwrap())?,
+                    right: parse_type_cmp_type(pairs.next().unwrap())?,
                 },
                 span,
             })
@@ -321,17 +321,11 @@ where
     let right: Vec<_> = iter.collect();
 
     match right.len() != 0 {
-        true => {
-            let left_count = left.len();
-            Ok(Some(ExpressionTree::Node {
-                left: Box::new(parse_exp_tree(left)?),
-                op: AstNode {
-                    value: op,
-                    span: pairs.skip(left_count).next().unwrap().as_span(),
-                },
-                right: Box::new(parse_exp_tree(right)?),
-            }))
-        }
+        true => Ok(Some(ExpressionTree::Node {
+            left: Box::new(parse_exp_tree(left)?),
+            op,
+            right: Box::new(parse_exp_tree(right)?),
+        })),
         false => Ok(None),
     }
 }

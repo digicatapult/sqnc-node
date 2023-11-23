@@ -4,6 +4,7 @@ pub mod errors;
 pub mod parser;
 
 mod cli;
+mod convert;
 
 fn main() -> ! {
     let result = cli::Cli::new().run();

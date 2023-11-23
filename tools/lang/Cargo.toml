@@ -10,3 +10,6 @@ exitcode = "1.1.2"
 lazy_static = "1.4.0"
 pest = "2.6"
 pest_derive = "2.6"
+dscp-runtime-types = { path = '../../runtime/types' }
+serde = { version = "1.0.189" }
+serde_json = { version = "1.0.107" }

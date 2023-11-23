@@ -72,8 +72,8 @@ impl<T: frame_system::Config + Config> ValidateProcessWeights<u32> for Substrate
         // Proof Size summary in bytes:
         //  Measured:  `1550`
         //  Estimated: `18813`
-        // Minimum execution time: 27_901_000 picoseconds.
-        Weight::from_parts(28_460_000, 0)
+        // Minimum execution time: 44_570_000 picoseconds.
+        Weight::from_parts(45_570_000, 0)
             .saturating_add(Weight::from_parts(0, 18813))
             .saturating_add(T::DbWeight::get().reads(1))
     }
