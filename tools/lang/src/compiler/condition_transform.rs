@@ -274,22 +274,6 @@ pub fn transform_condition_to_program(
                         }),
                     }?;
 
-                    if input.arg.token_type.value != output.arg.token_type.value {
-                        return Err(CompilationError {
-                            stage: crate::compiler::CompilationStage::GenerateRestrictions,
-                            exit_code: exitcode::DATAERR,
-                            inner: PestError::new_from_span(
-                                ErrorVariant::CustomError {
-                                    message: format!(
-                                        "Invalid comparison between token type {} and {}",
-                                        input.arg.token_type.value, output.arg.token_type.value
-                                    ),
-                                },
-                                span,
-                            ),
-                        });
-                    }
-
                     let original_key = TokenMetadataKey::try_from(ORIGINAL_ID_KEY.to_vec()).unwrap();
                     let result = vec![
                         BooleanExpressionSymbol::Restriction(Restriction::MatchInputOutputMetadataValue {
