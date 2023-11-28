@@ -1,10 +1,9 @@
-pub mod ast;
-pub mod compiler;
-pub mod errors;
-pub mod parser;
-
+mod ast;
 mod cli;
+mod compiler;
 mod convert;
+mod errors;
+mod parser;
 
 fn main() -> ! {
     let result = cli::Cli::new().run();

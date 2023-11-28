@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 use crate::{
     ast::{parse_str_to_ast, types::AstRoot},
     compiler::compile_ast_to_restrictions,
-    convert::make_pretty_processes,
+    convert::transform_to_json,
     errors::CompilationError,
 };
 
@@ -13,13 +13,13 @@ use crate::{
 #[derive(Debug, Parser)] // requires `derive` feature
 #[command(name = "dscp-lang", version, author)]
 #[command(about = "Tool for checking and compiling dscp token specifications", long_about = None)]
-pub(crate) struct Cli {
+pub struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
 
 #[derive(Debug, Subcommand)]
-enum Commands {
+pub enum Commands {
     #[command(arg_required_else_help = true)]
     Parse {
         #[arg(help = "Path to dscp token specification file")]
@@ -52,11 +52,11 @@ enum Commands {
 }
 
 impl Cli {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Cli::parse()
     }
 
-    pub(crate) fn run(&self) -> Result<(), CompilationError> {
+    pub fn run(&self) -> Result<(), CompilationError> {
         match &self.command {
             Commands::Parse { file_path, verbose } => {
                 println!("Loading file {}", file_path.to_str().unwrap());
@@ -119,17 +119,19 @@ impl Cli {
                 let ast = parse_str_to_ast(&contents)?;
                 let programs = compile_ast_to_restrictions(ast)?;
 
-                println!("Successfully parsed the following programs:");
-                if *verbose {
-                    for program in &programs {
-                        println!("{}", String::from_utf8(program.name.to_vec()).unwrap());
-                        let program_str = serde_json::to_string(program).unwrap();
-                        println!("JSON: {}", program_str);
+                println!("Successfully compiled the following programs:");
+                for program in &programs {
+                    let program_name = String::from_utf8(program.name.to_vec()).unwrap();
+                    if *verbose {
+                        let program_str = transform_to_json(program, false).unwrap();
+                        println!("\n{}:\n{}", program_name, program_str);
+                    } else {
+                        println!("\t{}", program_name);
                     }
                 }
 
                 if let Some(path) = output_file {
-                    fs::write(path, make_pretty_processes(&programs).unwrap()).unwrap()
+                    fs::write(path, transform_to_json(&programs, true).unwrap()).unwrap()
                 }
 
                 Ok(())

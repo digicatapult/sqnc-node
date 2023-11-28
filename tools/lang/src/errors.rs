@@ -28,7 +28,7 @@ impl fmt::Display for CompilationStage {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, thiserror::Error)]
 pub struct CompilationError {
     pub(crate) stage: CompilationStage,
     pub(crate) exit_code: i32,
