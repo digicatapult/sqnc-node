@@ -181,6 +181,9 @@ pub fn run() -> sc_cli::Result<()> {
             let runner = cli.create_runner(cmd)?;
             runner.sync_run(|config| cmd.run::<Block>(&config))
         }
+        Some(Subcommand::Lang(cmd)) => cmd
+            .run()
+            .map_err(|lang_err| sc_cli::Error::Application(Box::new(lang_err))),
         None => {
             let runner = cli.create_runner(&cli.run)?;
             runner

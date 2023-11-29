@@ -1,8 +1,16 @@
 [package]
 name = "dscp-lang"
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
+
+[lib]
+name = "dscp_lang"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dscp-lang"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.4.6", features = ["derive"] }
@@ -13,3 +21,4 @@ pest_derive = "2.6"
 dscp-runtime-types = { path = '../../runtime/types' }
 serde = { version = "1.0.189" }
 serde_json = { version = "1.0.107" }
+thiserror = { version = "1.0.50" }

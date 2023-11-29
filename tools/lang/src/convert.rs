@@ -1,8 +1,7 @@
 use std::error::Error;
 
+use serde::Serialize;
 use serde_json::Value;
-
-use crate::compiler::Process;
 
 fn transform_value(val: Value) -> Value {
     match val {
@@ -23,17 +22,23 @@ fn transform_value(val: Value) -> Value {
     }
 }
 
-pub fn make_pretty_processes(processes: &Vec<Process>) -> Result<String, Box<dyn Error>> {
-    let serialised = serde_json::to_value(processes)?;
+pub fn transform_to_json<T>(val: &T, pretty: bool) -> Result<String, Box<dyn Error>>
+where
+    T: Serialize,
+{
+    let serialised = serde_json::to_value(val)?;
     let transformed = transform_value(serialised);
-    Ok(serde_json::to_string_pretty(&transformed)?)
+    Ok(match pretty {
+        true => serde_json::to_string_pretty(&transformed),
+        false => serde_json::to_string(&transformed),
+    }?)
 }
 
 #[cfg(test)]
 mod tests {
     use dscp_runtime_types::BooleanExpressionSymbol;
 
-    use super::make_pretty_processes;
+    use super::transform_to_json;
     use crate::compiler::Process;
 
     #[test]
@@ -47,7 +52,7 @@ mod tests {
             .try_into()
             .unwrap(),
         }];
-        let result = make_pretty_processes(&processes);
+        let result = transform_to_json(&processes, true);
 
         assert!(result.is_ok());
         assert_eq!(
@@ -64,6 +69,26 @@ mod tests {
   }
 ]"#
             .to_owned()
+        );
+    }
+
+    #[test]
+    fn transforms_not_pretty() {
+        let processes = vec![Process {
+            name: vec![116u8, 101u8, 115u8, 116u8].try_into().unwrap(),
+            version: 1u32,
+            program: vec![BooleanExpressionSymbol::Restriction(
+                dscp_runtime_types::Restriction::None,
+            )]
+            .try_into()
+            .unwrap(),
+        }];
+        let result = transform_to_json(&processes, false);
+
+        assert!(result.is_ok());
+        assert_eq!(
+            result.unwrap(),
+            r#"[{"name":"test","program":[{"Restriction":"None"}],"version":1}]"#.to_owned()
         );
     }
 
@@ -89,7 +114,7 @@ mod tests {
                 .unwrap(),
             },
         ];
-        let result = make_pretty_processes(&processes);
+        let result = transform_to_json(&processes, true);
 
         assert!(result.is_ok());
         assert_eq!(
@@ -132,7 +157,7 @@ mod tests {
             .try_into()
             .unwrap(),
         }];
-        let result = make_pretty_processes(&processes);
+        let result = transform_to_json(&processes, true);
 
         assert!(result.is_ok());
         assert_eq!(
