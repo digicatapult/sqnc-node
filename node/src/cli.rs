@@ -8,6 +8,10 @@ pub struct Cli {
 
     #[clap(flatten)]
     pub run: RunCmd,
+
+    /// Enable manual sealing of blocks, primarily for testing. Must be run with --dev
+    #[arg(long, requires = "dev")]
+    pub manual_seal: bool,
 }
 
 #[derive(Debug, clap::Subcommand)]
