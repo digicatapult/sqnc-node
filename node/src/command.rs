@@ -2,7 +2,7 @@ use crate::{
     benchmarking::{inherent_benchmark_data, RemarkBuilder, TransferKeepAliveBuilder},
     chain_spec,
     cli::{Cli, Subcommand},
-    service,
+    service, test_service,
 };
 use dscp_node_runtime::{Block, EXISTENTIAL_DEPOSIT};
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
@@ -186,8 +186,12 @@ pub fn run() -> sc_cli::Result<()> {
             .map_err(|lang_err| sc_cli::Error::Application(Box::new(lang_err))),
         None => {
             let runner = cli.create_runner(&cli.run)?;
-            runner
-                .run_node_until_exit(|config| async move { service::new_full(config).map_err(sc_cli::Error::Service) })
+            runner.run_node_until_exit(|config| async move {
+                match cli.manual_seal {
+                    true => test_service::new_test(config).map_err(sc_cli::Error::Service),
+                    false => service::new_full(config).map_err(sc_cli::Error::Service),
+                }
+            })
         }
     }
 }
