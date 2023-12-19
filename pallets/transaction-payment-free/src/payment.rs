@@ -1,9 +1,9 @@
 use crate::Config;
-use codec::FullCodec;
 use frame_support::{
     traits::{Currency, Imbalance, OnUnbalanced},
     unsigned::TransactionValidityError,
 };
+use parity_scale_codec::FullCodec;
 use sp_runtime::{
     traits::{AtLeast32BitUnsigned, DispatchInfoOf, MaybeSerializeDeserialize, Zero},
     transaction_validity::InvalidTransaction,

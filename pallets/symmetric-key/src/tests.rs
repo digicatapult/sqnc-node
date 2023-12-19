@@ -92,7 +92,7 @@ impl pallet_scheduler::Config for Test {
 
 pub struct TestRandomness<Test>(sp_std::marker::PhantomData<Test>);
 
-impl<Output: codec::Decode + Default, Test> frame_support::traits::Randomness<Output, Test::BlockNumber>
+impl<Output: parity_scale_codec::Decode + Default, Test> frame_support::traits::Randomness<Output, Test::BlockNumber>
     for TestRandomness<Test>
 where
     Test: frame_system::Config,

@@ -1,8 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{traits::Get, BoundedVec, Parameter, RuntimeDebug};
 pub use pallet::*;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_runtime::traits::{AtLeast32Bit, One};
 use sp_std::prelude::*;
@@ -97,9 +97,9 @@ pub use weights::WeightInfo;
 pub mod pallet {
 
     use super::*;
-    use codec::MaxEncodedLen;
     use frame_support::{pallet_prelude::*, BoundedVec};
     use frame_system::pallet_prelude::*;
+    use parity_scale_codec::MaxEncodedLen;
 
     /// The pallet's configuration trait.
     #[pallet::config]
