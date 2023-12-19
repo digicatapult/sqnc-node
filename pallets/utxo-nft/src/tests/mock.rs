@@ -1,13 +1,13 @@
 // Creating mock runtime here
 
 use crate as pallet_utxo_nft;
-use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     parameter_types,
     traits::{ConstU32, ConstU64, Hooks},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
 use frame_system as system;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_core::H256;
 use sp_runtime::{

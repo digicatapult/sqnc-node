@@ -1709,7 +1709,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dscp-lang"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "clap",
  "dscp-runtime-types",
@@ -1724,7 +1724,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node"
-version = "9.3.0"
+version = "9.3.1"
 dependencies = [
  "async-trait",
  "bs58",
@@ -1773,7 +1773,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-node-runtime"
-version = "9.3.0"
+version = "9.3.1"
 dependencies = [
  "dscp-runtime-types",
  "frame-benchmarking",
@@ -1815,14 +1815,12 @@ dependencies = [
  "sp-std",
  "sp-transaction-pool",
  "sp-version",
- "strum",
- "strum_macros",
  "substrate-wasm-builder",
 ]
 
 [[package]]
 name = "dscp-pallet-traits"
-version = "3.2.3"
+version = "3.2.4"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -1832,7 +1830,7 @@ dependencies = [
 
 [[package]]
 name = "dscp-runtime-types"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "frame-support",
  "pallet-process-validation",
@@ -4882,7 +4880,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-doas"
-version = "2.0.3"
+version = "2.0.4"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -4971,7 +4969,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-process-validation"
-version = "3.4.3"
+version = "3.4.4"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",
@@ -5040,7 +5038,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-symmetric-key"
-version = "2.0.3"
+version = "2.0.4"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5092,7 +5090,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-payment-free"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5137,7 +5135,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-utxo-nft"
-version = "6.1.1"
+version = "6.1.2"
 dependencies = [
  "dscp-pallet-traits",
  "frame-benchmarking",

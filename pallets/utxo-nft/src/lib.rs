@@ -1,6 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use codec::{Codec, MaxEncodedLen};
 use dscp_pallet_traits as traits;
 use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
 use frame_support::{
@@ -8,6 +7,7 @@ use frame_support::{
     BoundedVec,
 };
 pub use pallet::*;
+use parity_scale_codec::{Codec, MaxEncodedLen};
 use sp_runtime::traits::{AtLeast32Bit, Hash, One};
 
 /// A FRAME pallet for handling non-fungible tokens

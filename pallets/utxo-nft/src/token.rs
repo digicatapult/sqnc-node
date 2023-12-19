@@ -1,7 +1,6 @@
-use codec::MaxEncodedLen;
-use codec::{Decode, Encode};
 use frame_support::RuntimeDebug;
 use frame_support::{traits::Get, BoundedBTreeMap, BoundedVec};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 
 /// A FRAME pallet for handling non-fungible tokens

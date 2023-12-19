@@ -1,6 +1,5 @@
-use codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 
-use frame_support::codec::MaxEncodedLen;
 use frame_support::{traits::Get, BoundedBTreeMap};
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
