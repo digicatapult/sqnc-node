@@ -5,8 +5,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'pallet-utxo-nft'
-version = "6.1.2"
-
+version = "6.2.0"
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
