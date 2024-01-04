@@ -9,25 +9,25 @@ resolver = "2"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.159", default-features = false }
-serde_json = { version = "1.0.108", default-features = false }
-jsonrpsee = { version = "0.16.2", features = ["server"] }
-clap = { version = "4.4.6", features = ["derive"] }
-futures = { version = "0.3.27", features = ["thread-pool"] }
-bs58 = "0.4.0"
-async-trait = "0.1.57"
-hex-literal = "0.3.4"
+serde = { version = "1.0.194", default-features = false }
+serde_json = { version = "1.0.111", default-features = false }
+clap = { version = "4.4.12", features = ["derive"] }
+futures = { version = "0.3.30", features = ["thread-pool"] }
+bs58 = "0.5.0"
+async-trait = "0.1.77"
+hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.4.0"
-pest = "2.6"
-pest_derive = "2.6"
-thiserror = "1.0.50"
+pest = "2.7.5"
+pest_derive = "2.7.5"
+thiserror = "1.0.56"
 
-####################################
-# substrate dependencies crates.io #
-####################################
+#################################################################
+# substrate linked dependencies in crates.io that may be pinned #
+#################################################################
+jsonrpsee = { version = "0.16.3" }
 scale-info = { version = "2.10.0", default-features = false }
-parity-scale-codec = { version = "3.6.1", default-features = false }
+parity-scale-codec = { version = "3.6.9", default-features = false }
 
 ###################################
 # substrate dependencies from git #

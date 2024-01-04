@@ -48,7 +48,7 @@ sp-keystore = { workspace = true }
 frame-system = { workspace = true }
 
 # These dependencies are used for the node template's RPCs
-jsonrpsee = { workspace = true }
+jsonrpsee = { workspace = true, features = ["server"] }
 sc-rpc = { workspace = true }
 sp-api = { workspace = true }
 sc-rpc-api = { workspace = true }
