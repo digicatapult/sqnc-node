@@ -8,11 +8,12 @@ repository = 'https://github.com/digicatapult/dscp-node/'
 description = "Common pallet traits for the dscp-node"
 
 [dependencies]
-scale-info = { workspace = true }
-parity-scale-codec = { workspace = true }
+scale-info = { workspace = true, features = ["derive", "serde"] }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+sp-runtime = { workspace = true, features = ["serde"] }
 sp-std = { workspace = true }
 frame-support = { workspace = true }
 
 [features]
 default = ['std']
-std = ['sp-std/std', 'frame-support/std']
+std = ['sp-runtime/std', 'sp-std/std', 'frame-support/std']

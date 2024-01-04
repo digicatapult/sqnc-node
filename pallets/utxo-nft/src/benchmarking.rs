@@ -5,7 +5,7 @@ use super::*;
 
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_support::{traits::ConstU32, BoundedBTreeMap, BoundedVec};
-use frame_system::{Pallet as System, RawOrigin};
+use frame_system::{pallet_prelude::BlockNumberFor, Pallet as System, RawOrigin};
 use sp_runtime::traits::Bounded;
 use sp_std::convert::TryFrom;
 use sp_std::vec::Vec;
@@ -167,7 +167,7 @@ benchmarks! {
             outputs
         )?;
 
-        System::<T>::set_block_number(T::BlockNumber::max_value());
+        System::<T>::set_block_number(BlockNumberFor::<T>::max_value());
         assert_eq!(TokensById::<T>::get(token_id).is_none(), false);
     }: _(RawOrigin::Signed(caller), token_id)
     verify {

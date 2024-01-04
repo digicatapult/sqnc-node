@@ -19,6 +19,7 @@ clap = { workspace = true }
 futures = { workspace = true }
 bs58 = { workspace = true }
 async-trait = { workspace = true }
+serde_json = { workspace = true }
 
 sc-cli = { workspace = true }
 sp-core = { workspace = true }
@@ -26,8 +27,10 @@ sc-executor = { workspace = true }
 sc-service = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-keystore = { workspace = true }
+sc-network = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
+sc-offchain = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 sc-consensus-babe = { workspace = true }
 sc-consensus-babe-rpc = { workspace = true }
@@ -60,6 +63,7 @@ frame-benchmarking-cli = { workspace = true }
 
 # Local Dependencies
 dscp-node-runtime = { path = '../runtime' }
+dscp-runtime-types = { path = '../runtime/types' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
 dscp-lang = { path = '../tools/lang' }
 

@@ -1,7 +1,8 @@
 use crate::{graveyard::GraveyardState, output::Output, tests::mock::*, Error, Event};
 use dscp_pallet_traits::ProcessFullyQualifiedId;
-use frame_support::{assert_err, assert_ok, bounded_btree_map, bounded_vec, traits::Hooks, weights::Weight};
+use frame_support::{assert_err, assert_ok, traits::Hooks, weights::Weight};
 use sp_core::H256;
+use sp_runtime::{bounded_btree_map, bounded_vec};
 
 const SUCCEED_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,

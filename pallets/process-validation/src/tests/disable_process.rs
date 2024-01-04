@@ -3,8 +3,8 @@ use crate::tests::{ProcessIdentifier, RuntimeEvent as TestEvent};
 use crate::Error;
 use crate::Event::*;
 use crate::{binary_expression_tree::*, Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
-use frame_support::bounded_vec;
-use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
+use frame_support::{assert_noop, assert_ok};
+use sp_runtime::{bounded_vec, DispatchError};
 
 const PROCESS_ID: ProcessIdentifier = ProcessIdentifier::A;
 

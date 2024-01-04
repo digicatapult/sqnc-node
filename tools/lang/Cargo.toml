@@ -13,7 +13,7 @@ name = "dscp-lang"
 path = "src/main.rs"
 
 [dependencies]
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 clap = { workspace = true }
 exitcode = { workspace = true }

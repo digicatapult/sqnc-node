@@ -18,10 +18,11 @@
 //! Tests for the module.
 
 use super::*;
-use frame_support::{assert_noop, assert_ok, dispatch::DispatchError, weights::Weight};
+use frame_support::{assert_noop, assert_ok, weights::Weight};
 use mock::{
     new_test_ext, Doas, DoasCall, Logger, LoggerCall, RuntimeCall, RuntimeEvent as TestEvent, RuntimeOrigin, System,
 };
+use sp_runtime::DispatchError;
 
 #[test]
 fn test_setup_works() {

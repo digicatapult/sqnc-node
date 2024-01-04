@@ -5,12 +5,10 @@ use dscp_pallet_traits::ProcessIO;
 use frame_support::Parameter;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-#[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_std::vec::Vec;
 
-#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
 pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     None,
     Fail,

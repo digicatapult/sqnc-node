@@ -11,8 +11,10 @@ repository = "https://github.com/digicatapult/dscp-node/"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-parity-scale-codec = { workspace = true }
-scale-info = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+scale-info = { workspace = true, features = ["derive", "serde"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["alloc"] }
 
 pallet-babe = { workspace = true }
 pallet-balances = { workspace = true }
@@ -26,15 +28,17 @@ frame-executive = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-consensus-babe = { workspace = true }
-sp-consensus-grandpa = { workspace = true }
-sp-core = { workspace = true }
+sp-consensus-grandpa = { workspace = true, features = ["serde"] }
+sp-core = { workspace = true, features = ["serde"] }
+sp-genesis-builder = { workspace = true }
 sp-inherents = { workspace = true }
 sp-offchain = { workspace = true }
-sp-runtime = { workspace = true }
+sp-runtime = { workspace = true, features = ["serde"] }
 sp-session = { workspace = true }
 sp-std = { workspace = true }
+sp-storage = { workspace = true }
 sp-transaction-pool = { workspace = true }
-sp-version = { workspace = true }
+sp-version = { workspace = true, features = ["serde"] }
 frame-try-runtime = { workspace = true, optional = true }
 
 # Dependencies not in node template
@@ -60,8 +64,6 @@ pallet-symmetric-key = { default-features = false, path = '../pallets/symmetric-
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
 dscp-runtime-types = { default-features = false, path = './types' }
 
-serde = { workspace = true }
-
 [build-dependencies]
 substrate-wasm-builder = { workspace = true }
 
@@ -73,6 +75,7 @@ std = [
     "frame-benchmarking?/std",
     "parity-scale-codec/std",
     "scale-info/std",
+    "serde_json/std",
     "frame-executive/std",
     "frame-support/std",
     "frame-system-rpc-runtime-api/std",
@@ -95,6 +98,7 @@ std = [
     "sp-consensus-babe/std",
     "sp-consensus-grandpa/std",
     "sp-core/std",
+    "sp-genesis-builder/std",
     "sp-inherents/std",
     "sp-offchain/std",
     "sp-runtime/std",

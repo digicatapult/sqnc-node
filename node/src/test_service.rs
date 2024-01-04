@@ -1,7 +1,10 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 #![allow(clippy::needless_borrow)]
-use dscp_node_runtime::{self, opaque::Block, RuntimeApi};
-use futures::channel::mpsc::Receiver;
+
+use futures::{channel::mpsc::Receiver, FutureExt};
+use std::sync::Arc;
+
+use sc_client_api::Backend;
 use sc_consensus_manual_seal::{
     consensus::{babe::BabeConsensusDataProvider, timestamp::SlotTimestampProvider},
     EngineCommand, ManualSealParams,
@@ -9,10 +12,12 @@ use sc_consensus_manual_seal::{
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
+use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_consensus_babe::AuthorityId;
 use sp_core::H256;
 use sp_keyring::sr25519::Keyring::Alice;
-use std::sync::Arc;
+
+use dscp_node_runtime::{self, opaque::Block, RuntimeApi};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -39,6 +44,10 @@ type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type FullGrandpaBlockImport = sc_consensus_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
 
+/// The minimum period of blocks on which justifications will be
+/// imported and generated.
+const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
+
 /// Returns most parts of a service. Not enough to run a full chain,
 /// But enough to perform chain operations like purge-chain
 fn new_partial(
@@ -48,7 +57,7 @@ fn new_partial(
         FullClient,
         FullBackend,
         FullSelectChain,
-        sc_consensus::DefaultImportQueue<Block, FullClient>,
+        sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::FullPool<Block, FullClient>,
         (
             impl Fn(
@@ -100,6 +109,7 @@ fn new_partial(
 
     let (grandpa_block_import, ..) = sc_consensus_grandpa::block_import(
         client.clone(),
+        GRANDPA_JUSTIFICATION_PERIOD,
         &client.clone(),
         select_chain.clone(),
         telemetry.as_ref().map(|x| x.handle()),
@@ -158,19 +168,38 @@ pub fn new_test(config: Configuration) -> Result<TaskManager, ServiceError> {
         other: (rpc_builder, block_import, babe_link, commands_stream, mut telemetry),
     } = new_partial(&config)?;
 
+    let net_config = sc_network::config::FullNetworkConfiguration::new(&config.network);
+
     let (network, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
         sc_service::build_network(sc_service::BuildNetworkParams {
             config: &config,
+            net_config,
             client: client.clone(),
             transaction_pool: transaction_pool.clone(),
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
             block_announce_validator_builder: None,
             warp_sync_params: None,
+            block_relay: None,
         })?;
 
     if config.offchain_worker.enabled {
-        sc_service::build_offchain_workers(&config, task_manager.spawn_handle(), client.clone(), network.clone());
+        task_manager.spawn_handle().spawn(
+            "offchain-workers-runner",
+            "offchain-worker",
+            sc_offchain::OffchainWorkers::new(sc_offchain::OffchainWorkerOptions {
+                runtime_api_provider: client.clone(),
+                is_validator: config.role.is_authority(),
+                keystore: Some(keystore_container.keystore()),
+                offchain_db: backend.offchain_storage(),
+                transaction_pool: Some(OffchainTransactionPoolFactory::new(transaction_pool.clone())),
+                network_provider: network.clone(),
+                enable_http_requests: true,
+                custom_extensions: |_| vec![],
+            })
+            .run(client.clone(), task_manager.spawn_handle())
+            .boxed(),
+        );
     }
 
     let role = config.role.clone();
