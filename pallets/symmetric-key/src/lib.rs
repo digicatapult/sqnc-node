@@ -51,14 +51,14 @@ pub mod pallet {
         type RotateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
         /// Source of randomness when generating new keys.
         /// In production this should come from a secure source such as the Babe pallet
-        type Randomness: Randomness<Self::Hash, Self::BlockNumber>;
+        type Randomness: Randomness<Self::Hash, BlockNumberFor<Self>>;
 
         #[pallet::constant]
-        type RefreshPeriod: Get<Self::BlockNumber>;
+        type RefreshPeriod: Get<BlockNumberFor<Self>>;
         /// Overarching type of all pallets origins.
         type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
         /// The Scheduler.
-        type Scheduler: ScheduleNamed<Self::BlockNumber, Self::ScheduleCall, Self::PalletsOrigin>;
+        type Scheduler: ScheduleNamed<BlockNumberFor<Self>, Self::ScheduleCall, Self::PalletsOrigin>;
 
         type WeightInfo: WeightInfo;
     }
@@ -68,7 +68,7 @@ pub mod pallet {
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        fn on_initialize(_block_number: T::BlockNumber) -> frame_support::weights::Weight {
+        fn on_initialize(_block_number: BlockNumberFor<T>) -> frame_support::weights::Weight {
             use sp_runtime::traits::Zero;
 
             let existing_schedule = <KeyScheduleId<T>>::get();
@@ -78,7 +78,7 @@ pub mod pallet {
                     let id: Vec<u8> = KEY_ROTATE_ID.encode();
                     if T::Scheduler::schedule_named(
                         id.clone(),
-                        DispatchTime::After(T::BlockNumber::zero()),
+                        DispatchTime::After(BlockNumberFor::<T>::zero()),
                         Some((T::RefreshPeriod::get(), u32::max_value())),
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),

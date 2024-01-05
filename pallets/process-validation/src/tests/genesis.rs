@@ -3,7 +3,7 @@ use crate::binary_expression_tree::BooleanExpressionSymbol;
 use crate::binary_expression_tree::BooleanOperator;
 use crate::tests::ProcessIdentifier;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction, VersionModel};
-use frame_support::bounded_vec;
+use sp_runtime::bounded_vec;
 
 // -- fixtures --
 #[allow(dead_code)]

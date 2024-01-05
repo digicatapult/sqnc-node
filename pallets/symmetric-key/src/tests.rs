@@ -2,24 +2,19 @@
 
 use crate as pallet_symmetric_key;
 use frame_support::{
-    parameter_types,
+    derive_impl, parameter_types,
     traits::{ConstU32, EqualPrivilegeOnly, OnFinalize, OnInitialize},
     weights::Weight,
     BoundedVec,
 };
 use frame_system as system;
-use sp_core::H256;
-use sp_runtime::{
-    testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
-    Perbill,
-};
+use frame_system::pallet_prelude::BlockNumberFor;
+use sp_runtime::{BuildStorage, Perbill};
 
 mod rotate_key;
 mod schedule;
 mod update_key;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 // For testing the pallet, we construct most of a mock runtime. This means
@@ -28,12 +23,8 @@ type Block = frame_system::mocking::MockBlock<Test>;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
-    pub enum Test where
-        Block = Block,
-        NodeBlock = Block,
-        UncheckedExtrinsic = UncheckedExtrinsic,
-    {
-        System: system::{Pallet, Call, Config, Storage, Event<T>},
+    pub enum Test {
+        System: system::{Pallet, Call, Config<T>, Storage, Event<T>},
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
         SymmetricKey: pallet_symmetric_key::{Pallet, Call, Storage, Event<T>},
     }
@@ -47,31 +38,9 @@ parameter_types! {
         );
 }
 
+#[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl system::Config for Test {
-    type BaseCallFilter = frame_support::traits::Everything;
-    type BlockWeights = BlockWeights;
-    type BlockLength = ();
-    type DbWeight = ();
-    type RuntimeOrigin = RuntimeOrigin;
-    type RuntimeCall = RuntimeCall;
-    type Index = u64;
-    type BlockNumber = u64;
-    type Hash = H256;
-    type Hashing = BlakeTwo256;
-    type AccountId = u64;
-    type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
-    type RuntimeEvent = RuntimeEvent;
-    type BlockHashCount = BlockHashCount;
-    type Version = ();
-    type PalletInfo = PalletInfo;
-    type AccountData = ();
-    type OnNewAccount = ();
-    type OnKilledAccount = ();
-    type SystemWeightInfo = ();
-    type SS58Prefix = SS58Prefix;
-    type OnSetCode = ();
-    type MaxConsumers = ConstU32<16>;
+    type Block = Block;
 }
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
@@ -92,12 +61,12 @@ impl pallet_scheduler::Config for Test {
 
 pub struct TestRandomness<Test>(sp_std::marker::PhantomData<Test>);
 
-impl<Output: parity_scale_codec::Decode + Default, Test> frame_support::traits::Randomness<Output, Test::BlockNumber>
+impl<Output: parity_scale_codec::Decode + Default, Test> frame_support::traits::Randomness<Output, BlockNumberFor<Test>>
     for TestRandomness<Test>
 where
     Test: frame_system::Config,
 {
-    fn random(_subject: &[u8]) -> (Output, Test::BlockNumber) {
+    fn random(_subject: &[u8]) -> (Output, BlockNumberFor<Test>) {
         use sp_runtime::traits::TrailingZeroInput;
         let bn = frame_system::Pallet::<Test>::block_number();
         let bn_u8: u8 = bn.try_into().unwrap_or_default();
@@ -129,7 +98,7 @@ impl pallet_symmetric_key::Config for Test {
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+    system::GenesisConfig::<Test>::default().build_storage().unwrap().into()
 }
 
 pub fn run_to_block(n: u64) {

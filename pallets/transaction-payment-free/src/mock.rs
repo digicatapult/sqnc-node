@@ -1,36 +1,23 @@
 use super::*;
 use crate as pallet_transaction_payment_free;
 use frame_support::dispatch::{DispatchClass, DispatchInfo};
-use frame_support::{
-    parameter_types,
-    traits::{ConstU32, ConstU64, Get},
-    weights::Weight,
-};
+use frame_support::{derive_impl, parameter_types, traits::Get, weights::Weight};
 use frame_system as system;
 use pallet_balances::Call as BalancesCall;
-use sp_core::H256;
-use sp_runtime::{
-    testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
-};
+use sp_runtime::BuildStorage;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-    pub enum Test where
-        Block = Block,
-        NodeBlock = Block,
-        UncheckedExtrinsic = UncheckedExtrinsic,
-    {
-        System: system::{Pallet, Call, Config, Storage, Event<T>},
+    pub enum Test {
+        System: system::{Pallet, Call, Config<T>, Storage, Event<T>},
         Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
         TransactionPaymentFree: pallet_transaction_payment_free::{Pallet},
     }
 );
 
 pub const CALL: &<Test as frame_system::Config>::RuntimeCall =
-    &RuntimeCall::Balances(BalancesCall::transfer { dest: 2, value: 69 });
+    &RuntimeCall::Balances(BalancesCall::transfer_allow_death { dest: 2, value: 69 });
 
 pub struct BlockWeights;
 impl Get<frame_system::limits::BlockWeights> for BlockWeights {
@@ -47,31 +34,10 @@ impl Get<frame_system::limits::BlockWeights> for BlockWeights {
     }
 }
 
+#[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl system::Config for Test {
-    type BaseCallFilter = frame_support::traits::Everything;
-    type BlockWeights = BlockWeights;
-    type BlockLength = ();
-    type DbWeight = ();
-    type RuntimeOrigin = RuntimeOrigin;
-    type Index = u64;
-    type BlockNumber = u64;
-    type RuntimeCall = RuntimeCall;
-    type Hash = H256;
-    type Hashing = BlakeTwo256;
-    type AccountId = u64;
-    type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
-    type RuntimeEvent = RuntimeEvent;
-    type BlockHashCount = ConstU64<250>;
-    type Version = ();
-    type PalletInfo = PalletInfo;
+    type Block = Block;
     type AccountData = pallet_balances::AccountData<u64>;
-    type OnNewAccount = ();
-    type OnKilledAccount = ();
-    type SystemWeightInfo = ();
-    type SS58Prefix = ();
-    type OnSetCode = ();
-    type MaxConsumers = ConstU32<16>;
 }
 
 parameter_types! {
@@ -90,7 +56,8 @@ impl pallet_balances::Config for Test {
     type WeightInfo = ();
     type FreezeIdentifier = ();
     type MaxFreezes = ();
-    type HoldIdentifier = ();
+    type RuntimeHoldReason = ();
+    type RuntimeFreezeReason = ();
     type MaxHolds = ();
 }
 
@@ -107,7 +74,7 @@ pub fn info_from_weight(w: Weight) -> DispatchInfo {
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
+    let mut t = system::GenesisConfig::<Test>::default().build_storage().unwrap();
     pallet_balances::GenesisConfig::<Test> {
         balances: vec![(1, 10)],
     }

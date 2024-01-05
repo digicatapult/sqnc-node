@@ -3,14 +3,12 @@
 use frame_support::{traits::ConstU32, BoundedVec};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
+use serde::{Deserialize, Serialize};
 use sp_runtime::{
     traits::{IdentifyAccount, Verify},
     MultiSignature,
 };
 use strum_macros::EnumDiscriminants;
-
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
 
 pub use pallet_process_validation::{BooleanExpressionSymbol, BooleanOperator, Restriction};
 
@@ -50,12 +48,12 @@ pub type RuntimeProgram = BoundedVec<RuntimeExpressionSymbol, MaxProcessProgramL
 
 pub type Role = BoundedVec<u8, ConstU32<32>>;
 
-#[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq, EnumDiscriminants)]
-#[strum_discriminants(derive(Encode, Decode, MaxEncodedLen, TypeInfo))]
+#[derive(
+    Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Eq, EnumDiscriminants, Serialize, Deserialize,
+)]
+#[strum_discriminants(derive(Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize))]
 #[strum_discriminants(vis(pub))]
 #[strum_discriminants(name(MetadataValueType))]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "std", strum_discriminants(derive(Serialize, Deserialize)))]
 pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal(BoundedVec<u8, ConstU32<32>>),

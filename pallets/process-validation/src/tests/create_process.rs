@@ -6,9 +6,8 @@ use crate::tests::RuntimeEvent as TestEvent;
 use crate::Error;
 use crate::Event::*;
 use crate::{Process, ProcessModel, ProcessStatus, Restriction::None, VersionModel};
-use frame_support::bounded_vec;
-use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
-use sp_runtime::ModuleError;
+use frame_support::{assert_noop, assert_ok};
+use sp_runtime::{bounded_vec, DispatchError, ModuleError};
 
 // -- fixtures --
 #[allow(dead_code)]

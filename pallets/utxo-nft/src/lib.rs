@@ -34,7 +34,7 @@ pub mod pallet {
 
     use super::*;
     use frame_support::{ensure, pallet_prelude::*, Parameter};
-    use frame_system::pallet_prelude::*;
+    use frame_system::pallet_prelude::{BlockNumberFor, *};
 
     /// The pallet's configuration trait.
     #[pallet::config]
@@ -76,7 +76,7 @@ pub mod pallet {
 
         // Maximum number of process outputs
         #[pallet::constant]
-        type TokenTombstoneDuration: Get<<Self as frame_system::Config>::BlockNumber>;
+        type TokenTombstoneDuration: Get<BlockNumberFor<Self>>;
     }
 
     // Define some derived types off of the Config trait to clean up declarations later
@@ -108,7 +108,7 @@ pub mod pallet {
         <T as frame_system::Config>::AccountId,
         <T as Config>::RoleKey,
         <T as Config>::TokenId,
-        <T as frame_system::Config>::BlockNumber,
+        BlockNumberFor<T>,
         <T as Config>::MaxMetadataCount,
         <T as Config>::TokenMetadataKey,
         <T as Config>::TokenMetadataValue,
@@ -204,7 +204,7 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_idle(
-            _block_number: T::BlockNumber,
+            _block_number: BlockNumberFor<T>,
             remaining_weight: frame_support::weights::Weight,
         ) -> frame_support::weights::Weight {
             // 1 read and 1 write to get/set the graveyard state

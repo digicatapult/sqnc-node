@@ -1,6 +1,6 @@
 [package]
 name = "pallet-doas"
-version = "2.0.4"
+version = "2.1.0"
 authors = [
 	"Digital Catapult <https://www.digicatapult.org.uk>",
 	"Parity Technologies <admin@parity.io>",
@@ -16,12 +16,12 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 frame-benchmarking = { workspace = true, optional = true }
-serde = { workspace = true, optional = true }
-scale-info = { workspace = true }
-parity-scale-codec = { workspace = true }
+serde = { workspace = true, optional = true, features = ["derive"] }
+scale-info = { workspace = true, features = ["derive", "serde"] }
+parity-scale-codec = { workspace = true, features = ["derive"] }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
-sp-runtime = { workspace = true }
+sp-runtime = { workspace = true, features = ["serde"] }
 sp-io = { workspace = true }
 sp-std = { workspace = true }
 

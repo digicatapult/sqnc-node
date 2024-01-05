@@ -2,7 +2,8 @@ use super::*;
 
 use crate::tests::RuntimeEvent as TestEvent;
 use crate::Event;
-use frame_support::{assert_err, assert_ok, bounded_vec, dispatch::DispatchError};
+use frame_support::{assert_err, assert_ok};
+use sp_runtime::{bounded_vec, DispatchError};
 
 #[test]
 fn rotate_key_as_root() {

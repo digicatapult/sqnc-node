@@ -1,12 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::weights::Weight;
-use frame_support::{Parameter, RuntimeDebug};
-use parity_scale_codec::{Decode, Encode};
+use frame_support::Parameter;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 
-use frame_support::codec::MaxEncodedLen;
 use frame_support::sp_runtime::traits::AtLeast32Bit;
 use scale_info::TypeInfo;
+use sp_runtime::RuntimeDebug;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::prelude::*;
 

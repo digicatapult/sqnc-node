@@ -3,8 +3,8 @@ use super::*;
 use crate::tests::RuntimeEvent as TestEvent;
 use crate::Error;
 use crate::Event;
-use frame_support::bounded_vec;
-use frame_support::{assert_noop, assert_ok, dispatch::DispatchError};
+use frame_support::{assert_noop, assert_ok};
+use sp_runtime::{bounded_vec, DispatchError};
 
 #[test]
 fn update_key_as_root() {

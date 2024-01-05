@@ -1,7 +1,7 @@
-use frame_support::RuntimeDebug;
 use frame_support::{traits::Get, BoundedBTreeMap, BoundedVec};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
+use sp_runtime::RuntimeDebug;
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;

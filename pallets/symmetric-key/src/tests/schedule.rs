@@ -1,8 +1,8 @@
-use frame_support::bounded_vec;
-
 use super::*;
 use crate::tests::RuntimeEvent as TestEvent;
 use crate::Event;
+
+use sp_runtime::bounded_vec;
 
 #[test]
 fn schedule_before_first_call() {

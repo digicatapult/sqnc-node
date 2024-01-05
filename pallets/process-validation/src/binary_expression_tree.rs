@@ -1,12 +1,11 @@
+use frame_support::Parameter;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-#[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
 use crate::Restriction;
 
-#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
 pub enum BooleanOperator {
     Null,         // false
     Identity,     // true
@@ -26,11 +25,29 @@ pub enum BooleanOperator {
     InhibitionR,  // B and !A
 }
 
-#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+impl Default for BooleanOperator {
+    fn default() -> Self {
+        BooleanOperator::Null
+    }
+}
+
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
 pub enum BooleanExpressionSymbol<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     Op(BooleanOperator),
     Restriction(Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>),
+}
+
+impl<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> Default
+    for BooleanExpressionSymbol<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator>
+where
+    RoleKey: Parameter + Default + Ord,
+    TokenMetadataKey: Parameter + Default + Ord,
+    TokenMetadataValue: Parameter + Default,
+    TokenMetadataValueDiscriminator: Parameter + Default + From<TokenMetadataValue>,
+{
+    fn default() -> Self {
+        BooleanExpressionSymbol::Restriction(Restriction::Fail)
+    }
 }
 
 impl BooleanOperator {

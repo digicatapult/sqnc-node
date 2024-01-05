@@ -1,10 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{traits::Get, BoundedVec, Parameter, RuntimeDebug};
+use frame_support::{traits::Get, BoundedVec, Parameter};
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use sp_runtime::traits::{AtLeast32Bit, One};
+use sp_runtime::{
+    traits::{AtLeast32Bit, One},
+    RuntimeDebug,
+};
 use sp_std::prelude::*;
 
 use dscp_pallet_traits::{
@@ -178,7 +181,6 @@ pub mod pallet {
         )>,
     }
 
-    #[cfg(feature = "std")]
     impl<T: Config> Default for GenesisConfig<T> {
         fn default() -> Self {
             Self { processes: Vec::new() }
@@ -186,7 +188,7 @@ pub mod pallet {
     }
 
     #[pallet::genesis_build]
-    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+    impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
         fn build(&self) {
             for (process_id, program) in self.processes.iter() {
                 if !Pallet::<T>::validate_program(&program) {

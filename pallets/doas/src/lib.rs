@@ -89,14 +89,14 @@ pub mod pallet {
         /// - The weight of this call is defined by the caller.
         /// # </weight>
         #[pallet::call_index(1)]
-        #[pallet::weight((*_weight, call.get_dispatch_info().class))]
+        #[pallet::weight((*weight, call.get_dispatch_info().class))]
         pub fn doas_root_unchecked_weight(
             origin: OriginFor<T>,
             call: Box<<T as Config>::Call>,
-            _weight: Weight,
+            weight: Weight,
         ) -> DispatchResultWithPostInfo {
-            // This is a public call, so we ensure that the origin is some signed account.
             T::DoasOrigin::ensure_origin(origin)?;
+            let _ = weight; // We don't check the weight witness since it is a root call.
 
             let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
             Self::deposit_event(Event::DidAsRoot(res.map(|_| ()).map_err(|e| e.error)));
