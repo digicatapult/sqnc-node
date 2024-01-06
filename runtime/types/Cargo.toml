@@ -17,8 +17,8 @@ parity-scale-codec = { workspace = true, features = ["derive"] }
 frame-support = { workspace = true }
 sp-core = { workspace = true, features = ["serde"] }
 sp-runtime = { workspace = true, features = ["serde"] }
-strum = { version = "0.24.1", features = [] }
-strum_macros = { version = "0.24.3", features = [] }
+strum = { version = "0.25.0", features = [] }
+strum_macros = { version = "0.25.3", features = [] }
 
 pallet-process-validation = { default-features = false, path = '../../pallets/process-validation' }
 
