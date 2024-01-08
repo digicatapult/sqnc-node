@@ -1,6 +1,6 @@
 [package]
 name = "dscp-node-runtime"
-version = "10.0.0"
+version = "10.0.1"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"

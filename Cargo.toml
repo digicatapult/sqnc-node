@@ -21,6 +21,8 @@ lazy_static = "1.4.0"
 pest = "2.7.6"
 pest_derive = "2.7.6"
 thiserror = "1.0.56"
+strum = { version = "0.25.0", default-features = false }
+strum_macros = { version = "0.25.3", default-features = false }
 
 #################################################################
 # substrate linked dependencies in crates.io that may be pinned #

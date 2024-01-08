@@ -5,7 +5,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/dscp-node/'
 name = 'dscp-runtime-types'
-version = "1.0.1"
+version = "1.0.2"
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -17,8 +17,8 @@ parity-scale-codec = { workspace = true, features = ["derive"] }
 frame-support = { workspace = true }
 sp-core = { workspace = true, features = ["serde"] }
 sp-runtime = { workspace = true, features = ["serde"] }
-strum = { version = "0.25.0", features = [] }
-strum_macros = { version = "0.25.3", features = [] }
+strum = { workspace = true, features = [] }
+strum_macros = { workspace = true, features = [] }
 
 pallet-process-validation = { default-features = false, path = '../../pallets/process-validation' }
 
