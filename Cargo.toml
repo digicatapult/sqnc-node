@@ -9,18 +9,20 @@ resolver = "2"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.194", default-features = false }
+serde = { version = "1.0.195", default-features = false }
 serde_json = { version = "1.0.111", default-features = false }
-clap = { version = "4.4.12", features = ["derive"] }
+clap = { version = "4.4.13", features = ["derive"] }
 futures = { version = "0.3.30", features = ["thread-pool"] }
 bs58 = "0.5.0"
 async-trait = "0.1.77"
 hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.4.0"
-pest = "2.7.5"
-pest_derive = "2.7.5"
+pest = "2.7.6"
+pest_derive = "2.7.6"
 thiserror = "1.0.56"
+strum = { version = "0.25.0", default-features = false }
+strum_macros = { version = "0.25.3", default-features = false }
 
 #################################################################
 # substrate linked dependencies in crates.io that may be pinned #
