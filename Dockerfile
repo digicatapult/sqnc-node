@@ -41,7 +41,7 @@ FROM ubuntu:jammy AS runtime
 
 RUN <<EOF
 apt-get update
-apt-get install -y libgcc-11-dev
+apt-get install -y libgcc-11-dev curl
 rm -rf /var/lib/apt/lists/*
 EOF
 
@@ -53,4 +53,6 @@ WORKDIR /dscp-node
 
 ENTRYPOINT [ "/dscp-node/dscp-node" ]
 
-EXPOSE 30333 9933 9944
+HEALTHCHECK CMD curl -f http://localhost:9944/health || exit 1
+
+EXPOSE 30333 9615 9944
