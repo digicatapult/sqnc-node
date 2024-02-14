@@ -1941,150 +1941,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1435fa1053d8b2fbbe9be7e97eca7f33d37b28409959813daefc1446a14247f1"
 
 [[package]]
-name = "sqnc-lang"
-version = "0.3.0"
-dependencies = [
- "clap",
- "sqnc-runtime-types",
- "exitcode",
- "lazy_static",
- "pest",
- "pest_derive",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "sqnc-node"
-version = "10.0.6"
-dependencies = [
- "async-trait",
- "bs58 0.5.0",
- "clap",
- "sqnc-lang",
- "sqnc-node-runtime",
- "sqnc-runtime-types",
- "frame-benchmarking",
- "frame-benchmarking-cli",
- "frame-system",
- "futures",
- "jsonrpsee",
- "pallet-transaction-payment-free",
- "pallet-transaction-payment-rpc",
- "sc-basic-authorship",
- "sc-cli",
- "sc-client-api",
- "sc-consensus",
- "sc-consensus-babe",
- "sc-consensus-babe-rpc",
- "sc-consensus-grandpa",
- "sc-consensus-manual-seal",
- "sc-executor",
- "sc-keystore",
- "sc-network",
- "sc-offchain",
- "sc-rpc",
- "sc-rpc-api",
- "sc-service",
- "sc-telemetry",
- "sc-transaction-pool",
- "sc-transaction-pool-api",
- "serde_json",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-consensus-babe",
- "sp-consensus-grandpa",
- "sp-core",
- "sp-inherents",
- "sp-keyring",
- "sp-keystore",
- "sp-runtime",
- "sp-timestamp",
- "substrate-build-script-utils",
- "substrate-frame-rpc-system",
- "try-runtime-cli",
-]
-
-[[package]]
-name = "sqnc-node-runtime"
-version = "10.0.6"
-dependencies = [
- "sqnc-runtime-types",
- "frame-benchmarking",
- "frame-executive",
- "frame-support",
- "frame-system",
- "frame-system-benchmarking",
- "frame-system-rpc-runtime-api",
- "frame-try-runtime",
- "hex-literal",
- "pallet-babe",
- "pallet-balances",
- "pallet-collective",
- "pallet-doas",
- "pallet-grandpa",
- "pallet-membership",
- "pallet-node-authorization",
- "pallet-preimage",
- "pallet-process-validation",
- "pallet-scheduler",
- "pallet-sudo",
- "pallet-symmetric-key",
- "pallet-timestamp",
- "pallet-transaction-payment-free",
- "pallet-transaction-payment-rpc-runtime-api",
- "pallet-utxo-nft",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "serde_json",
- "sp-api",
- "sp-block-builder",
- "sp-consensus-babe",
- "sp-consensus-grandpa",
- "sp-core",
- "sp-genesis-builder",
- "sp-inherents",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
- "sp-storage 13.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
- "sp-transaction-pool",
- "sp-version",
- "substrate-wasm-builder",
-]
-
-[[package]]
-name = "sqnc-pallet-traits"
-version = "3.3.0"
-dependencies = [
- "frame-support",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
-]
-
-[[package]]
-name = "sqnc-runtime-types"
-version = "1.0.2"
-dependencies = [
- "frame-support",
- "pallet-process-validation",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-core",
- "sp-runtime",
- "strum 0.26.1",
- "strum_macros 0.26.1",
-]
-
-[[package]]
 name = "dtoa"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5156,7 +5012,6 @@ dependencies = [
 name = "pallet-process-validation"
 version = "3.5.0"
 dependencies = [
- "sqnc-pallet-traits",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -5167,6 +5022,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
+ "sqnc-pallet-traits",
 ]
 
 [[package]]
@@ -5328,7 +5184,6 @@ dependencies = [
 name = "pallet-utxo-nft"
 version = "6.2.0"
 dependencies = [
- "sqnc-pallet-traits",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -5339,6 +5194,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
+ "sqnc-pallet-traits",
 ]
 
 [[package]]
@@ -8785,6 +8641,150 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
+]
+
+[[package]]
+name = "sqnc-lang"
+version = "0.3.0"
+dependencies = [
+ "clap",
+ "exitcode",
+ "lazy_static",
+ "pest",
+ "pest_derive",
+ "serde",
+ "serde_json",
+ "sqnc-runtime-types",
+ "thiserror",
+]
+
+[[package]]
+name = "sqnc-node"
+version = "11.0.0"
+dependencies = [
+ "async-trait",
+ "bs58 0.5.0",
+ "clap",
+ "frame-benchmarking",
+ "frame-benchmarking-cli",
+ "frame-system",
+ "futures",
+ "jsonrpsee",
+ "pallet-transaction-payment-free",
+ "pallet-transaction-payment-rpc",
+ "sc-basic-authorship",
+ "sc-cli",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-consensus-babe",
+ "sc-consensus-babe-rpc",
+ "sc-consensus-grandpa",
+ "sc-consensus-manual-seal",
+ "sc-executor",
+ "sc-keystore",
+ "sc-network",
+ "sc-offchain",
+ "sc-rpc",
+ "sc-rpc-api",
+ "sc-service",
+ "sc-telemetry",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "serde_json",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-babe",
+ "sp-consensus-grandpa",
+ "sp-core",
+ "sp-inherents",
+ "sp-keyring",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-timestamp",
+ "sqnc-lang",
+ "sqnc-node-runtime",
+ "sqnc-runtime-types",
+ "substrate-build-script-utils",
+ "substrate-frame-rpc-system",
+ "try-runtime-cli",
+]
+
+[[package]]
+name = "sqnc-node-runtime"
+version = "11.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-executive",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "frame-system-rpc-runtime-api",
+ "frame-try-runtime",
+ "hex-literal",
+ "pallet-babe",
+ "pallet-balances",
+ "pallet-collective",
+ "pallet-doas",
+ "pallet-grandpa",
+ "pallet-membership",
+ "pallet-node-authorization",
+ "pallet-preimage",
+ "pallet-process-validation",
+ "pallet-scheduler",
+ "pallet-sudo",
+ "pallet-symmetric-key",
+ "pallet-timestamp",
+ "pallet-transaction-payment-free",
+ "pallet-transaction-payment-rpc-runtime-api",
+ "pallet-utxo-nft",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-api",
+ "sp-block-builder",
+ "sp-consensus-babe",
+ "sp-consensus-grandpa",
+ "sp-core",
+ "sp-genesis-builder",
+ "sp-inherents",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-session",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
+ "sp-storage 13.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
+ "sp-transaction-pool",
+ "sp-version",
+ "sqnc-runtime-types",
+ "substrate-wasm-builder",
+]
+
+[[package]]
+name = "sqnc-pallet-traits"
+version = "3.3.0"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?branch=release-polkadot-v1.5.0)",
+]
+
+[[package]]
+name = "sqnc-runtime-types"
+version = "1.0.2"
+dependencies = [
+ "frame-support",
+ "pallet-process-validation",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-runtime",
+ "strum 0.26.1",
+ "strum_macros 0.26.1",
 ]
 
 [[package]]
