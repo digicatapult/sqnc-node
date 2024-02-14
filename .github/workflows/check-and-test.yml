@@ -78,7 +78,7 @@ jobs:
               - consider whether the changes could significantly affect the weight of any extrinsics
               - consider whether benchmarks need updating to correctly cover weight variations over inputs
 
-            For a guide on running benchmarks to update weights see [calculating weights](https://github.com/digicatapult/dscp-node#calculating-weights)
+            For a guide on running benchmarks to update weights see [calculating weights](https://github.com/digicatapult/sqnc-node#calculating-weights)
 
   check:
     name: Check and test

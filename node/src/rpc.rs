@@ -12,7 +12,7 @@ use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 
-use dscp_node_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
+use sqnc_node_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
 use sp_keystore::KeystorePtr;
 
 /// Extra dependencies for BABE.

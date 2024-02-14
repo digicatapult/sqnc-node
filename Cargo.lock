@@ -1941,11 +1941,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1435fa1053d8b2fbbe9be7e97eca7f33d37b28409959813daefc1446a14247f1"
 
 [[package]]
-name = "dscp-lang"
+name = "sqnc-lang"
 version = "0.3.0"
 dependencies = [
  "clap",
- "dscp-runtime-types",
+ "sqnc-runtime-types",
  "exitcode",
  "lazy_static",
  "pest",
@@ -1956,15 +1956,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "dscp-node"
+name = "sqnc-node"
 version = "10.0.6"
 dependencies = [
  "async-trait",
  "bs58 0.5.0",
  "clap",
- "dscp-lang",
- "dscp-node-runtime",
- "dscp-runtime-types",
+ "sqnc-lang",
+ "sqnc-node-runtime",
+ "sqnc-runtime-types",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system",
@@ -2009,10 +2009,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dscp-node-runtime"
+name = "sqnc-node-runtime"
 version = "10.0.6"
 dependencies = [
- "dscp-runtime-types",
+ "sqnc-runtime-types",
  "frame-benchmarking",
  "frame-executive",
  "frame-support",
@@ -2059,7 +2059,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dscp-pallet-traits"
+name = "sqnc-pallet-traits"
 version = "3.3.0"
 dependencies = [
  "frame-support",
@@ -2070,7 +2070,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dscp-runtime-types"
+name = "sqnc-runtime-types"
 version = "1.0.2"
 dependencies = [
  "frame-support",
@@ -5156,7 +5156,7 @@ dependencies = [
 name = "pallet-process-validation"
 version = "3.5.0"
 dependencies = [
- "dscp-pallet-traits",
+ "sqnc-pallet-traits",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -5328,7 +5328,7 @@ dependencies = [
 name = "pallet-utxo-nft"
 version = "6.2.0"
 dependencies = [
- "dscp-pallet-traits",
+ "sqnc-pallet-traits",
  "frame-benchmarking",
  "frame-support",
  "frame-system",

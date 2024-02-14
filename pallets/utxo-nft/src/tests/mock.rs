@@ -12,7 +12,7 @@ use scale_info::TypeInfo;
 use sp_runtime::BuildStorage;
 
 type Block = frame_system::mocking::MockBlock<Test>;
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;

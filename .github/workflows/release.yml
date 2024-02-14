@@ -121,10 +121,10 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dscp-node-${{ matrix.architectures.arch }}
+          name: sqnc-node-${{ matrix.architectures.arch }}
           path: |
-            ./target/${{ matrix.architectures.target-tupl }}/production/dscp-node
-            ./target/${{ matrix.architectures.target-tupl }}/production/wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm
+            ./target/${{ matrix.architectures.target-tupl }}/production/sqnc-node
+            ./target/${{ matrix.architectures.target-tupl }}/production/wbuild/sqnc-node-runtime/sqnc_node_runtime.compact.wasm
 
   build-release:
     name: Build release
@@ -136,12 +136,12 @@ jobs:
       - name: Download x86_64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dscp-node-x86_64
+          name: sqnc-node-x86_64
           path: x86_64
       - name: Download aarch64 Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dscp-node-aarch64
+          name: sqnc-node-aarch64
           path: aarch64
       - name: Prepare artefacts
         env:
@@ -150,19 +150,19 @@ jobs:
           ls -R .
           pushd ./x86_64
           echo $BUILD_VERSION | tee ./VERSION.txt
-          mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
-          chmod +x ./dscp-node
-          shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
-          shasum -a 256 ./dscp_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./dscp_node_runtime.compact.wasm.sha256
-          tar -czvf ../dscp-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
-          tar -czvf ../dscp-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm.sha256
+          mv ./wbuild/sqnc-node-runtime/sqnc_node_runtime.compact.wasm ./sqnc_node_runtime.compact.wasm
+          chmod +x ./sqnc-node
+          shasum -a 256 ./sqnc-node | cut -d ' ' -f 1 | tee ./sqnc-node.sha256
+          shasum -a 256 ./sqnc_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./sqnc_node_runtime.compact.wasm.sha256
+          tar -czvf ../sqnc-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./sqnc-node ./sqnc-node.sha256
+          tar -czvf ../sqnc-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./sqnc_node_runtime.compact.wasm ./sqnc_node_runtime.compact.wasm.sha256
           popd;
           pushd ./aarch64
           echo $BUILD_VERSION | tee ./VERSION.txt
-          mv ./wbuild/dscp-node-runtime/dscp_node_runtime.compact.wasm ./dscp_node_runtime.compact.wasm
-          chmod +x ./dscp-node
-          shasum -a 256 ./dscp-node | cut -d ' ' -f 1 | tee ./dscp-node.sha256
-          tar -czvf ../dscp-node-${BUILD_VERSION}-aarch64-unknown-linux-gnu.tar.gz ./VERSION.txt ./dscp-node ./dscp-node.sha256
+          mv ./wbuild/sqnc-node-runtime/sqnc_node_runtime.compact.wasm ./sqnc_node_runtime.compact.wasm
+          chmod +x ./sqnc-node
+          shasum -a 256 ./sqnc-node | cut -d ' ' -f 1 | tee ./sqnc-node.sha256
+          tar -czvf ../sqnc-node-${BUILD_VERSION}-aarch64-unknown-linux-gnu.tar.gz ./VERSION.txt ./sqnc-node ./sqnc-node.sha256
           popd;
 
       - name: Build release version
@@ -174,9 +174,9 @@ jobs:
           prerelease: ${{ needs.get-version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
           files: |
-            ./dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
-            ./dscp-node-${{ needs.get-version.outputs.version }}-aarch64-unknown-linux-gnu.tar.gz
-            ./dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
+            ./sqnc-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ./sqnc-node-${{ needs.get-version.outputs.version }}-aarch64-unknown-linux-gnu.tar.gz
+            ./sqnc-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
       - name: Delete release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
         uses: actions/github-script@v7
@@ -200,9 +200,9 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            ./dscp-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
-            ./dscp-node-${{ needs.get-version.outputs.version }}-aarch64-unknown-linux-gnu.tar.gz
-            ./dscp-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
+            ./sqnc-node-${{ needs.get-version.outputs.version }}-x86_64-unknown-linux-gnu.tar.gz
+            ./sqnc-node-${{ needs.get-version.outputs.version }}-aarch64-unknown-linux-gnu.tar.gz
+            ./sqnc-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
 
   # Docker build are always performed but are only version tagged on new version
   build-docker:
@@ -231,11 +231,11 @@ jobs:
         # if it's a non new version tag with hash and latest-dev
         run: |
           if [ "$IS_NEW_VERSION" == "true" ]; then
-            echo "GHCR_VERSION_TAG=ghcr.io/digicatapult/dscp-node:$VERSION" >> $GITHUB_OUTPUT
-            echo "DOCKERHUB_VERSION_TAG=digicatapult/dscp-node:$VERSION" >> $GITHUB_OUTPUT
+            echo "GHCR_VERSION_TAG=ghcr.io/digicatapult/sqnc-node:$VERSION" >> $GITHUB_OUTPUT
+            echo "DOCKERHUB_VERSION_TAG=digicatapult/sqnc-node:$VERSION" >> $GITHUB_OUTPUT
             if [ "$IS_PRERELEASE" == "false" ]; then
-              echo "GHCR_LATEST_TAG=ghcr.io/digicatapult/dscp-node:latest" >> $GITHUB_OUTPUT
-              echo "DOCKERHUB_LATEST_TAG=digicatapult/dscp-node:latest" >> $GITHUB_OUTPUT
+              echo "GHCR_LATEST_TAG=ghcr.io/digicatapult/sqnc-node:latest" >> $GITHUB_OUTPUT
+              echo "DOCKERHUB_LATEST_TAG=digicatapult/sqnc-node:latest" >> $GITHUB_OUTPUT
             else
               echo "GHCR_LATEST_TAG=" >> $GITHUB_OUTPUT
               echo "DOCKERHUB_LATEST_TAG=" >> $GITHUB_OUTPUT
@@ -255,8 +255,8 @@ jobs:
       - name: Login to Dockerhub Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DSCP_DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DSCP_DOCKERHUB_TOKEN }}
+          username: ${{ secrets.SQNC_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.SQNC_DOCKERHUB_TOKEN }}
       - name: Build image
         uses: docker/build-push-action@v5
         with:
@@ -264,19 +264,19 @@ jobs:
           context: .
           build-args: |
             RUST_TOOLCHAIN=${{ needs.get-version.outputs.toolchain }}
-            DSCP_VERSION=${{ needs.get-version.outputs.version }}
+            SQNC_VERSION=${{ needs.get-version.outputs.version }}
           file: ./Dockerfile
           platforms: linux/amd64, linux/arm64
           push: true
           tags: |
-            ghcr.io/digicatapult/dscp-node:${{ github.sha }}
+            ghcr.io/digicatapult/sqnc-node:${{ github.sha }}
             ${{ steps.generate-tags.outputs.GHCR_VERSION_TAG }}
             ${{ steps.generate-tags.outputs.GHCR_LATEST_TAG }}
-            digicatapult/dscp-node:${{ github.sha }}
+            digicatapult/sqnc-node:${{ github.sha }}
             ${{ steps.generate-tags.outputs.DOCKERHUB_VERSION_TAG }}
             ${{ steps.generate-tags.outputs.DOCKERHUB_LATEST_TAG }}
           labels: |
-            org.opencontainers.image.title=dscp-node
+            org.opencontainers.image.title=sqnc-node
             org.opencontainers.image.description=${{ github.event.repository.description }}
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
             org.opencontainers.image.url=${{ github.event.repository.html_url }}

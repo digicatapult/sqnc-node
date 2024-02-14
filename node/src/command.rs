@@ -4,7 +4,7 @@ use crate::{
     cli::{Cli, Subcommand},
     service, test_service,
 };
-use dscp_node_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use sqnc_node_runtime::{Block, EXISTENTIAL_DEPOSIT};
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
@@ -12,7 +12,7 @@ use sp_keyring::Sr25519Keyring;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
-        "DSCP Node".into()
+        "SQNC Node".into()
     }
 
     fn impl_version() -> String {

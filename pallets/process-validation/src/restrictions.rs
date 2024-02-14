@@ -1,7 +1,7 @@
 // This file contains the different types of restrictions that can be evaluated during
 // a call to `validate_process`
 
-use dscp_pallet_traits::ProcessIO;
+use sqnc_pallet_traits::ProcessIO;
 use frame_support::Parameter;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;

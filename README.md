@@ -1,8 +1,8 @@
-# DSCP node
+# Sequence (SQNC) node
 
 This repository contains the source code for the blockchain nodes used in a number of Digital Catapult projects that address Distributed System challenges. The structure and code is heavily based on [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template). To use this repository, it's important to understand the [key concepts](https://substrate.dev/docs/en/) of Substrate, such as `FRAME`, `runtime`, `extrinsics` and `transaction weight`.
 
-For more on governance visit [dscp-documentation](https://github.com/digicatapult/dscp-documentation/blob/main/docs/governance.md).
+For more on governance visit [sqnc-documentation](https://github.com/digicatapult/sqnc-documentation/blob/main/docs/governance.md).
 
 ## Getting started
 
@@ -28,13 +28,13 @@ The build will generate a `target` directory.
 Running the release build:
 
 ```bash
-./target/release/dscp-node --dev
+./target/release/sqnc-node --dev
 ```
 
 Note that if you want to reset the state of your chain (for example because you've changed a storage format) you can call:
 
 ```bash
-./target/release/dscp-node purge-chain --dev
+./target/release/sqnc-node purge-chain --dev
 ```
 
 This will delete your dev chain so that it can be started from scratch again.
@@ -44,7 +44,7 @@ This will delete your dev chain so that it can be started from scratch again.
 The node uses the [node-authorization](https://docs.rs/pallet-node-authorization/3.0.0/pallet_node_authorization/index.html) pallet to manage a configurable set of nodes for a permissioned network. The pre-configured well-known network for `local` chain contains `Alice`, `Bob`, `Charlie` and `Eve`. A node will not peer with the rest of the network unless the owner (account) starts the node with a `node-key` that corresponds to their `PeerId` and `AccountId` saved in `wellKnownNodes` storage. The set of `PeerId`s is initially configured in [`GenesisConfig`](node/src/chain_spec.rs). For example, to run and peer `Alice` and `Bob`, call the following two commands:
 
 ```bash
-./target/release/dscp-node \
+./target/release/sqnc-node \
 --chain=local \
 --base-path /tmp/validator1 \
 --alice \
@@ -54,7 +54,7 @@ The node uses the [node-authorization](https://docs.rs/pallet-node-authorization
 ```
 
 ```bash
-./target/release/dscp-node \
+./target/release/sqnc-node \
 --chain=local \
 --base-path /tmp/validator2 \
 --bob \
@@ -67,7 +67,7 @@ For `dev` chain, the network only contains a node for `Alice` so other nodes wil
 
 ### Calculating weights
 
-Extrinsic calls in `dscp-node` are weighted to ensure blocks are filled appropriately. For production weight calculations please run benchmarks on an AWS `t3a.2xlarge` instance.
+Extrinsic calls in `sqnc-node` are weighted to ensure blocks are filled appropriately. For production weight calculations please run benchmarks on an AWS `t3a.2xlarge` instance.
 
 To calculate the weights for a pallet you first must ensure the node is built with the benchmarking feature enabled:
 
@@ -78,7 +78,7 @@ cargo build --profile=production --features runtime-benchmarks
 Then you can run the benchmark tool with for example
 
 ```bash
-./target/production/dscp-node benchmark pallet \
+./target/production/sqnc-node benchmark pallet \
     --pallet 'pallet_utxo_nft' \
     --extrinsic '*' \
     --repeat 1000 \
@@ -102,7 +102,7 @@ Then follow the instructions at the top of [`docker-compose.yaml`](docker-compos
 
 ## API
 
-The node can be interacted with using [`@polkadot/api`](https://www.npmjs.com/package/@polkadot/api). [For example](https://github.com/digicatapult/dscp-api/blob/main/app/util/substrateApi.js).
+The node can be interacted with using [`@polkadot/api`](https://www.npmjs.com/package/@polkadot/api). [For example](https://github.com/digicatapult/sqnc-api/blob/main/app/util/substrateApi.js).
 
 ### UtxoNFT pallet
 
@@ -375,6 +375,6 @@ A FRAME pallet is compromised of a number of blockchain primitives:
 
 ### Tools
 
-Contains additional tools used in conjunction with the `dscp-node`. These include:
+Contains additional tools used in conjunction with the `sqnc-node`. These include:
 
-- [dscp-lang](./tools/lang/README.md) - A tool for writing and validating token models for use with [`pallet_process_management`](#processvalidation-pallet)
+- [sqnc-lang](./tools/lang/README.md) - A tool for writing and validating token models for use with [`pallet_process_management`](#processvalidation-pallet)

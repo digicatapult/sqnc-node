@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use dscp_pallet_traits as traits;
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
+use sqnc_pallet_traits as traits;
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
 use frame_support::{
     traits::{Get, TryCollect},
     BoundedVec,

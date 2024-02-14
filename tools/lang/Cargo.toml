@@ -1,15 +1,15 @@
 [package]
-name = "dscp-lang"
+name = "sqnc-lang"
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 version = "0.3.0"
 edition = "2021"
 
 [lib]
-name = "dscp_lang"
+name = "sqnc_lang"
 path = "src/lib.rs"
 
 [[bin]]
-name = "dscp-lang"
+name = "sqnc-lang"
 path = "src/main.rs"
 
 [dependencies]
@@ -22,4 +22,4 @@ pest = { workspace = true }
 pest_derive = { workspace = true }
 thiserror = { workspace = true }
 
-dscp-runtime-types = { path = '../../runtime/types' }
+sqnc-runtime-types = { path = '../../runtime/types' }

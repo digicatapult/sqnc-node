@@ -1,5 +1,5 @@
 /*
-Token specification example from l3. See https://github.com/digicatapult/dscp-documentation/blob/main/docs/l3/index.md for details
+Token specification example from l3. See https://github.com/digicatapult/sqnc-documentation/blob/main/docs/l3/index.md for details
 */
 
 // `token`s define token formats that should be persisted in transitions

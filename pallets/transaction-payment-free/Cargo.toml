@@ -7,7 +7,7 @@ authors = [
 ]
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/digicatapult/dscp-node/"
+repository = "https://github.com/digicatapult/sqnc-node/"
 description = "FRAME pallet to manage transaction payments"
 readme = "README.md"
 

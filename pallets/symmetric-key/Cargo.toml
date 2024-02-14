@@ -3,7 +3,7 @@ authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 description = 'A FRAME pallet for handling a shared IPFS swarm key'
 edition = '2021'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/dscp-node/'
+repository = 'https://github.com/digicatapult/sqnc-node/'
 name = 'pallet-symmetric-key'
 version = "2.1.0"
 

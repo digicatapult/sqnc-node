@@ -10,7 +10,7 @@ use sp_runtime::traits::Bounded;
 use sp_std::convert::TryFrom;
 use sp_std::vec::Vec;
 
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator};
 
 use crate::output::Output;
 #[allow(unused)]

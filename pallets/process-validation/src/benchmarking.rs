@@ -15,7 +15,7 @@ type BooleanExpressionSymbol<T> = crate::BooleanExpressionSymbol<
     <T as Config>::TokenMetadataValueDiscriminator,
 >;
 
-type ProcessIO<T> = dscp_pallet_traits::ProcessIO<
+type ProcessIO<T> = sqnc_pallet_traits::ProcessIO<
     <T as Config>::TokenId,
     <T as frame_system::Config>::AccountId,
     <T as Config>::RoleKey,
@@ -24,7 +24,7 @@ type ProcessIO<T> = dscp_pallet_traits::ProcessIO<
 >;
 
 type ProcessFullyQualifiedId<T> =
-    dscp_pallet_traits::ProcessFullyQualifiedId<<T as Config>::ProcessIdentifier, <T as Config>::ProcessVersion>;
+    sqnc_pallet_traits::ProcessFullyQualifiedId<<T as Config>::ProcessIdentifier, <T as Config>::ProcessVersion>;
 
 fn prepare_program<T: Config>(l: u32) -> BoundedVec<BooleanExpressionSymbol<T>, T::MaxProcessProgramLength> {
     let metadata_restriction = Restriction::MatchInputOutputMetadataValue {

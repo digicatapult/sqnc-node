@@ -2,13 +2,13 @@
 
 This guide will hopefully provide help to upgrade Substrate in the future.
 
-This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/dscp-node/pull/91/files)
+This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/sqnc-node/pull/91/files)
 
 ## Prerequisities
 
 Make sure **main** is up to date and create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
 
-You will need to run `rustup` which is [documented here](https://github.com/digicatapult/dscp-node/blob/main/README.md).
+You will need to run `rustup` which is [documented here](https://github.com/digicatapult/sqnc-node/blob/main/README.md).
 
 ## Upgrade Substrate
 
@@ -39,7 +39,7 @@ For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEve
 `RuntimeOrigin`. This information was
 obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.30). Checking the branch will help with renaming and syntax changes.
 
-[Version changes can be the most difficult parts of the code](https://github.com/digicatapult/dscp-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial, or minor, changes (depending on the update).
+[Version changes can be the most difficult parts of the code](https://github.com/digicatapult/sqnc-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial, or minor, changes (depending on the update).
 
 After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests. If there are any compilation errors Rust is very good at highlighting issues and suggesting looking error codes e.g. `rustc --explain E0152 `.
 
@@ -55,14 +55,14 @@ If it passes, bump its version in the pallets `pallets/doas/Cargo.toml` push it 
 ### Runtime
 
 We now need to test that the upgraded dependencies work for the runtime including our newly upgraded pallets. So firstly replace all the pallet versions in the runtime's `runtime/Cargo.toml` and then we need to test a runtime build, we do this by
-`cargo build --release -p dscp-node-runtime`
+`cargo build --release -p sqnc-node-runtime`
 
 We will need to increment the runtimes `spec_version` to a higher value, note spec_version does not recognize semver, so we treat it as a whole number. e.g. In place of `5.6.8` the `spec_version` would be `568`.
 
 We should also bump our runtime's version in `runtime/Cargo.toml`
 We should now run the tests for the runtime, which we can do using:
 
-`cargo test --release -p dscp-node-runtime`
+`cargo test --release -p sqnc-node-runtime`
 
 If the tests pass create a PR from the **integration** branch.
 

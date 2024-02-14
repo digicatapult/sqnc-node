@@ -1,6 +1,6 @@
 use super::*;
 
-use dscp_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
 use sp_runtime::bounded_vec;
 use sp_std::collections::btree_map::BTreeMap;
 
