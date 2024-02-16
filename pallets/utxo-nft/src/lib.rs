@@ -1,7 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use sqnc_pallet_traits as traits;
-use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
 use frame_support::{
     traits::{Get, TryCollect},
     BoundedVec,
@@ -9,6 +7,8 @@ use frame_support::{
 pub use pallet::*;
 use parity_scale_codec::{Codec, MaxEncodedLen};
 use sp_runtime::traits::{AtLeast32Bit, Hash, One};
+use sqnc_pallet_traits as traits;
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessValidator, ValidateProcessWeights};
 
 /// A FRAME pallet for handling non-fungible tokens
 use sp_std::prelude::*;

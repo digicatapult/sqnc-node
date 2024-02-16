@@ -1,10 +1,10 @@
-use sqnc_node_runtime::{RuntimeGenesisConfig, WASM_BINARY};
-use sqnc_runtime_types::{AccountId, RuntimeExpressionSymbol, RuntimeRestriction, Signature};
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use sqnc_node_runtime::{RuntimeGenesisConfig, WASM_BINARY};
+use sqnc_runtime_types::{AccountId, RuntimeExpressionSymbol, RuntimeRestriction, Signature};
 
 const DEFAULT_PROTOCOL_ID: &str = "sqnc";
 

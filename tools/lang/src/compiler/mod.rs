@@ -1,8 +1,8 @@
+use serde::Serialize;
 use sqnc_runtime_types::{
     BooleanExpressionSymbol, BooleanOperator, ProcessIdentifier, ProcessVersion, RuntimeProgram, TokenMetadataKey,
     TokenMetadataValue,
 };
-use serde::Serialize;
 use std::collections::HashMap;
 
 use crate::{

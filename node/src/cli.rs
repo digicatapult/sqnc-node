@@ -1,5 +1,5 @@
-use sqnc_lang::cli::Cli as LangCli;
 use sc_cli::RunCmd;
+use sqnc_lang::cli::Cli as LangCli;
 
 #[derive(Debug, clap::Parser)]
 pub struct Cli {

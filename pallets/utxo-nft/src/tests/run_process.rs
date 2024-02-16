@@ -1,8 +1,8 @@
 use crate::{graveyard::GraveyardState, output::Output, tests::mock::*, token::Token, Error, Event};
-use sqnc_pallet_traits::ProcessFullyQualifiedId;
 use frame_support::{assert_err, assert_ok};
 use sp_core::H256;
 use sp_runtime::{bounded_btree_map, bounded_vec};
+use sqnc_pallet_traits::ProcessFullyQualifiedId;
 
 const SUCCEED_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFullyQualifiedId {
     id: ProcessIdentifier::ShouldSucceed,
