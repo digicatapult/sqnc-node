@@ -11,8 +11,8 @@ use crate::{
 
 /// A fictional versioning CLI
 #[derive(Debug, Parser)] // requires `derive` feature
-#[command(name = "dscp-lang", version, author)]
-#[command(about = "Tool for checking and compiling dscp token specifications", long_about = None)]
+#[command(name = "sqnc-lang", version, author)]
+#[command(about = "Tool for checking and compiling sqnc token specifications", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -22,7 +22,7 @@ pub struct Cli {
 pub enum Commands {
     #[command(arg_required_else_help = true)]
     Parse {
-        #[arg(help = "Path to dscp token specification file")]
+        #[arg(help = "Path to sqnc token specification file")]
         file_path: PathBuf,
 
         #[arg(
@@ -35,7 +35,7 @@ pub enum Commands {
     },
     #[command(arg_required_else_help = true)]
     Build {
-        #[arg(help = "Path to dscp token specification file")]
+        #[arg(help = "Path to sqnc token specification file")]
         file_path: PathBuf,
 
         #[arg(short, long, help = "Path of JSON file to output programs to")]

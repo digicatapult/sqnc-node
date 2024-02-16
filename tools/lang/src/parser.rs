@@ -1,3 +1,3 @@
 #[derive(pest_derive::Parser)]
-#[grammar = "dscp.pest"]
-pub(crate) struct DscpParser;
+#[grammar = "sqnc.pest"]
+pub(crate) struct SqncParser;

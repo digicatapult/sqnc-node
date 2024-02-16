@@ -1,8 +1,8 @@
-use dscp_runtime_types::{
+use serde::Serialize;
+use sqnc_runtime_types::{
     BooleanExpressionSymbol, BooleanOperator, ProcessIdentifier, ProcessVersion, RuntimeProgram, TokenMetadataKey,
     TokenMetadataValue,
 };
-use serde::Serialize;
 use std::collections::HashMap;
 
 use crate::{
@@ -76,7 +76,7 @@ fn make_process_restrictions(
         .enumerate()
         .map(|(index, input)| {
             Ok(vec![
-                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedInputMetadataValue {
+                BooleanExpressionSymbol::Restriction(sqnc_runtime_types::Restriction::FixedInputMetadataValue {
                     index: index as u32,
                     metadata_key: token_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
@@ -85,7 +85,7 @@ fn make_process_restrictions(
                     })?),
                 }),
                 BooleanExpressionSymbol::Op(BooleanOperator::And),
-                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedInputMetadataValue {
+                BooleanExpressionSymbol::Restriction(sqnc_runtime_types::Restriction::FixedInputMetadataValue {
                     index: index as u32,
                     metadata_key: version_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
@@ -105,7 +105,7 @@ fn make_process_restrictions(
         .enumerate()
         .map(|(index, output)| {
             Ok(vec![
-                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedOutputMetadataValue {
+                BooleanExpressionSymbol::Restriction(sqnc_runtime_types::Restriction::FixedOutputMetadataValue {
                     index: index as u32,
                     metadata_key: token_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
@@ -114,7 +114,7 @@ fn make_process_restrictions(
                     })?),
                 }),
                 BooleanExpressionSymbol::Op(BooleanOperator::And),
-                BooleanExpressionSymbol::Restriction(dscp_runtime_types::Restriction::FixedOutputMetadataValue {
+                BooleanExpressionSymbol::Restriction(sqnc_runtime_types::Restriction::FixedOutputMetadataValue {
                     index: index as u32,
                     metadata_key: version_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
@@ -134,12 +134,12 @@ fn make_process_restrictions(
 
     let program: Vec<_> = [
         vec![BooleanExpressionSymbol::Restriction(
-            dscp_runtime_types::Restriction::FixedNumberOfInputs {
+            sqnc_runtime_types::Restriction::FixedNumberOfInputs {
                 num_inputs: fn_decl.inputs.value.len() as u32,
             },
         )],
         vec![BooleanExpressionSymbol::Restriction(
-            dscp_runtime_types::Restriction::FixedNumberOfOutputs {
+            sqnc_runtime_types::Restriction::FixedNumberOfOutputs {
                 num_outputs: fn_decl.outputs.value.len() as u32,
             },
         )],

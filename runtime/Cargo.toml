@@ -1,11 +1,11 @@
 [package]
-name = "dscp-node-runtime"
-version = "10.0.6"
+name = "sqnc-node-runtime"
+version = "11.0.0"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"
 publish = false
-repository = "https://github.com/digicatapult/dscp-node/"
+repository = "https://github.com/digicatapult/sqnc-node/"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -62,7 +62,7 @@ pallet-utxo-nft = { default-features = false, path = '../pallets/utxo-nft' }
 pallet-process-validation = { default-features = false, path = '../pallets/process-validation' }
 pallet-symmetric-key = { default-features = false, path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
-dscp-runtime-types = { default-features = false, path = './types' }
+sqnc-runtime-types = { default-features = false, path = './types' }
 
 [build-dependencies]
 substrate-wasm-builder = { workspace = true }
@@ -106,7 +106,7 @@ std = [
     "sp-std/std",
     "sp-transaction-pool/std",
     "sp-version/std",
-    "dscp-runtime-types/std",
+    "sqnc-runtime-types/std",
     "pallet-utxo-nft/std",
     "pallet-scheduler/std",
     "pallet-symmetric-key/std",

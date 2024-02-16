@@ -12,7 +12,7 @@ pub use parse::parse_ast;
 pub use types::Ast;
 
 pub fn parse_str_to_ast(input: &str) -> Result<Ast, CompilationError> {
-    let pairs = DscpParser::parse(Rule::main, input);
+    let pairs = SqncParser::parse(Rule::main, input);
     if let Err(e) = pairs {
         return Err(CompilationError {
             stage: CompilationStage::ParseGrammar,

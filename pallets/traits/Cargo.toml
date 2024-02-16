@@ -1,11 +1,11 @@
 [package]
-name = "dscp-pallet-traits"
+name = "sqnc-pallet-traits"
 version = "3.3.0"
 edition = "2021"
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/dscp-node/'
-description = "Common pallet traits for the dscp-node"
+repository = 'https://github.com/digicatapult/sqnc-node/'
+description = "Common pallet traits for the sqnc-node"
 
 [dependencies]
 scale-info = { workspace = true, features = ["derive", "serde"] }

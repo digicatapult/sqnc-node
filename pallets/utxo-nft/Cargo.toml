@@ -3,7 +3,7 @@ authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 description = 'A FRAME pallet for handling non-fungible tokens'
 edition = '2021'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/dscp-node/'
+repository = 'https://github.com/digicatapult/sqnc-node/'
 name = 'pallet-utxo-nft'
 version = "6.2.0"
 
@@ -21,7 +21,7 @@ sp-io = { workspace = true }
 sp-std = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
 
-dscp-pallet-traits = { default-features = false, path = '../traits' }
+sqnc-pallet-traits = { default-features = false, path = '../traits' }
 
 [dev-dependencies]
 serde = { workspace = true, features = ["derive"] }
@@ -36,7 +36,7 @@ std = [
     'frame-system/std',
     'frame-benchmarking/std',
     'sp-std/std',
-    'dscp-pallet-traits/std',
+    'sqnc-pallet-traits/std',
 ]
 runtime-benchmarks = ['frame-benchmarking', 'sp-core']
 try-runtime = ["frame-support/try-runtime"]

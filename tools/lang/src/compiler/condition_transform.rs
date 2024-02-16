@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use dscp_runtime_types::{
+use sqnc_runtime_types::{
     BooleanExpressionSymbol, BooleanOperator, MetadataValue, MetadataValueType, Restriction, RuntimeExpressionSymbol,
     TokenMetadataKey,
 };

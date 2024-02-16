@@ -8,7 +8,7 @@
 //! EXECUTION: None, WASM-EXECUTION: Compiled, CHAIN: None, DB CACHE: 1024
 
 // Executed Command:
-// ./target/production/dscp-node
+// ./target/production/sqnc-node
 // benchmark
 // pallet
 // --pallet
@@ -27,7 +27,7 @@
 #![allow(unused_imports)]
 #![allow(missing_docs)]
 
-use dscp_pallet_traits::ValidateProcessWeights;
+use sqnc_pallet_traits::ValidateProcessWeights;
 use frame_support::{traits::Get, weights::Weight};
 use core::marker::PhantomData;
 

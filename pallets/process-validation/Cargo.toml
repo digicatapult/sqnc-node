@@ -3,7 +3,7 @@ authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 description = 'A FRAME pallet for storing and evaluating process validation restrictions'
 edition = '2021'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/dscp-node/'
+repository = 'https://github.com/digicatapult/sqnc-node/'
 name = 'pallet-process-validation'
 version = "3.5.0"
 
@@ -21,7 +21,7 @@ sp-runtime = { workspace = true, features = ["serde"] }
 sp-io = { workspace = true }
 sp-std = { workspace = true }
 
-dscp-pallet-traits = { default-features = false, path = '../traits' }
+sqnc-pallet-traits = { default-features = false, path = '../traits' }
 
 [dev-dependencies]
 sp-core = { workspace = true }
@@ -34,7 +34,7 @@ std = [
     'frame-system/std',
     'frame-benchmarking/std',
     'sp-std/std',
-    'dscp-pallet-traits/std',
+    'sqnc-pallet-traits/std',
 ]
 runtime-benchmarks = ['frame-benchmarking']
 try-runtime = ["frame-support/try-runtime"]

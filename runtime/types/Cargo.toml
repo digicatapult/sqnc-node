@@ -1,10 +1,10 @@
 [package]
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
-description = 'Shared types used by dscp-runtime'
+description = 'Shared types used by sqnc-runtime'
 edition = '2021'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/dscp-node/'
-name = 'dscp-runtime-types'
+repository = 'https://github.com/digicatapult/sqnc-node/'
+name = 'sqnc-runtime-types'
 version = "1.0.2"
 
 [package.metadata.docs.rs]

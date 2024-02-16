@@ -48,7 +48,7 @@ use pallet_transaction_payment_free::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-pub use dscp_runtime_types::*;
+pub use sqnc_runtime_types::*;
 
 pub mod constants;
 use crate::constants::time::*;
@@ -79,10 +79,10 @@ pub mod opaque {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("dscp"),
-    impl_name: create_runtime_str!("dscp"),
+    spec_name: create_runtime_str!("sqnc"),
+    impl_name: create_runtime_str!("sqnc"),
     authoring_version: 1,
-    spec_version: 1006,
+    spec_version: 1100,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,

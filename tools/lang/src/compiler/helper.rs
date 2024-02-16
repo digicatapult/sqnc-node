@@ -26,7 +26,7 @@ where
 pub mod tests {
     use super::to_bounded_vec;
     use crate::ast::types::AstNode;
-    use dscp_runtime_types::ProcessIdentifier;
+    use sqnc_runtime_types::ProcessIdentifier;
 
     pub fn to_ast_node<'a, V>(value: V) -> AstNode<'a, V> {
         let span = pest::Span::new("", 0, 0).unwrap();

@@ -10,7 +10,7 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 
-use dscp_pallet_traits::{
+use sqnc_pallet_traits::{
     ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidateProcessWeights, ValidationResult,
 };
 

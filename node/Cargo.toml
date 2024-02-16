@@ -1,15 +1,15 @@
 [package]
 build = 'build.rs'
-description = 'Substrate node for DSCP Project'
+description = 'Substrate node for SQNC Project'
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 edition = '2021'
 license = 'Apache-2.0'
-repository = 'https://github.com/digicatapult/dscp-node/'
-name = 'dscp-node'
-version = '10.0.6'
+repository = 'https://github.com/digicatapult/sqnc-node/'
+name = 'sqnc-node'
+version = '11.0.0'
 
 [[bin]]
-name = 'dscp-node'
+name = 'sqnc-node'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -62,10 +62,10 @@ frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 
 # Local Dependencies
-dscp-node-runtime = { path = '../runtime' }
-dscp-runtime-types = { path = '../runtime/types' }
+sqnc-node-runtime = { path = '../runtime' }
+sqnc-runtime-types = { path = '../runtime/types' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
-dscp-lang = { path = '../tools/lang' }
+sqnc-lang = { path = '../tools/lang' }
 
 # CLI-specific dependencies
 try-runtime-cli = { workspace = true, optional = true }
@@ -78,7 +78,7 @@ substrate-build-script-utils = { workspace = true }
 [features]
 default = []
 runtime-benchmarks = [
-	"dscp-node-runtime/runtime-benchmarks",
+	"sqnc-node-runtime/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
 ]

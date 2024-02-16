@@ -36,7 +36,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use dscp_runtime_types::BooleanExpressionSymbol;
+    use sqnc_runtime_types::BooleanExpressionSymbol;
 
     use super::transform_to_json;
     use crate::compiler::Process;
@@ -47,7 +47,7 @@ mod tests {
             name: vec![116u8, 101u8, 115u8, 116u8].try_into().unwrap(),
             version: 1u32,
             program: vec![BooleanExpressionSymbol::Restriction(
-                dscp_runtime_types::Restriction::None,
+                sqnc_runtime_types::Restriction::None,
             )]
             .try_into()
             .unwrap(),
@@ -78,7 +78,7 @@ mod tests {
             name: vec![116u8, 101u8, 115u8, 116u8].try_into().unwrap(),
             version: 1u32,
             program: vec![BooleanExpressionSymbol::Restriction(
-                dscp_runtime_types::Restriction::None,
+                sqnc_runtime_types::Restriction::None,
             )]
             .try_into()
             .unwrap(),
@@ -99,7 +99,7 @@ mod tests {
                 name: vec![116u8, 101u8, 115u8, 116u8, 49u8].try_into().unwrap(),
                 version: 1u32,
                 program: vec![BooleanExpressionSymbol::Restriction(
-                    dscp_runtime_types::Restriction::None,
+                    sqnc_runtime_types::Restriction::None,
                 )]
                 .try_into()
                 .unwrap(),
@@ -108,7 +108,7 @@ mod tests {
                 name: vec![116u8, 101u8, 115u8, 116u8, 50u8].try_into().unwrap(),
                 version: 1u32,
                 program: vec![BooleanExpressionSymbol::Restriction(
-                    dscp_runtime_types::Restriction::None,
+                    sqnc_runtime_types::Restriction::None,
                 )]
                 .try_into()
                 .unwrap(),
@@ -149,7 +149,7 @@ mod tests {
             name: vec![116u8, 101u8, 115u8, 116u8].try_into().unwrap(), // test
             version: 1u32,
             program: vec![BooleanExpressionSymbol::Restriction(
-                dscp_runtime_types::Restriction::InputHasMetadata {
+                sqnc_runtime_types::Restriction::InputHasMetadata {
                     index: 1u32,
                     metadata_key: vec![107u8, 101u8, 121u8].try_into().unwrap(), // key
                 },

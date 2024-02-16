@@ -1,5 +1,5 @@
-use dscp_lang::cli::Cli as LangCli;
 use sc_cli::RunCmd;
+use sqnc_lang::cli::Cli as LangCli;
 
 #[derive(Debug, clap::Parser)]
 pub struct Cli {
@@ -49,6 +49,6 @@ pub enum Subcommand {
     /// Db meta columns information.
     ChainInfo(sc_cli::ChainInfoCmd),
 
-    /// DSCP language tool for parsing and compiling dscp files.
+    /// SQNC language tool for parsing and compiling sqnc files.
     Lang(LangCli),
 }

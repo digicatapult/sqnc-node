@@ -17,7 +17,7 @@ use sp_consensus_babe::AuthorityId;
 use sp_core::H256;
 use sp_keyring::sr25519::Keyring::Alice;
 
-use dscp_node_runtime::{self, opaque::Block, RuntimeApi};
+use sqnc_node_runtime::{self, opaque::Block, RuntimeApi};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -31,11 +31,11 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
     type ExtendHostFunctions = ();
 
     fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-        dscp_node_runtime::api::dispatch(method, data)
+        sqnc_node_runtime::api::dispatch(method, data)
     }
 
     fn native_version() -> sc_executor::NativeVersion {
-        dscp_node_runtime::native_version()
+        sqnc_node_runtime::native_version()
     }
 }
 

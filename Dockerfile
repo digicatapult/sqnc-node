@@ -22,18 +22,18 @@ elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
 fi
 EOF
 
-ARG DSCP_VERSION=latest
-ARG DSCP_REPO=https://github.com/digicatapult/dscp-node
+ARG SQNC_VERSION=latest
+ARG SQNC_REPO=https://github.com/digicatapult/sqnc-node
 
 RUN <<EOF
 if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-  ./fetch --repo="${DSCP_REPO}" --tag="${DSCP_VERSION}" --release-asset="dscp-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./;
-  mkdir ./dscp-node;
-  tar -xzf ./dscp-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./dscp-node;
+  ./fetch --repo="${SQNC_REPO}" --tag="${SQNC_VERSION}" --release-asset="sqnc-node-.*-x86_64-unknown-linux-gnu.tar.gz" ./;
+  mkdir ./sqnc-node;
+  tar -xzf ./sqnc-node-*-x86_64-unknown-linux-gnu.tar.gz -C ./sqnc-node;
 elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
-  ./fetch --repo="${DSCP_REPO}" --tag="${DSCP_VERSION}" --release-asset="dscp-node-.*-aarch64-unknown-linux-gnu.tar.gz" ./;
-  mkdir ./dscp-node;
-  tar -xzf ./dscp-node-*-aarch64-unknown-linux-gnu.tar.gz -C ./dscp-node;
+  ./fetch --repo="${SQNC_REPO}" --tag="${SQNC_VERSION}" --release-asset="sqnc-node-.*-aarch64-unknown-linux-gnu.tar.gz" ./;
+  mkdir ./sqnc-node;
+  tar -xzf ./sqnc-node-*-aarch64-unknown-linux-gnu.tar.gz -C ./sqnc-node;
 fi
 EOF
 
@@ -45,13 +45,13 @@ apt-get install -y libgcc-11-dev curl
 rm -rf /var/lib/apt/lists/*
 EOF
 
-RUN mkdir /dscp-node /data
+RUN mkdir /sqnc-node /data
 
-COPY --from=setup /tmp/dscp-node /dscp-node/
+COPY --from=setup /tmp/sqnc-node /sqnc-node/
 
-WORKDIR /dscp-node
+WORKDIR /sqnc-node
 
-ENTRYPOINT [ "/dscp-node/dscp-node" ]
+ENTRYPOINT [ "/sqnc-node/sqnc-node" ]
 
 HEALTHCHECK CMD curl -f http://localhost:9944/health || exit 1
 
