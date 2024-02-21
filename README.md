@@ -181,7 +181,7 @@ pub fn disable_process(
 The process `program` argument is formed of a `BoundedVec` of `BooleanExpressionSymbol`s with a configured maximum length in our runtime of 200 symbols. Each `BooleanExpressionSymbol` can be either a process `Restriction` (see below) which evaluates to a boolean value at runtime or a `BooleanOperation` which can perform an binary operation on a pair of boolean arguments. The program itself is then a binary expression tree written in `postfix` notation so the tree:
 
 ```
-     OR
+     AND
    /    \
  AND    OR
  / \    / \
