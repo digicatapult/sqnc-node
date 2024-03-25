@@ -58,6 +58,7 @@ pub enum MetadataValue<TokenId> {
     File(Hash),
     Literal(BoundedVec<u8, ConstU32<32>>),
     TokenId(TokenId),
+    Integer(i128),
     None,
 }
 

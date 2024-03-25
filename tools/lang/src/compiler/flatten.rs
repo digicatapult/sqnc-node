@@ -65,6 +65,17 @@ fn transform_comparison<'a>(
             op,
             right,
         }),
+        Comparison::PropInt { left, op, right } => Ok(Comparison::PropInt {
+            left: AstNode {
+                value: TokenProp {
+                    token: transform_name(left.value.token, token_name_transforms.clone())?,
+                    prop: left.value.prop,
+                },
+                span: left.span,
+            },
+            op,
+            right,
+        }),
         Comparison::PropSender { left, op } => Ok(Comparison::PropSender {
             left: AstNode {
                 value: TokenProp {

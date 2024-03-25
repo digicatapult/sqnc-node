@@ -1,6 +1,6 @@
 [package]
 name = "sqnc-node-runtime"
-version = "11.0.0"
+version = "11.1.0"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"
 license = "Apache-2.0"

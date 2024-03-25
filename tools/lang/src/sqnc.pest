@@ -5,6 +5,7 @@ char = {
     | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
     | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
 }
+number = ${ "-"? ~ ASCII_DIGIT+ }
 
 ident = @{ !(keyword ~ !(ASCII_ALPHANUMERIC | "_")) ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 ident_prop = { ident ~ "." ~ ident }
@@ -18,13 +19,15 @@ keyword = _{ pub | priv | fn | token | where | sender | bool_op | cmp_op }
 
 file = { "File" }
 literal = { "Literal" }
+integer = { "Integer" }
 role = { "Role" }
 none = { "None" }
 sender = { "sender" }
 literal_value = { string }
+integer_value = { number }
 
-partial_type = _{ file | literal | role | none | literal_value | ident }
-cmp_type = _{ file | literal | role | none }
+partial_type = _{ file | literal | integer | role | none | literal_value | integer_value | ident }
+cmp_type = _{ file | literal | integer | role | none }
 
 type = { partial_type ~ ("|" ~ partial_type)* }
 
@@ -34,6 +37,7 @@ properties = { (field ~ ",")* ~ (field)? }
 token_decl = { token ~ ident ~ "{" ~ properties ~ "}" }
 
 prop_lit_cmp = { ident_prop ~ cmp_op ~ literal_value }
+prop_int_cmp = { ident_prop ~ cmp_op ~ integer_value }
 prop_sender_cmp = { ident_prop ~ cmp_op ~ sender }
 ident_ident_cmp = { ident ~ cmp_op ~ ident }
 prop_ident_cmp = { ident_prop ~ cmp_op ~ ident }
@@ -43,7 +47,7 @@ prop_type_cmp = { ident_prop ~ cmp_type_op ~ cmp_type }
 fn_args = { "|" ~ (ident ~ ",")* ~ ident? ~ "|" }
 fn_cmp = { ident ~ fn_args ~ "=>" ~ fn_args }
 
-cmp = _{ fn_cmp | prop_prop_cmp | prop_lit_cmp | prop_sender_cmp | prop_ident_cmp | ident_ident_cmp | prop_type_cmp }
+cmp = _{ fn_cmp | prop_prop_cmp | prop_lit_cmp | prop_int_cmp | prop_sender_cmp | prop_ident_cmp | ident_ident_cmp | prop_type_cmp }
 
 cmp_op = _{ eq | neq }
     eq = { "==" }

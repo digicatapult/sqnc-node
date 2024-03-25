@@ -41,7 +41,9 @@ pub enum TokenFieldType<'a> {
     File,
     Role,
     Literal,
+    Integer,
     LiteralValue(AstNode<'a, &'a str>),
+    IntegerValue(AstNode<'a, i128>),
     Token(AstNode<'a, &'a str>),
 }
 
@@ -52,7 +54,9 @@ impl<'a> Display for TokenFieldType<'a> {
             TokenFieldType::File => write!(f, "File"),
             TokenFieldType::Role => write!(f, "Role"),
             TokenFieldType::Literal => write!(f, "Literal"),
+            TokenFieldType::Integer => write!(f, "Integer"),
             TokenFieldType::LiteralValue(s) => write!(f, "\"{}\"", s.value),
+            TokenFieldType::IntegerValue(s) => write!(f, "{}", s.value),
             TokenFieldType::Token(s) => write!(f, "{}", s.value),
         }
     }
@@ -151,6 +155,7 @@ pub enum TypeCmpType {
     File,
     Role,
     Literal,
+    Integer,
     Token,
 }
 
@@ -171,6 +176,11 @@ pub enum Comparison<'a> {
         left: AstNode<'a, TokenProp<'a>>,
         op: BoolCmp,
         right: AstNode<'a, &'a str>,
+    },
+    PropInt {
+        left: AstNode<'a, TokenProp<'a>>,
+        op: BoolCmp,
+        right: AstNode<'a, i128>,
     },
     PropSender {
         left: AstNode<'a, TokenProp<'a>>,
@@ -212,6 +222,13 @@ impl<'a> Display for Comparison<'a> {
                     BoolCmp::Neq => "!=",
                 };
                 write!(f, "{}.{} {} \"{}\"", left.value.token, left.value.prop, op, right)
+            }
+            Comparison::PropInt { left, op, right } => {
+                let op = match op {
+                    BoolCmp::Eq => "==",
+                    BoolCmp::Neq => "!=",
+                };
+                write!(f, "{}.{} {} {}", left.value.token, left.value.prop, op, right)
             }
             Comparison::PropSender { left, op } => {
                 let op = match op {
@@ -255,6 +272,7 @@ impl<'a> Display for Comparison<'a> {
                     TypeCmpType::File => "File",
                     TypeCmpType::Role => "Role",
                     TypeCmpType::Literal => "Literal",
+                    TypeCmpType::Integer => "Integer",
                     TypeCmpType::Token => "Token",
                 };
                 write!(f, "{}.{}{} {}", left.value.token, left.value.prop, op, right)
