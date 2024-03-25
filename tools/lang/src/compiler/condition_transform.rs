@@ -137,10 +137,10 @@ pub fn transform_condition_to_program(
             match comp {
                 Comparison::Fn { .. } => Err(CompilationError {
                     stage: crate::compiler::CompilationStage::ReduceTokens,
-                    exit_code: exitcode::DATAERR,
+                    exit_code: exitcode::SOFTWARE,
                     inner: PestError::new_from_span(
                         ErrorVariant::CustomError {
-                            message: "Unexpected function call (should have been flattened)?".into(),
+                            message: "Internal Error. Unexpected function call (should have been flattened)?".into(),
                         },
                         span,
                     ),
@@ -182,6 +182,63 @@ pub fn transform_condition_to_program(
                         value: right.value.as_bytes().to_owned(),
                         span: right.span,
                     })?);
+
+                    let mut result = vec![match is_input {
+                        true => BooleanExpressionSymbol::Restriction(Restriction::FixedInputMetadataValue {
+                            index,
+                            metadata_key,
+                            metadata_value,
+                        }),
+                        false => BooleanExpressionSymbol::Restriction(Restriction::FixedOutputMetadataValue {
+                            index,
+                            metadata_key,
+                            metadata_value,
+                        }),
+                    }];
+
+                    if op == BoolCmp::Neq {
+                        result.append(&mut vec![
+                            BooleanExpressionSymbol::Restriction(Restriction::None),
+                            BooleanExpressionSymbol::Op(BooleanOperator::NotL),
+                        ]);
+                    }
+
+                    Ok(result)
+                }
+                Comparison::PropInt { left, op, right } => {
+                    let TokenPropLocation {
+                        is_input, index, types, ..
+                    } = find_token_prop(token_decls, fn_decl, &left.value)?;
+                    if types
+                        .iter()
+                        .find(|field_type| match &field_type.value {
+                            TokenFieldType::Integer => true,
+                            TokenFieldType::IntegerValue(v) => v.value == right.value,
+                            _ => false,
+                        })
+                        .is_none()
+                    {
+                        return Err(CompilationError {
+                            stage: crate::compiler::CompilationStage::GenerateRestrictions,
+                            exit_code: exitcode::DATAERR,
+                            inner: PestError::new_from_span(
+                                ErrorVariant::CustomError {
+                                    message: format!(
+                                        "Invalid comparison between property {} and value {}",
+                                        left.value.prop.value, right.value
+                                    ),
+                                },
+                                span,
+                            ),
+                        });
+                    }
+
+                    let metadata_key = to_bounded_vec(AstNode {
+                        value: left.value.prop.value.as_bytes().to_owned(),
+                        span: left.value.prop.span,
+                    })?;
+
+                    let metadata_value = MetadataValue::Integer(right.value);
 
                     let mut result = vec![match is_input {
                         true => BooleanExpressionSymbol::Restriction(Restriction::FixedInputMetadataValue {
@@ -605,6 +662,18 @@ pub fn transform_condition_to_program(
                                 index: left.index,
                                 metadata_key: metadata_key.clone(),
                                 metadata_value_type: MetadataValueType::Literal,
+                            },
+                        })],
+                        TypeCmpType::Integer => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
+                            true => Restriction::FixedInputMetadataValueType {
+                                index: left.index,
+                                metadata_key: metadata_key.clone(),
+                                metadata_value_type: MetadataValueType::Integer,
+                            },
+                            false => Restriction::FixedOutputMetadataValueType {
+                                index: left.index,
+                                metadata_key: metadata_key.clone(),
+                                metadata_value_type: MetadataValueType::Integer,
                             },
                         })],
                         TypeCmpType::Token => vec![BooleanExpressionSymbol::Restriction(match left.is_input {

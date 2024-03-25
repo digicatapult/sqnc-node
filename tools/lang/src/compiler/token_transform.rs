@@ -60,7 +60,20 @@ pub fn token_decl_to_conditions<'a>(
                             span: field_type.span,
                         },
                     },
+                    TokenFieldType::Integer => Comparison::PropType {
+                        left: token_prop_node,
+                        op: TypeCmp::Is,
+                        right: AstNode {
+                            value: TypeCmpType::Integer,
+                            span: field_type.span,
+                        },
+                    },
                     TokenFieldType::LiteralValue(v) => Comparison::PropLit {
+                        left: token_prop_node,
+                        op: BoolCmp::Eq,
+                        right: v.clone(),
+                    },
+                    TokenFieldType::IntegerValue(v) => Comparison::PropInt {
                         left: token_prop_node,
                         op: BoolCmp::Eq,
                         right: v.clone(),
@@ -214,6 +227,33 @@ mod tests {
     }
 
     #[test]
+    fn single_prop_integer() {
+        let token_name = to_ast_node("test");
+        let prop_name = to_ast_node("prop");
+        let token_decl = TokenDecl {
+            name: to_ast_node("token"),
+            props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
+                name: prop_name.clone(),
+                types: Arc::new([to_ast_node(TokenFieldType::Integer)]),
+            })])),
+        };
+        let result = token_decl_to_conditions(token_name.clone(), &token_decl);
+
+        assert!(result.is_ok());
+        assert_eq!(
+            result.unwrap(),
+            vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropType {
+                left: to_ast_node(TokenProp {
+                    token: token_name,
+                    prop: prop_name
+                }),
+                op: TypeCmp::Is,
+                right: to_ast_node(TypeCmpType::Integer)
+            }))]
+        );
+    }
+
+    #[test]
     fn single_prop_token() {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
@@ -258,6 +298,34 @@ mod tests {
         assert_eq!(
             result.unwrap(),
             vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropLit {
+                left: to_ast_node(TokenProp {
+                    token: token_name,
+                    prop: prop_name
+                }),
+                op: BoolCmp::Eq,
+                right: lit_val
+            }))]
+        );
+    }
+
+    #[test]
+    fn single_prop_int_val() {
+        let token_name = to_ast_node("test");
+        let prop_name = to_ast_node("prop");
+        let lit_val = to_ast_node(42i128);
+        let token_decl = TokenDecl {
+            name: to_ast_node("token"),
+            props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
+                name: prop_name.clone(),
+                types: Arc::new([to_ast_node(TokenFieldType::IntegerValue(lit_val.clone()))]),
+            })])),
+        };
+        let result = token_decl_to_conditions(token_name.clone(), &token_decl);
+
+        assert!(result.is_ok());
+        assert_eq!(
+            result.unwrap(),
+            vec![ExpressionTree::Leaf(to_ast_node(Comparison::PropInt {
                 left: to_ast_node(TokenProp {
                     token: token_name,
                     prop: prop_name

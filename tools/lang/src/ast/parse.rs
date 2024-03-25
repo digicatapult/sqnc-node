@@ -23,14 +23,38 @@ fn parse_literal<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a
     })
 }
 
+fn parse_integer<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, i128>, CompilationError> {
+    let integer_value_string = pair.into_inner().next().unwrap(); // integer_value
+    let parsed_integer = integer_value_string.as_str().parse::<i128>();
+
+    match parsed_integer {
+        Ok(val) => Ok(AstNode {
+            value: val,
+            span: integer_value_string.as_span(),
+        }),
+        Err(_) => Err(CompilationError {
+            stage: CompilationStage::BuildAst,
+            exit_code: exitcode::DATAERR,
+            inner: PestError::new_from_span(
+                ErrorVariant::CustomError {
+                    message: "Error parsing integer".into(),
+                },
+                integer_value_string.as_span(),
+            ),
+        }),
+    }
+}
+
 fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenFieldType>, CompilationError> {
     let span = pair.as_span();
     let field_type = match pair.as_rule() {
         Rule::file => Ok(TokenFieldType::File),
         Rule::literal => Ok(TokenFieldType::Literal),
+        Rule::integer => Ok(TokenFieldType::Integer),
         Rule::role => Ok(TokenFieldType::Role),
         Rule::none => Ok(TokenFieldType::None),
         Rule::literal_value => Ok(TokenFieldType::LiteralValue(parse_literal(pair)?)),
+        Rule::integer_value => Ok(TokenFieldType::IntegerValue(parse_integer(pair)?)),
         Rule::ident => Ok(TokenFieldType::Token(AstNode {
             span: pair.as_span(),
             value: pair.as_str(),
@@ -255,6 +279,18 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
 
             Ok(AstNode {
                 value: Comparison::PropLit { left, op, right },
+                span,
+            })
+        }
+        Rule::prop_int_cmp => {
+            let mut pairs = pair.into_inner();
+
+            let left = parse_ident_prop(pairs.next().unwrap())?;
+            let op = parse_bool_cmp_op(pairs.next().unwrap())?;
+            let right = parse_integer(pairs.next().unwrap())?; // literal_value
+
+            Ok(AstNode {
+                value: Comparison::PropInt { left, op, right },
                 span,
             })
         }
