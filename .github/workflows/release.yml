@@ -166,7 +166,7 @@ jobs:
           popd;
 
       - name: Build release version
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: ${{ needs.get-version.outputs.version }}
@@ -192,7 +192,7 @@ jobs:
             }
       - name: Build release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: latest
