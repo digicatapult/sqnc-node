@@ -1,79 +1,95 @@
-# Upgrading Substrate dependencies
+# Upgrading polkadot-sdk dependencies
 
-This guide will hopefully provide help to upgrade Substrate in the future.
+A guide on how to upgrade to the latest [release](https://github.com/paritytech/polkadot-sdk/releases) of `polkadot-sdk`.
 
-This is a guide based on updating from `0.9.25` to `0.9.30` and the issues it caused can be seen [here](https://github.com/digicatapult/sqnc-node/pull/91/files)
+Based on updating from `release-polkadot-v1.5.0` to `release-polkadot-v1.9.0`. See the [PR](https://github.com/digicatapult/sqnc-node/pull/169/files).
 
-## Prerequisities
+## Upgrade branch version
 
-Make sure **main** is up to date and create an **integration** branch which all other branches will be PR'd into. This reduces git issues like having to use `git reset`.
+In the root `Cargo.toml` bump the dependencies that point to a release branch of the `polkadot-sdk`:
 
-You will need to run `rustup` which is [documented here](https://github.com/digicatapult/sqnc-node/blob/main/README.md).
+For example
 
-## Upgrade Substrate
-
-This [diener tool](https://crates.io/crates/diener) can be used to update the toml versions easily by upgrading each `cargo.toml` given a specific branch/path
-
-`cargo install diener`
-and in the root of the `veritable-node` directory run `diener update --substrate --branch polkadot-v<version>`
-
-### Test Building the Node
-
-We are test building the Node having only upgraded the dependencies, this includes no code changes to any of the pallets, runtime or node. We include features runtime benchmarks to fully tests all deps.
-
-To build the Node:
-
-```bash
-cargo build --release --features runtime-benchmarks
+```rust
+frame-support = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.5.0" }
 ```
+
+becomes
+
+```rust
+frame-support = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.9.0" }
+```
+
+Run `cargo update` to get newer versions of all dependencies.
+
+## Debugging techniques
+
+Now that the `polkadot-sdk` dependencies point to a newer release, the next steps involve attempting to compile various sections of `sqnc-node`. There will likely be errors and the advice from the compiler can be difficult to understand. Some techniques for solving compiler errors:
+
+- Thoroughly read ALL of the error. The compiler produces a lot of output for errors and often the relevant tip is buried deep amongst lots of other information. For example, the important part of the following error was `perhaps two different versions of crate 'jsonrpsee_core' are being used?`. The solution was to bump to the latest version of `jsonrpsee` in `Cargo.toml`.
+
+```rust
+error[E0271]: expected `impl Fn(DenyUnsafe, Arc<dyn SpawnNamed>) -> Result<RpcModule<()>, Error>` to be a opaque type that returns `Result<RpcModule<_>, Error>`, but it returns `Result<RpcModule<()>, Error>`
+   --> node/src/test_service.rs:214:22
+    |
+214 |         rpc_builder: Box::new(rpc_builder),
+    |                      ^^^^^^^^^^^^^^^^^^^^^ expected `Result<RpcModule<_>, Error>`, found `Result<RpcModule<()>, Error>`
+    |
+    = note: `RpcModule<()>` and `jsonrpsee_core::server::rpc_module::RpcModule<_>` have similar names, but are actually distinct types
+note: `RpcModule<()>` is defined in crate `jsonrpsee_core`
+   --> /Users/JGray/.cargo/registry/src/index.crates.io-6f17d22bba15001f/jsonrpsee-core-0.16.3/src/server/rpc_module.rs:522:1
+    |
+522 | pub struct RpcModule<Context> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: `jsonrpsee_core::server::rpc_module::RpcModule<_>` is defined in crate `jsonrpsee_core`
+   --> /Users/JGray/.cargo/registry/src/index.crates.io-6f17d22bba15001f/jsonrpsee-core-0.22.3/src/server/rpc_module.rs:502:1
+    |
+502 | pub struct RpcModule<Context> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: perhaps two different versions of crate `jsonrpsee_core` are being used?
+    = note: required for the cast from `Box<impl Fn(DenyUnsafe, Arc<(dyn SpawnNamed + 'static)>) -> Result<RpcModule<()>, sc_service::Error>>` to `Box<(dyn Fn(DenyUnsafe, Arc<(dyn SpawnNamed + 'static)>) -> Result<jsonrpsee_core::server::rpc_module::RpcModule<_>, sc_service::Error> + 'static)>`
+```
+
+- Rerun `cargo build` after attempting to fix each error. One small change can fix many errors (or generate lots of new ones if wrong).
+- Check the [templates](https://github.com/paritytech/polkadot-sdk/tree/release-polkadot-v1.9.0/templates) of the release branch to see what differences there are between the paritytech managed template and `sqnc-node` (which is based on the template). Look back through the commit log - there can often be pull requests that show the necessary code changes to work with the newest release.
+- Check [release changelogs](https://github.com/paritytech/polkadot-sdk/releases).
 
 ### Pallets
 
-Once the version updates have been made we should try to build a pallet, in this example we shall try to build the `pallet-doas` in isolation.
-
-`cargo build --release -p pallet-doas`
-
-If there are errors you will need to investigate. It would also be worth looking at the [substrate-node-template](https://github.com/substrate-developer-hub/substrate-node-template) to see what what changes they have made when updgrading and potentially compare code changes between different tagged releases of substrate.
-
-For example, during the `0.9.30` upgrade `Event` and `Origin` became `RuntimeEvent` and
-`RuntimeOrigin`. This information was
-obtained from checking the [Polkadot `0.9.30` branch](https://github.com/paritytech/substrate/tree/polkadot-v0.9.30). Checking the branch will help with renaming and syntax changes.
-
-[Version changes can be the most difficult parts of the code](https://github.com/digicatapult/sqnc-node/pull/91/files#diff-6d40c1b90e071cdb5271cce23374b2ecae20ab264980fda18a4d4d4c290efca1), if you look at the original compared against the new version there could substancial, or minor, changes (depending on the update).
-
-After the change each pallet needs to be inspected, fixed if needed, along with fixes to tests. If there are any compilation errors Rust is very good at highlighting issues and suggesting looking error codes e.g. `rustc --explain E0152 `.
+First attempt to build each of the pallets.
 
 ```bash
-cargo build --release pallet-doas
+cargo build --release \
+    -p pallet-doas \
+    -p pallet-process-validation \
+    -p pallet-symmetric-key \
+    -p sqnc-pallet-traits \
+    -p pallet-transaction-payment-free \
+    -p pallet-utxo-nft
 ```
 
-Once a pallet has been brought up to date it needs to be tested, something like
-`cargo test --release -p pallet-doas`
+Pallets can also be built one at a time e.g. `cargo build --release -p pallet-doas`.
 
-If it passes, bump its version in the pallets `pallets/doas/Cargo.toml` push it into it's own PR, then into the **integration** branch
+Once a pallet successfully builds, it needs to be tested `cargo test --release -p pallet-doas`.
+
+If tests pass, bump at least a minor version in the pallet `Cargo.toml` e.g. `pallets/doas/Cargo.toml`.
 
 ### Runtime
 
-We now need to test that the upgraded dependencies work for the runtime including our newly upgraded pallets. So firstly replace all the pallet versions in the runtime's `runtime/Cargo.toml` and then we need to test a runtime build, we do this by
-`cargo build --release -p sqnc-node-runtime`
+Test that the upgraded dependencies work for the runtime, including the newly upgraded pallets `cargo build --release -p sqnc-node-runtime`. Fix any compilation errors.
 
-We will need to increment the runtimes `spec_version` to a higher value, note spec_version does not recognize semver, so we treat it as a whole number. e.g. In place of `5.6.8` the `spec_version` would be `568`.
+Bump the runtime version in `runtime/Cargo.toml`. Also increment the runtime `spec_version` in `runtime/src/lib.rs` to match. Note `spec_version` does not recognize semver, so treat it as a whole number. e.g. in place of `5.6.8` the `spec_version` would be `568`.
 
-We should also bump our runtime's version in `runtime/Cargo.toml`
-We should now run the tests for the runtime, which we can do using:
+Run the tests for the runtime:
 
 `cargo test --release -p sqnc-node-runtime`
 
-If the tests pass create a PR from the **integration** branch.
-
 ### Node
 
-The last item to upgrade is the `veritable-node` itself.
-
-There are two steps to undertake, the veritable-node's and veritable-node-runtime's versions should be bumped in `node/Cargo.toml` and then we should try to build with the runtime-benchmarks feature enabled.
+The last item to upgrade is the `node` itself. Bump the node's version in `node/Cargo.toml` and try to build with the runtime-benchmarks feature enabled:
 
 ```bash
 cargo build --release --features runtime-benchmarks
 ```
 
-Once all of the nodes/pallets have been checked, `cargo fmt` passes and their tests pass a PR can be raised against the **integration** branch into main.
+Fix any compilation issues and run `cargo test`. Finally remember to `cargo fmt`.
