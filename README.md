@@ -10,6 +10,7 @@ You will need a Rust environment:
 
 ```bash
 curl https://sh.rustup.rs -sSf | sh
+rustup component add rust-src
 ```
 
 ### Building the Node

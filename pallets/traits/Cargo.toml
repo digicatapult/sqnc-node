@@ -1,6 +1,6 @@
 [package]
 name = "sqnc-pallet-traits"
-version = "3.3.0"
+version = "3.4.0"
 edition = "2021"
 authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
 license = 'Apache-2.0'
