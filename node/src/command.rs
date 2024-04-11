@@ -39,7 +39,6 @@ impl SubstrateCli for Cli {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()?),
             "" | "local" => Box::new(chain_spec::local_testnet_config()?),
-            "l3-prod" => Box::new(chain_spec::l3_prod_config()?),
             "l3-sqnc" => Box::new(chain_spec::l3_sqnc_config()?),
             path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
         })
