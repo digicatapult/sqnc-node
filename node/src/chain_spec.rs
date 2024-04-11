@@ -73,6 +73,10 @@ pub fn l3_prod_config() -> Result<ChainSpec, String> {
     ChainSpec::from_json_bytes(&include_bytes!("../res/prod-l3-azure.json")[..])
 }
 
+pub fn l3_sqnc_config() -> Result<ChainSpec, String> {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/l3-sqnc.json")[..])
+}
+
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
     Ok(ChainSpec::builder(
         WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?,

@@ -8876,7 +8876,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-node"
-version = "11.2.0"
+version = "11.3.0"
 dependencies = [
  "async-trait",
  "bs58 0.5.1",
