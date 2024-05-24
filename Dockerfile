@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM ubuntu:jammy AS setup
+FROM ubuntu:noble AS setup
 
 RUN <<EOF
 apt-get update
@@ -37,7 +37,7 @@ elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
 fi
 EOF
 
-FROM ubuntu:jammy AS runtime
+FROM ubuntu:noble AS runtime
 
 RUN <<EOF
 apt-get update
