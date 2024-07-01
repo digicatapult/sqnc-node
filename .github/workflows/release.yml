@@ -258,7 +258,7 @@ jobs:
           username: ${{ secrets.SQNC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.SQNC_DOCKERHUB_TOKEN }}
       - name: Build image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
