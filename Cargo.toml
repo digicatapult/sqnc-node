@@ -9,17 +9,17 @@ resolver = "2"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.203", default-features = false }
+serde = { version = "1.0.204", default-features = false }
 serde_json = { version = "1.0.120", default-features = false }
 clap = { version = "4.5.8", features = ["derive"] }
 futures = { version = "0.3.30", features = ["thread-pool"] }
 bs58 = "0.5.1"
-async-trait = "0.1.80"
+async-trait = "0.1.81"
 hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.5.0"
-pest = "2.7.10"
-pest_derive = "2.7.10"
+pest = "2.7.11"
+pest_derive = "2.7.11"
 thiserror = "1.0.61"
 strum = { version = "0.26.3", default-features = false }
 strum_macros = { version = "0.26.4", default-features = false }
