@@ -9,7 +9,7 @@ resolver = "2"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.206", default-features = false }
+serde = { version = "1.0.207", default-features = false }
 serde_json = { version = "1.0.124", default-features = false }
 clap = { version = "4.5.15", features = ["derive"] }
 futures = { version = "0.3.30", features = ["thread-pool"] }
