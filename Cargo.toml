@@ -9,9 +9,9 @@ resolver = "2"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.207", default-features = false }
-serde_json = { version = "1.0.124", default-features = false }
-clap = { version = "4.5.15", features = ["derive"] }
+serde = { version = "1.0.208", default-features = false }
+serde_json = { version = "1.0.125", default-features = false }
+clap = { version = "4.5.16", features = ["derive"] }
 futures = { version = "0.3.30", features = ["thread-pool"] }
 bs58 = "0.5.1"
 async-trait = "0.1.81"
