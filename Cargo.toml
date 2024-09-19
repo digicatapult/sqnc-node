@@ -18,8 +18,8 @@ async-trait = "0.1.82"
 hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.5.0"
-pest = "2.7.12"
-pest_derive = "2.7.12"
+pest = "2.7.13"
+pest_derive = "2.7.13"
 thiserror = "1.0.63"
 strum = { version = "0.26.3", default-features = false }
 strum_macros = { version = "0.26.4", default-features = false }
