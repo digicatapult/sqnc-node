@@ -10,16 +10,16 @@ resolver = "2"
 # non-substrate dependencies #
 ##############################
 serde = { version = "1.0.210", default-features = false }
-serde_json = { version = "1.0.128", default-features = false }
-clap = { version = "4.5.18", features = ["derive"] }
-futures = { version = "0.3.30", features = ["thread-pool"] }
+serde_json = { version = "1.0.132", default-features = false }
+clap = { version = "4.5.20", features = ["derive"] }
+futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
-async-trait = "0.1.82"
+async-trait = "0.1.83"
 hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.5.0"
-pest = "2.7.13"
-pest_derive = "2.7.13"
+pest = "2.7.14"
+pest_derive = "2.7.14"
 thiserror = "1.0.64"
 strum = { version = "0.26.3", default-features = false }
 strum_macros = { version = "0.26.4", default-features = false }
