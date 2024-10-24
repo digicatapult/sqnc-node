@@ -28,7 +28,7 @@ strum_macros = { version = "0.26.4", default-features = false }
 # substrate linked dependencies in crates.io that may be pinned #
 #################################################################
 jsonrpsee = { version = "0.22.3" }
-scale-info = { version = "2.11.4", default-features = false }
+scale-info = { version = "2.11.5", default-features = false }
 parity-scale-codec = { version = "3.6.12", default-features = false }
 
 ###################################
