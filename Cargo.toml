@@ -20,7 +20,7 @@ exitcode = "1.1.2"
 lazy_static = "1.5.0"
 pest = "2.7.14"
 pest_derive = "2.7.14"
-thiserror = "1.0.65"
+thiserror = "1.0.67"
 strum = { version = "0.26.3", default-features = false }
 strum_macros = { version = "0.26.4", default-features = false }
 
