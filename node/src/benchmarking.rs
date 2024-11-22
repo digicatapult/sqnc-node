@@ -7,7 +7,7 @@ use sp_core::{Encode, Pair};
 use sp_inherents::{InherentData, InherentDataProvider};
 use sp_keyring::Sr25519Keyring;
 use sp_runtime::{OpaqueExtrinsic, SaturatedConversion};
-use sqnc_node_runtime as runtime;
+use sqnc_runtime as runtime;
 
 use std::{sync::Arc, time::Duration};
 

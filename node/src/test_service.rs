@@ -9,7 +9,6 @@ use sc_consensus_manual_seal::{
     consensus::{babe::BabeConsensusDataProvider, timestamp::SlotTimestampProvider},
     EngineCommand, ManualSealParams,
 };
-pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
@@ -17,29 +16,15 @@ use sp_consensus_babe::AuthorityId;
 use sp_core::H256;
 use sp_keyring::sr25519::Keyring::Alice;
 
-use sqnc_node_runtime::{self, opaque::Block, RuntimeApi};
+use sqnc_runtime::{self, opaque::Block, RuntimeApi};
 
-// Our native executor instance.
-pub struct ExecutorDispatch;
+pub type HostFunctions = (
+    sp_io::SubstrateHostFunctions,
+    sp_statement_store::runtime_api::HostFunctions,
+);
 
-impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
-    /// Only enable the benchmarking host functions when we actually want to benchmark.
-    #[cfg(feature = "runtime-benchmarks")]
-    type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
-    /// Otherwise we only use the default Substrate host functions.
-    #[cfg(not(feature = "runtime-benchmarks"))]
-    type ExtendHostFunctions = ();
-
-    fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-        sqnc_node_runtime::api::dispatch(method, data)
-    }
-
-    fn native_version() -> sc_executor::NativeVersion {
-        sqnc_node_runtime::native_version()
-    }
-}
-
-pub type FullClient = sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
+pub type RuntimeExecutor = sc_executor::WasmExecutor<HostFunctions>;
+pub type FullClient = sc_service::TFullClient<Block, RuntimeApi, RuntimeExecutor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type FullGrandpaBlockImport = sc_consensus_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
@@ -60,10 +45,7 @@ fn new_partial(
         sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::FullPool<Block, FullClient>,
         (
-            impl Fn(
-                crate::rpc::DenyUnsafe,
-                sc_rpc::SubscriptionTaskExecutor,
-            ) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
+            impl Fn(sc_rpc::SubscriptionTaskExecutor) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
             sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
             sc_consensus_babe::BabeLink<Block>,
             Receiver<EngineCommand<H256>>,
@@ -83,7 +65,7 @@ fn new_partial(
         })
         .transpose()?;
 
-    let executor = sc_service::new_native_or_wasm_executor(config);
+    let executor = sc_service::new_wasm_executor(&config.executor);
 
     let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<Block, RuntimeApi, _>(
         config,
@@ -131,11 +113,10 @@ fn new_partial(
     let rpc_builder = {
         let client = client.clone();
         let pool = transaction_pool.clone();
-        Box::new(move |deny_unsafe, _| {
+        Box::new(move |_| {
             let deps = crate::rpc::TestDeps {
                 client: client.clone(),
                 pool: pool.clone(),
-                deny_unsafe,
                 command_sink: command_sink.clone(),
             };
 
@@ -156,7 +137,9 @@ fn new_partial(
 }
 
 /// Builds a new service for a full client.
-pub fn new_test(config: Configuration) -> Result<TaskManager, ServiceError> {
+pub fn new_test<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::traits::Block>::Hash>>(
+    config: Configuration,
+) -> Result<TaskManager, ServiceError> {
     let sc_service::PartialComponents {
         client,
         backend,
@@ -168,7 +151,12 @@ pub fn new_test(config: Configuration) -> Result<TaskManager, ServiceError> {
         other: (rpc_builder, block_import, babe_link, commands_stream, mut telemetry),
     } = new_partial(&config)?;
 
-    let net_config = sc_network::config::FullNetworkConfiguration::new(&config.network);
+    let net_config =
+        sc_network::config::FullNetworkConfiguration::<Block, <Block as sp_runtime::traits::Block>::Hash, N>::new(
+            &config.network,
+            config.prometheus_registry().cloned(),
+        );
+    let metrics = N::register_notification_metrics(config.prometheus_registry());
 
     let (network, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
         sc_service::build_network(sc_service::BuildNetworkParams {
@@ -179,8 +167,9 @@ pub fn new_test(config: Configuration) -> Result<TaskManager, ServiceError> {
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
             block_announce_validator_builder: None,
-            warp_sync_params: None,
+            warp_sync_config: None,
             block_relay: None,
+            metrics,
         })?;
 
     if config.offchain_worker.enabled {
@@ -193,7 +182,7 @@ pub fn new_test(config: Configuration) -> Result<TaskManager, ServiceError> {
                 keystore: Some(keystore_container.keystore()),
                 offchain_db: backend.offchain_storage(),
                 transaction_pool: Some(OffchainTransactionPoolFactory::new(transaction_pool.clone())),
-                network_provider: network.clone(),
+                network_provider: Arc::new(network.clone()),
                 enable_http_requests: true,
                 custom_extensions: |_| vec![],
             })

@@ -76,13 +76,13 @@ If tests pass, bump at least a minor version in the pallet `Cargo.toml` e.g. `pa
 
 ### Runtime
 
-Test that the upgraded dependencies work for the runtime, including the newly upgraded pallets `cargo build --release -p sqnc-node-runtime`. Fix any compilation errors.
+Test that the upgraded dependencies work for the runtime, including the newly upgraded pallets `cargo build --release -p sqnc-runtime`. Fix any compilation errors.
 
 Bump the runtime version in `runtime/Cargo.toml`. Also increment the runtime `spec_version` in `runtime/src/lib.rs` to match. Note `spec_version` does not recognize semver, so treat it as a whole number. e.g. in place of `5.6.8` the `spec_version` would be `568`.
 
 Run the tests for the runtime:
 
-`cargo test --release -p sqnc-node-runtime`
+`cargo test --release -p sqnc-runtime`
 
 ### Node
 

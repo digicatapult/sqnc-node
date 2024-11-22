@@ -45,6 +45,8 @@ sp-timestamp = { workspace = true }
 sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
 sp-keystore = { workspace = true }
+sp-io = { workspace = true }
+sp-statement-store = { workspace = true }
 frame-system = { workspace = true }
 
 # These dependencies are used for the node template's RPCs
@@ -62,7 +64,7 @@ frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 
 # Local Dependencies
-sqnc-node-runtime = { path = '../runtime' }
+sqnc-runtime = { path = '../runtime' }
 sqnc-runtime-types = { path = '../runtime/types' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
 sqnc-lang = { path = '../tools/lang' }
@@ -78,7 +80,7 @@ substrate-build-script-utils = { workspace = true }
 [features]
 default = []
 runtime-benchmarks = [
-	"sqnc-node-runtime/runtime-benchmarks",
+	"sqnc-runtime/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
 ]

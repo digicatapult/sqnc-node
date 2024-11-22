@@ -26,7 +26,8 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-use frame_support::genesis_builder_helper::{build_config, create_default_config};
+use frame_support::genesis_builder_helper::{build_state, get_preset};
+
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime,
@@ -349,13 +350,14 @@ impl pallet_symmetric_key::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type KeyLength = KeyLength;
     type RefreshPeriod = RefreshPeriod;
-    type ScheduleCall = RuntimeCall;
+    type RuntimeCall = RuntimeCall;
     type UpdateOrigin = MoreThanHalfMembers;
     type RotateOrigin = MoreThanTwoMembers;
     type Randomness = pallet_babe::RandomnessFromOneEpochAgo<Runtime>;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
     type WeightInfo = pallet_symmetric_key::weights::SubstrateWeight<Runtime>;
+    type Preimages = Preimage;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -605,8 +607,8 @@ impl_runtime_apis! {
         }
     }
 
-    impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
-        fn account_nonce(account: AccountId) -> Index {
+    impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
+        fn account_nonce(account: AccountId) -> Nonce {
             System::account_nonce(account)
         }
     }
@@ -707,12 +709,16 @@ impl_runtime_apis! {
     }
 
     impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
-        fn create_default_config() -> Vec<u8> {
-            create_default_config::<RuntimeGenesisConfig>()
+        fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
+            build_state::<RuntimeGenesisConfig>(config)
         }
 
-        fn build_config(config: Vec<u8>) -> sp_genesis_builder::Result {
-            build_config::<RuntimeGenesisConfig>(config)
+        fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
+            get_preset::<RuntimeGenesisConfig>(id, |_| None)
+        }
+
+        fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
+            vec![]
         }
     }
 }

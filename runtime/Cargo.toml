@@ -1,5 +1,5 @@
 [package]
-name = "sqnc-node-runtime"
+name = "sqnc-runtime"
 version = "11.2.0"
 authors = ["Digital Catapult <https://www.digicatapult.org.uk>"]
 edition = "2021"

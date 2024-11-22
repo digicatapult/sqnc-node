@@ -11722,7 +11722,7 @@ dependencies = [
  "frame-benchmarking-cli",
  "frame-system",
  "futures",
- "jsonrpsee 0.22.3",
+ "jsonrpsee 0.24.7",
  "pallet-transaction-payment-free",
  "pallet-transaction-payment-rpc",
  "sc-basic-authorship",
@@ -11752,12 +11752,14 @@ dependencies = [
  "sp-consensus-grandpa 21.0.0",
  "sp-core 34.0.0",
  "sp-inherents 34.0.0",
+ "sp-io 38.0.0",
  "sp-keyring 39.0.0",
  "sp-keystore 0.40.0",
  "sp-runtime 39.0.2",
+ "sp-statement-store 18.0.0",
  "sp-timestamp 34.0.0",
  "sqnc-lang",
- "sqnc-node-runtime",
+ "sqnc-runtime",
  "sqnc-runtime-types",
  "substrate-build-script-utils",
  "substrate-frame-rpc-system",
@@ -11765,7 +11767,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "sqnc-node-runtime"
+name = "sqnc-pallet-traits"
+version = "3.4.0"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime 39.0.2",
+ "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "sqnc-runtime"
 version = "11.2.0"
 dependencies = [
  "frame-benchmarking",
@@ -11812,17 +11825,6 @@ dependencies = [
  "sp-version 37.0.0",
  "sqnc-runtime-types",
  "substrate-wasm-builder",
-]
-
-[[package]]
-name = "sqnc-pallet-traits"
-version = "3.4.0"
-dependencies = [
- "frame-support",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime 39.0.2",
- "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

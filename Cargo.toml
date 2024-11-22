@@ -1,9 +1,9 @@
-[profile.release]
-panic = 'unwind'
-
 [workspace]
 members = ['node', 'pallets/*', 'runtime', 'runtime/types', 'tools/*']
 resolver = "2"
+
+[workspace.package]
+edition = "2021"
 
 [workspace.dependencies]
 ##############################
@@ -27,7 +27,7 @@ strum_macros = { version = "0.26.4", default-features = false }
 #################################################################
 # substrate linked dependencies in crates.io that may be pinned #
 #################################################################
-jsonrpsee = { version = "0.22.3" }
+jsonrpsee = { version = "0.24.3" }
 scale-info = { version = "2.11.5", default-features = false }
 parity-scale-codec = { version = "3.7.0", default-features = false }
 
@@ -59,6 +59,7 @@ sp-genesis-builder = { version = "0.15.1", default-features = false }
 sp-inherents = { version = "34.0.0", default-features = false }
 sp-offchain = { version = "34.0.0", default-features = false }
 sp-session = { version = "36.0.0", default-features = false }
+sp-statement-store = { version = "18.0.0", default-features = false }
 sp-storage = { version = "21.0.0", default-features = false }
 sp-transaction-pool = { version = "34.0.0", default-features = false }
 sp-version = { version = "37.0.0", default-features = false }
@@ -102,6 +103,9 @@ try-runtime-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", bran
 # build dependencies
 substrate-wasm-builder = { version = "24.0.1" }
 substrate-build-script-utils = { version = "11.0.0" }
+
+[profile.release]
+panic = 'unwind'
 
 [profile.production]
 inherits = "release"

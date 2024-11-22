@@ -4,7 +4,6 @@ use futures::channel::mpsc::Sender;
 use jsonrpsee::RpcModule;
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_manual_seal::{rpc::ManualSeal, rpc::ManualSealApiServer, EngineCommand};
-pub use sc_rpc_api::DenyUnsafe;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
@@ -13,7 +12,7 @@ use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 
 use sp_keystore::KeystorePtr;
-use sqnc_node_runtime::{opaque::Block, AccountId, Balance, Hash, Index};
+use sqnc_runtime::{opaque::Block, AccountId, Balance, Hash, Nonce};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
@@ -31,8 +30,6 @@ pub struct FullDeps<C, P, SC> {
     pub pool: Arc<P>,
     /// The SelectChain Strategy
     pub select_chain: SC,
-    /// Whether to deny unsafe calls
-    pub deny_unsafe: DenyUnsafe,
     /// BABE specific dependencies.
     pub babe: BabeDeps,
 }
@@ -45,7 +42,7 @@ where
     C: ProvideRuntimeApi<Block>,
     C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
     C: Send + Sync + 'static,
-    C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
+    C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BabeApi<Block>,
     C::Api: BlockBuilder<Block>,
@@ -61,8 +58,8 @@ where
         client,
         pool,
         select_chain,
-        deny_unsafe,
         babe,
+        ..
     } = deps;
 
     let BabeDeps {
@@ -70,9 +67,9 @@ where
         babe_worker_handle,
     } = babe;
 
-    module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+    module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-    module.merge(Babe::new(client, babe_worker_handle, keystore, select_chain, deny_unsafe).into_rpc())?;
+    module.merge(Babe::new(client.clone(), babe_worker_handle, keystore, select_chain).into_rpc())?;
 
     Ok(module)
 }
@@ -83,8 +80,6 @@ pub struct TestDeps<C, P> {
     pub client: Arc<C>,
     /// Transaction pool instance.
     pub pool: Arc<P>,
-    /// Whether to deny unsafe calls
-    pub deny_unsafe: DenyUnsafe,
     /// A command stream to send authoring commands to manual seal consensus engine
     pub command_sink: Sender<EngineCommand<Hash>>,
 }
@@ -95,7 +90,7 @@ where
     C: ProvideRuntimeApi<Block>,
     C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
     C: Send + Sync + 'static,
-    C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
+    C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BlockBuilder<Block>,
     P: TransactionPool + 'static,
@@ -107,11 +102,10 @@ where
     let TestDeps {
         client,
         pool,
-        deny_unsafe,
         command_sink,
     } = deps;
 
-    module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+    module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
     module.merge(ManualSeal::new(command_sink).into_rpc())?;
 

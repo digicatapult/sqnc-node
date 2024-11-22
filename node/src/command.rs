@@ -8,7 +8,12 @@ use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
-use sqnc_node_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use sqnc_runtime::{Block, EXISTENTIAL_DEPOSIT};
+
+type NetworkWorker = sc_network::NetworkWorker<
+    sqnc_runtime::opaque::Block,
+    <sqnc_runtime::opaque::Block as sp_runtime::traits::Block>::Hash,
+>;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
@@ -131,7 +136,7 @@ pub fn run() -> sc_cli::Result<()> {
                                 .into());
                         }
 
-                        cmd.run::<sp_runtime::traits::HashingFor<Block>, ()>(config)
+                        cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, ()>(Some(config.chain_spec))
                     }
                     BenchmarkCmd::Block(cmd) => {
                         let PartialComponents { client, .. } = service::new_partial(&config)?;
@@ -184,8 +189,8 @@ pub fn run() -> sc_cli::Result<()> {
             let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| async move {
                 match cli.manual_seal {
-                    true => test_service::new_test(config).map_err(sc_cli::Error::Service),
-                    false => service::new_full(config).map_err(sc_cli::Error::Service),
+                    true => test_service::new_test::<NetworkWorker>(config).map_err(sc_cli::Error::Service),
+                    false => service::new_full::<NetworkWorker>(config).map_err(sc_cli::Error::Service),
                 }
             })
         }

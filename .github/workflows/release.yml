@@ -124,7 +124,7 @@ jobs:
           name: sqnc-node-${{ matrix.architectures.arch }}
           path: |
             ./target/${{ matrix.architectures.target-tupl }}/production/sqnc-node
-            ./target/${{ matrix.architectures.target-tupl }}/production/wbuild/sqnc-node-runtime/sqnc_node_runtime.compact.wasm
+            ./target/${{ matrix.architectures.target-tupl }}/production/wbuild/sqnc-runtime/sqnc_runtime.compact.wasm
 
   build-release:
     name: Build release
@@ -150,16 +150,16 @@ jobs:
           ls -R .
           pushd ./x86_64
           echo $BUILD_VERSION | tee ./VERSION.txt
-          mv ./wbuild/sqnc-node-runtime/sqnc_node_runtime.compact.wasm ./sqnc_node_runtime.compact.wasm
+          mv ./wbuild/sqnc-runtime/sqnc_runtime.compact.wasm ./sqnc_runtime.compact.wasm
           chmod +x ./sqnc-node
           shasum -a 256 ./sqnc-node | cut -d ' ' -f 1 | tee ./sqnc-node.sha256
-          shasum -a 256 ./sqnc_node_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./sqnc_node_runtime.compact.wasm.sha256
+          shasum -a 256 ./sqnc_runtime.compact.wasm | cut -d ' ' -f 1 | tee ./sqnc_runtime.compact.wasm.sha256
           tar -czvf ../sqnc-node-${BUILD_VERSION}-x86_64-unknown-linux-gnu.tar.gz ./VERSION.txt ./sqnc-node ./sqnc-node.sha256
-          tar -czvf ../sqnc-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./sqnc_node_runtime.compact.wasm ./sqnc_node_runtime.compact.wasm.sha256
+          tar -czvf ../sqnc-node-${BUILD_VERSION}-runtime-wasm.tar.gz ./VERSION.txt ./sqnc_runtime.compact.wasm ./sqnc_runtime.compact.wasm.sha256
           popd;
           pushd ./aarch64
           echo $BUILD_VERSION | tee ./VERSION.txt
-          mv ./wbuild/sqnc-node-runtime/sqnc_node_runtime.compact.wasm ./sqnc_node_runtime.compact.wasm
+          mv ./wbuild/sqnc-runtime/sqnc_runtime.compact.wasm ./sqnc_runtime.compact.wasm
           chmod +x ./sqnc-node
           shasum -a 256 ./sqnc-node | cut -d ' ' -f 1 | tee ./sqnc-node.sha256
           tar -czvf ../sqnc-node-${BUILD_VERSION}-aarch64-unknown-linux-gnu.tar.gz ./VERSION.txt ./sqnc-node ./sqnc-node.sha256
