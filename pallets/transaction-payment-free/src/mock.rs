@@ -1,7 +1,7 @@
 use super::*;
 use crate as pallet_transaction_payment_free;
-use frame_support::dispatch::{DispatchClass, DispatchInfo};
-use frame_support::{derive_impl, parameter_types, traits::Get, weights::Weight};
+use frame_support::dispatch::DispatchInfo;
+use frame_support::{derive_impl, parameter_types, weights::Weight};
 use frame_system as system;
 use pallet_balances::Call as BalancesCall;
 use sp_runtime::BuildStorage;
@@ -18,21 +18,6 @@ frame_support::construct_runtime!(
 
 pub const CALL: &<Test as frame_system::Config>::RuntimeCall =
     &RuntimeCall::Balances(BalancesCall::transfer_allow_death { dest: 2, value: 69 });
-
-pub struct BlockWeights;
-impl Get<frame_system::limits::BlockWeights> for BlockWeights {
-    fn get() -> frame_system::limits::BlockWeights {
-        frame_system::limits::BlockWeights::builder()
-            .base_block(Weight::zero())
-            .for_class(DispatchClass::all(), |weights| {
-                weights.base_extrinsic = Weight::zero();
-            })
-            .for_class(DispatchClass::non_mandatory(), |weights| {
-                weights.max_total = Some(Weight::from_parts(1024u64, u64::MAX));
-            })
-            .build_or_panic()
-    }
-}
 
 #[derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl system::Config for Test {
