@@ -22,7 +22,7 @@ sp-std = { workspace = true }
 
 [dev-dependencies]
 serde = { workspace = true, features = ["derive"] }
-frame-support-test = { workspace = true }
+pallet-preimage = { workspace = true, default-features = true }
 pallet-scheduler = { workspace = true }
 sp-core = { workspace = true }
 

@@ -4,8 +4,8 @@ pub use pallet::*;
 
 use frame_support::{
     traits::{
-        schedule::{DispatchTime, Named as ScheduleNamed, LOWEST_PRIORITY},
-        Get, Randomness,
+        schedule::{v3::Named as ScheduleNamed, DispatchTime, LOWEST_PRIORITY},
+        Bounded, Get, QueryPreimage, Randomness, StorePreimage,
     },
     BoundedVec,
 };
@@ -27,6 +27,9 @@ pub mod weights;
 
 pub use weights::WeightInfo;
 
+type CallOf<T> = <T as Config>::RuntimeCall;
+type BoundedCallOf<T> = Bounded<<T as Config>::RuntimeCall, <T as frame_system::Config>::Hashing>;
+
 #[frame_support::pallet]
 pub mod pallet {
 
@@ -37,8 +40,13 @@ pub mod pallet {
     /// The pallet's configuration trait.
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        /// what does this do!!!!
-        type ScheduleCall: Parameter + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin> + From<Call<Self>>;
+        // The runtime call type which can be constructed from a call in this pallet
+        type RuntimeCall: Parameter
+            + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin>
+            + From<Call<Self>>
+            + IsType<<Self as frame_system::Config>::RuntimeCall>
+            + From<frame_system::Call<Self>>;
+
         /// The overarching event type.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -58,7 +66,9 @@ pub mod pallet {
         /// Overarching type of all pallets origins.
         type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
         /// The Scheduler.
-        type Scheduler: ScheduleNamed<BlockNumberFor<Self>, Self::ScheduleCall, Self::PalletsOrigin>;
+        type Scheduler: ScheduleNamed<BlockNumberFor<Self>, CallOf<Self>, Self::PalletsOrigin, Hasher = Self::Hashing>;
+        /// The Preimage provider.
+        type Preimages: QueryPreimage<H = Self::Hashing> + StorePreimage;
 
         type WeightInfo: WeightInfo;
     }
@@ -75,14 +85,19 @@ pub mod pallet {
 
             match existing_schedule {
                 None => {
-                    let id: Vec<u8> = KEY_ROTATE_ID.encode();
+                    let mut id = [0u8; 32];
+                    id[..12].copy_from_slice(&KEY_ROTATE_ID);
+
+                    let call: <T as Config>::RuntimeCall = Call::rotate_key {}.into();
+                    let bounded_call: BoundedCallOf<T> = <T as Config>::Preimages::bound(call).unwrap();
+
                     if T::Scheduler::schedule_named(
-                        id.clone(),
+                        id,
                         DispatchTime::After(BlockNumberFor::<T>::zero()),
                         Some((T::RefreshPeriod::get(), u32::max_value())),
                         LOWEST_PRIORITY,
                         frame_system::RawOrigin::Root.into(),
-                        Call::rotate_key {}.into(),
+                        bounded_call,
                     )
                     .is_err()
                     {
@@ -90,7 +105,7 @@ pub mod pallet {
                         return Weight::zero();
                     }
 
-                    <KeyScheduleId<T>>::put(Some(BoundedVec::<_, _>::truncate_from(id)));
+                    <KeyScheduleId<T>>::put(Some(BoundedVec::try_from(Vec::from(&id)).unwrap()));
 
                     Weight::zero()
                 }
