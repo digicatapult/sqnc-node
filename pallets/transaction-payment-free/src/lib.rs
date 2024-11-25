@@ -30,7 +30,8 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
 
     #[pallet::pallet]
-    pub struct Pallet<T>(_);
+    #[pallet::without_storage_info]
+    pub struct Pallet<T>(PhantomData<T>);
 
     /// The pallet's configuration trait.
     #[pallet::config]

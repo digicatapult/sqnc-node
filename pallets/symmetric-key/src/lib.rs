@@ -9,6 +9,7 @@ use frame_support::{
     },
     BoundedVec,
 };
+use sp_io::hashing::blake2_256;
 use sp_runtime::traits::Dispatchable;
 
 /// A FRAME pallet for handling non-fungible tokens
@@ -73,8 +74,12 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
     }
 
+    /// The in-code storage version.
+    const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+
     #[pallet::pallet]
-    pub struct Pallet<T>(PhantomData<T>);
+    #[pallet::storage_version(STORAGE_VERSION)]
+    pub struct Pallet<T>(_);
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
@@ -85,8 +90,10 @@ pub mod pallet {
 
             match existing_schedule {
                 None => {
-                    let mut id = [0u8; 32];
-                    id[..12].copy_from_slice(&KEY_ROTATE_ID);
+                    // id needs to be derived from KEY_ROTATE_ID to a `Vec<u8>` and then hashed with blake2_256
+                    // looking at https://github.com/paritytech/polkadot-sdk/blob/dba2dd59101617aad64d167e400b19e2c35052b1/substrate/frame/scheduler/src/lib.rs#L639
+                    // TODO: run old node into a complex state and then load this new runtime. Check the above is correct. then write a migration for KeyScheduleId
+                    let id = blake2_256(&KEY_ROTATE_ID.encode());
 
                     let call: <T as Config>::RuntimeCall = Call::rotate_key {}.into();
                     let bounded_call: BoundedCallOf<T> = <T as Config>::Preimages::bound(call).unwrap();
@@ -105,7 +112,8 @@ pub mod pallet {
                         return Weight::zero();
                     }
 
-                    <KeyScheduleId<T>>::put(Some(BoundedVec::try_from(Vec::from(&id)).unwrap()));
+                    let id: Vec<u8> = id.encode();
+                    <KeyScheduleId<T>>::put(Some(BoundedVec::truncate_from(id)));
 
                     Weight::zero()
                 }

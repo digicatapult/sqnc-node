@@ -8,7 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use frame_support::{
     derive_impl,
-    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, OnRuntimeUpgrade},
+    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly},
 };
 
 use frame_system::EnsureRoot;
@@ -404,14 +404,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-    Runtime,
-    Block,
-    frame_system::ChainContext<Runtime>,
-    Runtime,
-    AllPalletsWithSystem,
-    UtxoNftStoragePrefixMigration,
->;
+pub type Executive =
+    frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
@@ -431,28 +425,6 @@ mod benches {
         [pallet_scheduler, Scheduler]
         [pallet_symmetric_key, IpfsKey]
     );
-}
-
-const UTXO_NFT_OLD_PREFIX: &str = "SimpleNFT";
-/// Migrate from `SimpleNFT` to the new pallet prefix `UtxoNFT`
-pub struct UtxoNftStoragePrefixMigration;
-
-impl OnRuntimeUpgrade for UtxoNftStoragePrefixMigration {
-    fn on_runtime_upgrade() -> frame_support::weights::Weight {
-        pallet_collective::migrations::v4::migrate::<Runtime, UtxoNFT, _>(UTXO_NFT_OLD_PREFIX)
-    }
-
-    #[cfg(feature = "try-runtime")]
-    fn pre_upgrade() -> Result<(), &'static str> {
-        pallet_collective::migrations::v4::pre_migrate::<UtxoNFT, _>(UTXO_NFT_OLD_PREFIX);
-        Ok(())
-    }
-
-    #[cfg(feature = "try-runtime")]
-    fn post_upgrade() -> Result<(), &'static str> {
-        pallet_collective::migrations::v4::post_migrate::<UtxoNFT, _>(UTXO_NFT_OLD_PREFIX);
-        Ok(())
-    }
 }
 
 impl_runtime_apis! {

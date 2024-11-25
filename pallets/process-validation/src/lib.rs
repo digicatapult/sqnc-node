@@ -138,8 +138,12 @@ pub mod pallet {
         type WeightInfo: WeightInfo + ValidateProcessWeights<u32>;
     }
 
+    /// The in-code storage version.
+    const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+
     #[pallet::pallet]
-    pub struct Pallet<T>(PhantomData<T>);
+    #[pallet::storage_version(STORAGE_VERSION)]
+    pub struct Pallet<T>(_);
 
     /// Storage map definition
     #[pallet::storage]
