@@ -5943,7 +5943,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-doas"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6032,7 +6032,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-process-validation"
-version = "3.6.0"
+version = "3.7.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6105,7 +6105,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-symmetric-key"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -6161,7 +6161,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-payment-free"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -6208,7 +6208,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-utxo-nft"
-version = "6.3.0"
+version = "6.4.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -11700,7 +11700,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-lang"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "clap",
  "exitcode",
@@ -11715,7 +11715,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-node"
-version = "11.3.0"
+version = "11.4.0"
 dependencies = [
  "async-trait",
  "bs58 0.5.1",
@@ -11770,7 +11770,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-pallet-traits"
-version = "3.4.0"
+version = "3.5.0"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -11781,7 +11781,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-runtime"
-version = "11.2.0"
+version = "11.3.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
