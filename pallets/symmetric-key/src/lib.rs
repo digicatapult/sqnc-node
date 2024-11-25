@@ -5,10 +5,12 @@ pub use pallet::*;
 use frame_support::{
     traits::{
         schedule::{v3::Named as ScheduleNamed, DispatchTime, LOWEST_PRIORITY},
-        Bounded, Get, QueryPreimage, Randomness, StorePreimage,
+        Bounded, ConstU32, Get, QueryPreimage, Randomness, StorePreimage,
     },
+    weights::Weight,
     BoundedVec,
 };
+use parity_scale_codec::Encode;
 use sp_io::hashing::blake2_256;
 use sp_runtime::traits::Dispatchable;
 
@@ -24,6 +26,7 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+pub mod migrations;
 pub mod weights;
 
 pub use weights::WeightInfo;
@@ -187,5 +190,26 @@ pub mod pallet {
         }
 
         BoundedVec::<_, T::KeyLength>::truncate_from(output)
+    }
+}
+
+impl<T: Config> Pallet<T> {
+    /// Migrate storage format from V1 to V4.
+    ///
+    /// Returns the weight consumed by this migration.
+    pub fn migrate_v0_to_v1() -> Weight {
+        let id = <KeyScheduleId<T>>::get();
+        let id = match id {
+            None => None,
+            Some(id) => {
+                let id = id.to_vec();
+                let id = blake2_256(&id);
+                let id: Vec<u8> = id.encode();
+                Some(BoundedVec::<u8, ConstU32<32>>::truncate_from(id))
+            }
+        };
+        <KeyScheduleId<T>>::put(id);
+
+        T::DbWeight::get().reads(2) + T::DbWeight::get().writes(1)
     }
 }

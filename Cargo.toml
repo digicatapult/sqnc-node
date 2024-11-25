@@ -23,6 +23,7 @@ pest_derive = "2.7.14"
 thiserror = "1.0.69"
 strum = { version = "0.26.3", default-features = false }
 strum_macros = { version = "0.26.4", default-features = false }
+log = { version = "0.4.22", default-features = false }
 
 #################################################################
 # substrate linked dependencies in crates.io that may be pinned #

@@ -6110,6 +6110,8 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "hex-literal",
+ "log",
  "pallet-preimage",
  "pallet-scheduler",
  "parity-scale-codec",
