@@ -71,6 +71,7 @@ jobs:
           rustup target add ${{ matrix.architectures.target-tupl }} --toolchain ${{ needs.get-version.outputs.toolchain }}
           rustup target add wasm32-unknown-unknown --toolchain ${{ needs.get-version.outputs.toolchain }}
           rustup component add rust-src
+          cargo update
       - name: install deps
         run: sudo apt-get update && sudo apt-get install ${{ matrix.architectures.dependencies }}
       - name: Install sccache
