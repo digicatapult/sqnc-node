@@ -62,6 +62,7 @@ pallet-utxo-nft = { default-features = false, path = '../pallets/utxo-nft' }
 pallet-process-validation = { default-features = false, path = '../pallets/process-validation' }
 pallet-symmetric-key = { default-features = false, path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
+sqnc-pallet-traits = { default-features = false, path = '../pallets/traits' }
 sqnc-runtime-types = { default-features = false, path = './types' }
 
 [build-dependencies]
@@ -110,6 +111,7 @@ std = [
     "pallet-utxo-nft/std",
     "pallet-scheduler/std",
     "pallet-symmetric-key/std",
+    "sqnc-pallet-traits/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",
@@ -121,11 +123,14 @@ runtime-benchmarks = [
     "pallet-balances/runtime-benchmarks",
     "pallet-collective/runtime-benchmarks",
     "pallet-grandpa/runtime-benchmarks",
-    "pallet-timestamp/runtime-benchmarks",
-    "pallet-scheduler/runtime-benchmarks",
-    "pallet-utxo-nft/runtime-benchmarks",
-    "pallet-symmetric-key/runtime-benchmarks",
+    "pallet-membership/runtime-benchmarks",
+    "pallet-preimage/runtime-benchmarks",
     "pallet-process-validation/runtime-benchmarks",
+    "pallet-scheduler/runtime-benchmarks",
+    "pallet-sudo/runtime-benchmarks",
+    "pallet-symmetric-key/runtime-benchmarks",
+    "pallet-timestamp/runtime-benchmarks",
+    "pallet-utxo-nft/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
 ]
 try-runtime = [
@@ -143,9 +148,9 @@ try-runtime = [
     "pallet-preimage/try-runtime",
     "pallet-process-validation/try-runtime",
     "pallet-scheduler/try-runtime",
-    "pallet-utxo-nft/try-runtime",
     "pallet-sudo/try-runtime",
     "pallet-symmetric-key/try-runtime",
     "pallet-timestamp/try-runtime",
+    "pallet-utxo-nft/try-runtime",
     "pallet-transaction-payment-free/try-runtime",
 ]

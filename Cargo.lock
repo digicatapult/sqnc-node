@@ -11825,6 +11825,7 @@ dependencies = [
  "sp-storage 21.0.0",
  "sp-transaction-pool 34.0.0",
  "sp-version 37.0.0",
+ "sqnc-pallet-traits",
  "sqnc-runtime-types",
  "substrate-wasm-builder",
 ]

@@ -49,7 +49,11 @@ use pallet_transaction_payment_free::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use sqnc_pallet_traits::ValidateProcessWeights;
+
 pub use sqnc_runtime_types::*;
+
+pub mod weights;
 
 pub mod constants;
 use crate::constants::time::*;
@@ -155,6 +159,8 @@ impl frame_system::Config for Runtime {
     type SS58Prefix = SS58Prefix;
     /// The maximum number of consumers allowed on a single account.
     type MaxConsumers = frame_support::traits::ConstU32<16>;
+    // Weights for system extrinsics
+    type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -171,7 +177,7 @@ impl pallet_babe::Config for Runtime {
     type ExpectedBlockTime = ExpectedBlockTime;
     type EpochChangeTrigger = pallet_babe::SameAuthoritiesForever;
     type DisabledValidators = ();
-    type WeightInfo = ();
+    type WeightInfo = (); // not using actual as benchmark does not produce valid WeightInfo
     type MaxAuthorities = ConstU32<32>;
     type MaxNominators = ConstU32<0>;
     type KeyOwnerProof = sp_core::Void;
@@ -181,7 +187,7 @@ impl pallet_babe::Config for Runtime {
 impl pallet_grandpa::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
 
-    type WeightInfo = ();
+    type WeightInfo = (); // not actual local as benchmark does not produce valid WeightInfo
     type MaxAuthorities = ConstU32<32>;
     type MaxSetIdSessionEntries = ConstU64<0>;
     type MaxNominators = ConstU32<0>;
@@ -195,7 +201,7 @@ impl pallet_timestamp::Config for Runtime {
     type Moment = u64;
     type OnTimestampSet = Babe;
     type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
 /// Existential deposit.
@@ -212,7 +218,7 @@ impl pallet_balances::Config for Runtime {
     type DustRemoval = ();
     type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
     type AccountStore = System;
-    type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
     type FreezeIdentifier = ();
     type MaxFreezes = ();
     type RuntimeHoldReason = ();
@@ -226,7 +232,7 @@ impl pallet_transaction_payment_free::Config for Runtime {
 impl pallet_sudo::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeCall = RuntimeCall;
-    type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_sudo::WeightInfo<Runtime>;
 }
 
 impl pallet_doas::Config for Runtime {
@@ -243,7 +249,7 @@ impl pallet_node_authorization::Config for Runtime {
     type RemoveOrigin = MoreThanHalfMembers;
     type SwapOrigin = MoreThanHalfMembers;
     type ResetOrigin = MoreThanHalfMembers;
-    type WeightInfo = ();
+    type WeightInfo = (); // no benchmarks defined in pallet!
 }
 
 parameter_types! {
@@ -260,12 +266,12 @@ impl pallet_scheduler::Config for Runtime {
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = EnsureRoot<AccountId>;
     type MaxScheduledPerBlock = ConstU32<50>;
-    type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
 }
 
 impl pallet_preimage::Config for Runtime {
-    type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_preimage::WeightInfo<Runtime>;
     type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type ManagerOrigin = EnsureRoot<AccountId>;
@@ -283,7 +289,7 @@ impl pallet_utxo_nft::Config for Runtime {
     type TokenMetadataKey = TokenMetadataKey;
     type TokenMetadataValue = TokenMetadataValue;
     type ProcessValidator = ProcessValidation;
-    type WeightInfo = pallet_utxo_nft::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_utxo_nft::WeightInfo<Runtime>;
     type MaxMetadataCount = ConstU32<64>;
     type MaxRoleCount = ConstU32<16>;
     type MaxInputCount = ConstU32<64>;
@@ -297,7 +303,7 @@ impl pallet_process_validation::Config for Runtime {
     type ProcessVersion = ProcessVersion;
     type CreateProcessOrigin = MoreThanTwoMembers;
     type DisableProcessOrigin = MoreThanTwoMembers;
-    type WeightInfo = pallet_process_validation::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_process_validation::WeightInfo<Runtime>;
     type TokenId = TokenId;
     type RoleKey = Role;
     type TokenMetadataKey = TokenMetadataKey;
@@ -322,7 +328,7 @@ impl pallet_collective::Config<GovernanceCollective> for Runtime {
     type MaxProposals = GovernanceMaxProposals;
     type MaxMembers = GovernanceMaxMembers;
     type DefaultVote = pallet_collective::PrimeDefaultVote;
-    type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
     type SetMembersOrigin = MoreThanHalfMembers;
     type MaxProposalWeight = MaxProposalWeight;
 }
@@ -338,7 +344,7 @@ impl pallet_membership::Config<GovernanceMembershipInstance> for Runtime {
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
     type MaxMembers = ConstU32<100>;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_membership::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -356,7 +362,7 @@ impl pallet_symmetric_key::Config for Runtime {
     type Randomness = pallet_babe::RandomnessFromOneEpochAgo<Runtime>;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
-    type WeightInfo = pallet_symmetric_key::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_symmetric_key::WeightInfo<Runtime>;
     type Preimages = Preimage;
 }
 
@@ -425,14 +431,18 @@ mod benches {
     define_benchmarks!(
         [frame_benchmarking, BaselineBench::<Runtime>]
         [frame_system, SystemBench::<Runtime>]
-        [pallet_balances, Balances]
-        [pallet_timestamp, Timestamp]
-        [pallet_grandpa, Grandpa]
         [pallet_babe, Babe]
-        [pallet_utxo_nft, UtxoNFT]
+        [pallet_balances, Balances]
+        [pallet_collective, TechnicalCommittee]
+        [pallet_grandpa, Grandpa]
+        [pallet_membership, Membership]
+        [pallet_preimage, Preimage]
         [pallet_process_validation, ProcessValidation]
         [pallet_scheduler, Scheduler]
+        [pallet_sudo, Sudo]
         [pallet_symmetric_key, IpfsKey]
+        [pallet_timestamp, Timestamp]
+        [pallet_utxo_nft, UtxoNFT]
     );
 }
 

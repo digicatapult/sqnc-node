@@ -10,9 +10,7 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 
-use sqnc_pallet_traits::{
-    ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidateProcessWeights, ValidationResult,
-};
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
 
 #[cfg(test)]
 mod tests;
@@ -135,7 +133,7 @@ pub mod pallet {
             + MaybeSerializeDeserialize;
 
         // Origin for overriding weight calculation implementation
-        type WeightInfo: WeightInfo + ValidateProcessWeights<u32>;
+        type WeightInfo: WeightInfo;
     }
 
     /// The in-code storage version.

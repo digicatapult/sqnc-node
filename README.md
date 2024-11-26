@@ -80,13 +80,13 @@ Then you can run the benchmark tool with for example
 
 ```bash
 ./target/production/sqnc-node benchmark pallet \
-    --pallet 'pallet_utxo_nft' \
+    --pallet '*' \
     --extrinsic '*' \
     --repeat 1000 \
-    --output ./weights/
+    --output ./runtime/src/weights
 ```
 
-The generated weights implementation should then be integrated into the relevant pallet.
+Which will update the weights for all pallets in the runtime automatically. Specify a single pallet to just update that one.
 
 ### Upgrading Substrate
 
