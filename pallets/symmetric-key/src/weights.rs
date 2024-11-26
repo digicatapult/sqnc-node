@@ -1,10 +1,9 @@
-#![cfg_attr(rustfmt, rustfmt_skip)]
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 #![allow(missing_docs)]
 
-use frame_support::{traits::Get, weights::Weight};
 use core::marker::PhantomData;
+use frame_support::{traits::Get, weights::Weight};
 
 /// Weight functions for `pallet_symmetric_key`.
 pub trait WeightInfo {

@@ -93,9 +93,6 @@ pub mod pallet {
 
             match existing_schedule {
                 None => {
-                    // id needs to be derived from KEY_ROTATE_ID to a `Vec<u8>` and then hashed with blake2_256
-                    // looking at https://github.com/paritytech/polkadot-sdk/blob/dba2dd59101617aad64d167e400b19e2c35052b1/substrate/frame/scheduler/src/lib.rs#L639
-                    // TODO: run old node into a complex state and then load this new runtime. Check the above is correct. then write a migration for KeyScheduleId
                     let id = blake2_256(&KEY_ROTATE_ID.encode());
 
                     let call: <T as Config>::RuntimeCall = Call::rotate_key {}.into();
@@ -194,7 +191,7 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T> {
-    /// Migrate storage format from V1 to V4.
+    /// Migrate storage format from V0 to V1.
     ///
     /// Returns the weight consumed by this migration.
     pub fn migrate_v0_to_v1() -> Weight {
@@ -210,6 +207,6 @@ impl<T: Config> Pallet<T> {
         };
         <KeyScheduleId<T>>::put(id);
 
-        T::DbWeight::get().reads(2) + T::DbWeight::get().writes(1)
+        T::DbWeight::get().reads(1) + T::DbWeight::get().writes(1)
     }
 }

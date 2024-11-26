@@ -23,7 +23,7 @@ pub mod v1 {
                 return T::DbWeight::get().reads(1);
             }
 
-            Pallet::<T>::migrate_v0_to_v1()
+            Pallet::<T>::migrate_v0_to_v1() + T::DbWeight::get().reads(1)
         }
     }
 }
