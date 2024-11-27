@@ -92,7 +92,6 @@ jobs:
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
           rustup target add wasm32-unknown-unknown --toolchain ${{ needs.get-version.outputs.toolchain }}
           rustup component add rust-src
-          cargo update
       - name: install protobuf compiler
         run: sudo apt-get install protobuf-compiler
       - name: Install sccache
