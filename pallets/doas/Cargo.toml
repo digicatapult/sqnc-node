@@ -1,6 +1,6 @@
 [package]
 name = "pallet-doas"
-version = "2.3.1"
+version = { workspace = true }
 authors = [
 	"Digital Catapult <https://www.digicatapult.org.uk>",
 	"Parity Technologies <admin@parity.io>",
