@@ -4,23 +4,16 @@ A guide on how to upgrade to the latest [release](https://github.com/paritytech/
 
 Based on updating from `release-polkadot-v1.5.0` to `release-polkadot-v1.9.0`. See the [PR](https://github.com/digicatapult/sqnc-node/pull/169/files).
 
-## Upgrade branch version
+## Upgrade polkadot-sdk version
 
-In the root `Cargo.toml` bump the dependencies that point to a release branch of the `polkadot-sdk`:
+`Polkadot-sdk` (`substrate`) dependencies are upgraded using the tool [`psvm`](https://github.com/paritytech/psvm). Once installed you can update the `polkadot-sdk` with, for example:
 
-For example
-
-```rust
-frame-support = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.5.0" }
+```bash
+# upgrade polkadot-sdk to version stable2409-2
+psvm -v "stable2409-2"
 ```
 
-becomes
-
-```rust
-frame-support = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk.git", branch = "release-polkadot-v1.9.0" }
-```
-
-Run `cargo update` to get newer versions of all dependencies.
+Available versions are documented on [https://github.com/paritytech/release-registry/](https://github.com/paritytech/release-registry/)
 
 ## Debugging techniques
 
@@ -76,13 +69,13 @@ If tests pass, bump at least a minor version in the pallet `Cargo.toml` e.g. `pa
 
 ### Runtime
 
-Test that the upgraded dependencies work for the runtime, including the newly upgraded pallets `cargo build --release -p sqnc-node-runtime`. Fix any compilation errors.
+Test that the upgraded dependencies work for the runtime, including the newly upgraded pallets `cargo build --release -p sqnc-runtime`. Fix any compilation errors.
 
 Bump the runtime version in `runtime/Cargo.toml`. Also increment the runtime `spec_version` in `runtime/src/lib.rs` to match. Note `spec_version` does not recognize semver, so treat it as a whole number. e.g. in place of `5.6.8` the `spec_version` would be `568`.
 
 Run the tests for the runtime:
 
-`cargo test --release -p sqnc-node-runtime`
+`cargo test --release -p sqnc-runtime`
 
 ### Node
 

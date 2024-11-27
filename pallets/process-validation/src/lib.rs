@@ -10,9 +10,7 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 
-use sqnc_pallet_traits::{
-    ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidateProcessWeights, ValidationResult,
-};
+use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
 
 #[cfg(test)]
 mod tests;
@@ -135,11 +133,15 @@ pub mod pallet {
             + MaybeSerializeDeserialize;
 
         // Origin for overriding weight calculation implementation
-        type WeightInfo: WeightInfo + ValidateProcessWeights<u32>;
+        type WeightInfo: WeightInfo;
     }
 
+    /// The in-code storage version.
+    const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+
     #[pallet::pallet]
-    pub struct Pallet<T>(PhantomData<T>);
+    #[pallet::storage_version(STORAGE_VERSION)]
+    pub struct Pallet<T>(_);
 
     /// Storage map definition
     #[pallet::storage]

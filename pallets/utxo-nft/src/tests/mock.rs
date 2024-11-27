@@ -103,6 +103,16 @@ impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessVa
     }
 }
 
+pub struct TestWeights {}
+impl pallet_utxo_nft::WeightInfo for TestWeights {
+    fn run_process(_: u32, _: u32) -> Weight {
+        Weight::from_parts(1, 1)
+    }
+    fn delete_token() -> Weight {
+        Weight::from_parts(1, 1)
+    }
+}
+
 impl pallet_utxo_nft::Config for Test {
     type RuntimeEvent = RuntimeEvent;
 
@@ -112,7 +122,7 @@ impl pallet_utxo_nft::Config for Test {
     type TokenMetadataValue = MetadataValue<Self::TokenId>;
 
     type ProcessValidator = MockProcessValidator;
-    type WeightInfo = ();
+    type WeightInfo = TestWeights;
 
     type MaxMetadataCount = ConstU32<4>;
     type MaxRoleCount = ConstU32<2>;

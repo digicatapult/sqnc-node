@@ -1,6 +1,6 @@
 [package]
 name = "pallet-transaction-payment-free"
-version = "2.2.0"
+version = "2.3.0"
 authors = [
 	"Digital Catapult <https://www.digicatapult.org.uk>",
 	"Parity Technologies <admin@parity.io>",

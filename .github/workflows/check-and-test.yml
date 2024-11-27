@@ -63,7 +63,7 @@ jobs:
         if: steps.check.outputs.pallets != ''
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
+          comment-author: "github-actions[bot]"
           body-includes: This PR updates the following pallets
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v4
@@ -92,6 +92,7 @@ jobs:
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
           rustup target add wasm32-unknown-unknown --toolchain ${{ needs.get-version.outputs.toolchain }}
           rustup component add rust-src
+          cargo update
       - name: install protobuf compiler
         run: sudo apt-get install protobuf-compiler
       - name: Install sccache

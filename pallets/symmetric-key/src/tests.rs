@@ -27,6 +27,7 @@ frame_support::construct_runtime!(
         System: system::{Pallet, Call, Config<T>, Storage, Event<T>},
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
         SymmetricKey: pallet_symmetric_key::{Pallet, Call, Storage, Event<T>},
+        Preimage: pallet_preimage,
     }
 );
 parameter_types! {
@@ -56,7 +57,15 @@ impl pallet_scheduler::Config for Test {
     type MaxScheduledPerBlock = ConstU32<100>;
     type WeightInfo = ();
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
-    type Preimages = ();
+    type Preimages = Preimage;
+}
+
+impl pallet_preimage::Config for Test {
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
+    type Currency = ();
+    type ManagerOrigin = frame_system::EnsureRoot<u64>;
+    type Consideration = ();
 }
 
 pub struct TestRandomness<Test>(sp_std::marker::PhantomData<Test>);
@@ -86,12 +95,13 @@ impl pallet_symmetric_key::Config for Test {
     type RuntimeEvent = RuntimeEvent;
     type KeyLength = ConstU32<32>;
     type RefreshPeriod = RefreshPeriod;
-    type ScheduleCall = RuntimeCall;
+    type RuntimeCall = RuntimeCall;
     type UpdateOrigin = system::EnsureRoot<u64>;
     type RotateOrigin = system::EnsureRoot<u64>;
     type Randomness = TestRandomness<Self>;
     type PalletsOrigin = OriginCaller;
     type Scheduler = Scheduler;
+    type Preimages = Preimage;
     type WeightInfo = ();
 }
 

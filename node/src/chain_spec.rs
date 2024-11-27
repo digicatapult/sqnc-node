@@ -3,13 +3,13 @@ use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use sqnc_node_runtime::{RuntimeGenesisConfig, WASM_BINARY};
+use sqnc_runtime::WASM_BINARY;
 use sqnc_runtime_types::{AccountId, RuntimeExpressionSymbol, RuntimeRestriction, Signature};
 
 const DEFAULT_PROTOCOL_ID: &str = "sqnc";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec;
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -153,7 +153,7 @@ fn testnet_genesis(
         },
         "babe": {
             "authorities": initial_authorities.iter().map(|x| (x.0.clone(), 1)).collect::<Vec<_>>(),
-            "epochConfig": Some(sqnc_node_runtime::BABE_GENESIS_EPOCH_CONFIG),
+            "epochConfig": Some(sqnc_runtime::BABE_GENESIS_EPOCH_CONFIG),
         },
         "grandpa": {
             "authorities": initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
