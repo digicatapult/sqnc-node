@@ -6,7 +6,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/sqnc-node/'
 name = 'sqnc-node'
-version = '11.4.1'
+version = { workspace = true }
 
 [[bin]]
 name = 'sqnc-node'

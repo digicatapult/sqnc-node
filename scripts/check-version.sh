@@ -43,7 +43,7 @@ function assert_tomlq() {
 
 function get_working_copy_version() {
   assert_tomlq
-  CURRENT_VERSION=$(tomlq .package.version ./node/Cargo.toml | sed 's/"//g')
+  CURRENT_VERSION=$(tomlq .workspace.package.version ./Cargo.toml | sed 's/"//g')
 
   printf "This version found to be %s\n" "$CURRENT_VERSION"
 

@@ -87,7 +87,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("sqnc"),
     impl_name: create_runtime_str!("sqnc"),
     authoring_version: 1,
-    spec_version: 1131,
+    spec_version: 1132,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
