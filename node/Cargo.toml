@@ -6,7 +6,7 @@ edition = '2021'
 license = 'Apache-2.0'
 repository = 'https://github.com/digicatapult/sqnc-node/'
 name = 'sqnc-node'
-version = '11.4.0'
+version = '11.4.1'
 
 [[bin]]
 name = 'sqnc-node'
@@ -68,9 +68,6 @@ sqnc-runtime = { path = '../runtime' }
 sqnc-runtime-types = { path = '../runtime/types' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
 sqnc-lang = { path = '../tools/lang' }
-
-# CLI-specific dependencies
-try-runtime-cli = { workspace = true, optional = true }
 
 pallet-transaction-payment-rpc = { workspace = true }
 
