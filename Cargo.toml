@@ -12,7 +12,7 @@ version = "12.0.0"
 ##############################
 serde = { version = "1.0.215", default-features = false }
 serde_json = { version = "1.0.133", default-features = false }
-clap = { version = "4.5.21", features = ["derive"] }
+clap = { version = "4.5.22", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
 async-trait = "0.1.83"
@@ -30,7 +30,7 @@ log = { version = "0.4.22", default-features = false }
 # substrate linked dependencies in crates.io that may be pinned #
 #################################################################
 jsonrpsee = { version = "0.24.3" }
-scale-info = { version = "2.11.5", default-features = false }
+scale-info = { version = "2.11.6", default-features = false }
 parity-scale-codec = { version = "3.7.0", default-features = false }
 
 ###################################
@@ -41,7 +41,7 @@ parity-scale-codec = { version = "3.7.0", default-features = false }
 frame-support = { version = "38.0.0", default-features = false }
 frame-system = { version = "38.0.0", default-features = false }
 frame-benchmarking = { version = "38.0.0", default-features = false }
-sp-runtime = { version = "39.0.1", default-features = false }
+sp-runtime = { version = "39.0.2", default-features = false }
 sp-io = { version = "38.0.0", default-features = false }
 sp-std = { version = "14.0.0", default-features = false }
 sp-core = { version = "34.0.0", default-features = false }
