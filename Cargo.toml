@@ -10,8 +10,8 @@ version = "12.0.0"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.216", default-features = false }
-serde_json = { version = "1.0.133", default-features = false }
+serde = { version = "1.0.217", default-features = false }
+serde_json = { version = "1.0.134", default-features = false }
 clap = { version = "4.5.23", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
@@ -21,7 +21,7 @@ exitcode = "1.1.2"
 lazy_static = "1.5.0"
 pest = "2.7.15"
 pest_derive = "2.7.15"
-thiserror = "2.0.8"
+thiserror = "2.0.9"
 strum = { version = "0.26.3", default-features = false }
 strum_macros = { version = "0.26.4", default-features = false }
 log = { version = "0.4.22", default-features = false }
@@ -38,10 +38,10 @@ parity-scale-codec = { version = "3.6.12", default-features = false }
 ###################################
 
 # Runtime component dependencies
-frame-support = { version = "38.0.0", default-features = false }
+frame-support = { version = "38.2.0", default-features = false }
 frame-system = { version = "38.0.0", default-features = false }
 frame-benchmarking = { version = "38.0.0", default-features = false }
-sp-runtime = { version = "39.0.3", default-features = false }
+sp-runtime = { version = "39.0.5", default-features = false }
 sp-io = { version = "38.0.0", default-features = false }
 sp-std = { version = "14.0.0", default-features = false }
 sp-core = { version = "34.0.0", default-features = false }
@@ -80,7 +80,7 @@ sc-executor = { version = "0.40.1" }
 sc-service = { version = "0.46.0" }
 sc-telemetry = { version = "25.0.0" }
 sc-keystore = { version = "33.0.0" }
-sc-network = { version = "0.45.1" }
+sc-network = { version = "0.45.3" }
 sc-transaction-pool = { version = "37.0.0" }
 sc-transaction-pool-api = { version = "37.0.0" }
 sc-offchain = { version = "40.0.0" }
