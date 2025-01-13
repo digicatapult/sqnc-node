@@ -49,6 +49,7 @@ pallet-scheduler = { version = "39.0.0", default-features = false }
 pallet-balances = { version = "39.0.0", default-features = false }
 pallet-babe = { version = "38.0.0", default-features = false }
 pallet-grandpa = { version = "38.0.0", default-features = false }
+pallet-session = { version = "38.0.0", default-features = false }
 pallet-sudo = { version = "38.0.0", default-features = false }
 pallet-timestamp = { version = "37.0.0", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { version = "38.0.0", default-features = false }
@@ -61,10 +62,13 @@ sp-genesis-builder = { version = "0.15.1", default-features = false }
 sp-inherents = { version = "34.0.0", default-features = false }
 sp-offchain = { version = "34.0.0", default-features = false }
 sp-session = { version = "36.0.0", default-features = false }
+sp-staking = { version = "36.0.0", default-features = false }
+sp-state-machine = { version = "0.43.0", default-features = false }
 sp-statement-store = { version = "18.0.0", default-features = false }
 sp-storage = { version = "21.0.0", default-features = false }
 sp-transaction-pool = { version = "34.0.0", default-features = false }
 sp-version = { version = "37.0.0", default-features = false }
+sp-weights = { version = "31.0.0", default-features = false }
 frame-try-runtime = { version = "0.44.0", default-features = false }
 pallet-collective = { version = "38.0.0", default-features = false }
 pallet-membership = { version = "38.0.0", default-features = false }

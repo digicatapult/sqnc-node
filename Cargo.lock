@@ -5462,6 +5462,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-validator-set"
+version = "12.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-session",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-state-machine",
+ "sp-std",
+ "sp-weights",
+]
+
+[[package]]
 name = "parity-bip39"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9260,12 +9281,14 @@ dependencies = [
  "pallet-preimage",
  "pallet-process-validation",
  "pallet-scheduler",
+ "pallet-session",
  "pallet-sudo",
  "pallet-symmetric-key",
  "pallet-timestamp",
  "pallet-transaction-payment-free",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-utxo-nft",
+ "pallet-validator-set",
  "parity-scale-codec",
  "scale-info",
  "serde",

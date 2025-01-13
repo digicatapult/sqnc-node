@@ -18,6 +18,7 @@ use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT, NumberFor};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
+    traits::OpaqueKeys,
     transaction_validity::{TransactionSource, TransactionValidity},
     ApplyExtrinsicResult,
 };
@@ -175,8 +176,8 @@ parameter_types! {
 impl pallet_babe::Config for Runtime {
     type EpochDuration = EpochDuration;
     type ExpectedBlockTime = ExpectedBlockTime;
-    type EpochChangeTrigger = pallet_babe::SameAuthoritiesForever;
-    type DisabledValidators = ();
+    type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+    type DisabledValidators = Session;
     type WeightInfo = (); // not using actual as benchmark does not produce valid WeightInfo
     type MaxAuthorities = ConstU32<32>;
     type MaxNominators = ConstU32<0>;
@@ -366,14 +367,39 @@ impl pallet_symmetric_key::Config for Runtime {
     type Preimages = Preimage;
 }
 
+impl pallet_session::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type ValidatorId = <Self as frame_system::Config>::AccountId;
+    type ValidatorIdOf = pallet_validator_set::ValidatorOf<Self>;
+    type ShouldEndSession = Babe;
+    type NextSessionRotation = Babe;
+    type SessionManager = ValidatorSet;
+    type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type Keys = opaque::SessionKeys;
+    type WeightInfo = ();
+}
+
+parameter_types! {
+    pub const MinAuthorities: u32 = 2;
+}
+
+impl pallet_validator_set::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type AddRemoveOrigin = MoreThanHalfMembers;
+    type MinAuthorities = MinAuthorities;
+    type WeightInfo = pallet_validator_set::weights::SubstrateWeight<Runtime>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
     pub enum Runtime {
         System: frame_system,
         Timestamp: pallet_timestamp,
+        Balances: pallet_balances,
+        ValidatorSet: pallet_validator_set,
+        Session: pallet_session,
         Babe: pallet_babe,
         Grandpa: pallet_grandpa,
-        Balances: pallet_balances,
         TransactionPaymentFree: pallet_transaction_payment_free,
         Sudo: pallet_sudo,
         UtxoNFT: pallet_utxo_nft,
