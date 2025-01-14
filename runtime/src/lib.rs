@@ -176,7 +176,7 @@ parameter_types! {
 impl pallet_babe::Config for Runtime {
     type EpochDuration = EpochDuration;
     type ExpectedBlockTime = ExpectedBlockTime;
-    type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+    type EpochChangeTrigger = pallet_babe::SameAuthoritiesForever; // Enable session rotation by replacing with pallet_babe::ExternalTrigger
     type DisabledValidators = Session;
     type WeightInfo = (); // not using actual as benchmark does not produce valid WeightInfo
     type MaxAuthorities = ConstU32<32>;
@@ -367,11 +367,18 @@ impl pallet_symmetric_key::Config for Runtime {
     type Preimages = Preimage;
 }
 
+pub struct NeverEndSession;
+impl pallet_session::ShouldEndSession<BlockNumber> for NeverEndSession {
+    fn should_end_session(_now: BlockNumber) -> bool {
+        false
+    }
+}
+
 impl pallet_session::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ValidatorId = <Self as frame_system::Config>::AccountId;
     type ValidatorIdOf = pallet_validator_set::ValidatorOf<Self>;
-    type ShouldEndSession = Babe;
+    type ShouldEndSession = NeverEndSession; // Enable session rotation by replacing with Babe
     type NextSessionRotation = Babe;
     type SessionManager = ValidatorSet;
     type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
