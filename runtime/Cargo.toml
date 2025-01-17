@@ -22,6 +22,7 @@ frame-support = { workspace = true }
 pallet-grandpa = { workspace = true }
 pallet-sudo = { workspace = true }
 frame-system = { workspace = true }
+pallet-session = { workspace = true }
 pallet-timestamp = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 frame-executive = { workspace = true }
@@ -62,6 +63,7 @@ pallet-utxo-nft = { default-features = false, path = '../pallets/utxo-nft' }
 pallet-process-validation = { default-features = false, path = '../pallets/process-validation' }
 pallet-symmetric-key = { default-features = false, path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
+pallet-validator-set = { default-features = false, path = '../pallets/validator-set' }
 sqnc-pallet-traits = { default-features = false, path = '../pallets/traits' }
 sqnc-runtime-types = { default-features = false, path = './types' }
 
@@ -90,10 +92,12 @@ std = [
     "pallet-node-authorization/std",
     "pallet-preimage/std",
     "pallet-process-validation/std",
+    "pallet-session/std",
     "pallet-sudo/std",
     "pallet-timestamp/std",
     "pallet-transaction-payment-free/std",
     "pallet-transaction-payment-rpc-runtime-api/std",
+    "pallet-validator-set/std",
     "sp-api/std",
     "sp-block-builder/std",
     "sp-consensus-babe/std",
@@ -131,6 +135,7 @@ runtime-benchmarks = [
     "pallet-symmetric-key/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
     "pallet-utxo-nft/runtime-benchmarks",
+    "pallet-validator-set/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
 ]
 try-runtime = [
@@ -148,9 +153,11 @@ try-runtime = [
     "pallet-preimage/try-runtime",
     "pallet-process-validation/try-runtime",
     "pallet-scheduler/try-runtime",
+    "pallet-session/try-runtime",
     "pallet-sudo/try-runtime",
     "pallet-symmetric-key/try-runtime",
     "pallet-timestamp/try-runtime",
     "pallet-utxo-nft/try-runtime",
     "pallet-transaction-payment-free/try-runtime",
+    "pallet-validator-set/try-runtime",
 ]

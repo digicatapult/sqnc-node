@@ -5181,7 +5181,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-doas"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5270,7 +5270,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-process-validation"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5343,7 +5343,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-symmetric-key"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5399,7 +5399,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-transaction-payment-free"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5446,7 +5446,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-utxo-nft"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5459,6 +5459,27 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "sqnc-pallet-traits",
+]
+
+[[package]]
+name = "pallet-validator-set"
+version = "12.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-session",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-state-machine",
+ "sp-std",
+ "sp-weights",
 ]
 
 [[package]]
@@ -9160,7 +9181,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-lang"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "clap",
  "exitcode",
@@ -9175,7 +9196,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-node"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "async-trait",
  "bs58 0.5.1",
@@ -9229,7 +9250,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-pallet-traits"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -9240,7 +9261,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-runtime"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-executive",
@@ -9260,12 +9281,14 @@ dependencies = [
  "pallet-preimage",
  "pallet-process-validation",
  "pallet-scheduler",
+ "pallet-session",
  "pallet-sudo",
  "pallet-symmetric-key",
  "pallet-timestamp",
  "pallet-transaction-payment-free",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-utxo-nft",
+ "pallet-validator-set",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -9291,7 +9314,7 @@ dependencies = [
 
 [[package]]
 name = "sqnc-runtime-types"
-version = "12.0.0"
+version = "12.1.0"
 dependencies = [
  "frame-support",
  "pallet-process-validation",

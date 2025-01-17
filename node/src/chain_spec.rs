@@ -3,7 +3,7 @@ use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use sqnc_runtime::WASM_BINARY;
+use sqnc_runtime::{opaque::SessionKeys, SessionConfig, ValidatorSetConfig, WASM_BINARY};
 use sqnc_runtime_types::{AccountId, RuntimeExpressionSymbol, RuntimeRestriction, Signature};
 
 const DEFAULT_PROTOCOL_ID: &str = "sqnc";
@@ -29,8 +29,12 @@ where
 }
 
 /// Generate an authority key.
-pub fn authority_keys_from_seed(s: &str) -> (BabeId, GrandpaId) {
-    (get_from_seed::<BabeId>(s), get_from_seed::<GrandpaId>(s))
+pub fn authority_keys_from_seed(s: &str) -> (AccountId, BabeId, GrandpaId) {
+    (
+        get_account_id_from_seed::<sr25519::Public>(s),
+        get_from_seed::<BabeId>(s),
+        get_from_seed::<GrandpaId>(s),
+    )
 }
 
 pub fn development_config() -> Result<ChainSpec, String> {
@@ -141,7 +145,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
-    initial_authorities: Vec<(BabeId, GrandpaId)>,
+    initial_authorities: Vec<(AccountId, BabeId, GrandpaId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
     technical_committee_accounts: Vec<AccountId>,
@@ -152,11 +156,20 @@ fn testnet_genesis(
             "balances": endowed_accounts.iter().cloned().map(|k| (k, 1i64 << 60)).collect::<Vec<_>>(),
         },
         "babe": {
-            "authorities": initial_authorities.iter().map(|x| (x.0.clone(), 1)).collect::<Vec<_>>(),
+            "authorities": Vec::<BabeId>::new(),
             "epochConfig": Some(sqnc_runtime::BABE_GENESIS_EPOCH_CONFIG),
         },
         "grandpa": {
-            "authorities": initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
+            "authorities": Vec::<GrandpaId>::new(),
+        },
+        "validatorSet": ValidatorSetConfig {
+            initial_validators: initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
+        },
+        "session": SessionConfig {
+            keys: initial_authorities.iter().map(|x| {
+                (x.0.clone(), x.0.clone(), SessionKeys { babe: x.1.clone(), grandpa: x.2.clone() })
+            }).collect::<Vec<_>>(),
+            non_authority_keys: Vec::new()
         },
         "sudo": {
             "key": Some(root_key),

@@ -211,7 +211,7 @@ fn parse_type_cmp_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Type
     Ok(AstNode { value, span })
 }
 
-fn parse_ident_prop<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<TokenProp<'a>>, CompilationError> {
+fn parse_ident_prop<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, TokenProp<'a>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
         Rule::ident_prop => {
