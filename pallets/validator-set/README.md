@@ -11,6 +11,8 @@ be found at [./licenses/substrate-validator-set.LICENSE](./licenses/substrate-va
 This module is then relicensed by Digital Catapult under the same Apache-2.0
 license a copy of which is [in the root of this repository](../../LICENSE)
 
+Note that this pallet has been forked rather than included from the original source to guarantee versioning compatibility with the `polkadot-sdk` being used in both.
+
 License: Apache-2.0
 
 ## Setup with Substrate Node Template
