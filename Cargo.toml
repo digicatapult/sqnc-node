@@ -72,7 +72,7 @@ sp-weights = { version = "31.0.0", default-features = false }
 frame-try-runtime = { version = "0.44.0", default-features = false }
 pallet-collective = { version = "38.0.0", default-features = false }
 pallet-membership = { version = "38.0.0", default-features = false }
-pallet-node-authorization = { version = "38.0.0", default-features = false }
+pallet-node-authorization = { version = "39.0.0", default-features = false }
 pallet-preimage = { version = "38.0.0", default-features = false }
 pallet-transaction-payment-rpc = { version = "41.0.0", default-features = false }
 frame-system-rpc-runtime-api = { version = "34.0.0", default-features = false }
