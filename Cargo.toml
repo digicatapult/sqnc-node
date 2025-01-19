@@ -86,7 +86,7 @@ sc-telemetry = { version = "25.0.0" }
 sc-keystore = { version = "33.0.0" }
 sc-network = { version = "0.45.3" }
 sc-transaction-pool = { version = "37.0.0" }
-sc-transaction-pool-api = { version = "37.0.0" }
+sc-transaction-pool-api = { version = "38.0.0" }
 sc-offchain = { version = "40.0.0" }
 sc-consensus-manual-seal = { version = "0.46.0" }
 sc-consensus-babe = { version = "0.45.0" }
