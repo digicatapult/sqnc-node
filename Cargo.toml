@@ -75,7 +75,7 @@ pallet-membership = { version = "38.0.0", default-features = false }
 pallet-node-authorization = { version = "38.0.0", default-features = false }
 pallet-preimage = { version = "38.0.0", default-features = false }
 pallet-transaction-payment-rpc = { version = "41.0.0", default-features = false }
-frame-system-rpc-runtime-api = { version = "34.0.0", default-features = false }
+frame-system-rpc-runtime-api = { version = "35.0.0", default-features = false }
 frame-system-benchmarking = { version = "38.0.0", default-features = false }
 
 # node dependencies
