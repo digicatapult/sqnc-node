@@ -83,7 +83,7 @@ sc-cli = { version = "0.47.0" }
 sc-executor = { version = "0.40.1" }
 sc-service = { version = "0.46.0" }
 sc-telemetry = { version = "25.0.0" }
-sc-keystore = { version = "33.0.0" }
+sc-keystore = { version = "34.0.0" }
 sc-network = { version = "0.45.3" }
 sc-transaction-pool = { version = "37.0.0" }
 sc-transaction-pool-api = { version = "37.0.0" }
