@@ -53,7 +53,7 @@ pallet-session = { version = "38.0.0", default-features = false }
 pallet-sudo = { version = "38.0.0", default-features = false }
 pallet-timestamp = { version = "37.0.0", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { version = "38.0.0", default-features = false }
-frame-executive = { version = "38.0.0", default-features = false }
+frame-executive = { version = "39.0.0", default-features = false }
 sp-api = { version = "34.0.0", default-features = false }
 sp-block-builder = { version = "34.0.0", default-features = false }
 sp-consensus-babe = { version = "0.40.0", default-features = false }
