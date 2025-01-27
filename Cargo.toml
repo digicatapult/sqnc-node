@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.package]
 edition = "2021"
-version = "12.1.0"
+version = "12.1.1"
 
 [workspace.dependencies]
 ##############################
@@ -34,7 +34,7 @@ scale-info = { version = "2.11.6", default-features = false }
 parity-scale-codec = { version = "3.6.12", default-features = false }
 
 ###################################
-# substrate dependencies from git #
+# substrate dependencies #
 ###################################
 
 # Runtime component dependencies
