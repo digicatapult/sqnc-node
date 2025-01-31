@@ -11,7 +11,7 @@ version = "12.1.1"
 # non-substrate dependencies #
 ##############################
 serde = { version = "1.0.217", default-features = false }
-serde_json = { version = "1.0.137", default-features = false }
+serde_json = { version = "1.0.138", default-features = false }
 clap = { version = "4.5.27", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
