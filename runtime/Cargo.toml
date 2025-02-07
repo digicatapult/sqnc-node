@@ -11,7 +11,7 @@ repository = "https://github.com/digicatapult/sqnc-node/"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-parity-scale-codec = { workspace = true, features = ["derive"] }
+parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"] }
 scale-info = { workspace = true, features = ["derive", "serde"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["alloc"] }
@@ -25,6 +25,7 @@ frame-system = { workspace = true }
 pallet-session = { workspace = true }
 pallet-timestamp = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
+pallet-proxy = { workspace = true }
 frame-executive = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
@@ -97,6 +98,7 @@ std = [
     "pallet-timestamp/std",
     "pallet-transaction-payment-free/std",
     "pallet-transaction-payment-rpc-runtime-api/std",
+    "pallet-proxy/std",
     "pallet-validator-set/std",
     "sp-api/std",
     "sp-block-builder/std",
@@ -137,6 +139,7 @@ runtime-benchmarks = [
     "pallet-utxo-nft/runtime-benchmarks",
     "pallet-validator-set/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
+    "pallet-proxy/runtime-benchmarks",
 ]
 try-runtime = [
     "frame-try-runtime",
@@ -160,4 +163,5 @@ try-runtime = [
     "pallet-utxo-nft/try-runtime",
     "pallet-transaction-payment-free/try-runtime",
     "pallet-validator-set/try-runtime",
+    "pallet-proxy/try-runtime",
 ]

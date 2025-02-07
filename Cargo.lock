@@ -5298,6 +5298,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-proxy"
+version = "38.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d39df395f0dbcf07dafe842916adea3266a87ce36ed87b5132184b6bcd746393"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-scheduler"
 version = "39.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9291,6 +9306,7 @@ dependencies = [
  "pallet-node-authorization",
  "pallet-preimage",
  "pallet-process-validation",
+ "pallet-proxy",
  "pallet-scheduler",
  "pallet-session",
  "pallet-sudo",

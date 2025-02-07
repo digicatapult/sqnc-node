@@ -49,6 +49,7 @@ pallet-scheduler = { version = "39.0.0", default-features = false }
 pallet-balances = { version = "39.0.0", default-features = false }
 pallet-babe = { version = "38.0.0", default-features = false }
 pallet-grandpa = { version = "38.0.0", default-features = false }
+pallet-proxy = { version = "38.0.0", default-features = false }
 pallet-session = { version = "38.0.0", default-features = false }
 pallet-sudo = { version = "38.0.0", default-features = false }
 pallet-timestamp = { version = "37.0.0", default-features = false }
