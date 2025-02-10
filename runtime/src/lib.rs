@@ -283,6 +283,9 @@ parameter_types! {
 	TypeInfo,
 )]
 pub enum ProxyType {
+    RunProcess,
+    Any,
+
 
 
 }
@@ -298,6 +301,12 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 		match self {
 			ProxyType::Any => true,
 			// Will want to eventually add more 
+            ProxyType::RunProcess => matches!(c,
+                RuntimeCall::UtxoNFT(..) |
+                RuntimeCall::ProcessValidation(..)
+            ),
+ 
+            _ => false,  // Do we want to reject all other transactions ???
 
 		}
 	}
