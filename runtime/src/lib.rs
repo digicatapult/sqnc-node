@@ -8,7 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use frame_support::{
     derive_impl,
-    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, OneSessionHandler,InstanceFilter},
+    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter, OneSessionHandler},
 };
 
 use frame_system::EnsureRoot;
@@ -21,14 +21,12 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::OpaqueKeys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    AccountId32, ApplyExtrinsicResult,
-    RuntimeDebug
+    AccountId32, ApplyExtrinsicResult, RuntimeDebug,
 };
 use sp_std::prelude::*;
 
-use sp_runtime::codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-
+use sp_runtime::codec::{Decode, Encode, MaxEncodedLen};
 
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -261,7 +259,7 @@ impl pallet_node_authorization::Config for Runtime {
 }
 
 parameter_types! {
-    pub const ProxyDepositBase: Balance = 0; // 0 indicates no cost to creating proxies - may be prone to spam 
+    pub const ProxyDepositBase: Balance = 0; // 0 indicates no cost to creating proxies - may be prone to spam
     pub const ProxyDepositFactor: Balance = 0;
     pub const AnnouncementDepositBase: Balance = 0;
     pub const AnnouncementDepositFactor: Balance = 0;
@@ -269,72 +267,53 @@ parameter_types! {
 }
 
 /// The type used to represent the kinds of proxying allowed.
-#[derive(
-	Copy,
-	Clone,
-	Eq,
-	PartialEq,
-	Ord,
-	PartialOrd,
-	Encode,
-	Decode,
-	RuntimeDebug,
-	MaxEncodedLen,
-	TypeInfo,
-)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub enum ProxyType {
     RunProcess,
     Any,
-
-
-
+    Governance,
 }
 impl Default for ProxyType {
-	fn default() -> Self {
-		Self::Any
-	}
+    fn default() -> Self {
+        Self::Any
+    }
 }
 
 // Determines which calls a proxy type can execute.
 impl InstanceFilter<RuntimeCall> for ProxyType {
-	fn filter(&self, c: &RuntimeCall) -> bool {
-		match self {
-			ProxyType::Any => true,
-			// Will want to eventually add more 
-            ProxyType::RunProcess => matches!(c,
-                RuntimeCall::UtxoNFT(..) |
-                RuntimeCall::ProcessValidation(..)
-            ),
- 
-            _ => false,  // Do we want to reject all other transactions ???
-
-		}
-	}
-	fn is_superset(&self, o: &Self) -> bool {
-		match (self, o) {
-			(x, y) if x == y => true,
-			(ProxyType::Any, _) => true,
-			(_, ProxyType::Any) => false,
-			_ => false,
-		}
-	}
+    fn filter(&self, c: &RuntimeCall) -> bool {
+        match self {
+            ProxyType::Any => true,
+            ProxyType::RunProcess => matches!(c, RuntimeCall::UtxoNFT(..)),
+            ProxyType::Governance => matches!(c, RuntimeCall::TechnicalCommittee(..)),
+        }
+    }
+    fn is_superset(&self, o: &Self) -> bool {
+        match (self, o) {
+            (x, y) if x == y => true,
+            (ProxyType::Any, _) => true,  // `Any` is a superset of all
+            (_, ProxyType::Any) => false, // Nothing is a superset of `Any`
+            (ProxyType::RunProcess, ProxyType::Governance) => false, // RunProcess can't execute Governance calls
+            (ProxyType::Governance, ProxyType::RunProcess) => false, // Governance can't execute RunProcess calls
+            _ => false,
+        }
+    }
 }
 
 impl pallet_proxy::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeCall = RuntimeCall;
     type Currency = Balances;
-    type ProxyType = ProxyType;  // We can provide custom Proxy Types
-    type ProxyDepositBase = ProxyDepositBase;  // We would want to set this to 0??
-    type ProxyDepositFactor = ProxyDepositFactor; // Each account can have multiple proxies. For each additional proxy, this amount is added to the deposit.
-    type MaxProxies = ConstU32<32>; // Max amt of proxies per single account 
-    type MaxPending = ConstU32<32>; // The maximum amount of time-delayed announcements that are allowed to be pending.
+    type ProxyType = ProxyType; // Custom Proxy Types
+    type ProxyDepositBase = ProxyDepositBase;
+    type ProxyDepositFactor = ProxyDepositFactor;
+    type MaxProxies = ConstU32<32>;
+    type MaxPending = ConstU32<32>;
     type CallHasher = BlakeTwo256;
-    type AnnouncementDepositBase = AnnouncementDepositBase;  // We would want to set this to 0??
-    type AnnouncementDepositFactor = AnnouncementDepositFactor; // ??
+    type AnnouncementDepositBase = AnnouncementDepositBase;
+    type AnnouncementDepositFactor = AnnouncementDepositFactor;
     type WeightInfo = ();
 }
-
 
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
