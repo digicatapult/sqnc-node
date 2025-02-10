@@ -291,8 +291,8 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
     fn is_superset(&self, o: &Self) -> bool {
         match (self, o) {
             (x, y) if x == y => true,
-            (ProxyType::Any, _) => true,  
-            (_, ProxyType::Any) => false, 
+            (ProxyType::Any, _) => true,
+            (_, ProxyType::Any) => false,
             _ => false,
         }
     }
