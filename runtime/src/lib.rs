@@ -291,10 +291,8 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
     fn is_superset(&self, o: &Self) -> bool {
         match (self, o) {
             (x, y) if x == y => true,
-            (ProxyType::Any, _) => true,  // `Any` is a superset of all
-            (_, ProxyType::Any) => false, // Nothing is a superset of `Any`
-            (ProxyType::RunProcess, ProxyType::Governance) => false, // RunProcess can't execute Governance calls
-            (ProxyType::Governance, ProxyType::RunProcess) => false, // Governance can't execute RunProcess calls
+            (ProxyType::Any, _) => true,  
+            (_, ProxyType::Any) => false, 
             _ => false,
         }
     }
@@ -568,6 +566,7 @@ mod benches {
         [pallet_symmetric_key, IpfsKey]
         [pallet_timestamp, Timestamp]
         [pallet_utxo_nft, UtxoNFT]
+        [pallet_proxy, Proxy]
     );
 }
 
