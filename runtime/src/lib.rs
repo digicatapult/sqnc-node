@@ -310,7 +310,7 @@ impl pallet_proxy::Config for Runtime {
     type CallHasher = BlakeTwo256;
     type AnnouncementDepositBase = AnnouncementDepositBase;
     type AnnouncementDepositFactor = AnnouncementDepositFactor;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
 }
 
 parameter_types! {
