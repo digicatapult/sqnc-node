@@ -7,11 +7,11 @@ pub mod pallet_collective;
 pub mod pallet_membership;
 pub mod pallet_preimage;
 pub mod pallet_process_validation;
+pub mod pallet_proxy;
 pub mod pallet_scheduler;
 pub mod pallet_sudo;
 pub mod pallet_symmetric_key;
 pub mod pallet_timestamp;
 pub mod pallet_utxo_nft;
-pub mod pallet_proxy;
 
 mod impl_traits;
