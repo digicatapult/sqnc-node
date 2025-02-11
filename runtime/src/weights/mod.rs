@@ -12,5 +12,6 @@ pub mod pallet_sudo;
 pub mod pallet_symmetric_key;
 pub mod pallet_timestamp;
 pub mod pallet_utxo_nft;
+pub mod pallet_proxy;
 
 mod impl_traits;
