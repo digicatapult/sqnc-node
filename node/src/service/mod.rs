@@ -9,8 +9,16 @@ use sc_consensus_grandpa::SharedVoterState;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, WarpSyncConfig};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
-
 use sqnc_runtime::{self, opaque::Block, RuntimeApi};
+
+use crate::rpc::SqncDeps;
+
+pub mod manual_seal;
+mod observable_block_import;
+mod proposal_finality;
+
+use observable_block_import::ObservableBlockImport;
+use proposal_finality::ProposalFinality;
 
 /// Host functions required for kitchensink runtime and Substrate node.
 #[cfg(not(feature = "runtime-benchmarks"))]
@@ -62,7 +70,7 @@ pub fn new_partial(
         sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::FullPool<Block, FullClient>,
         (
-            impl Fn(sc_rpc::SubscriptionTaskExecutor) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
+            sc_consensus_babe::BabeWorkerHandle<Block>,
             (
                 sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
                 sc_consensus_babe::BabeLink<Block>,
@@ -137,26 +145,6 @@ pub fn new_partial(
         offchain_tx_pool_factory: OffchainTransactionPoolFactory::new(transaction_pool.clone()),
     })?;
 
-    let rpc_builder = {
-        let client = client.clone();
-        let pool = transaction_pool.clone();
-        let select_chain = select_chain.clone();
-        let keystore = keystore_container.keystore().clone();
-
-        move |_| {
-            let deps = crate::rpc::FullDeps {
-                client: client.clone(),
-                pool: pool.clone(),
-                select_chain: select_chain.clone(),
-                babe: crate::rpc::BabeDeps {
-                    babe_worker_handle: babe_worker_handle.clone(),
-                    keystore: keystore.clone(),
-                },
-            };
-            crate::rpc::create_full(deps).map_err(Into::into)
-        }
-    };
-
     let import_setup = (block_import, babe_link, grandpa_link);
     Ok(sc_service::PartialComponents {
         client,
@@ -166,7 +154,7 @@ pub fn new_partial(
         select_chain,
         import_queue,
         transaction_pool,
-        other: (rpc_builder, import_setup, telemetry),
+        other: (babe_worker_handle, import_setup, telemetry),
     })
 }
 
@@ -182,7 +170,7 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (rpc_builder, import_setup, mut telemetry),
+        other: (babe_worker_handle, import_setup, mut telemetry),
     } = new_partial(&config)?;
 
     let (block_import, babe_link, grandpa_link) = import_setup;
@@ -252,6 +240,30 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
 
+    let (sync_state_extended_deps, proposal_finality_request_handler) = SqncDeps::new(sync_service.clone());
+
+    let rpc_builder = {
+        let client = client.clone();
+        let pool = transaction_pool.clone();
+        let select_chain = select_chain.clone();
+        let keystore = keystore_container.keystore().clone();
+        let sync_state_extended_deps = sync_state_extended_deps.clone();
+
+        move |_| {
+            let deps = crate::rpc::FullDeps {
+                client: client.clone(),
+                pool: pool.clone(),
+                select_chain: select_chain.clone(),
+                babe: crate::rpc::BabeDeps {
+                    babe_worker_handle: babe_worker_handle.clone(),
+                    keystore: keystore.clone(),
+                },
+                sync_state_extended: sync_state_extended_deps.clone(),
+            };
+            crate::rpc::create_full(deps).map_err(Into::into)
+        }
+    };
+
     let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
         config,
         backend,
@@ -274,6 +286,15 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
             transaction_pool.clone(),
             prometheus_registry.as_ref(),
             telemetry.as_ref().map(Telemetry::handle),
+        );
+
+        let (block_import, receiver) = ObservableBlockImport::new(block_import);
+        let proposal_log = ProposalFinality::new(client.clone(), receiver, proposal_finality_request_handler);
+
+        task_manager.spawn_handle().spawn_blocking(
+            "import-block-proposal",
+            Some("block-authoring"),
+            proposal_log.start_proposal_log(),
         );
 
         let slot_duration = babe_link.config().slot_duration();

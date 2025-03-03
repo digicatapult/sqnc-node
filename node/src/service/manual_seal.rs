@@ -137,7 +137,7 @@ fn new_partial(
 }
 
 /// Builds a new service for a full client.
-pub fn new_test<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::traits::Block>::Hash>>(
+pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::traits::Block>::Hash>>(
     config: Configuration,
 ) -> Result<TaskManager, ServiceError> {
     let sc_service::PartialComponents {

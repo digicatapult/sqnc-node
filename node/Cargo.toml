@@ -20,6 +20,8 @@ futures = { workspace = true }
 bs58 = { workspace = true }
 async-trait = { workspace = true }
 serde_json = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
 
 sc-cli = { workspace = true }
 sp-core = { workspace = true }
@@ -28,6 +30,7 @@ sc-service = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-keystore = { workspace = true }
 sc-network = { workspace = true }
+sc-network-sync = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
 sc-offchain = { workspace = true }
@@ -57,6 +60,7 @@ sc-rpc-api = { workspace = true }
 sp-blockchain = { workspace = true }
 sp-block-builder = { workspace = true }
 sc-basic-authorship = { workspace = true }
+sc-utils = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 
 # These dependencies are used for runtime benchmarking

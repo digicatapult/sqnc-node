@@ -4,15 +4,18 @@ use futures::channel::mpsc::Sender;
 use jsonrpsee::RpcModule;
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_manual_seal::{rpc::ManualSeal, rpc::ManualSealApiServer, EngineCommand};
+use sc_network_sync::types::SyncStatusProvider;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
-
 use sp_keystore::KeystorePtr;
 use sqnc_runtime::{opaque::Block, AccountId, Balance, Hash, Nonce};
+
+mod sqnc;
+pub use sqnc::*;
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
@@ -23,7 +26,7 @@ pub struct BabeDeps {
 }
 
 /// Full client dependencies.
-pub struct FullDeps<C, P, SC> {
+pub struct FullDeps<C, P, SC, SS> {
     /// The client instance to use.
     pub client: Arc<C>,
     /// Transaction pool instance.
@@ -32,11 +35,13 @@ pub struct FullDeps<C, P, SC> {
     pub select_chain: SC,
     /// BABE specific dependencies.
     pub babe: BabeDeps,
+    /// Sync service
+    pub sync_state_extended: SqncDeps<Block, SS>,
 }
 
 /// Instantiate all full RPC extensions.
-pub fn create_full<C, P, SC>(
-    deps: FullDeps<C, P, SC>,
+pub fn create_full<C, P, SC, SS>(
+    deps: FullDeps<C, P, SC, SS>,
 ) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
     C: ProvideRuntimeApi<Block>,
@@ -48,6 +53,7 @@ where
     C::Api: BlockBuilder<Block>,
     P: TransactionPool + 'static,
     SC: SelectChain<Block> + 'static,
+    SS: SyncStatusProvider<Block> + Send + Sync + Clone + 'static,
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
     use sc_consensus_babe_rpc::{Babe, BabeApiServer};
@@ -70,6 +76,7 @@ where
     module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
     module.merge(Babe::new(client.clone(), babe_worker_handle, keystore, select_chain).into_rpc())?;
+    module.merge(Sqnc::new(client.clone(), deps.sync_state_extended).into_rpc())?;
 
     Ok(module)
 }
