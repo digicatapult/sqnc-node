@@ -61,7 +61,7 @@ pub struct ExtendedSyncState<Number> {
 #[rpc(client, server)]
 pub trait SqncApi<Number> {
     #[method(name = "sqnc_syncStateExtended")]
-    async fn system_sync_state_extended(&self) -> Result<ExtendedSyncState<Number>, Error>;
+    async fn sqnc_sync_state_extended(&self) -> Result<ExtendedSyncState<Number>, Error>;
 }
 
 pub struct Sqnc<C, SS, Block>
@@ -100,7 +100,7 @@ where
     C: HeaderBackend<Block> + Send + Sync + 'static,
     SS: SyncStatusProvider<Block> + Send + Sync + Clone + 'static,
 {
-    async fn system_sync_state_extended(
+    async fn sqnc_sync_state_extended(
         &self,
     ) -> Result<ExtendedSyncState<<Block::Header as sp_runtime::traits::Header>::Number>, Error> {
         let client = self.client.clone();

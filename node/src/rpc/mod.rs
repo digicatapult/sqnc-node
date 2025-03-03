@@ -36,7 +36,7 @@ pub struct FullDeps<C, P, SC, SS> {
     /// BABE specific dependencies.
     pub babe: BabeDeps,
     /// Sync service
-    pub sync_state_extended: SqncDeps<Block, SS>,
+    pub sqnc: SqncDeps<Block, SS>,
 }
 
 /// Instantiate all full RPC extensions.
@@ -76,7 +76,7 @@ where
     module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
     module.merge(Babe::new(client.clone(), babe_worker_handle, keystore, select_chain).into_rpc())?;
-    module.merge(Sqnc::new(client.clone(), deps.sync_state_extended).into_rpc())?;
+    module.merge(Sqnc::new(client.clone(), deps.sqnc).into_rpc())?;
 
     Ok(module)
 }

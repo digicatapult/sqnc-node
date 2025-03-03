@@ -240,14 +240,14 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
 
-    let (sync_state_extended_deps, proposal_finality_request_handler) = SqncDeps::new(sync_service.clone());
+    let (sqnc_deps, proposal_finality_request_handler) = SqncDeps::new(sync_service.clone());
 
     let rpc_builder = {
         let client = client.clone();
         let pool = transaction_pool.clone();
         let select_chain = select_chain.clone();
         let keystore = keystore_container.keystore().clone();
-        let sync_state_extended_deps = sync_state_extended_deps.clone();
+        let sqnc_deps = sqnc_deps.clone();
 
         move |_| {
             let deps = crate::rpc::FullDeps {
@@ -258,7 +258,7 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
                     babe_worker_handle: babe_worker_handle.clone(),
                     keystore: keystore.clone(),
                 },
-                sync_state_extended: sync_state_extended_deps.clone(),
+                sqnc: sqnc_deps.clone(),
             };
             crate::rpc::create_full(deps).map_err(Into::into)
         }
