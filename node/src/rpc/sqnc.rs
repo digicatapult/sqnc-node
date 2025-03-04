@@ -9,6 +9,8 @@ use sp_blockchain::HeaderBackend;
 use sp_runtime::traits::{Block as BlockT, Header};
 use std::sync::Arc;
 
+const RPC_INTERNAL_ERROR: &str = "Error getting extended sync state";
+
 pub enum ProposalFinalityRequest<B>
 where
     B: BlockT,
@@ -107,11 +109,12 @@ where
         let info = client.info();
         let (sender, receiver) = oneshot::channel::<Option<Block::Header>>();
 
-        if let Err(_) = self
+        if let Err(err) = self
             .request
             .unbounded_send(ProposalFinalityRequest::GetLatestFinalisedBlockByLocal(sender))
         {
-            log::warn!("Failed to send proposal finality request");
+            log::warn!("Failed to send proposal finality request: {:?}", err);
+            return Err(Error::Internal(RPC_INTERNAL_ERROR.into()));
         }
 
         let (best_seen_block, last_authored_finalised_block) = futures::join!(self.sync_service.status(), receiver);
@@ -127,7 +130,14 @@ where
                 highest_block: best_seen_block.unwrap_or(info.best_number),
                 last_authored_finalised_block,
             }),
-            _ => todo!(),
+            (_, Err(err)) => {
+                log::warn!("Error getting last authored finalised block: {:?}", err);
+                Err(Error::Internal(RPC_INTERNAL_ERROR.into()))
+            }
+            _ => {
+                log::warn!("Unknown error getting sync state");
+                Err(Error::Internal(RPC_INTERNAL_ERROR.into()))
+            }
         }
     }
 }

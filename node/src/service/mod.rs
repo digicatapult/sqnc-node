@@ -279,6 +279,15 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
         telemetry: telemetry.as_mut(),
     })?;
 
+    let (import_authored_block, receiver) = ObservableBlockImport::new(block_import);
+    let proposal_log = ProposalFinality::new(client.clone(), receiver, proposal_finality_request_handler);
+
+    task_manager.spawn_handle().spawn_blocking(
+        "import-block-proposal",
+        Some("block-authoring"),
+        proposal_log.start_proposal_log(),
+    );
+
     if role.is_authority() {
         let proposer = sc_basic_authorship::ProposerFactory::new(
             task_manager.spawn_handle(),
@@ -288,22 +297,13 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
             telemetry.as_ref().map(Telemetry::handle),
         );
 
-        let (block_import, receiver) = ObservableBlockImport::new(block_import);
-        let proposal_log = ProposalFinality::new(client.clone(), receiver, proposal_finality_request_handler);
-
-        task_manager.spawn_handle().spawn_blocking(
-            "import-block-proposal",
-            Some("block-authoring"),
-            proposal_log.start_proposal_log(),
-        );
-
         let slot_duration = babe_link.config().slot_duration();
         let babe_config = sc_consensus_babe::BabeParams {
             keystore: keystore_container.keystore(),
             client,
             select_chain,
             env: proposer,
-            block_import,
+            block_import: import_authored_block,
             sync_oracle: sync_service.clone(),
             justification_sync_link: sync_service.clone(),
             create_inherent_data_providers: move |_, _| create_inherent_data_providers(slot_duration),
