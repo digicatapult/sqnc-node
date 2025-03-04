@@ -293,6 +293,14 @@ pub(super) fn doas_root_unchecked_weight(origin: OriginFor<T>, call: Box<<T as C
 pub(super) fn doas(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo { ... }
 ```
 
+### CUstom RPCs
+
+`sqnc-node` exposes the following custom rpcs:
+
+| name                     | description                                                                                                                                 | parameters | response format                                                                                                     |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :--------- | :------------------------------------------------------------------------------------------------------------------ |
+| `sqnc_syncStateExtended` | Extension of the `system_syncState` RPC that additionally returns the last block authored by this specific instance that has been finalised | None       | `{ "startingBlock": Number, "currentBlock": Number, "highestBlock": Number, "lastAuthoredFinalisedBlock": Number }` |
+
 ## Repo Structure
 
 A Substrate project consists of a number of components that are spread across a few

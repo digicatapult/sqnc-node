@@ -35,7 +35,7 @@ pub struct FullDeps<C, P, SC, SS> {
     pub select_chain: SC,
     /// BABE specific dependencies.
     pub babe: BabeDeps,
-    /// Sync service
+    /// Sqnc specific dependencies
     pub sqnc: SqncDeps<Block, SS>,
 }
 
@@ -82,17 +82,21 @@ where
 }
 
 /// Full client dependencies.
-pub struct TestDeps<C, P> {
+pub struct TestDeps<C, P, SS> {
     /// The client instance to use.
     pub client: Arc<C>,
     /// Transaction pool instance.
     pub pool: Arc<P>,
     /// A command stream to send authoring commands to manual seal consensus engine
     pub command_sink: Sender<EngineCommand<Hash>>,
+    /// Sqnc specific dependencies
+    pub sqnc: SqncDeps<Block, SS>,
 }
 
 // Instantiate all full RPC extensions.
-pub fn create_test<C, P>(deps: TestDeps<C, P>) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
+pub fn create_test<C, P, SS>(
+    deps: TestDeps<C, P, SS>,
+) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
     C: ProvideRuntimeApi<Block>,
     C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
@@ -101,6 +105,7 @@ where
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BlockBuilder<Block>,
     P: TransactionPool + 'static,
+    SS: SyncStatusProvider<Block> + Send + Sync + Clone + 'static,
 {
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
     use substrate_frame_rpc_system::{System, SystemApiServer};
@@ -110,11 +115,13 @@ where
         client,
         pool,
         command_sink,
+        sqnc,
     } = deps;
 
     module.merge(System::new(client.clone(), pool).into_rpc())?;
     module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
     module.merge(ManualSeal::new(command_sink).into_rpc())?;
+    module.merge(Sqnc::new(client.clone(), sqnc).into_rpc())?;
 
     Ok(module)
 }

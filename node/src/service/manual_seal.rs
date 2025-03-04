@@ -1,22 +1,26 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 #![allow(clippy::needless_borrow)]
 
-use futures::{channel::mpsc::Receiver, FutureExt};
+use futures::FutureExt;
 use std::sync::Arc;
 
 use sc_client_api::Backend;
 use sc_consensus_manual_seal::{
     consensus::{babe::BabeConsensusDataProvider, timestamp::SlotTimestampProvider},
-    EngineCommand, ManualSealParams,
+    ManualSealParams,
 };
 use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_consensus_babe::AuthorityId;
-use sp_core::H256;
 use sp_keyring::sr25519::Keyring::Alice;
 
 use sqnc_runtime::{self, opaque::Block, RuntimeApi};
+
+use crate::{
+    rpc::SqncDeps,
+    service::{ObservableBlockImport, ProposalFinality},
+};
 
 pub type HostFunctions = (
     sp_io::SubstrateHostFunctions,
@@ -45,10 +49,8 @@ fn new_partial(
         sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::FullPool<Block, FullClient>,
         (
-            impl Fn(sc_rpc::SubscriptionTaskExecutor) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
             sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
             sc_consensus_babe::BabeLink<Block>,
-            Receiver<EngineCommand<H256>>,
             Option<Telemetry>,
         ),
     >,
@@ -109,21 +111,6 @@ fn new_partial(
         config.prometheus_registry(),
     );
 
-    let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
-    let rpc_builder = {
-        let client = client.clone();
-        let pool = transaction_pool.clone();
-        Box::new(move |_| {
-            let deps = crate::rpc::TestDeps {
-                client: client.clone(),
-                pool: pool.clone(),
-                command_sink: command_sink.clone(),
-            };
-
-            crate::rpc::create_test(deps).map_err(Into::into)
-        })
-    };
-
     Ok(PartialComponents {
         client,
         backend,
@@ -132,7 +119,7 @@ fn new_partial(
         task_manager,
         transaction_pool,
         select_chain,
-        other: (rpc_builder, block_import, babe_link, commands_stream, telemetry),
+        other: (block_import, babe_link, telemetry),
     })
 }
 
@@ -148,7 +135,7 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (rpc_builder, block_import, babe_link, commands_stream, mut telemetry),
+        other: (block_import, babe_link, mut telemetry),
     } = new_partial(&config)?;
 
     let net_config =
@@ -194,6 +181,25 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
     let role = config.role.clone();
     let prometheus_registry = config.prometheus_registry().cloned();
 
+    let (sqnc_deps, proposal_finality_request_handler) = SqncDeps::new(sync_service.clone());
+    let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
+    let rpc_builder = {
+        let client = client.clone();
+        let pool = transaction_pool.clone();
+        let sqnc_deps = sqnc_deps.clone();
+
+        Box::new(move |_| {
+            let deps = crate::rpc::TestDeps {
+                client: client.clone(),
+                pool: pool.clone(),
+                command_sink: command_sink.clone(),
+                sqnc: sqnc_deps.clone(),
+            };
+
+            crate::rpc::create_test(deps).map_err(Into::into)
+        })
+    };
+
     let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
         config,
         backend,
@@ -225,6 +231,15 @@ pub fn new_full<N: sc_network::NetworkBackend<Block, <Block as sp_runtime::trait
             vec![(AuthorityId::from(Alice.public()), 1000)],
         )
         .expect("");
+
+        let (block_import, receiver) = ObservableBlockImport::new(block_import);
+        let proposal_log = ProposalFinality::new(client.clone(), receiver, proposal_finality_request_handler);
+
+        task_manager.spawn_handle().spawn_blocking(
+            "import-block-proposal",
+            Some("block-authoring"),
+            proposal_log.start_proposal_log(),
+        );
 
         // Background authorship future.
         let authorship_future = sc_consensus_manual_seal::run_manual_seal(ManualSealParams {

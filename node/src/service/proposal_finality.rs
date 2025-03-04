@@ -11,7 +11,11 @@ struct ProposalFinalityState<B>
 where
     B: sp_runtime::traits::Block,
 {
+    /// list of blocks proposed by the node
     proposed_blocks: Vec<B::Header>,
+    /// the latest finalised block observed. Needed because manual seal imports blocks after marking it as finalised
+    latest_finalised: Option<B::Header>,
+    // latest block finalised by us. Updated either when importing a block that's last been finalised or when a finalised block is observed that was authored by us
     latest_finalised_by_us: Option<B::Header>,
 }
 
@@ -22,6 +26,7 @@ where
     pub fn new() -> Self {
         Self {
             proposed_blocks: Vec::new(),
+            latest_finalised: None,
             latest_finalised_by_us: None,
         }
     }
@@ -29,8 +34,16 @@ where
     fn handle_imported_block(&mut self, header: Option<B::Header>) {
         match header {
             Some(header) => {
-                log::debug!("Proposed block: {} ({})", header.number(), header.hash());
-                self.proposed_blocks.push(header);
+                let block_number = header.number();
+                let block_hash = header.hash();
+                log::debug!("🏗 Proposed block: {} ({})", block_number, block_hash);
+
+                self.proposed_blocks.push(header.clone());
+
+                let last_finalised_block = self.latest_finalised.as_ref();
+                if Some(header.hash()) == last_finalised_block.map(|h| h.hash()) {
+                    self.handle_finalised_block_by_us(header);
+                }
             }
             None => log::warn!(target: LOG_TARGET, "😬 Proposed block receiver did not contain header"),
         }
@@ -42,30 +55,43 @@ where
             return;
         }
         let header = header.unwrap();
+        self.latest_finalised = Some(header.clone());
+
         let block_number = header.number();
         let block_hash = header.hash();
 
-        log::debug!(target: LOG_TARGET, "💁‍♂ Finalised block: {} ({})", block_number, block_hash);
+        log::debug!(target: LOG_TARGET, "🏗 Finalised block: {} ({})", block_number, block_hash);
 
         let maybe_proposed_block = self
             .proposed_blocks
             .iter()
-            .find(|&proposed_header| header.hash().eq(&proposed_header.hash()));
+            .find(|&proposed_header| block_hash.eq(&proposed_header.hash()));
 
         match maybe_proposed_block {
             Some(_) => {
-                log::info!(target: LOG_TARGET, "🍾 Proposed block was finalised: {} ({})", block_number, block_hash);
+                self.handle_finalised_block_by_us(header);
+            }
+            None => {
+                log::debug!(
+                  target: LOG_TARGET,
+                     "🏗 Finalised block {} ({}) was not authored by us",
+                    block_number,
+                    block_hash
+                );
                 self.proposed_blocks
                     .retain(|proposed_header| proposed_header.number() > block_number);
-                self.latest_finalised_by_us = Some(header);
             }
-            None => log::debug!(
-              target: LOG_TARGET,
-                "💁‍♂ Finalised block {} ({}) was not authored by us",
-                block_number,
-                block_hash
-            ),
         }
+    }
+
+    fn handle_finalised_block_by_us(&mut self, header: B::Header) {
+        let block_number = header.number();
+        let block_hash = header.hash();
+
+        log::info!(target: LOG_TARGET, "🍾 Proposed block was finalised: {} ({})", block_number, block_hash);
+        self.proposed_blocks
+            .retain(|proposed_header| proposed_header.number() > block_number);
+        self.latest_finalised_by_us = Some(header.clone());
     }
 
     fn handle_request(&self, request: Option<ProposalFinalityRequest<B>>) {
@@ -161,7 +187,26 @@ mod tests {
         state.handle_imported_block(None);
 
         assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, None);
         assert_eq!(state.latest_finalised_by_us, None);
+    }
+
+    #[test]
+    fn state_handle_imported_block_after_finalised() {
+        let hash1 = sqnc_runtime::Hash::random();
+        let hash2 = sqnc_runtime::Hash::random();
+        let header1: sqnc_runtime::Header = Header::new(1u32, hash1, hash1, hash1, Digest { logs: vec![] });
+        let header2: sqnc_runtime::Header = Header::new(2u32, hash2, hash2, hash2, Digest { logs: vec![] });
+
+        let mut state = ProposalFinalityState::<sqnc_runtime::Block>::new();
+        state.handle_imported_block(Some(header1.clone()));
+        state.handle_finalised_block(Some(header2.clone()));
+
+        state.handle_imported_block(Some(header2.clone()));
+
+        assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, Some(header2.clone()));
+        assert_eq!(state.latest_finalised_by_us, Some(header2.clone()));
     }
 
     #[test]
@@ -178,6 +223,7 @@ mod tests {
         state.handle_finalised_block(Some(header1.clone()));
 
         assert_eq!(state.proposed_blocks, vec![header2]);
+        assert_eq!(state.latest_finalised, Some(header1.clone()));
         assert_eq!(state.latest_finalised_by_us, Some(header1));
     }
 
@@ -195,7 +241,24 @@ mod tests {
         state.handle_finalised_block(Some(header2.clone()));
 
         assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, Some(header2.clone()));
         assert_eq!(state.latest_finalised_by_us, Some(header2));
+    }
+
+    #[test]
+    fn state_handle_finalised_block_by_not_us() {
+        let hash1 = sqnc_runtime::Hash::random();
+        let hash2 = sqnc_runtime::Hash::random();
+        let header1: sqnc_runtime::Header = Header::new(1u32, hash1, hash1, hash1, Digest { logs: vec![] });
+        let header2: sqnc_runtime::Header = Header::new(2u32, hash2, hash2, hash2, Digest { logs: vec![] });
+
+        let mut state = ProposalFinalityState::<sqnc_runtime::Block>::new();
+        state.handle_imported_block(Some(header1.clone()));
+        state.handle_finalised_block(Some(header2.clone()));
+
+        assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, Some(header2.clone()));
+        assert_eq!(state.latest_finalised_by_us, None);
     }
 
     #[test]
@@ -204,6 +267,7 @@ mod tests {
         state.handle_finalised_block(None);
 
         assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, None);
         assert_eq!(state.latest_finalised_by_us, None);
     }
 
@@ -222,6 +286,7 @@ mod tests {
         let result = r.await.unwrap();
         assert_eq!(result, Some(header.clone()));
         assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, Some(header.clone()));
         assert_eq!(state.latest_finalised_by_us, Some(header));
     }
 
@@ -236,6 +301,7 @@ mod tests {
 
         state.handle_request(None);
         assert_eq!(state.proposed_blocks, vec![]);
+        assert_eq!(state.latest_finalised, Some(header.clone()));
         assert_eq!(state.latest_finalised_by_us, Some(header));
     }
 }
