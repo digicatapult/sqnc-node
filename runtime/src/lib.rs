@@ -8,7 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use frame_support::{
     derive_impl,
-    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly},
+    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter, OneSessionHandler},
 };
 
 use frame_system::EnsureRoot;
@@ -20,9 +20,13 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::OpaqueKeys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult,
+    AccountId32, ApplyExtrinsicResult, RuntimeDebug,
 };
 use sp_std::prelude::*;
+
+use scale_info::TypeInfo;
+use sp_runtime::codec::{Decode, Encode, MaxEncodedLen};
+
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -88,7 +92,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("sqnc"),
     impl_name: create_runtime_str!("sqnc"),
     authoring_version: 1,
-    spec_version: 1134,
+    spec_version: 1138,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -254,6 +258,61 @@ impl pallet_node_authorization::Config for Runtime {
 }
 
 parameter_types! {
+    pub const ProxyDepositBase: Balance = 0; // 0 indicates no cost to creating proxies - may be prone to spam
+    pub const ProxyDepositFactor: Balance = 0;
+    pub const AnnouncementDepositBase: Balance = 0;
+    pub const AnnouncementDepositFactor: Balance = 0;
+
+}
+
+/// The type used to represent the kinds of proxying allowed.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+pub enum ProxyType {
+    RunProcess,
+    Any,
+    Governance,
+}
+impl Default for ProxyType {
+    fn default() -> Self {
+        Self::Any
+    }
+}
+
+// Determines which calls a proxy type can execute.
+impl InstanceFilter<RuntimeCall> for ProxyType {
+    fn filter(&self, c: &RuntimeCall) -> bool {
+        match self {
+            ProxyType::Any => true,
+            ProxyType::RunProcess => matches!(c, RuntimeCall::UtxoNFT(..)),
+            ProxyType::Governance => matches!(c, RuntimeCall::TechnicalCommittee(..)),
+        }
+    }
+    fn is_superset(&self, o: &Self) -> bool {
+        match (self, o) {
+            (x, y) if x == y => true,
+            (ProxyType::Any, _) => true,
+            (_, ProxyType::Any) => false,
+            _ => false,
+        }
+    }
+}
+
+impl pallet_proxy::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeCall = RuntimeCall;
+    type Currency = Balances;
+    type ProxyType = ProxyType; // Custom Proxy Types
+    type ProxyDepositBase = ProxyDepositBase;
+    type ProxyDepositFactor = ProxyDepositFactor;
+    type MaxProxies = ConstU32<32>;
+    type MaxPending = ConstU32<32>;
+    type CallHasher = BlakeTwo256;
+    type AnnouncementDepositBase = AnnouncementDepositBase;
+    type AnnouncementDepositFactor = AnnouncementDepositFactor;
+    type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
+}
+
+parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
         BlockWeights::get().max_block;
 }
@@ -410,7 +469,8 @@ construct_runtime!(
         IpfsKey: pallet_symmetric_key,
         Membership: pallet_membership::<Instance1>,
         TechnicalCommittee: pallet_collective::<Instance1>,
-        Doas: pallet_doas
+        Doas: pallet_doas,
+        Proxy: pallet_proxy
     }
 );
 
@@ -469,6 +529,7 @@ mod benches {
         [pallet_symmetric_key, IpfsKey]
         [pallet_timestamp, Timestamp]
         [pallet_utxo_nft, UtxoNFT]
+        [pallet_proxy, Proxy]
     );
 }
 

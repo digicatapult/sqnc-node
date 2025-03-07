@@ -10,21 +10,22 @@ version = "12.2.0"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.217", default-features = false }
-serde_json = { version = "1.0.134", default-features = false }
-clap = { version = "4.5.23", features = ["derive"] }
+serde = { version = "1.0.218", default-features = false }
+serde_json = { version = "1.0.140", default-features = false }
+clap = { version = "4.5.31", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
-async-trait = "0.1.84"
+async-trait = "0.1.87"
 hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.5.0"
 pest = "2.7.15"
 pest_derive = "2.7.15"
-thiserror = "2.0.9"
-strum = { version = "0.26.3", default-features = false }
-strum_macros = { version = "0.26.4", default-features = false }
-log = { version = "0.4.22", default-features = false }
+thiserror = "2.0.12"
+strum = { version = "0.27.1", default-features = false }
+strum_macros = { version = "0.27.1", default-features = false }
+log = { version = "0.4.26", default-features = false }
+tokio = { version = "1.43.0", default-features = true }
 
 #################################################################
 # substrate linked dependencies in crates.io that may be pinned #
@@ -34,7 +35,7 @@ scale-info = { version = "2.11.6", default-features = false }
 parity-scale-codec = { version = "3.6.12", default-features = false }
 
 ###################################
-# substrate dependencies from git #
+# substrate dependencies #
 ###################################
 
 # Runtime component dependencies
@@ -49,6 +50,7 @@ pallet-scheduler = { version = "39.0.0", default-features = false }
 pallet-balances = { version = "39.0.0", default-features = false }
 pallet-babe = { version = "38.0.0", default-features = false }
 pallet-grandpa = { version = "38.0.0", default-features = false }
+pallet-proxy = { version = "38.0.0", default-features = false }
 pallet-session = { version = "38.0.0", default-features = false }
 pallet-sudo = { version = "38.0.0", default-features = false }
 pallet-timestamp = { version = "37.0.0", default-features = false }
@@ -85,6 +87,7 @@ sc-service = { version = "0.46.0" }
 sc-telemetry = { version = "25.0.0" }
 sc-keystore = { version = "33.0.0" }
 sc-network = { version = "0.45.3" }
+sc-network-sync = { version = "0.44.1" }
 sc-transaction-pool = { version = "37.0.0" }
 sc-transaction-pool-api = { version = "37.0.0" }
 sc-offchain = { version = "40.0.0" }
@@ -102,6 +105,7 @@ sc-rpc = { version = "40.0.0" }
 sc-rpc-api = { version = "0.44.0" }
 sp-blockchain = { version = "37.0.1" }
 sc-basic-authorship = { version = "0.45.0" }
+sc-utils = { version = "17.0.0" }
 substrate-frame-rpc-system = { version = "39.0.0" }
 frame-benchmarking-cli = { version = "43.0.0" }
 
