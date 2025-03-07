@@ -8,7 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use frame_support::{
     derive_impl,
-    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter, OneSessionHandler},
+    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter},
 };
 
 use frame_system::EnsureRoot;
@@ -20,7 +20,7 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::OpaqueKeys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    AccountId32, ApplyExtrinsicResult, RuntimeDebug,
+    ApplyExtrinsicResult, RuntimeDebug,
 };
 use sp_std::prelude::*;
 
