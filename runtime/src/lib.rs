@@ -8,12 +8,11 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use frame_support::{
     derive_impl,
-    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter, OneSessionHandler},
+    traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter},
 };
 
 use frame_system::EnsureRoot;
 use pallet_grandpa::AuthorityId as GrandpaId;
-use pallet_session::SessionHandler;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT, NumberFor};
@@ -21,7 +20,7 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::OpaqueKeys,
     transaction_validity::{TransactionSource, TransactionValidity},
-    AccountId32, ApplyExtrinsicResult, RuntimeDebug,
+    ApplyExtrinsicResult, RuntimeDebug,
 };
 use sp_std::prelude::*;
 
@@ -93,7 +92,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("sqnc"),
     impl_name: create_runtime_str!("sqnc"),
     authoring_version: 1,
-    spec_version: 1138,
+    spec_version: 1139,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -427,42 +426,6 @@ impl pallet_symmetric_key::Config for Runtime {
     type Preimages = Preimage;
 }
 
-// we need to on a new session intercept the new keys and make sure these are the existing ones.
-// this is so that if the incoming validator set is empty we continue to keep the chain going.
-// most of these methods can stay the same, we just need to hijack `on_new_session`
-pub struct SessionHandlerBaitAndSwitch;
-impl SessionHandler<AccountId> for SessionHandlerBaitAndSwitch {
-    const KEY_TYPE_IDS: &'static [KeyTypeId] = &[sp_runtime::key_types::BABE, sp_runtime::key_types::GRANDPA];
-    fn on_genesis_session<Ks: OpaqueKeys>(validators: &[(AccountId, Ks)]) {
-        <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders::on_genesis_session(validators);
-    }
-    fn on_before_session_ending() {
-        <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders::on_before_session_ending();
-    }
-    fn on_disabled(validator_index: u32) {
-        <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders::on_disabled(validator_index);
-    }
-    fn on_new_session<Ks: OpaqueKeys>(_: bool, _: &[(AccountId, Ks)], _: &[(AccountId, Ks)]) {
-        let zero_account = AccountId32::new([0; 32]);
-
-        let current_babe_validators = Babe::authorities().into_iter().map(|(v_id, _)| (&zero_account, v_id));
-        <Babe as OneSessionHandler<AccountId>>::on_new_session(
-            true,
-            current_babe_validators.clone(),
-            current_babe_validators.clone(),
-        );
-
-        let current_grandpa_validators = Grandpa::grandpa_authorities()
-            .into_iter()
-            .map(|(v_id, _)| (&zero_account, v_id));
-        <Grandpa as OneSessionHandler<AccountId>>::on_new_session(
-            true,
-            current_grandpa_validators.clone(),
-            current_grandpa_validators.clone(),
-        );
-    }
-}
-
 impl pallet_session::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type ValidatorId = <Self as frame_system::Config>::AccountId;
@@ -470,7 +433,7 @@ impl pallet_session::Config for Runtime {
     type ShouldEndSession = Babe;
     type NextSessionRotation = Babe;
     type SessionManager = ValidatorSet;
-    type SessionHandler = SessionHandlerBaitAndSwitch; // Enable session rotation by replacing with: <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type Keys = opaque::SessionKeys;
     type WeightInfo = ();
 }
