@@ -10,7 +10,7 @@ version = "12.3.0"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.218", default-features = false }
+serde = { version = "1.0.219", default-features = false }
 serde_json = { version = "1.0.140", default-features = false }
 clap = { version = "4.5.31", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
@@ -25,7 +25,7 @@ thiserror = "2.0.12"
 strum = { version = "0.27.1", default-features = false }
 strum_macros = { version = "0.27.1", default-features = false }
 log = { version = "0.4.26", default-features = false }
-tokio = { version = "1.43.0", default-features = true }
+tokio = { version = "1.44.0", default-features = true }
 
 #################################################################
 # substrate linked dependencies in crates.io that may be pinned #
