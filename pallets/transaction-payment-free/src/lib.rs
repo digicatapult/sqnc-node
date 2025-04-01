@@ -11,10 +11,15 @@ mod mock;
 mod tests;
 
 use sp_runtime::{
-    traits::{DispatchInfoOf, Dispatchable, SignedExtension, Zero},
-    transaction_validity::TransactionValidityError,
+    traits::{DispatchInfoOf, Dispatchable, Zero},
+    transaction_validity::{InvalidTransaction, TransactionSource, TransactionValidityError, ValidTransaction},
     FixedPointOperand,
 };
+
+use frame_support::weights::Weight;
+use frame_system::RawOrigin;
+use sp_runtime::traits::Implication;
+use sp_runtime::traits::TransactionExtension;
 
 mod payment;
 
@@ -96,32 +101,69 @@ impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
     }
 }
 
-impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
+impl<T: Config> TransactionExtension<T::RuntimeCall> for ChargeTransactionPayment<T>
 where
-    BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
     T::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+    BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
-    type AccountId = T::AccountId;
-    type Call = T::RuntimeCall;
-    type AdditionalSigned = ();
+
+    type Val = BalanceOf<T>;
     type Pre = (
         BalanceOf<T>,
-        Self::AccountId,
+        T::AccountId,
         <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo,
     );
-    fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
-        Ok(())
+    type Implicit = ();
+
+    fn validate(
+        &self,
+        origin: <T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        _call: &T::RuntimeCall,
+        _info: &<T::RuntimeCall as Dispatchable>::Info,
+        _len: usize,
+        _implicit: Self::Implicit,
+        _implication: &impl Implication,
+        _source: TransactionSource,
+    ) -> Result<
+        (
+            ValidTransaction,
+            Self::Val,
+            <T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        ),
+        TransactionValidityError,
+    > {
+        Ok((
+            ValidTransaction {
+                priority: 0,
+                requires: vec![],
+                provides: vec![],
+                longevity: u64::MAX,
+                propagate: true,
+            },
+            self.0,
+            origin,
+        ))
     }
 
-    fn pre_dispatch(
+    fn weight(&self, _call: &T::RuntimeCall) -> Weight {
+        Weight::zero()
+    }
+
+    fn prepare(
         self,
-        who: &Self::AccountId,
-        call: &Self::Call,
-        info: &DispatchInfoOf<Self::Call>,
+        val: Self::Val,
+        origin: &<T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        call: &T::RuntimeCall,
+        info: &<T::RuntimeCall as Dispatchable>::Info,
         len: usize,
     ) -> Result<Self::Pre, TransactionValidityError> {
-        let (_fee, imbalance) = self.zero_fee(who, call, info, len)?;
-        Ok((self.0, who.clone(), imbalance))
+        let who = match origin.clone().into() {
+            Ok(RawOrigin::Signed(who)) => who,
+            _ => return Err(TransactionValidityError::Invalid(InvalidTransaction::BadSigner)),
+        };
+
+        let (_fee, imbalance) = self.zero_fee(&who, call, info, len)?;
+        Ok((val, who, imbalance))
     }
 }
