@@ -77,4 +77,8 @@ impl<T: frame_system::Config> pallet_sudo::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().reads(1))
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
+	fn check_only_sudo_account() -> Weight {
+		// replace with real benchmarked value? 
+		Weight::from_parts(1_000_000, 0)
+	}
 }
