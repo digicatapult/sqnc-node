@@ -58,10 +58,12 @@ pub use sqnc_pallet_traits::ValidateProcessWeights;
 
 pub use sqnc_runtime_types::*;
 
+pub mod constants;
+mod utils;
 pub mod weights;
 
-pub mod constants;
 use crate::constants::time::*;
+use utils::MembersNotifyBoth;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -92,7 +94,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("sqnc"),
     impl_name: create_runtime_str!("sqnc"),
     authoring_version: 1,
-    spec_version: 1139,
+    spec_version: 1140,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -372,6 +374,14 @@ impl pallet_process_validation::Config for Runtime {
     type MaxProcessProgramLength = MaxProcessProgramLength;
 }
 
+impl pallet_organisation_data::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type OrgDataKey = OrgDataKey;
+    type OrgDataValue = OrgDataValue;
+    type MaxOrgMemberEntries = ConstU32<ORG_DATA_KEY_COUNT>;
+    type WeightInfo = weights::pallet_organisation_data::WeightInfo<Runtime>;
+}
+
 parameter_types! {
     pub const GovernanceMotionDuration: BlockNumber = 7 * DAYS;
     pub const GovernanceMaxProposals: u32 = 100;
@@ -401,8 +411,8 @@ impl pallet_membership::Config<GovernanceMembershipInstance> for Runtime {
     type SwapOrigin = MoreThanHalfMembers;
     type ResetOrigin = MoreThanHalfMembers;
     type PrimeOrigin = EnsureRoot<AccountId>;
-    type MembershipInitialized = TechnicalCommittee;
-    type MembershipChanged = TechnicalCommittee;
+    type MembershipInitialized = MembersNotifyBoth<TechnicalCommittee, OrganisationData>;
+    type MembershipChanged = MembersNotifyBoth<TechnicalCommittee, OrganisationData>;
     type MaxMembers = ConstU32<100>;
     type WeightInfo = weights::pallet_membership::WeightInfo<Runtime>;
 }
@@ -469,6 +479,7 @@ construct_runtime!(
         IpfsKey: pallet_symmetric_key,
         Membership: pallet_membership::<Instance1>,
         TechnicalCommittee: pallet_collective::<Instance1>,
+        OrganisationData: pallet_organisation_data,
         Doas: pallet_doas,
         Proxy: pallet_proxy
     }
@@ -496,7 +507,10 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 
-type Migrations = pallet_symmetric_key::migrations::v1::MigrateToV1<Runtime>;
+type Migrations = (
+    pallet_symmetric_key::migrations::v1::MigrateToV1<Runtime>,
+    pallet_organisation_data::migrations::v1::MigrateToV1<Runtime, GovernanceMembershipInstance>,
+);
 
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
@@ -530,8 +544,15 @@ mod benches {
         [pallet_timestamp, Timestamp]
         [pallet_utxo_nft, UtxoNFT]
         [pallet_proxy, Proxy]
+        [pallet_organisation_data, OrganisationData]
     );
 }
+
+#[cfg(feature = "runtime-benchmarks")]
+impl frame_system_benchmarking::Config for Runtime {}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl frame_benchmarking::baseline::Config for Runtime {}
 
 impl_runtime_apis! {
     impl sp_api::Core<Block> for Runtime {
@@ -749,9 +770,6 @@ impl_runtime_apis! {
 
             use frame_system_benchmarking::Pallet as SystemBench;
             use baseline::Pallet as BaselineBench;
-
-            impl frame_system_benchmarking::Config for Runtime {}
-            impl baseline::Config for Runtime {}
 
             use frame_support::traits::WhitelistedStorageKeys;
             let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();

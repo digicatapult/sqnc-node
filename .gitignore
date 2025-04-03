@@ -10,3 +10,4 @@ weights/*.rs
 *.iml
 .idea
 .vscode
+data

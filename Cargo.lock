@@ -5289,6 +5289,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-organisation-data"
+version = "12.3.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-membership",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-staking",
+ "sp-state-machine",
+ "sp-std",
+ "sp-weights",
+]
+
+[[package]]
 name = "pallet-preimage"
 version = "38.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9341,6 +9362,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-membership",
  "pallet-node-authorization",
+ "pallet-organisation-data",
  "pallet-preimage",
  "pallet-process-validation",
  "pallet-proxy",
