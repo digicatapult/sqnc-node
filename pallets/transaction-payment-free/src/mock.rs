@@ -43,6 +43,7 @@ impl pallet_balances::Config for Test {
     type MaxFreezes = ();
     type RuntimeHoldReason = ();
     type RuntimeFreezeReason = ();
+    type DoneSlashHandler = ();
 }
 
 impl Config for Test {
@@ -52,7 +53,7 @@ impl Config for Test {
 /// create a transaction info struct from weight. Handy to avoid building the whole struct.
 pub fn info_from_weight(w: Weight) -> DispatchInfo {
     DispatchInfo {
-        weight: w,
+        call_weight: w,
         ..Default::default()
     }
 }

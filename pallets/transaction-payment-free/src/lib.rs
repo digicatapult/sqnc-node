@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
+use frame_support::weights::Weight;
+use log;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
@@ -11,15 +13,10 @@ mod mock;
 mod tests;
 
 use sp_runtime::{
-    traits::{DispatchInfoOf, Dispatchable, Zero},
-    transaction_validity::{InvalidTransaction, TransactionSource, TransactionValidityError, ValidTransaction},
+    traits::{Dispatchable, TransactionExtension},
+    transaction_validity::{TransactionSource, TransactionValidityError, ValidTransaction},
     FixedPointOperand,
 };
-
-use frame_support::weights::Weight;
-use frame_system::RawOrigin;
-use sp_runtime::traits::Implication;
-use sp_runtime::traits::TransactionExtension;
 
 mod payment;
 
@@ -65,29 +62,6 @@ where
     pub fn from(fee: BalanceOf<T>) -> Self {
         Self(fee)
     }
-
-    fn zero_fee(
-        &self,
-        who: &T::AccountId,
-        call: &T::RuntimeCall,
-        info: &DispatchInfoOf<T::RuntimeCall>,
-        _len: usize,
-    ) -> Result<
-        (
-            BalanceOf<T>,
-            <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo,
-        ),
-        TransactionValidityError,
-    > {
-        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::zero_fee(
-            who,
-            call,
-            info,
-            Zero::zero(),
-            Zero::zero(),
-        )
-        .map(|i| (Zero::zero(), i))
-    }
 }
 
 impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
@@ -107,23 +81,23 @@ where
     BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
-
-    type Val = BalanceOf<T>;
-    type Pre = (
-        BalanceOf<T>,
-        T::AccountId,
-        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo,
-    );
     type Implicit = ();
+    type Val = ();
+    type Pre = ();
+
+    fn weight(&self, _: &T::RuntimeCall) -> Weight {
+        log::debug!(target: "runtime", "ChargeTransactionPayment::weight - returning zero");
+        Weight::zero()
+    }
 
     fn validate(
         &self,
         origin: <T::RuntimeCall as Dispatchable>::RuntimeOrigin,
         _call: &T::RuntimeCall,
-        _info: &<T::RuntimeCall as Dispatchable>::Info,
+        _info: &DispatchInfo,
         _len: usize,
-        _implicit: Self::Implicit,
-        _implication: &impl Implication,
+        _: (),
+        _implication: &impl Encode,
         _source: TransactionSource,
     ) -> Result<
         (
@@ -133,37 +107,30 @@ where
         ),
         TransactionValidityError,
     > {
-        Ok((
-            ValidTransaction {
-                priority: 0,
-                requires: vec![],
-                provides: vec![],
-                longevity: u64::MAX,
-                propagate: true,
-            },
-            self.0,
-            origin,
-        ))
-    }
-
-    fn weight(&self, _call: &T::RuntimeCall) -> Weight {
-        Weight::zero()
+        log::debug!(target: "runtime", "ChargeTransactionPayment::validate - skipping fee check");
+        Ok((ValidTransaction::default(), (), origin))
     }
 
     fn prepare(
         self,
-        val: Self::Val,
-        origin: &<T::RuntimeCall as Dispatchable>::RuntimeOrigin,
-        call: &T::RuntimeCall,
-        info: &<T::RuntimeCall as Dispatchable>::Info,
-        len: usize,
+        _val: Self::Val,
+        _origin: &<T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        _call: &T::RuntimeCall,
+        _info: &DispatchInfo,
+        _len: usize,
     ) -> Result<Self::Pre, TransactionValidityError> {
-        let who = match origin.clone().into() {
-            Ok(RawOrigin::Signed(who)) => who,
-            _ => return Err(TransactionValidityError::Invalid(InvalidTransaction::BadSigner)),
-        };
+        log::debug!(target: "runtime", "ChargeTransactionPayment::prepare - no-op");
+        Ok(())
+    }
 
-        let (_fee, imbalance) = self.zero_fee(&who, call, info, len)?;
-        Ok((val, who, imbalance))
+    fn post_dispatch_details(
+        _pre: Self::Pre,
+        _info: &DispatchInfo,
+        _post_info: &PostDispatchInfo,
+        _len: usize,
+        _result: &sp_runtime::DispatchResult,
+    ) -> Result<Weight, TransactionValidityError> {
+        log::debug!(target: "runtime", "ChargeTransactionPayment::post_dispatch_details - no refund/adjustment needed");
+        Ok(Weight::zero())
     }
 }

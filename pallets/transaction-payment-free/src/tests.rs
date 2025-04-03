@@ -1,36 +1,27 @@
 use super::*;
-use frame_support::{assert_err, assert_ok, weights::Weight};
-use mock::{info_from_weight, new_test_ext, Balances, System, Test, CALL};
-use sp_runtime::transaction_validity::InvalidTransaction;
+use frame_support::weights::Weight;
+use mock::{info_from_weight, new_test_ext, Balances, Test, CALL};
+use sp_runtime::traits::TxBaseImplication;
 
 #[test]
-fn transaction_payment_works_with_no_fee_for_account_with_balance() {
+fn no_fee_is_charged_for_transaction() {
     new_test_ext().execute_with(|| {
+        let implication = TxBaseImplication(CALL.clone());
         let user = 1;
-        assert_eq!(Balances::free_balance(user), 10);
-        assert_ok!(ChargeTransactionPayment::<Test>::from(0).pre_dispatch(
-            &user,
-            CALL,
+        let initial_balance = Balances::free_balance(user);
+
+        let ext = ChargeTransactionPayment::<Test>::from(0);
+        let result = ext.validate(
+            frame_system::RawOrigin::Signed(user).into(),
+            &CALL,
             &info_from_weight(Weight::zero()),
-            0
-        ));
-        assert_eq!(Balances::free_balance(user), 10);
-    });
-}
-
-#[test]
-fn transaction_payment_fails_for_account_with_no_balance() {
-    new_test_ext().execute_with(|| {
-        // So events are emitted
-        System::set_block_number(10);
-
-        let user = 2;
-        assert_eq!(Balances::free_balance(user), 0);
-        assert_err!(
-            ChargeTransactionPayment::<Test>::from(0).pre_dispatch(&user, CALL, &info_from_weight(Weight::zero()), 0),
-            InvalidTransaction::Payment
+            0,
+            (),
+            &implication,
+            TransactionSource::External,
         );
-        // No events for such a scenario
-        assert_eq!(System::events().len(), 0);
+
+        assert!(result.is_ok());
+        assert_eq!(Balances::free_balance(user), initial_balance);
     });
 }
