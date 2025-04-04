@@ -37,6 +37,7 @@ sc-offchain = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 sc-consensus-babe = { workspace = true }
 sc-consensus-babe-rpc = { workspace = true }
+sc-statement-store = { workspace = true }
 sp-consensus-babe = { workspace = true }
 sp-consensus = { workspace = true }
 sc-consensus = { workspace = true }

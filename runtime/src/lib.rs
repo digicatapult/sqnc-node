@@ -10,23 +10,22 @@ use frame_support::{
     derive_impl,
     traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter},
 };
-
 use frame_system::EnsureRoot;
 use pallet_grandpa::AuthorityId as GrandpaId;
+use scale_info::prelude::string::String;
+use scale_info::TypeInfo;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_runtime::codec::{Decode, Encode, MaxEncodedLen};
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT, NumberFor};
 use sp_runtime::{
-    create_runtime_str, generic, impl_opaque_keys,
+    generic, impl_opaque_keys,
     traits::OpaqueKeys,
     transaction_validity::{TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, RuntimeDebug,
 };
+use sp_std::borrow::Cow;
 use sp_std::prelude::*;
-
-use scale_info::TypeInfo;
-use sp_runtime::codec::{Decode, Encode, MaxEncodedLen};
-
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -91,14 +90,14 @@ pub mod opaque {
 
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("sqnc"),
-    impl_name: create_runtime_str!("sqnc"),
+    spec_name: Cow::Borrowed("sqnc"),
+    impl_name: Cow::Borrowed("sqnc"),
     authoring_version: 1,
     spec_version: 1140,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
-    state_version: 1,
+    system_version: 1,
 };
 
 /// The BABE epoch configuration at genesis.
@@ -230,6 +229,7 @@ impl pallet_balances::Config for Runtime {
     type MaxFreezes = ();
     type RuntimeHoldReason = ();
     type RuntimeFreezeReason = ();
+    type DoneSlashHandler = ();
 }
 
 impl pallet_transaction_payment_free::Config for Runtime {
@@ -401,6 +401,9 @@ impl pallet_collective::Config<GovernanceCollective> for Runtime {
     type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
     type SetMembersOrigin = MoreThanHalfMembers;
     type MaxProposalWeight = MaxProposalWeight;
+    type DisapproveOrigin = EnsureRoot<AccountId>; // Only root can disapprove proposals without penalty
+    type KillOrigin = EnsureRoot<AccountId>; // Only root can kill potentially malicious proposals
+    type Consideration = ();
 }
 
 type GovernanceMembershipInstance = pallet_membership::Instance1;
@@ -720,10 +723,10 @@ impl_runtime_apis! {
             _len: u32,
         ) -> pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo<Balance> {
             let dispatch_info = frame_support::dispatch::GetDispatchInfo::get_dispatch_info(&uxt);
-            let DispatchInfo { weight, class, .. } = dispatch_info;
+            let DispatchInfo { call_weight, class, .. } = dispatch_info;
 
             pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo {
-                weight,
+                weight: call_weight,
                 class,
                 partial_fee: 0u32.into()
             }
@@ -764,7 +767,7 @@ impl_runtime_apis! {
 
         fn dispatch_benchmark(
             config: frame_benchmarking::BenchmarkConfig
-        ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
+        ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, String> {
             use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch};
             use sp_storage::TrackedStorageKey;
 
