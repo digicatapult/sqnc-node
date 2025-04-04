@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
+use frame_support::weights::Weight;
+use log;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
@@ -11,8 +13,8 @@ mod mock;
 mod tests;
 
 use sp_runtime::{
-    traits::{DispatchInfoOf, Dispatchable, SignedExtension, Zero},
-    transaction_validity::TransactionValidityError,
+    traits::{Dispatchable, TransactionExtension},
+    transaction_validity::{TransactionSource, TransactionValidityError, ValidTransaction},
     FixedPointOperand,
 };
 
@@ -60,29 +62,6 @@ where
     pub fn from(fee: BalanceOf<T>) -> Self {
         Self(fee)
     }
-
-    fn zero_fee(
-        &self,
-        who: &T::AccountId,
-        call: &T::RuntimeCall,
-        info: &DispatchInfoOf<T::RuntimeCall>,
-        _len: usize,
-    ) -> Result<
-        (
-            BalanceOf<T>,
-            <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo,
-        ),
-        TransactionValidityError,
-    > {
-        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::zero_fee(
-            who,
-            call,
-            info,
-            Zero::zero(),
-            Zero::zero(),
-        )
-        .map(|i| (Zero::zero(), i))
-    }
 }
 
 impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
@@ -96,32 +75,62 @@ impl<T: Config> sp_std::fmt::Debug for ChargeTransactionPayment<T> {
     }
 }
 
-impl<T: Config> SignedExtension for ChargeTransactionPayment<T>
+impl<T: Config> TransactionExtension<T::RuntimeCall> for ChargeTransactionPayment<T>
 where
-    BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
     T::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+    BalanceOf<T>: Send + Sync + From<u64> + FixedPointOperand,
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
-    type AccountId = T::AccountId;
-    type Call = T::RuntimeCall;
-    type AdditionalSigned = ();
-    type Pre = (
-        BalanceOf<T>,
-        Self::AccountId,
-        <<T as Config>::OnFreeTransaction as OnFreeTransaction<T>>::LiquidityInfo,
-    );
-    fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
+    type Implicit = ();
+    type Val = ();
+    type Pre = ();
+
+    fn weight(&self, _: &T::RuntimeCall) -> Weight {
+        log::debug!(target: "runtime", "ChargeTransactionPayment::weight - returning zero");
+        Weight::zero()
+    }
+
+    fn validate(
+        &self,
+        origin: <T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        _call: &T::RuntimeCall,
+        _info: &DispatchInfo,
+        _len: usize,
+        _: (),
+        _implication: &impl Encode,
+        _source: TransactionSource,
+    ) -> Result<
+        (
+            ValidTransaction,
+            Self::Val,
+            <T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        ),
+        TransactionValidityError,
+    > {
+        log::debug!(target: "runtime", "ChargeTransactionPayment::validate - skipping fee check");
+        Ok((ValidTransaction::default(), (), origin))
+    }
+
+    fn prepare(
+        self,
+        _val: Self::Val,
+        _origin: &<T::RuntimeCall as Dispatchable>::RuntimeOrigin,
+        _call: &T::RuntimeCall,
+        _info: &DispatchInfo,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        log::debug!(target: "runtime", "ChargeTransactionPayment::prepare - no-op");
         Ok(())
     }
 
-    fn pre_dispatch(
-        self,
-        who: &Self::AccountId,
-        call: &Self::Call,
-        info: &DispatchInfoOf<Self::Call>,
-        len: usize,
-    ) -> Result<Self::Pre, TransactionValidityError> {
-        let (_fee, imbalance) = self.zero_fee(who, call, info, len)?;
-        Ok((self.0, who.clone(), imbalance))
+    fn post_dispatch_details(
+        _pre: Self::Pre,
+        _info: &DispatchInfo,
+        _post_info: &PostDispatchInfo,
+        _len: usize,
+        _result: &sp_runtime::DispatchResult,
+    ) -> Result<Weight, TransactionValidityError> {
+        log::debug!(target: "runtime", "ChargeTransactionPayment::post_dispatch_details - no refund/adjustment needed");
+        Ok(Weight::zero())
     }
 }
