@@ -6061,7 +6061,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-organisation-data"
-version = "12.3.0"
+version = "12.4.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
