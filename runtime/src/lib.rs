@@ -10,9 +10,9 @@ use frame_support::{
     derive_impl,
     traits::{ConstU128, ConstU32, ConstU64, EitherOfDiverse, EqualPrivilegeOnly, InstanceFilter},
 };
-
 use frame_system::EnsureRoot;
 use pallet_grandpa::AuthorityId as GrandpaId;
+use scale_info::prelude::string::String;
 use scale_info::TypeInfo;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -746,7 +746,7 @@ impl_runtime_apis! {
 
         fn dispatch_benchmark(
             config: frame_benchmarking::BenchmarkConfig
-        ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
+        ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, String> {
             use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch};
             use sp_storage::TrackedStorageKey;
 
