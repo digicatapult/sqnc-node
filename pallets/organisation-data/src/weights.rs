@@ -8,14 +8,14 @@ use core::marker::PhantomData;
 
 /// Weight functions needed for validator_set.
 pub trait WeightInfo {
-	fn set_value() -> Weight;
+  fn set_value() -> Weight;
 }
 
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn set_value() -> Weight {
-			Weight::zero()
-	} 
+  fn set_value() -> Weight {
+      Weight::zero()
+  } 
 }
 
