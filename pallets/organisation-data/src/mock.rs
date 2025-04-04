@@ -1,4 +1,4 @@
-//! Mock helpers for Validator Set pallet.
+//! Mock helpers for Organisation Data pallet.
 
 #![cfg(test)]
 
