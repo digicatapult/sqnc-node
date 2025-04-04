@@ -5,6 +5,7 @@ pub mod pallet_balances;
 pub mod pallet_collective;
 // pub mod pallet_grandpa; // not using as WeightInfo doesn't match associated type on Config
 pub mod pallet_membership;
+pub mod pallet_organisation_data;
 pub mod pallet_preimage;
 pub mod pallet_process_validation;
 pub mod pallet_proxy;

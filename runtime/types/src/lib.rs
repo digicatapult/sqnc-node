@@ -8,7 +8,8 @@ use sp_runtime::{
     traits::{IdentifyAccount, Verify},
     MultiSignature,
 };
-use strum_macros::EnumDiscriminants;
+use strum::EnumCount;
+use strum_macros::{EnumCount, EnumDiscriminants};
 
 pub use pallet_process_validation::{BooleanExpressionSymbol, BooleanOperator, Restriction};
 
@@ -79,5 +80,46 @@ impl<T: PartialEq> PartialEq<T> for MetadataValue<T> {
             MetadataValue::<T>::TokenId(v) => v == rhs,
             _ => false,
         }
+    }
+}
+
+#[derive(
+    Encode,
+    Decode,
+    Clone,
+    MaxEncodedLen,
+    TypeInfo,
+    PartialEq,
+    Debug,
+    PartialOrd,
+    Ord,
+    Eq,
+    EnumDiscriminants,
+    Serialize,
+    Deserialize,
+    EnumCount,
+)]
+pub enum OrgDataKey {
+    AttachmentEndpoint,
+    OidcConfigurationEndpoint,
+}
+
+impl Default for OrgDataKey {
+    fn default() -> Self {
+        OrgDataKey::AttachmentEndpoint
+    }
+}
+
+pub const ORG_DATA_KEY_COUNT: u32 = OrgDataKey::COUNT as u32;
+
+#[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
+pub enum OrgDataValue {
+    Literal(BoundedVec<u8, ConstU32<32>>),
+    Preimage(Hash),
+}
+
+impl Default for OrgDataValue {
+    fn default() -> Self {
+        OrgDataValue::Literal(BoundedVec::new())
     }
 }

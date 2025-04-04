@@ -11,7 +11,10 @@ repository = "https://github.com/digicatapult/sqnc-node/"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"] }
+parity-scale-codec = { workspace = true, features = [
+    "derive",
+    "max-encoded-len",
+] }
 scale-info = { workspace = true, features = ["derive", "serde"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["alloc"] }
@@ -65,6 +68,7 @@ pallet-process-validation = { default-features = false, path = '../pallets/proce
 pallet-symmetric-key = { default-features = false, path = '../pallets/symmetric-key' }
 pallet-transaction-payment-free = { default-features = false, path = '../pallets/transaction-payment-free' }
 pallet-validator-set = { default-features = false, path = '../pallets/validator-set' }
+pallet-organisation-data = { default-features = false, path = '../pallets/organisation-data' }
 sqnc-pallet-traits = { default-features = false, path = '../pallets/traits' }
 sqnc-runtime-types = { default-features = false, path = './types' }
 
@@ -72,7 +76,6 @@ sqnc-runtime-types = { default-features = false, path = './types' }
 substrate-wasm-builder = { workspace = true }
 
 [features]
-default = ["std"]
 std = [
     "frame-try-runtime?/std",
     "frame-system-benchmarking?/std",
@@ -117,8 +120,10 @@ std = [
     "pallet-utxo-nft/std",
     "pallet-scheduler/std",
     "pallet-symmetric-key/std",
+    "pallet-organisation-data/std",
     "sqnc-pallet-traits/std",
 ]
+default = ["std"]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",
     "frame-support/runtime-benchmarks",
@@ -138,6 +143,7 @@ runtime-benchmarks = [
     "pallet-timestamp/runtime-benchmarks",
     "pallet-utxo-nft/runtime-benchmarks",
     "pallet-validator-set/runtime-benchmarks",
+    "pallet-organisation-data/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
     "pallet-proxy/runtime-benchmarks",
 ]
@@ -163,5 +169,6 @@ try-runtime = [
     "pallet-utxo-nft/try-runtime",
     "pallet-transaction-payment-free/try-runtime",
     "pallet-validator-set/try-runtime",
+    "pallet-organisation-data/try-runtime",
     "pallet-proxy/try-runtime",
 ]
