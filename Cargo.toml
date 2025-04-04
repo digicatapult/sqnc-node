@@ -56,7 +56,7 @@ pallet-sudo = { version = "39.0.0", default-features = false }
 pallet-timestamp = { version = "38.0.0", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { version = "39.0.0", default-features = false }
 frame-executive = { version = "39.1.0", default-features = false }
-sc-statement-store = { version = "20.0.0", default-features = false }
+sc-statement-store = { version = "21.0.0", default-features = false }
 sp-api = { version = "35.0.0", default-features = false }
 sp-block-builder = { version = "35.0.0", default-features = false }
 sp-consensus-babe = { version = "0.41.0", default-features = false }
