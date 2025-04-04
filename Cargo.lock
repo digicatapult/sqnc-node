@@ -9051,6 +9051,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "sc-statement-store"
+version = "20.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72e54a77bb383c1f34d219dc7d363655abadbab1463d3c6b2a2e388372b249af"
+dependencies = [
+ "log",
+ "parity-db",
+ "parking_lot 0.12.3",
+ "sc-client-api",
+ "sc-keystore",
+ "sp-api",
+ "sp-blockchain",
+ "sp-core",
+ "sp-runtime",
+ "sp-statement-store",
+ "substrate-prometheus-endpoint",
+ "tokio",
+]
+
+[[package]]
 name = "sc-sysinfo"
 version = "41.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10724,6 +10744,7 @@ dependencies = [
  "sc-rpc",
  "sc-rpc-api",
  "sc-service",
+ "sc-statement-store",
  "sc-telemetry",
  "sc-transaction-pool",
  "sc-transaction-pool-api",
