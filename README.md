@@ -293,7 +293,31 @@ pub(super) fn doas_root_unchecked_weight(origin: OriginFor<T>, call: Box<<T as C
 pub(super) fn doas(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo { ... }
 ```
 
-### CUstom RPCs
+### OrganisationData pallet
+
+The `OrganisationData` pallet allows for storing key/value pairs for members of the chain. This is initially for storing endpoints needed to fetch files from a given member. Values here can either be short 32 byte literals or stored as blob preimages via a hash reference.
+
+The pallet exposes one extrinsic:
+
+```rust
+pub(super) fn set_value(origin: OriginFor<T>, key: T::OrgDataKey, value: T::OrgDataValue) -> DispatchResult { ... }
+```
+
+Where `T::OrgDataKey` and `T::OrgDataValue` are set as:
+
+```rust
+pub enum OrgDataKey {
+    AttachmentEndpoint,
+    OidcConfigurationEndpoint,
+}
+
+pub enum OrgDataValue {
+    Literal(BoundedVec<u8, ConstU32<32>>),
+    Preimage(Hash),
+}
+```
+
+### Custom RPCs
 
 `sqnc-node` exposes the following custom rpcs:
 

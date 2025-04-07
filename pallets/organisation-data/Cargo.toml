@@ -1,0 +1,44 @@
+[package]
+name = 'pallet-organisation-data'
+authors = ['Digital Catapult <https://www.digicatapult.org.uk>']
+description = 'Pallet for managing member organisation data'
+edition = '2021'
+license = 'Apache-2.0'
+repository = 'https://github.com/digicatapult/sqnc-node/'
+version = { workspace = true }
+
+[dependencies]
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+sp-staking = { workspace = true }
+frame-benchmarking = { workspace = true, optional = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+sp-weights = { workspace = true }
+scale-info = { workspace = true, features = ['derive', 'serde'] }
+log = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+pallet-membership = { workspace = true }
+
+[dev-dependencies]
+sp-state-machine = { workspace = true }
+serde = { workspace = true, features = ['derive'] }
+
+[features]
+default = ['std']
+runtime-benchmarks = ['frame-benchmarking/runtime-benchmarks']
+std = [
+  'parity-scale-codec/std',
+  'frame-benchmarking/std',
+  'frame-support/std',
+  'frame-system/std',
+  'scale-info/std',
+  'sp-core/std',
+  'sp-io/std',
+  'sp-std/std',
+  'sp-runtime/std',
+  'pallet-membership/std',
+]
+try-runtime = ['frame-support/try-runtime']
