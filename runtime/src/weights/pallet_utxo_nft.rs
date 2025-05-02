@@ -45,7 +45,7 @@ impl<T: frame_system::Config> pallet_utxo_nft::WeightInfo for WeightInfo<T> {
 	/// Proof: `UtxoNFT::Graveyard` (`max_values`: None, `max_size`: Some(40), added: 2515, mode: `MaxEncodedLen`)
 	/// The range of component `i` is `[1, 10]`.
 	/// The range of component `o` is `[1, 10]`.
-	fn run_process(i: u32, o: u32, ) -> Weight {
+	fn run_process(_r: u32, i: u32, o: u32, ) -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `290 + i * (132 ±0)`
 		//  Estimated: `41613 + i * (9948 ±0)`

@@ -1,5 +1,6 @@
 use super::*;
 
+use frame_support::dispatch::RawOrigin;
 use sp_runtime::bounded_vec;
 use sp_std::collections::btree_map::BTreeMap;
 use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
@@ -25,7 +26,8 @@ fn it_succeeds_when_process_exists() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &0u64,
+            &RawOrigin::Signed(0u64),
+            &Vec::new(),
             &Vec::new(),
             &Vec::new(),
         );
@@ -57,7 +59,8 @@ fn it_fails_when_process_id_doesnt_exist() {
                 id: ProcessIdentifier::B,
                 version: 1u32,
             },
-            &0u64,
+            &RawOrigin::Signed(0u64),
+            &bounded_vec![],
             &bounded_vec![],
             &bounded_vec![],
         );
@@ -89,7 +92,8 @@ fn it_fails_when_process_version_doesnt_exist() {
                 id: ProcessIdentifier::A,
                 version: 2u32,
             },
-            &0u64,
+            &RawOrigin::Signed(0u64),
+            &bounded_vec![],
             &bounded_vec![],
             &bounded_vec![],
         );
@@ -121,7 +125,8 @@ fn it_fails_when_process_disabled() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &0u64,
+            &RawOrigin::Signed(0u64),
+            &bounded_vec![],
             &bounded_vec![],
             &bounded_vec![],
         );
@@ -160,7 +165,8 @@ fn it_succeeds_when_all_restrictions_succeed() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &0u64,
+            &RawOrigin::Signed(0u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
@@ -203,7 +209,8 @@ fn it_fails_when_one_restrictions_fails() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &0u64,
+            &RawOrigin::Signed(0u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
@@ -248,7 +255,8 @@ fn it_succeeds_with_complex_tree() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &1u64,
+            &RawOrigin::Signed(1u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
@@ -293,7 +301,8 @@ fn it_fails_with_complex_tree() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &1u64,
+            &RawOrigin::Signed(1u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: token_roles,
@@ -333,7 +342,8 @@ fn it_succeeds_with_handed_expressions_r() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &1u64,
+            &RawOrigin::Signed(1u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
@@ -373,7 +383,8 @@ fn it_succeeds_with_handed_expressions_l() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &1u64,
+            &RawOrigin::Signed(1u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
@@ -413,7 +424,8 @@ fn it_fails_with_handed_expressions_r() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &1u64,
+            &RawOrigin::Signed(1u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),
@@ -453,7 +465,8 @@ fn it_fails_with_handed_expressions_l() {
                 id: ProcessIdentifier::A,
                 version: 1u32,
             },
-            &1u64,
+            &RawOrigin::Signed(1u64),
+            &bounded_vec![],
             &vec![ProcessIO {
                 id: 1u128,
                 roles: BTreeMap::new(),

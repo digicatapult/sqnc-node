@@ -2,6 +2,7 @@
 // a call to `validate_process`
 
 use frame_support::Parameter;
+use frame_system::RawOrigin;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -9,72 +10,73 @@ use sp_std::vec::Vec;
 use sqnc_pallet_traits::ProcessIO;
 
 #[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
+pub enum ArgType {
+    Input,
+    Output,
+    Reference,
+}
+
+impl Default for ArgType {
+    fn default() -> Self {
+        ArgType::Input
+    }
+}
+
+#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
 pub enum Restriction<RoleKey, TokenMetadataKey, TokenMetadataValue, TokenMetadataValueDiscriminator> {
     None,
     Fail,
-    SenderHasInputRole {
+    SenderIsRoot,
+    SenderHasArgRole {
+        arg_type: ArgType,
         index: u32,
         role_key: RoleKey,
     },
-    SenderHasOutputRole {
+    ArgHasRole {
+        arg_type: ArgType,
         index: u32,
         role_key: RoleKey,
     },
-    OutputHasRole {
-        index: u32,
-        role_key: RoleKey,
-    },
-    OutputHasMetadata {
+    ArgHasMetadata {
+        arg_type: ArgType,
         index: u32,
         metadata_key: TokenMetadataKey,
     },
-    InputHasRole {
-        index: u32,
-        role_key: RoleKey,
+    MatchArgsRole {
+        left_arg_type: ArgType,
+        left_index: u32,
+        left_role_key: RoleKey,
+        right_arg_type: ArgType,
+        right_index: u32,
+        right_role_key: RoleKey,
     },
-    InputHasMetadata {
-        index: u32,
-        metadata_key: TokenMetadataKey,
+    MatchArgsMetadataValue {
+        left_arg_type: ArgType,
+        left_index: u32,
+        left_metadata_key: TokenMetadataKey,
+        right_arg_type: ArgType,
+        right_index: u32,
+        right_metadata_key: TokenMetadataKey,
     },
-    MatchInputOutputRole {
-        input_index: u32,
-        input_role_key: RoleKey,
-        output_index: u32,
-        output_role_key: RoleKey,
+    MatchArgIdToMetadataValue {
+        left_arg_type: ArgType,
+        left_index: u32,
+        right_arg_type: ArgType,
+        right_index: u32,
+        right_metadata_key: TokenMetadataKey,
     },
-    MatchInputOutputMetadataValue {
-        input_index: u32,
-        input_metadata_key: TokenMetadataKey,
-        output_index: u32,
-        output_metadata_key: TokenMetadataKey,
+    FixedArgCount {
+        arg_type: ArgType,
+        count: u32,
     },
-    MatchInputIdOutputMetadataValue {
-        input_index: u32,
-        output_index: u32,
-        output_metadata_key: TokenMetadataKey,
-    },
-    FixedNumberOfInputs {
-        num_inputs: u32,
-    },
-    FixedNumberOfOutputs {
-        num_outputs: u32,
-    },
-    FixedInputMetadataValue {
+    FixedArgMetadataValue {
+        arg_type: ArgType,
         index: u32,
         metadata_key: TokenMetadataKey,
         metadata_value: TokenMetadataValue,
     },
-    FixedOutputMetadataValue {
-        index: u32,
-        metadata_key: TokenMetadataKey,
-        metadata_value: TokenMetadataValue,
-    },
-    FixedOutputMetadataValueType {
-        index: u32,
-        metadata_key: TokenMetadataKey,
-        metadata_value_type: TokenMetadataValueDiscriminator,
-    },
-    FixedInputMetadataValueType {
+    FixedArgMetadataValueType {
+        arg_type: ArgType,
         index: u32,
         metadata_key: TokenMetadataKey,
         metadata_value_type: TokenMetadataValueDiscriminator,
@@ -94,167 +96,156 @@ where
     }
 }
 
-pub fn validate_restriction<I, A, R, T, V, D>(
+pub fn validate_restriction<'a, I, A, R, T, V, D, F>(
     restriction: Restriction<R, T, V, D>,
-    sender: &A,
-    inputs: &Vec<ProcessIO<I, A, R, T, V>>,
-    outputs: &Vec<ProcessIO<I, A, R, T, V>>,
+    origin: &RawOrigin<A>,
+    get_args: F,
 ) -> bool
 where
-    A: Parameter,
-    R: Parameter + Default + Ord,
-    T: Parameter + Default + Ord,
-    V: Parameter + PartialEq<I>,
-    D: Parameter + From<V>,
+    I: 'a,
+    A: Parameter + 'a,
+    R: Parameter + Default + Ord + 'a,
+    T: Parameter + Default + Ord + 'a,
+    V: Parameter + PartialEq<I> + 'a,
+    D: Parameter + From<V> + 'a,
+    F: Fn(ArgType) -> &'a Vec<ProcessIO<I, A, R, T, V>>,
 {
     match restriction {
-        Restriction::<R, T, V, D>::None => true,
-        Restriction::<R, T, V, D>::Fail => false,
-        Restriction::FixedNumberOfInputs { num_inputs } => return inputs.len() == num_inputs as usize,
-        Restriction::FixedNumberOfOutputs { num_outputs } => return outputs.len() == num_outputs as usize,
-        Restriction::FixedInputMetadataValue {
+        Restriction::None => true,
+        Restriction::Fail => false,
+        Restriction::SenderIsRoot => match origin {
+            RawOrigin::Root => true,
+            _ => false,
+        },
+        Restriction::FixedArgCount { arg_type, count } => get_args(arg_type).len() == count as usize,
+        Restriction::FixedArgMetadataValue {
+            arg_type,
             index,
             metadata_key,
             metadata_value,
         } => {
-            let Some(selected_input) = inputs.get(index as usize) else {
+            let args = get_args(arg_type);
+            let Some(arg) = args.get(index as usize) else {
                 return false;
             };
-            let meta = selected_input.metadata.get(&metadata_key);
+            let meta = arg.metadata.get(&metadata_key);
             meta == Some(&metadata_value)
         }
-        Restriction::FixedOutputMetadataValue {
-            index,
-            metadata_key,
-            metadata_value,
-        } => {
-            let Some(selected_output) = outputs.get(index as usize) else {
-                return false;
-            };
-            let meta = selected_output.metadata.get(&metadata_key);
-            meta == Some(&metadata_value)
-        }
-        Restriction::FixedOutputMetadataValueType {
+        Restriction::FixedArgMetadataValueType {
+            arg_type,
             index,
             metadata_key,
             metadata_value_type,
         } => {
-            let Some(selected_output) = outputs.get(index as usize) else {
+            let args = get_args(arg_type);
+            let Some(arg) = args.get(index as usize) else {
                 return false;
             };
-            match selected_output.metadata.get(&metadata_key) {
+            match arg.metadata.get(&metadata_key) {
                 Some(meta) => D::from(meta.clone()) == metadata_value_type,
                 None => false,
             }
         }
-        Restriction::FixedInputMetadataValueType {
+        Restriction::SenderHasArgRole {
+            arg_type,
             index,
-            metadata_key,
-            metadata_value_type,
+            role_key,
         } => {
-            let Some(selected_input) = inputs.get(index as usize) else {
+            let args = get_args(arg_type);
+            let Some(arg) = args.get(index as usize) else {
                 return false;
             };
-            match selected_input.metadata.get(&metadata_key) {
-                Some(meta) => D::from(meta.clone()) == metadata_value_type,
+            match arg.roles.get(&role_key) {
+                Some(account) => match origin {
+                    RawOrigin::Signed(acc) => acc == account,
+                    _ => false,
+                },
                 None => false,
             }
         }
-        Restriction::SenderHasInputRole { index, role_key } => {
-            let Some(selected_input) = inputs.get(index as usize) else {
-                return false;
-            };
-            match selected_input.roles.get(&role_key) {
-                Some(account) => sender == account,
-                None => false,
-            }
-        }
-        Restriction::SenderHasOutputRole { index, role_key } => {
-            let Some(selected_output) = outputs.get(index as usize) else {
-                return false;
-            };
-            match selected_output.roles.get(&role_key) {
-                Some(account) => sender == account,
-                None => false,
-            }
-        }
-        Restriction::MatchInputOutputRole {
-            input_index,
-            input_role_key,
-            output_index,
-            output_role_key,
+        Restriction::MatchArgsRole {
+            left_arg_type,
+            left_index,
+            left_role_key,
+            right_arg_type,
+            right_index,
+            right_role_key,
         } => {
-            let (Some(selected_input), Some(selected_output)) =
-                (inputs.get(input_index as usize), outputs.get(output_index as usize))
+            let left_args = get_args(left_arg_type);
+            let right_args = get_args(right_arg_type);
+            let (Some(left), Some(right)) = (left_args.get(left_index as usize), right_args.get(right_index as usize))
             else {
                 return false;
             };
-            match (
-                selected_input.roles.get(&input_role_key),
-                selected_output.roles.get(&output_role_key),
-            ) {
-                (Some(input_account), Some(output_account)) => input_account == output_account,
+            match (left.roles.get(&left_role_key), right.roles.get(&right_role_key)) {
+                (Some(left_account), Some(right_account)) => left_account == right_account,
                 _ => false,
             }
         }
-        Restriction::MatchInputOutputMetadataValue {
-            input_index,
-            input_metadata_key,
-            output_index,
-            output_metadata_key,
+        Restriction::MatchArgsMetadataValue {
+            left_arg_type,
+            left_index,
+            left_metadata_key,
+            right_arg_type,
+            right_index,
+            right_metadata_key,
         } => {
-            let (Some(selected_input), Some(selected_output)) =
-                (inputs.get(input_index as usize), outputs.get(output_index as usize))
+            let left_args = get_args(left_arg_type);
+            let right_args = get_args(right_arg_type);
+            let (Some(left_arg), Some(right_arg)) =
+                (left_args.get(left_index as usize), right_args.get(right_index as usize))
             else {
                 return false;
             };
             match (
-                selected_input.metadata.get(&input_metadata_key),
-                selected_output.metadata.get(&output_metadata_key),
+                left_arg.metadata.get(&left_metadata_key),
+                right_arg.metadata.get(&right_metadata_key),
             ) {
                 (Some(input_value), Some(output_value)) => input_value == output_value,
                 _ => false,
             }
         }
-        Restriction::MatchInputIdOutputMetadataValue {
-            input_index,
-            output_index,
-            output_metadata_key,
+        Restriction::MatchArgIdToMetadataValue {
+            left_arg_type,
+            left_index,
+            right_arg_type,
+            right_index,
+            right_metadata_key,
         } => {
-            let (Some(selected_input), Some(selected_output)) =
-                (inputs.get(input_index as usize), outputs.get(output_index as usize))
+            let left_args = get_args(left_arg_type);
+            let right_args = get_args(right_arg_type);
+            let (Some(left_arg), Some(right_arg)) =
+                (left_args.get(left_index as usize), right_args.get(right_index as usize))
             else {
                 return false;
             };
 
-            match selected_output.metadata.get(&output_metadata_key) {
-                Some(v) => v == &selected_input.id,
+            match right_arg.metadata.get(&right_metadata_key) {
+                Some(v) => v == &left_arg.id,
                 _ => false,
             }
         }
-        Restriction::OutputHasRole { index, role_key } => {
-            let Some(selected_output) = outputs.get(index as usize) else {
+        Restriction::ArgHasRole {
+            arg_type,
+            index,
+            role_key,
+        } => {
+            let args = get_args(arg_type);
+            let Some(arg) = args.get(index as usize) else {
                 return false;
             };
-            selected_output.roles.get(&role_key).is_some()
+            arg.roles.get(&role_key).is_some()
         }
-        Restriction::OutputHasMetadata { index, metadata_key } => {
-            let Some(selected_output) = outputs.get(index as usize) else {
+        Restriction::ArgHasMetadata {
+            arg_type,
+            index,
+            metadata_key,
+        } => {
+            let args = get_args(arg_type);
+            let Some(arg) = args.get(index as usize) else {
                 return false;
             };
-            selected_output.metadata.get(&metadata_key).is_some()
-        }
-        Restriction::InputHasRole { index, role_key } => {
-            let Some(selected_input) = inputs.get(index as usize) else {
-                return false;
-            };
-            selected_input.roles.get(&role_key).is_some()
-        }
-        Restriction::InputHasMetadata { index, metadata_key } => {
-            let Some(selected_input) = inputs.get(index as usize) else {
-                return false;
-            };
-            selected_input.metadata.get(&metadata_key).is_some()
+            arg.metadata.get(&metadata_key).is_some()
         }
     }
 }
@@ -265,17 +256,56 @@ mod tests {
     use sp_std::collections::btree_map::BTreeMap;
     use sp_std::iter::FromIterator;
 
+    type TestProcess = ProcessIO<u64, u64, u32, u32, u64>;
+    static EMPTY_ARGS: Vec<TestProcess> = Vec::<TestProcess>::new();
+
     #[test]
     fn none_restriction_succeeds() {
-        let result =
-            validate_restriction::<u64, u64, u32, u32, u64, u64>(Restriction::None, &1u64, &Vec::new(), &Vec::new());
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::None,
+            &RawOrigin::Signed(1u64),
+            |_| &EMPTY_ARGS,
+        );
         assert!(result);
     }
 
     #[test]
     fn fail_restriction_fails() {
-        let result =
-            validate_restriction::<u64, u64, u32, u32, u64, u64>(Restriction::Fail, &1u64, &Vec::new(), &Vec::new());
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::Fail,
+            &RawOrigin::Signed(1u64),
+            |_| &EMPTY_ARGS,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_is_root_succeeds_as_root() {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderIsRoot,
+            &RawOrigin::Root,
+            |_| &EMPTY_ARGS,
+        );
+        assert!(result);
+    }
+
+    #[test]
+    fn sender_is_root_fails_as_none() {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderIsRoot,
+            &RawOrigin::None,
+            |_| &EMPTY_ARGS,
+        );
+        assert!(!result);
+    }
+
+    #[test]
+    fn sender_is_root_fails_as_signed() {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderIsRoot,
+            &RawOrigin::Signed(1u64),
+            |_| &EMPTY_ARGS,
+        );
         assert!(!result);
     }
 
@@ -305,11 +335,16 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedNumberOfInputs { num_inputs: 4 },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgCount {
+                arg_type: ArgType::Input,
+                count: 4,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -330,11 +365,16 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedNumberOfInputs { num_inputs: 1 },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgCount {
+                arg_type: ArgType::Input,
+                count: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -355,11 +395,16 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedNumberOfOutputs { num_outputs: 2 },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgCount {
+                arg_type: ArgType::Output,
+                count: 2,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -380,11 +425,16 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedNumberOfOutputs { num_outputs: 1 },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgCount {
+                arg_type: ArgType::Output,
+                count: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -412,15 +462,18 @@ mod tests {
                 metadata: real_metadata,
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedInputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Input,
                 index: 2,
                 metadata_key: 2,
                 metadata_value: 110,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -448,15 +501,18 @@ mod tests {
                 metadata: real_metadata,
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedInputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -484,15 +540,18 @@ mod tests {
                 metadata: real_metadata,
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedInputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Input,
                 index: 2,
                 metadata_key: 2,
                 metadata_value: 45,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -522,15 +581,18 @@ mod tests {
                 metadata: real_metadata,
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedInputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Input,
                 index: 2,
                 metadata_key: 3,
                 metadata_value: 110,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -560,15 +622,18 @@ mod tests {
                 metadata: real_metadata,
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedInputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Input,
                 index: 3,
                 metadata_key: 2,
                 metadata_value: 110,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -598,15 +663,18 @@ mod tests {
                 metadata: real_metadata,
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedInputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 2,
                 metadata_value: 110,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -626,15 +694,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, 100)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedOutputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 1,
                 metadata_value: 100,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -654,15 +725,18 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedOutputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 1,
                 metadata_value: 100,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -682,15 +756,18 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedOutputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Output,
                 index: 0,
                 metadata_key: 1,
                 metadata_value: 99,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -710,15 +787,18 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedOutputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Output,
                 index: 0,
                 metadata_key: 0,
                 metadata_value: 100,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -738,15 +818,18 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::FixedOutputMetadataValue {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::FixedArgMetadataValue {
+                arg_type: ArgType::Output,
                 index: 2,
                 metadata_key: 1,
                 metadata_value: 100,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -791,6 +874,7 @@ mod tests {
     #[test]
     fn output_restrict_metadata_type_succeeds() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let outputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -803,15 +887,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedOutputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 1,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &other_args,
+            },
         );
         assert!(result);
     }
@@ -819,6 +906,7 @@ mod tests {
     #[test]
     fn output_restrict_metadata_type_incorrect_type_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let outputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -831,15 +919,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedOutputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 1,
                 metadata_value_type: MetadataValueDisc::BB,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -847,6 +938,7 @@ mod tests {
     #[test]
     fn output_restrict_metadata_type_incorrect_index_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let outputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -859,15 +951,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedOutputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Output,
                 index: 0,
                 metadata_key: 1,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -875,6 +970,7 @@ mod tests {
     #[test]
     fn output_restrict_metadata_type_incorrect_key_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let outputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -887,15 +983,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedOutputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 0,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -903,6 +1002,7 @@ mod tests {
     #[test]
     fn output_restrict_metadata_type_bad_index_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let outputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -915,15 +1015,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedOutputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Output,
                 index: 2,
                 metadata_key: 0,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -931,6 +1034,7 @@ mod tests {
     #[test]
     fn input_restrict_metadata_type_succeeds() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let inputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -943,15 +1047,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedInputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 1,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &other_args,
+            },
         );
         assert!(result);
     }
@@ -959,6 +1066,7 @@ mod tests {
     #[test]
     fn input_restrict_metadata_type_incorrect_type_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let inputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -971,15 +1079,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedInputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 1,
                 metadata_value_type: MetadataValueDisc::BB,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -987,6 +1098,7 @@ mod tests {
     #[test]
     fn input_restrict_metadata_type_incorrect_index_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let inputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -999,15 +1111,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedInputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Input,
                 index: 0,
                 metadata_key: 1,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -1015,6 +1130,7 @@ mod tests {
     #[test]
     fn input_restrict_metadata_type_incorrect_key_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let inputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -1027,15 +1143,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedInputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 0,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -1043,6 +1162,7 @@ mod tests {
     #[test]
     fn input_restrict_metadata_type_bad_index_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
+        let other_args = Vec::new();
         let inputs = vec![
             ProcessIO {
                 id: 0u64,
@@ -1055,15 +1175,18 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, MetadataValue::A)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, MetadataValue, MetadataValueDisc>(
-            Restriction::FixedInputMetadataValueType {
+        let result = validate_restriction(
+            Restriction::<u32, u32, MetadataValue, MetadataValueDisc>::FixedArgMetadataValueType {
+                arg_type: ArgType::Input,
                 index: 2,
                 metadata_key: 0,
                 metadata_value_type: MetadataValueDisc::AA,
             },
-            &1u64,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &other_args,
+            },
         );
         assert!(!result);
     }
@@ -1076,14 +1199,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasInputRole {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Input,
                 index: 0,
                 role_key: Default::default(),
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1096,14 +1222,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasInputRole {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Input,
                 index: 0,
                 role_key: Default::default(),
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1124,14 +1253,17 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasInputRole {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Input,
                 index: 1,
                 role_key: Default::default(),
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1144,11 +1276,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasInputRole { index: 0, role_key: 1 },
-            &1,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Input,
+                index: 0,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1161,11 +1299,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasInputRole { index: 1, role_key: 1 },
-            &1,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Input,
+                index: 1,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1178,14 +1322,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasOutputRole {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Output,
                 index: 0,
                 role_key: Default::default(),
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1198,14 +1345,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasOutputRole {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Output,
                 index: 0,
                 role_key: Default::default(),
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1226,14 +1376,17 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasOutputRole {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Output,
                 index: 1,
                 role_key: Default::default(),
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1246,11 +1399,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasOutputRole { index: 0, role_key: 1 },
-            &1,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Output,
+                index: 0,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1263,11 +1422,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::SenderHasOutputRole { index: 1, role_key: 1 },
-            &1,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::SenderHasArgRole {
+                arg_type: ArgType::Output,
+                index: 1,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1280,11 +1445,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasRole { index: 0, role_key: 1 },
-            &1,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Output,
+                index: 0,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1297,11 +1468,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasRole { index: 0, role_key: 2 },
-            &1,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Output,
+                index: 0,
+                role_key: 2,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1322,11 +1499,17 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasRole { index: 1, role_key: 1 },
-            &1,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Output,
+                index: 1,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1339,11 +1522,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasRole { index: 1, role_key: 1 },
-            &1,
-            &Vec::new(),
-            &outputs,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Output,
+                index: 1,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1362,16 +1551,21 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 0,
-                input_role_key: 0,
-                output_index: 0,
-                output_role_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_role_key: 0,
+                right_index: 0,
+                right_role_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1390,16 +1584,21 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 0,
-                input_role_key: 0,
-                output_index: 0,
-                output_role_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_role_key: 0,
+                right_index: 0,
+                right_role_key: 1,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1418,16 +1617,21 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 0,
-                input_role_key: 1,
-                output_index: 0,
-                output_role_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_role_key: 1,
+                right_index: 0,
+                right_role_key: 1,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1446,16 +1650,21 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 0,
-                input_role_key: 1,
-                output_index: 0,
-                output_role_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_role_key: 1,
+                right_index: 0,
+                right_role_key: 1,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1482,16 +1691,21 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 1,
-                input_role_key: 1,
-                output_index: 0,
-                output_role_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 1,
+                left_role_key: 1,
+                right_index: 0,
+                right_role_key: 1,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1510,22 +1724,27 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 1,
-                input_role_key: 0,
-                output_index: 0,
-                output_role_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 1,
+                left_role_key: 0,
+                right_index: 0,
+                right_role_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
 
     #[test]
-    fn match_input_output_role_bad_output_index_fails() {
+    fn match_input_output_role_bad_right_index_fails() {
         let input_roles = BTreeMap::from_iter(vec![(0, 1)]);
         let output_roles = BTreeMap::from_iter(vec![(0, 1)]);
         let inputs = vec![ProcessIO {
@@ -1538,16 +1757,21 @@ mod tests {
             roles: output_roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputRole {
-                input_index: 0,
-                input_role_key: 0,
-                output_index: 1,
-                output_role_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsRole {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_role_key: 0,
+                right_index: 1,
+                right_role_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1567,16 +1791,21 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 0,
-                input_metadata_key: 0,
-                output_index: 0,
-                output_metadata_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_metadata_key: 0,
+                right_index: 0,
+                right_metadata_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1596,16 +1825,21 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 0,
-                input_metadata_key: 0,
-                output_index: 0,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_metadata_key: 0,
+                right_index: 0,
+                right_metadata_key: 1,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1625,16 +1859,21 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 0,
-                input_metadata_key: 0,
-                output_index: 0,
-                output_metadata_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_metadata_key: 0,
+                right_index: 0,
+                right_metadata_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1654,16 +1893,21 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 0,
-                input_metadata_key: 0,
-                output_index: 0,
-                output_metadata_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_metadata_key: 0,
+                right_index: 0,
+                right_metadata_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1691,22 +1935,27 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 1,
-                input_metadata_key: 0,
-                output_index: 0,
-                output_metadata_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 1,
+                left_metadata_key: 0,
+                right_index: 0,
+                right_metadata_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
 
     #[test]
-    fn match_input_output_metadata_value_bad_input_index_fails() {
+    fn match_input_output_metadata_value_bad_left_index_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let input_metadata = BTreeMap::from_iter(vec![(0, 0)]);
         let output_metadata = BTreeMap::from_iter(vec![(0, 0)]);
@@ -1720,22 +1969,27 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 1,
-                input_metadata_key: 0,
-                output_index: 0,
-                output_metadata_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 1,
+                left_metadata_key: 0,
+                right_index: 0,
+                right_metadata_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
 
     #[test]
-    fn match_input_output_metadata_value_bad_output_index_fails() {
+    fn match_input_output_metadata_value_bad_right_index_fails() {
         let roles = BTreeMap::from_iter(vec![(Default::default(), 1)]);
         let input_metadata = BTreeMap::from_iter(vec![(0, 0)]);
         let output_metadata = BTreeMap::from_iter(vec![(0, 0)]);
@@ -1749,16 +2003,21 @@ mod tests {
             roles: roles.clone(),
             metadata: output_metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputOutputMetadataValue {
-                input_index: 0,
-                input_metadata_key: 0,
-                output_index: 1,
-                output_metadata_key: 0,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgsMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                left_metadata_key: 0,
+                right_index: 1,
+                right_metadata_key: 0,
             },
-            &1,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1775,15 +2034,20 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(1, 42)]),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 0,
-                output_index: 0,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                right_index: 0,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1800,15 +2064,20 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(2, 42)]),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 0,
-                output_index: 0,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                right_index: 0,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1825,15 +2094,20 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(1, 40)]),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 0,
-                output_index: 0,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                right_index: 0,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1857,15 +2131,20 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(1, 42)]),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 1,
-                output_index: 0,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 1,
+                right_index: 0,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1889,15 +2168,20 @@ mod tests {
                 metadata: BTreeMap::from_iter(vec![(1, 41)]),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 0,
-                output_index: 1,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                right_index: 1,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1914,15 +2198,20 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(1, 42)]),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 1,
-                output_index: 0,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 1,
+                right_index: 0,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1939,15 +2228,20 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(1, 42)]),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::MatchInputIdOutputMetadataValue {
-                input_index: 0,
-                output_index: 1,
-                output_metadata_key: 1,
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::MatchArgIdToMetadataValue {
+                left_arg_type: ArgType::Input,
+                right_arg_type: ArgType::Output,
+                left_index: 0,
+                right_index: 1,
+                right_metadata_key: 1,
             },
-            &1u64,
-            &inputs,
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -1960,14 +2254,17 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Output,
                 index: 0,
                 metadata_key: 1,
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -1980,14 +2277,17 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Output,
                 index: 0,
                 metadata_key: 2,
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2008,14 +2308,17 @@ mod tests {
                 metadata: metadata1.clone(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 1,
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2028,14 +2331,17 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::OutputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Output,
                 index: 1,
                 metadata_key: 1,
             },
-            &1,
-            &Vec::new(),
-            &outputs,
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Output => &outputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2048,11 +2354,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasRole { index: 0, role_key: 1 },
-            &1,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Input,
+                index: 0,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -2065,11 +2377,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasRole { index: 0, role_key: 2 },
-            &1,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Input,
+                index: 0,
+                role_key: 2,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2090,11 +2408,17 @@ mod tests {
                 metadata: BTreeMap::new(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasRole { index: 1, role_key: 1 },
-            &1,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Input,
+                index: 1,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2107,11 +2431,17 @@ mod tests {
             roles: roles.clone(),
             metadata: BTreeMap::new(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasRole { index: 1, role_key: 1 },
-            &1,
-            &inputs,
-            &Vec::new(),
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasRole {
+                arg_type: ArgType::Input,
+                index: 1,
+                role_key: 1,
+            },
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2124,14 +2454,17 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Input,
                 index: 0,
                 metadata_key: 1,
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(result);
     }
@@ -2144,14 +2477,17 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Input,
                 index: 0,
                 metadata_key: 2,
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2172,14 +2508,17 @@ mod tests {
                 metadata: metadata1.clone(),
             },
         ];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 1,
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }
@@ -2192,14 +2531,17 @@ mod tests {
             roles: BTreeMap::new(),
             metadata: metadata.clone(),
         }];
-        let result = validate_restriction::<u64, u64, u32, u32, u64, u64>(
-            Restriction::InputHasMetadata {
+        let result = validate_restriction(
+            Restriction::<u32, u32, u64, u64>::ArgHasMetadata {
+                arg_type: ArgType::Input,
                 index: 1,
                 metadata_key: 1,
             },
-            &1,
-            &inputs,
-            &Vec::new(),
+            &RawOrigin::Signed(1u64),
+            |a| match a {
+                ArgType::Input => &inputs,
+                _ => &EMPTY_ARGS,
+            },
         );
         assert!(!result);
     }

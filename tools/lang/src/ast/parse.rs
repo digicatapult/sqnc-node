@@ -462,7 +462,7 @@ pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstR
                 Some(node)
             }
             Rule::EOI => None,
-            _ => panic!(),
+            _ => Some(produce_unexpected_pair_error(pair)),
         })
         .collect()
 }

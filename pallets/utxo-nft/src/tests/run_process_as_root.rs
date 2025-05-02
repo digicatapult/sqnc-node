@@ -1,7 +1,7 @@
 use crate::{graveyard::GraveyardState, input::Input, output::Output, tests::mock::*, token::Token, Error, Event};
-use frame_support::{assert_err, assert_ok, dispatch::RawOrigin};
+use frame_support::{assert_err, assert_noop, assert_ok, dispatch::RawOrigin};
 use sp_core::H256;
-use sp_runtime::{bounded_btree_map, bounded_vec};
+use sp_runtime::{bounded_btree_map, bounded_vec, DispatchError};
 use sqnc_pallet_traits::ProcessFullyQualifiedId;
 
 const SUCCEED_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFullyQualifiedId {
@@ -14,13 +14,34 @@ const FAIL_PROCESS: ProcessFullyQualifiedId<ProcessIdentifier, u32> = ProcessFul
 };
 
 #[test]
+fn it_errors_if_not_root() {
+    new_test_ext().execute_with(|| {
+        // create a token with no parents
+        let roles = bounded_btree_map!(Default::default() => 1);
+        let metadata = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
+        assert_noop!(
+            UtxoNFT::run_process_as_root(
+                RuntimeOrigin::signed(1),
+                SUCCEED_PROCESS,
+                bounded_vec![],
+                bounded_vec![Output {
+                    roles: roles.clone(),
+                    metadata: metadata.clone()
+                }]
+            ),
+            DispatchError::BadOrigin
+        );
+    });
+}
+
+#[test]
 fn it_works_for_creating_token_with_file() {
     new_test_ext().execute_with(|| {
         // create a token with no parents
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -37,7 +58,7 @@ fn it_works_for_creating_token_with_file() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -54,8 +75,8 @@ fn it_works_for_creating_token_with_literal() {
         // create a token with no parents
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::Literal([0]));
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -72,7 +93,7 @@ fn it_works_for_creating_token_with_literal() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -89,8 +110,8 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
         // create a token with no parents
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 =>  MetadataValue::TokenId(0));
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -107,7 +128,7 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -124,8 +145,8 @@ fn it_works_for_creating_token_with_no_metadata_value() {
         // create a token with no parents
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -142,7 +163,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -164,8 +185,8 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             2 => MetadataValue::TokenId(0),
             3 => MetadataValue::None,
         );
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -182,7 +203,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -199,8 +220,8 @@ fn it_works_for_creating_token_with_multiple_roles() {
         // create a token with no parents
         let roles = bounded_btree_map!(Default::default() => 1, Role::NotOwner => 2);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -217,7 +238,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -236,8 +257,8 @@ fn it_works_for_creating_many_token() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
         let metadata1 = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
         let metadata2 = bounded_btree_map!(0 => MetadataValue::File(H256::zero()));
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -264,7 +285,7 @@ fn it_works_for_creating_many_token() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata0.clone(),
@@ -278,7 +299,7 @@ fn it_works_for_creating_many_token() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata1.clone(),
@@ -292,7 +313,7 @@ fn it_works_for_creating_many_token() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata2.clone(),
@@ -319,8 +340,8 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None, 1 => MetadataValue::File(H256::zero()));
         let metadata1 = bounded_btree_map!(0 => MetadataValue::Literal([0]));
         let metadata2 = bounded_btree_map!(1 => MetadataValue::Literal([0]));
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -347,7 +368,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata0.clone(),
@@ -361,7 +382,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata1.clone(),
@@ -375,7 +396,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata2.clone(),
@@ -391,8 +412,8 @@ fn it_works_for_destroying_single_token() {
     new_test_ext().execute_with(|| {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -402,8 +423,8 @@ fn it_works_for_destroying_single_token() {
         )
         .unwrap();
         // create a token with no parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1)],
             bounded_vec![]
@@ -417,7 +438,7 @@ fn it_works_for_destroying_single_token() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata.clone(),
@@ -441,8 +462,8 @@ fn it_does_not_destroy_references() {
     new_test_ext().execute_with(|| {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -452,8 +473,8 @@ fn it_does_not_destroy_references() {
         )
         .unwrap();
 
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Reference(1)],
             bounded_vec![]
@@ -478,7 +499,7 @@ fn it_does_not_destroy_references() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -504,8 +525,8 @@ fn it_works_for_destroying_many_tokens() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -525,8 +546,8 @@ fn it_works_for_destroying_many_tokens() {
         )
         .unwrap();
         // create a token with no parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1), Input::Token(2), Input::Token(3)],
             bounded_vec![]
@@ -540,7 +561,7 @@ fn it_works_for_destroying_many_tokens() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -554,7 +575,7 @@ fn it_works_for_destroying_many_tokens() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata1.clone(),
@@ -568,7 +589,7 @@ fn it_works_for_destroying_many_tokens() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata2.clone(),
@@ -596,8 +617,8 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -617,14 +638,14 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
         )
         .unwrap();
         // create a token with no parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1)],
             bounded_vec![]
         ));
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(2), Input::Token(3)],
             bounded_vec![]
@@ -638,7 +659,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -652,7 +673,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata1.clone(),
@@ -666,7 +687,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata2.clone(),
@@ -694,8 +715,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
         let roles1 = bounded_btree_map!(Default::default() => 2);
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -705,8 +726,8 @@ fn it_works_for_creating_and_destroy_single_tokens() {
         )
         .unwrap();
         // create a token with a parent
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1)],
             bounded_vec![Output {
@@ -723,7 +744,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             Token {
                 id: 1,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -737,7 +758,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             Token {
                 id: 2,
                 roles: roles1.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata1.clone(),
@@ -757,8 +778,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata3 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -774,8 +795,8 @@ fn it_works_for_creating_and_destroy_many_tokens() {
         )
         .unwrap();
         // create 2 tokens with 2 parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1), Input::Token(2)],
             bounded_vec![
@@ -798,7 +819,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 1,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -812,7 +833,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 2,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata1.clone(),
@@ -827,7 +848,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 3,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata2.clone(),
@@ -841,7 +862,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 4,
                 roles: roles1.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: RawOrigin::Root,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata3.clone(),
@@ -863,8 +884,8 @@ fn it_produces_process_ran_events_when_success() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata3 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -880,8 +901,8 @@ fn it_produces_process_ran_events_when_success() {
         )
         .unwrap();
         // create 2 tokens with 2 parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1), Input::Token(2)],
             bounded_vec![
@@ -898,7 +919,7 @@ fn it_produces_process_ran_events_when_success() {
         assert_eq!(
             System::events().iter().last().unwrap().event,
             RuntimeEvent::UtxoNFT(Event::ProcessRan {
-                sender: RawOrigin::Signed(1),
+                sender: RawOrigin::Root,
                 process: SUCCEED_PROCESS,
                 inputs: bounded_vec![1, 2],
                 outputs: bounded_vec![3, 4]
@@ -918,8 +939,8 @@ fn it_includes_references_in_event() {
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata3 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -935,8 +956,8 @@ fn it_includes_references_in_event() {
         )
         .unwrap();
         // create 2 tokens with 2 parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Reference(1), Input::Reference(2)],
             bounded_vec![
@@ -953,7 +974,7 @@ fn it_includes_references_in_event() {
         assert_eq!(
             System::events().iter().last().unwrap().event,
             RuntimeEvent::UtxoNFT(Event::ProcessRan {
-                sender: RawOrigin::Signed(1),
+                sender: RawOrigin::Root,
                 process: SUCCEED_PROCESS,
                 inputs: bounded_vec![1, 2],
                 outputs: bounded_vec![3, 4]
@@ -967,8 +988,8 @@ fn it_fails_for_destroying_single_invalid_token() {
     new_test_ext().execute_with(|| {
         // Try to destroy token as incorrect user
         assert_err!(
-            UtxoNFT::run_process(
-                RuntimeOrigin::signed(1),
+            UtxoNFT::run_process_as_root(
+                RuntimeOrigin::root(),
                 SUCCEED_PROCESS,
                 bounded_vec![Input::Token(42)],
                 bounded_vec![]
@@ -986,8 +1007,8 @@ fn it_fails_for_destroying_single_burnt_token() {
         let roles = bounded_btree_map!(Default::default() => 1);
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![Output {
@@ -996,8 +1017,8 @@ fn it_fails_for_destroying_single_burnt_token() {
             }],
         )
         .unwrap();
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1)],
             bounded_vec![],
@@ -1007,8 +1028,8 @@ fn it_fails_for_destroying_single_burnt_token() {
         let token = UtxoNFT::tokens_by_id(1);
         // Try to destroy token as incorrect user
         assert_err!(
-            UtxoNFT::run_process(
-                RuntimeOrigin::signed(1),
+            UtxoNFT::run_process_as_root(
+                RuntimeOrigin::root(),
                 SUCCEED_PROCESS,
                 bounded_vec![Input::Token(1)],
                 bounded_vec![Output {
@@ -1032,8 +1053,8 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
         let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![
@@ -1048,8 +1069,8 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
             ],
         )
         .unwrap();
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![Input::Token(1)],
             bounded_vec![],
@@ -1061,8 +1082,8 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         let token_2 = UtxoNFT::tokens_by_id(2);
         // Try to destroy token as incorrect user
         assert_err!(
-            UtxoNFT::run_process(
-                RuntimeOrigin::signed(1),
+            UtxoNFT::run_process_as_root(
+                RuntimeOrigin::root(),
                 SUCCEED_PROCESS,
                 bounded_vec![Input::Token(1), Input::Token(2)],
                 bounded_vec![Output {
@@ -1084,8 +1105,8 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
 #[test]
 fn it_works_for_running_success_process() {
     new_test_ext().execute_with(|| {
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
+        assert_ok!(UtxoNFT::run_process_as_root(
+            RuntimeOrigin::root(),
             SUCCEED_PROCESS,
             bounded_vec![],
             bounded_vec![]
@@ -1097,8 +1118,8 @@ fn it_works_for_running_success_process() {
 fn it_fails_for_running_success_process_with_invalid_input() {
     new_test_ext().execute_with(|| {
         assert_err!(
-            UtxoNFT::run_process(
-                RuntimeOrigin::signed(1),
+            UtxoNFT::run_process_as_root(
+                RuntimeOrigin::root(),
                 SUCCEED_PROCESS,
                 bounded_vec![Input::Token(42)],
                 bounded_vec![]
@@ -1112,7 +1133,7 @@ fn it_fails_for_running_success_process_with_invalid_input() {
 fn it_fails_for_running_fail_process() {
     new_test_ext().execute_with(|| {
         assert_err!(
-            UtxoNFT::run_process(RuntimeOrigin::signed(1), FAIL_PROCESS, bounded_vec![], bounded_vec![]),
+            UtxoNFT::run_process_as_root(RuntimeOrigin::root(), FAIL_PROCESS, bounded_vec![], bounded_vec![]),
             Error::<Test>::ProcessInvalid
         );
     });
