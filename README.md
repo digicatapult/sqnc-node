@@ -120,12 +120,25 @@ CurrentGraveyardState<T: Config> = StorageValue<_, GraveyardState, ValueQuery>;
 
 Tokens can be minted/burnt by calling the following extrinsic under `UtxoNFT`:
 
+TODO: fix docs
+
 ```rust
 pub fn run_process(
     origin: OriginFor<T>,
     process: ProcessId<T>,
-    inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
-    outputs: BoundedVec<Output<T>, T::MaxOutputCount>
+    inputs: BoundedVec<Input<T::TokenId>, T::MaxInputCount>,
+    outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
+) -> DispatchResultWithPostInfo { ... }
+```
+
+For processes that must be run as the system privilege (root) there is also:
+
+```rust
+pub fn run_process_as_root(
+    origin: OriginFor<T>,
+    process: ProcessId<T>,
+    inputs: BoundedVec<Input<T::TokenId>, T::MaxInputCount>,
+    outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
 ) -> DispatchResultWithPostInfo { ... }
 ```
 
