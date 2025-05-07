@@ -212,6 +212,23 @@ mod test {
     }
 
     #[test]
+    fn valid_ref_args() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          fn Test |
+              foo: &Bar
+          | => |
+              biz: Baz
+          | where {}
+      "##
+            )
+            .is_ok(),
+            true
+        );
+    }
+
+    #[test]
     fn valid_args_trailing_commas() {
         assert_eq!(
             parse_str_to_ast(
@@ -235,7 +252,8 @@ mod test {
                 r##"
           fn Test |
               foo: Bar,
-              foo2: Bar
+              foo2: Bar,
+              foo3: &Bar,
           | => |
               biz: Baz,
               biz2: Baz,
@@ -308,6 +326,21 @@ mod test {
     }
 
     #[test]
+    fn invalid_output_arg_ref() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          fn Test || => |
+              foo: &Bar,
+          | where {}
+      "##
+            )
+            .is_ok(),
+            false
+        );
+    }
+
+    #[test]
     fn valid_where_eq_prop_token() {
         assert_eq!(
             parse_str_to_ast(
@@ -356,6 +389,40 @@ mod test {
               biz: Baz,
           | where {
               foo.a == biz.b
+          }
+      "##
+            )
+            .is_ok(),
+            true
+        );
+    }
+
+    #[test]
+    fn valid_where_eq_prop_sender() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          fn Test |
+              foo: Bar,
+          | => || where {
+              foo.a == sender
+          }
+      "##
+            )
+            .is_ok(),
+            true
+        );
+    }
+
+    #[test]
+    fn valid_where_eq_sender_root() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          fn Test |
+              foo: Bar,
+          | => || where {
+              sender == root
           }
       "##
             )

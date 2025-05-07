@@ -1,0 +1,43 @@
+/*
+  This example token flow spec is intended to demonstrate the different features of the `sqnc` language
+*/
+
+// `token`s define token formats that should be persisted in transitions
+token Example {
+  // fields can be of type Role, File, Literal, a specific literal, a token type or a union of any of these
+  example_role: Role,
+  example_file: File | None,
+  example_literal_union: "a" | "b",
+}
+
+// `fn`s define process flow restrictions and consist of a set of inputs, a set of outputs and a set of additional conditions
+pub fn example_public | example_in: Example | => | example_out: Example | where {
+  // restrictions can be comma separated and can be combined with `&&` (and), || (or) operators and precedence set with `()` (parenthesis)
+
+  // restriction can reference private functions (see below)
+  example_private | example_in | => ||,
+  // restrict values by type in the case of unions
+  example_out.example_file: File,
+  // restrict output to continue from input
+  example_out == example_in,
+  // restrict property values
+  example_out.example_literal_union == "b",
+  // restrict property equality
+  example_in.example_role == example_out.example_role,
+  // restrict a property to sender
+  example_in.example_role == sender,
+  // restrict sender to root
+  sender == root
+} 
+
+// A `fn` can be private in which case it will not be published as a flow itself but can be referred to in the conditions of
+// other flows
+fn example_private | example: Example | => || where {
+  example.example_literal_union == "a"
+} 
+
+// token inputs can be parsed as reference with an `&` preceding the type to indicate it should not be burnt.
+// token equality is not allowed between an output and a reference. All other restrictions on properties are allowed 
+pub fn reference_example | ref_in: &Example, token_in: Example | => || where {
+
+} 

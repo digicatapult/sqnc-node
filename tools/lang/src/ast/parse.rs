@@ -45,6 +45,18 @@ fn parse_integer<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a
     }
 }
 
+fn parse_role_literal<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, RoleLit>, CompilationError> {
+    let role_value_string = pair.into_inner().next().unwrap(); // integer_value
+
+    match role_value_string.as_rule() {
+        Rule::root => Ok(AstNode {
+            value: RoleLit::Root,
+            span: role_value_string.as_span(),
+        }),
+        _ => produce_unexpected_pair_error(role_value_string),
+    }
+}
+
 fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenFieldType>, CompilationError> {
     let span = pair.as_span();
     let field_type = match pair.as_rule() {
@@ -125,13 +137,45 @@ fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDe
     }
 }
 
-fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
+fn parse_fn_input(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
+    if pair.as_rule() != Rule::fn_decl_input {
+        return produce_unexpected_pair_error(pair);
+    }
+
+    let span = pair.as_span();
+    let mut pairs = pair.into_inner();
+    let first = pairs.next().unwrap();
+    let second = pairs.next().unwrap();
+
+    match second.as_rule() {
+        Rule::reference_amp => Ok(AstNode {
+            value: FnArg {
+                is_reference: true,
+                name: parse_ident(first)?,
+                token_type: parse_ident(pairs.next().unwrap())?,
+            },
+            span,
+        }),
+        Rule::ident => Ok(AstNode {
+            value: FnArg {
+                is_reference: false,
+                name: parse_ident(first)?,
+                token_type: parse_ident(second)?,
+            },
+            span,
+        }),
+        _ => produce_unexpected_pair_error(second),
+    }
+}
+
+fn parse_fn_output(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
     match pair.as_rule() {
-        Rule::fn_decl_arg => {
+        Rule::fn_decl_output => {
             let span = pair.as_span();
             let mut pairs = pair.into_inner();
             Ok(AstNode {
                 value: FnArg {
+                    is_reference: false,
                     name: parse_ident(pairs.next().unwrap())?,
                     token_type: parse_ident(pairs.next().unwrap())?,
                 },
@@ -145,10 +189,17 @@ fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, Com
 fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Arc<[AstNode<FnArg>]>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
-        Rule::fn_decl_arg_list => {
+        Rule::fn_decl_input_list => {
             let args = pair.into_inner();
             Ok(AstNode {
-                value: args.into_iter().map(parse_fn_arg).collect::<Result<Arc<[_]>, _>>()?,
+                value: args.into_iter().map(parse_fn_input).collect::<Result<Arc<[_]>, _>>()?,
+                span,
+            })
+        }
+        Rule::fn_decl_output_list => {
+            let args = pair.into_inner();
+            Ok(AstNode {
+                value: args.into_iter().map(parse_fn_output).collect::<Result<Arc<[_]>, _>>()?,
                 span,
             })
         }
@@ -300,6 +351,17 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
                 value: Comparison::PropSender {
                     left: parse_ident_prop(pairs.next().unwrap())?,
                     op: parse_bool_cmp_op(pairs.next().unwrap())?,
+                },
+                span,
+            })
+        }
+        Rule::sender_role_cmp => {
+            let mut pairs = pair.into_inner();
+            let _sender = pairs.next(); // lhs is sender
+            Ok(AstNode {
+                value: Comparison::SenderRole {
+                    op: parse_bool_cmp_op(pairs.next().unwrap())?,
+                    right: parse_role_literal(pairs.next().unwrap())?,
                 },
                 span,
             })

@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use sp_std::vec::Vec;
 use sqnc_pallet_traits::ProcessIO;
 
-#[derive(Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Encode, Decode, Debug, Clone, MaxEncodedLen, TypeInfo, PartialEq, Serialize, Deserialize)]
 pub enum ArgType {
     Input,
     Output,
