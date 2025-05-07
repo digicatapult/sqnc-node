@@ -120,8 +120,6 @@ CurrentGraveyardState<T: Config> = StorageValue<_, GraveyardState, ValueQuery>;
 
 Tokens can be minted/burnt by calling the following extrinsic under `UtxoNFT`:
 
-TODO: fix docs
-
 ```rust
 pub fn run_process(
     origin: OriginFor<T>,
