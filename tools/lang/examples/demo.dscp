@@ -12,7 +12,7 @@ token Example {
 
 // `fn`s define process flow restrictions and consist of a set of inputs, a set of outputs and a set of additional conditions
 pub fn example_public | example_in: Example | => | example_out: Example | where {
-  // restrictions can be comma separated and can be combined with `&&` (and), || (or) operators and precedence set with `()` (parenthesis)
+  // restrictions can be comma separated and can be combined with `&` (and), | (or) operators and precedence set with `()` (parenthesis)
 
   // restriction can reference private functions (see below)
   example_private | example_in | => ||,
