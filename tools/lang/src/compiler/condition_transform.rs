@@ -1,14 +1,14 @@
 use std::{collections::HashMap, sync::Arc};
 
 use sqnc_runtime_types::{
-    BooleanExpressionSymbol, BooleanOperator, MetadataValue, MetadataValueType, Restriction, RuntimeExpressionSymbol,
-    TokenMetadataKey,
+    ArgType, BooleanExpressionSymbol, BooleanOperator, MetadataValue, MetadataValueType, Restriction,
+    RuntimeExpressionSymbol, TokenMetadataKey,
 };
 
 use crate::{
     ast::types::{
-        AstNode, BoolCmp, BoolOp, Comparison, ExpressionTree, FnArg, FnDecl, TokenDecl, TokenFieldType, TokenProp,
-        TypeCmp, TypeCmpType,
+        AstNode, BoolCmp, BoolOp, Comparison, ExpressionTree, FnArg, FnDecl, RoleLit, TokenDecl, TokenFieldType,
+        TokenProp, TypeCmp, TypeCmpType,
     },
     compiler::CompilationStage,
     errors::{CompilationError, ErrorVariant, PestError},
@@ -17,13 +17,13 @@ use crate::{
 use super::{constants::ORIGINAL_ID_KEY, to_bounded_vec};
 
 struct TokenLocation<'a> {
-    is_input: bool,
+    arg_type: ArgType,
     index: u32,
     arg: &'a FnArg<'a>,
 }
 
 struct TokenPropLocation<'a> {
-    is_input: bool,
+    arg_type: ArgType,
     index: u32,
     arg: &'a FnArg<'a>,
     prop: &'a str,
@@ -34,10 +34,20 @@ fn find_token<'a>(
     fn_decl: &'a FnDecl<'a>,
     name: &'a AstNode<'a, &'a str>,
 ) -> Result<TokenLocation<'a>, CompilationError> {
-    let find_input = fn_decl
+    let (input_refs, input_tokens): (Vec<_>, Vec<_>) = fn_decl
         .inputs
         .value
+        .as_ref()
         .iter()
+        .partition(|&input| input.value.is_reference);
+
+    let find_input_token = input_tokens
+        .into_iter()
+        .enumerate()
+        .find(|(.., input)| input.value.name.value == name.value);
+
+    let find_input_ref = input_refs
+        .into_iter()
         .enumerate()
         .find(|(.., input)| input.value.name.value == name.value);
 
@@ -48,8 +58,8 @@ fn find_token<'a>(
         .enumerate()
         .find(|(.., output)| output.value.name.value == name.value);
 
-    let (is_input, index, arg) = match (find_input, find_output) {
-        (None, None) => Err(CompilationError {
+    let (arg_type, index, arg) = match (find_input_ref, find_input_token, find_output) {
+        (None, None, None) => Err(CompilationError {
             stage: CompilationStage::GenerateRestrictions,
             exit_code: exitcode::DATAERR,
             inner: PestError::new_from_span(
@@ -59,9 +69,10 @@ fn find_token<'a>(
                 name.span,
             ),
         }),
-        (None, Some((index, arg))) => Ok((false, index, arg)),
-        (Some((index, arg)), None) => Ok((true, index, arg)),
-        (Some(_), Some(_)) => Err(CompilationError {
+        (None, None, Some((index, arg))) => Ok((ArgType::Output, index, arg)),
+        (None, Some((index, arg)), None) => Ok((ArgType::Input, index, arg)),
+        (Some((index, arg)), None, None) => Ok((ArgType::Reference, index, arg)),
+        _ => Err(CompilationError {
             stage: CompilationStage::GenerateRestrictions,
             exit_code: exitcode::SOFTWARE,
             inner: PestError::new_from_span(
@@ -74,7 +85,7 @@ fn find_token<'a>(
     }?;
 
     Ok(TokenLocation {
-        is_input,
+        arg_type,
         index: index as u32,
         arg: &arg.value,
     })
@@ -85,7 +96,7 @@ fn find_token_prop<'a>(
     fn_decl: &'a FnDecl<'a>,
     prop: &'a TokenProp<'a>,
 ) -> Result<TokenPropLocation<'a>, CompilationError> {
-    let TokenLocation { is_input, index, arg } = find_token(fn_decl, &prop.token)?;
+    let TokenLocation { arg_type, index, arg } = find_token(fn_decl, &prop.token)?;
 
     let token_decl = token_decls.get(arg.token_type.value).ok_or(CompilationError {
         stage: CompilationStage::GenerateRestrictions,
@@ -119,7 +130,7 @@ fn find_token_prop<'a>(
 
     Ok(TokenPropLocation {
         index: index as u32,
-        is_input,
+        arg_type,
         arg,
         prop: prop.value.name.value,
         types: prop.value.types.clone(),
@@ -147,7 +158,7 @@ pub fn transform_condition_to_program(
                 }),
                 Comparison::PropLit { left, op, right } => {
                     let TokenPropLocation {
-                        is_input, index, types, ..
+                        arg_type, index, types, ..
                     } = find_token_prop(token_decls, fn_decl, &left.value)?;
                     if types
                         .iter()
@@ -183,18 +194,14 @@ pub fn transform_condition_to_program(
                         span: right.span,
                     })?);
 
-                    let mut result = vec![match is_input {
-                        true => BooleanExpressionSymbol::Restriction(Restriction::FixedInputMetadataValue {
+                    let mut result = vec![BooleanExpressionSymbol::Restriction(
+                        Restriction::FixedArgMetadataValue {
+                            arg_type,
                             index,
                             metadata_key,
                             metadata_value,
-                        }),
-                        false => BooleanExpressionSymbol::Restriction(Restriction::FixedOutputMetadataValue {
-                            index,
-                            metadata_key,
-                            metadata_value,
-                        }),
-                    }];
+                        },
+                    )];
 
                     if op == BoolCmp::Neq {
                         result.append(&mut vec![
@@ -207,7 +214,7 @@ pub fn transform_condition_to_program(
                 }
                 Comparison::PropInt { left, op, right } => {
                     let TokenPropLocation {
-                        is_input, index, types, ..
+                        arg_type, index, types, ..
                     } = find_token_prop(token_decls, fn_decl, &left.value)?;
                     if types
                         .iter()
@@ -240,18 +247,14 @@ pub fn transform_condition_to_program(
 
                     let metadata_value = MetadataValue::Integer(right.value);
 
-                    let mut result = vec![match is_input {
-                        true => BooleanExpressionSymbol::Restriction(Restriction::FixedInputMetadataValue {
+                    let mut result = vec![BooleanExpressionSymbol::Restriction(
+                        Restriction::FixedArgMetadataValue {
+                            arg_type,
                             index,
                             metadata_key,
                             metadata_value,
-                        }),
-                        false => BooleanExpressionSymbol::Restriction(Restriction::FixedOutputMetadataValue {
-                            index,
-                            metadata_key,
-                            metadata_value,
-                        }),
-                    }];
+                        },
+                    )];
 
                     if op == BoolCmp::Neq {
                         result.append(&mut vec![
@@ -264,7 +267,7 @@ pub fn transform_condition_to_program(
                 }
                 Comparison::PropSender { left, op } => {
                     let TokenPropLocation {
-                        is_input, index, types, ..
+                        arg_type, index, types, ..
                     } = find_token_prop(token_decls, fn_decl, &left.value)?;
                     if types
                         .iter()
@@ -294,13 +297,24 @@ pub fn transform_condition_to_program(
                         span: left.value.prop.span,
                     })?;
 
-                    let mut result = vec![match is_input {
-                        true => {
-                            BooleanExpressionSymbol::Restriction(Restriction::SenderHasInputRole { index, role_key })
-                        }
-                        false => {
-                            BooleanExpressionSymbol::Restriction(Restriction::SenderHasOutputRole { index, role_key })
-                        }
+                    let mut result = vec![BooleanExpressionSymbol::Restriction(Restriction::SenderHasArgRole {
+                        arg_type,
+                        index,
+                        role_key,
+                    })];
+
+                    if op == BoolCmp::Neq {
+                        result.append(&mut vec![
+                            BooleanExpressionSymbol::Restriction(Restriction::None),
+                            BooleanExpressionSymbol::Op(BooleanOperator::NotL),
+                        ]);
+                    }
+
+                    Ok(result)
+                }
+                Comparison::SenderRole { op, right } => {
+                    let mut result = vec![match right.value {
+                        RoleLit::Root => BooleanExpressionSymbol::Restriction(Restriction::SenderIsRoot),
                     }];
 
                     if op == BoolCmp::Neq {
@@ -316,15 +330,15 @@ pub fn transform_condition_to_program(
                     let left = find_token(fn_decl, &left)?;
                     let right = find_token(fn_decl, &right)?;
 
-                    let (input, output) = match (&left.is_input, &right.is_input) {
-                        (true, false) => Ok((left, right)),
-                        (false, true) => Ok((right, left)),
+                    let (input, output) = match (&left.arg_type, &right.arg_type) {
+                        (ArgType::Input, ArgType::Output) => Ok((left, right)),
+                        (ArgType::Output, ArgType::Input) => Ok((right, left)),
                         _ => Err(CompilationError {
                             stage: crate::compiler::CompilationStage::GenerateRestrictions,
                             exit_code: exitcode::DATAERR,
                             inner: PestError::new_from_span(
                                 ErrorVariant::CustomError {
-                                    message: "Token comparisons must be between an input and an output".into(),
+                                    message: "Token comparisons must be between a burnt input and an output".into(),
                                 },
                                 span,
                             ),
@@ -333,20 +347,25 @@ pub fn transform_condition_to_program(
 
                     let original_key = TokenMetadataKey::try_from(ORIGINAL_ID_KEY.to_vec()).unwrap();
                     let result = vec![
-                        BooleanExpressionSymbol::Restriction(Restriction::MatchInputOutputMetadataValue {
-                            input_index: input.index,
-                            input_metadata_key: original_key.clone(),
-                            output_index: output.index,
-                            output_metadata_key: original_key.clone(),
+                        BooleanExpressionSymbol::Restriction(Restriction::MatchArgsMetadataValue {
+                            left_arg_type: input.arg_type,
+                            left_index: input.index,
+                            left_metadata_key: original_key.clone(),
+                            right_arg_type: output.arg_type,
+                            right_index: output.index,
+                            right_metadata_key: original_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Restriction(Restriction::InputHasMetadata {
+                        BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
+                            arg_type: input.arg_type,
                             index: input.index,
                             metadata_key: original_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Restriction(Restriction::MatchInputIdOutputMetadataValue {
-                            input_index: input.index,
-                            output_index: output.index,
-                            output_metadata_key: original_key.clone(),
+                        BooleanExpressionSymbol::Restriction(Restriction::MatchArgIdToMetadataValue {
+                            left_arg_type: input.arg_type,
+                            left_index: input.index,
+                            right_arg_type: output.arg_type,
+                            right_index: output.index,
+                            right_metadata_key: original_key.clone(),
                         }),
                         BooleanExpressionSymbol::Op(BooleanOperator::InhibitionR),
                         BooleanExpressionSymbol::Op(match op == BoolCmp::Eq {
@@ -358,24 +377,10 @@ pub fn transform_condition_to_program(
                     Ok(result)
                 }
                 Comparison::PropToken { left, op, right } => {
-                    let output = find_token_prop(token_decls, fn_decl, &left.value)?;
+                    let left_props = find_token_prop(token_decls, fn_decl, &left.value)?;
+                    let right = find_token(fn_decl, &right)?;
 
-                    if output.is_input {
-                        return Err(CompilationError {
-                            stage: crate::compiler::CompilationStage::GenerateRestrictions,
-                            exit_code: exitcode::DATAERR,
-                            inner: PestError::new_from_span(
-                                ErrorVariant::CustomError {
-                                    message: "Cannot assert a property on an input equates to a token".into(),
-                                },
-                                span,
-                            ),
-                        });
-                    }
-
-                    let input = find_token(fn_decl, &right)?;
-
-                    if !input.is_input {
+                    if right.arg_type == ArgType::Output {
                         return Err(CompilationError {
                             stage: crate::compiler::CompilationStage::GenerateRestrictions,
                             exit_code: exitcode::DATAERR,
@@ -388,11 +393,11 @@ pub fn transform_condition_to_program(
                         });
                     }
 
-                    if output
+                    if left_props
                         .types
                         .iter()
                         .find(|t| match &t.value {
-                            TokenFieldType::Token(t) => t.value == input.arg.token_type.value,
+                            TokenFieldType::Token(t) => t.value == right.arg.token_type.value,
                             _ => false,
                         })
                         .is_none()
@@ -404,7 +409,7 @@ pub fn transform_condition_to_program(
                                 ErrorVariant::CustomError {
                                     message: format!(
                                         "Invalid comparison between token type {} and property {} on token {}",
-                                        input.arg.token_type.value, output.prop, output.arg.token_type.value
+                                        right.arg.token_type.value, left_props.prop, left_props.arg.token_type.value
                                     ),
                                 },
                                 span,
@@ -414,32 +419,39 @@ pub fn transform_condition_to_program(
 
                     let original_key = TokenMetadataKey::try_from(ORIGINAL_ID_KEY.to_vec()).unwrap();
                     let output_metadata_key =
-                        TokenMetadataKey::try_from(output.prop.as_bytes().to_vec()).map_err(|_| CompilationError {
-                            stage: crate::compiler::CompilationStage::GenerateRestrictions,
-                            exit_code: exitcode::DATAERR,
-                            inner: PestError::new_from_span(
-                                ErrorVariant::CustomError {
-                                    message: format!("Property key {} is too long", output.prop),
-                                },
-                                left.value.prop.span,
-                            ),
+                        TokenMetadataKey::try_from(left_props.prop.as_bytes().to_vec()).map_err(|_| {
+                            CompilationError {
+                                stage: crate::compiler::CompilationStage::GenerateRestrictions,
+                                exit_code: exitcode::DATAERR,
+                                inner: PestError::new_from_span(
+                                    ErrorVariant::CustomError {
+                                        message: format!("Property key {} is too long", left_props.prop),
+                                    },
+                                    left.value.prop.span,
+                                ),
+                            }
                         })?;
 
                     let result = vec![
-                        BooleanExpressionSymbol::Restriction(Restriction::MatchInputOutputMetadataValue {
-                            input_index: input.index,
-                            input_metadata_key: original_key.clone(),
-                            output_index: output.index,
-                            output_metadata_key: output_metadata_key.clone(),
+                        BooleanExpressionSymbol::Restriction(Restriction::MatchArgsMetadataValue {
+                            left_arg_type: right.arg_type,
+                            left_index: right.index,
+                            left_metadata_key: original_key.clone(),
+                            right_arg_type: left_props.arg_type,
+                            right_index: left_props.index,
+                            right_metadata_key: output_metadata_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Restriction(Restriction::InputHasMetadata {
-                            index: input.index,
+                        BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
+                            arg_type: right.arg_type,
+                            index: right.index,
                             metadata_key: output_metadata_key.clone(),
                         }),
-                        BooleanExpressionSymbol::Restriction(Restriction::MatchInputIdOutputMetadataValue {
-                            input_index: input.index,
-                            output_index: output.index,
-                            output_metadata_key: output_metadata_key.clone(),
+                        BooleanExpressionSymbol::Restriction(Restriction::MatchArgIdToMetadataValue {
+                            left_arg_type: right.arg_type,
+                            left_index: right.index,
+                            right_arg_type: left_props.arg_type,
+                            right_index: left_props.index,
+                            right_metadata_key: output_metadata_key.clone(),
                         }),
                         BooleanExpressionSymbol::Op(BooleanOperator::InhibitionR),
                         BooleanExpressionSymbol::Op(match op {
@@ -454,9 +466,9 @@ pub fn transform_condition_to_program(
                     let left = find_token_prop(token_decls, fn_decl, &left.value)?;
                     let right = find_token_prop(token_decls, fn_decl, &right.value)?;
 
-                    let (input, output) = match (&left.is_input, &right.is_input) {
-                        (true, false) => Ok((left, right)),
-                        (false, true) => Ok((right, left)),
+                    let (input, output) = match (&left.arg_type, &right.arg_type) {
+                        (ArgType::Input | ArgType::Reference, ArgType::Output) => Ok((left, right)),
+                        (ArgType::Output, ArgType::Input | ArgType::Reference) => Ok((right, left)),
                         _ => Err(CompilationError {
                             stage: crate::compiler::CompilationStage::GenerateRestrictions,
                             exit_code: exitcode::DATAERR,
@@ -524,16 +536,17 @@ pub fn transform_condition_to_program(
                     let mut result: Vec<RuntimeExpressionSymbol> = Vec::new();
                     let mut check_count = 0;
                     if output_can_be_role {
-                        result.push(BooleanExpressionSymbol::Restriction(
-                            Restriction::MatchInputOutputRole {
-                                input_index: input.index,
-                                input_role_key: input_key.clone(),
-                                output_index: output.index,
-                                output_role_key: output_key.clone(),
-                            },
-                        ));
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::MatchArgsRole {
+                            left_arg_type: input.arg_type,
+                            left_index: input.index,
+                            left_role_key: input_key.clone(),
+                            right_arg_type: output.arg_type,
+                            right_index: output.index,
+                            right_role_key: output_key.clone(),
+                        }));
                         if output_can_be_none || output_can_be_metadata {
-                            result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasRole {
+                            result.push(BooleanExpressionSymbol::Restriction(Restriction::ArgHasRole {
+                                arg_type: output.arg_type,
                                 index: output.index,
                                 role_key: output_key.clone(),
                             }));
@@ -543,20 +556,24 @@ pub fn transform_condition_to_program(
                     }
 
                     if output_can_be_none {
-                        result.push(BooleanExpressionSymbol::Restriction(Restriction::InputHasMetadata {
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
+                            arg_type: input.arg_type,
                             index: input.index,
                             metadata_key: input_key.clone(),
                         }));
-                        result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasMetadata {
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
+                            arg_type: output.arg_type,
                             index: output.index,
                             metadata_key: output_key.clone(),
                         }));
                         result.push(BooleanExpressionSymbol::Op(BooleanOperator::Xnor));
-                        result.push(BooleanExpressionSymbol::Restriction(Restriction::InputHasRole {
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::ArgHasRole {
+                            arg_type: input.arg_type,
                             index: input.index,
                             role_key: input_key.clone(),
                         }));
-                        result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasRole {
+                        result.push(BooleanExpressionSymbol::Restriction(Restriction::ArgHasRole {
+                            arg_type: output.arg_type,
                             index: output.index,
                             role_key: output_key.clone(),
                         }));
@@ -567,15 +584,18 @@ pub fn transform_condition_to_program(
 
                     if output_can_be_metadata {
                         result.push(BooleanExpressionSymbol::Restriction(
-                            Restriction::MatchInputOutputMetadataValue {
-                                input_index: input.index,
-                                input_metadata_key: input_key.clone(),
-                                output_index: output.index,
-                                output_metadata_key: output_key.clone(),
+                            Restriction::MatchArgsMetadataValue {
+                                left_arg_type: input.arg_type,
+                                left_index: input.index,
+                                left_metadata_key: input_key.clone(),
+                                right_arg_type: output.arg_type,
+                                right_index: output.index,
+                                right_metadata_key: output_key.clone(),
                             },
                         ));
                         if output_can_be_none || output_can_be_role {
-                            result.push(BooleanExpressionSymbol::Restriction(Restriction::OutputHasMetadata {
+                            result.push(BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
+                                arg_type: output.arg_type,
                                 index: output.index,
                                 metadata_key: output_key.clone(),
                             }));
@@ -616,78 +636,52 @@ pub fn transform_condition_to_program(
                     let mut result = match right.value {
                         TypeCmpType::None => {
                             vec![
-                                BooleanExpressionSymbol::Restriction(match left.is_input {
-                                    true => Restriction::InputHasMetadata {
-                                        index: left.index,
-                                        metadata_key: metadata_key.clone(),
-                                    },
-                                    false => Restriction::OutputHasMetadata {
-                                        index: left.index,
-                                        metadata_key: metadata_key.clone(),
-                                    },
+                                BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
+                                    arg_type: left.arg_type,
+                                    index: left.index,
+                                    metadata_key: metadata_key.clone(),
                                 }),
                                 BooleanExpressionSymbol::Restriction(Restriction::None),
                                 BooleanExpressionSymbol::Op(BooleanOperator::NotL),
                             ]
                         }
-                        TypeCmpType::File => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
-                            true => Restriction::FixedInputMetadataValueType {
+                        TypeCmpType::File => vec![BooleanExpressionSymbol::Restriction(
+                            Restriction::FixedArgMetadataValueType {
+                                arg_type: left.arg_type,
                                 index: left.index,
                                 metadata_key: metadata_key.clone(),
                                 metadata_value_type: MetadataValueType::File,
                             },
-                            false => Restriction::FixedOutputMetadataValueType {
-                                index: left.index,
-                                metadata_key: metadata_key.clone(),
-                                metadata_value_type: MetadataValueType::File,
-                            },
+                        )],
+                        TypeCmpType::Role => vec![BooleanExpressionSymbol::Restriction(Restriction::ArgHasRole {
+                            arg_type: left.arg_type,
+                            index: left.index,
+                            role_key: metadata_key,
                         })],
-                        TypeCmpType::Role => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
-                            true => Restriction::InputHasRole {
-                                index: left.index,
-                                role_key: metadata_key,
-                            },
-                            false => Restriction::OutputHasRole {
-                                index: left.index,
-                                role_key: metadata_key,
-                            },
-                        })],
-                        TypeCmpType::Literal => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
-                            true => Restriction::FixedInputMetadataValueType {
+                        TypeCmpType::Literal => vec![BooleanExpressionSymbol::Restriction(
+                            Restriction::FixedArgMetadataValueType {
+                                arg_type: left.arg_type,
                                 index: left.index,
                                 metadata_key: metadata_key.clone(),
                                 metadata_value_type: MetadataValueType::Literal,
                             },
-                            false => Restriction::FixedOutputMetadataValueType {
-                                index: left.index,
-                                metadata_key: metadata_key.clone(),
-                                metadata_value_type: MetadataValueType::Literal,
-                            },
-                        })],
-                        TypeCmpType::Integer => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
-                            true => Restriction::FixedInputMetadataValueType {
+                        )],
+                        TypeCmpType::Integer => vec![BooleanExpressionSymbol::Restriction(
+                            Restriction::FixedArgMetadataValueType {
+                                arg_type: left.arg_type,
                                 index: left.index,
                                 metadata_key: metadata_key.clone(),
                                 metadata_value_type: MetadataValueType::Integer,
                             },
-                            false => Restriction::FixedOutputMetadataValueType {
-                                index: left.index,
-                                metadata_key: metadata_key.clone(),
-                                metadata_value_type: MetadataValueType::Integer,
-                            },
-                        })],
-                        TypeCmpType::Token => vec![BooleanExpressionSymbol::Restriction(match left.is_input {
-                            true => Restriction::FixedInputMetadataValueType {
+                        )],
+                        TypeCmpType::Token => vec![BooleanExpressionSymbol::Restriction(
+                            Restriction::FixedArgMetadataValueType {
+                                arg_type: left.arg_type,
                                 index: left.index,
                                 metadata_key: metadata_key.clone(),
                                 metadata_value_type: MetadataValueType::TokenId,
                             },
-                            false => Restriction::FixedOutputMetadataValueType {
-                                index: left.index,
-                                metadata_key: metadata_key.clone(),
-                                metadata_value_type: MetadataValueType::TokenId,
-                            },
-                        })],
+                        )],
                     };
 
                     if op == TypeCmp::Isnt {

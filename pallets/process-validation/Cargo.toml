@@ -17,6 +17,7 @@ parity-scale-codec = { workspace = true, features = ["derive"] }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
+log = { workspace = true }
 sp-runtime = { workspace = true, features = ["serde"] }
 sp-io = { workspace = true }
 sp-std = { workspace = true }

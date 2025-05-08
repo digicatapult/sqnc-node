@@ -36,7 +36,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use sqnc_runtime_types::BooleanExpressionSymbol;
+    use sqnc_runtime_types::{ArgType, BooleanExpressionSymbol};
 
     use super::transform_to_json;
     use crate::compiler::Process;
@@ -149,7 +149,8 @@ mod tests {
             name: vec![116u8, 101u8, 115u8, 116u8].try_into().unwrap(), // test
             version: 1u32,
             program: vec![BooleanExpressionSymbol::Restriction(
-                sqnc_runtime_types::Restriction::InputHasMetadata {
+                sqnc_runtime_types::Restriction::ArgHasMetadata {
+                    arg_type: ArgType::Input,
                     index: 1u32,
                     metadata_key: vec![107u8, 101u8, 121u8].try_into().unwrap(), // key
                 },
@@ -168,7 +169,8 @@ mod tests {
     "program": [
       {
         "Restriction": {
-          "InputHasMetadata": {
+          "ArgHasMetadata": {
+            "arg_type": "Input",
             "index": 1,
             "metadata_key": "key"
           }

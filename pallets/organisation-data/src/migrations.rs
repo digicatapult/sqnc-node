@@ -8,7 +8,7 @@ pub mod v1 {
     use super::*;
     use frame_support::pallet_prelude::*;
 
-    /// Migrate the symmetric-key pallet from V0 to V1.
+    /// Migrate the org-data pallet from V0 to V1.
     pub struct MigrateToV1<T, I>(core::marker::PhantomData<(T, I)>);
 
     impl<T: Config + pallet_membership::Config<I>, I: 'static> OnRuntimeUpgrade for MigrateToV1<T, I> {
