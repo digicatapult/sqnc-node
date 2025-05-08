@@ -377,24 +377,10 @@ pub fn transform_condition_to_program(
                     Ok(result)
                 }
                 Comparison::PropToken { left, op, right } => {
-                    let output = find_token_prop(token_decls, fn_decl, &left.value)?;
+                    let left_props = find_token_prop(token_decls, fn_decl, &left.value)?;
+                    let right = find_token(fn_decl, &right)?;
 
-                    if output.arg_type != ArgType::Output {
-                        return Err(CompilationError {
-                            stage: crate::compiler::CompilationStage::GenerateRestrictions,
-                            exit_code: exitcode::DATAERR,
-                            inner: PestError::new_from_span(
-                                ErrorVariant::CustomError {
-                                    message: "Cannot assert a property on an input equates to a token".into(),
-                                },
-                                span,
-                            ),
-                        });
-                    }
-
-                    let input = find_token(fn_decl, &right)?;
-
-                    if input.arg_type == ArgType::Output {
+                    if right.arg_type == ArgType::Output {
                         return Err(CompilationError {
                             stage: crate::compiler::CompilationStage::GenerateRestrictions,
                             exit_code: exitcode::DATAERR,
@@ -407,11 +393,11 @@ pub fn transform_condition_to_program(
                         });
                     }
 
-                    if output
+                    if left_props
                         .types
                         .iter()
                         .find(|t| match &t.value {
-                            TokenFieldType::Token(t) => t.value == input.arg.token_type.value,
+                            TokenFieldType::Token(t) => t.value == right.arg.token_type.value,
                             _ => false,
                         })
                         .is_none()
@@ -423,7 +409,7 @@ pub fn transform_condition_to_program(
                                 ErrorVariant::CustomError {
                                     message: format!(
                                         "Invalid comparison between token type {} and property {} on token {}",
-                                        input.arg.token_type.value, output.prop, output.arg.token_type.value
+                                        right.arg.token_type.value, left_props.prop, left_props.arg.token_type.value
                                     ),
                                 },
                                 span,
@@ -433,36 +419,38 @@ pub fn transform_condition_to_program(
 
                     let original_key = TokenMetadataKey::try_from(ORIGINAL_ID_KEY.to_vec()).unwrap();
                     let output_metadata_key =
-                        TokenMetadataKey::try_from(output.prop.as_bytes().to_vec()).map_err(|_| CompilationError {
-                            stage: crate::compiler::CompilationStage::GenerateRestrictions,
-                            exit_code: exitcode::DATAERR,
-                            inner: PestError::new_from_span(
-                                ErrorVariant::CustomError {
-                                    message: format!("Property key {} is too long", output.prop),
-                                },
-                                left.value.prop.span,
-                            ),
+                        TokenMetadataKey::try_from(left_props.prop.as_bytes().to_vec()).map_err(|_| {
+                            CompilationError {
+                                stage: crate::compiler::CompilationStage::GenerateRestrictions,
+                                exit_code: exitcode::DATAERR,
+                                inner: PestError::new_from_span(
+                                    ErrorVariant::CustomError {
+                                        message: format!("Property key {} is too long", left_props.prop),
+                                    },
+                                    left.value.prop.span,
+                                ),
+                            }
                         })?;
 
                     let result = vec![
                         BooleanExpressionSymbol::Restriction(Restriction::MatchArgsMetadataValue {
-                            left_arg_type: input.arg_type,
-                            left_index: input.index,
+                            left_arg_type: right.arg_type,
+                            left_index: right.index,
                             left_metadata_key: original_key.clone(),
-                            right_arg_type: output.arg_type,
-                            right_index: output.index,
+                            right_arg_type: left_props.arg_type,
+                            right_index: left_props.index,
                             right_metadata_key: output_metadata_key.clone(),
                         }),
                         BooleanExpressionSymbol::Restriction(Restriction::ArgHasMetadata {
-                            arg_type: input.arg_type,
-                            index: input.index,
+                            arg_type: right.arg_type,
+                            index: right.index,
                             metadata_key: output_metadata_key.clone(),
                         }),
                         BooleanExpressionSymbol::Restriction(Restriction::MatchArgIdToMetadataValue {
-                            left_arg_type: input.arg_type,
-                            left_index: input.index,
-                            right_arg_type: output.arg_type,
-                            right_index: output.index,
+                            left_arg_type: right.arg_type,
+                            left_index: right.index,
+                            right_arg_type: left_props.arg_type,
+                            right_index: left_props.index,
                             right_metadata_key: output_metadata_key.clone(),
                         }),
                         BooleanExpressionSymbol::Op(BooleanOperator::InhibitionR),
