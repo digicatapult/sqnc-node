@@ -38,6 +38,7 @@ pub struct Process {
 
 fn make_arg_type_restrictions<'a, I>(
     arg_type: ArgType,
+    token_decls: &HashMap<&str, TokenDecl>,
     iter: I,
 ) -> Result<Vec<Vec<RuntimeExpressionSymbol>>, CompilationError>
 where
@@ -48,6 +49,19 @@ where
 
     iter.enumerate()
         .map(|(index, arg)| {
+            let token_decl = token_decls.get(arg.value.token_type.value).ok_or(CompilationError {
+                stage: CompilationStage::ReduceTokens,
+                exit_code: exitcode::DATAERR,
+                inner: PestError::new_from_span(
+                    ErrorVariant::CustomError {
+                        message: format!("Unknown token type {}", arg.value.token_type.value),
+                    },
+                    arg.value.token_type.span,
+                ),
+            })?;
+            let version = token_decl.attributes.value.version;
+            let version = version.to_string();
+
             Ok(vec![
                 BooleanExpressionSymbol::Restriction(sqnc_runtime_types::Restriction::FixedArgMetadataValue {
                     arg_type,
@@ -64,7 +78,7 @@ where
                     index: index as u32,
                     metadata_key: version_type_key.clone(),
                     metadata_value: TokenMetadataValue::Literal(to_bounded_vec(AstNode {
-                        value: "1".as_bytes().to_owned(),
+                        value: version.as_bytes().to_owned(),
                         span: arg.value.token_type.span,
                     })?),
                 }),
@@ -114,9 +128,10 @@ fn make_process_restrictions(
     let input_token_count = input_tokens.len();
     let output_count = fn_decl.outputs.value.len();
 
-    let input_ref_conditions = make_arg_type_restrictions(ArgType::Reference, input_refs.into_iter())?;
-    let input_token_conditions = make_arg_type_restrictions(ArgType::Input, input_tokens.into_iter())?;
-    let output_conditions = make_arg_type_restrictions(ArgType::Output, fn_decl.outputs.value.into_iter())?;
+    let input_ref_conditions = make_arg_type_restrictions(ArgType::Reference, token_decls, input_refs.into_iter())?;
+    let input_token_conditions = make_arg_type_restrictions(ArgType::Input, token_decls, input_tokens.into_iter())?;
+    let output_conditions =
+        make_arg_type_restrictions(ArgType::Output, token_decls, fn_decl.outputs.value.into_iter())?;
 
     // loop through conditions to build program
     let condition_programs = conditions
@@ -193,7 +208,7 @@ pub fn compile_ast_to_restrictions(ast: Ast) -> Result<Vec<Process>, Compilation
                         value: f.name.value.as_bytes().to_vec(),
                         span: f.name.span,
                     })?,
-                    version: 1u32,
+                    version: f.attributes.value.version,
                     program: make_process_restrictions(f, &token_decls)?,
                 })
             }

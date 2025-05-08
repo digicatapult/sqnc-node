@@ -1,11 +1,16 @@
-string = ${ "\"" ~ inner ~ "\"" }
-inner  = @{ char* }
-char   =  {
+string     = ${ "\"" ~ inner ~ "\"" }
+inner      = @{ char* }
+char       =  {
     !("\"" | "\\") ~ ANY
   | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
   | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
 }
-number = ${ "-"? ~ ASCII_DIGIT+ }
+number_pos = ${ ASCII_DIGIT+ }
+number     = ${ "-"? ~ ASCII_DIGIT+ }
+
+version_attr = { "[#version(" ~ pos_integer_value ~ ")]" }
+token_attrs  = { (version_attr)* }
+fn_attrs     = { (version_attr)* }
 
 ident      = @{ !(keyword ~ !(ASCII_ALPHANUMERIC | "_")) ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 ident_prop =  { ident ~ "." ~ ident }
@@ -17,16 +22,17 @@ fn      = _{ "fn" }
 token   = _{ "token" }
 where   = _{ "where" }
 
-file          = { "File" }
-literal       = { "Literal" }
-integer       = { "Integer" }
-role          = { "Role" }
-none          = { "None" }
-sender        = { "sender" }
-root          = { "root" }
-literal_value = { string }
-integer_value = { number }
-role_value    = { root }
+file              = { "File" }
+literal           = { "Literal" }
+integer           = { "Integer" }
+role              = { "Role" }
+none              = { "None" }
+sender            = { "sender" }
+root              = { "root" }
+literal_value     = { string }
+pos_integer_value = { number_pos }
+integer_value     = { number }
+role_value        = { root }
 
 partial_type = _{ file | literal | integer | role | none | literal_value | integer_value | ident }
 cmp_type     = _{ file | literal | integer | role | none }
@@ -36,7 +42,7 @@ type = { partial_type ~ ("|" ~ partial_type)* }
 field      = { ident ~ ":" ~ type }
 properties = { (field ~ ",")* ~ (field)? }
 
-token_decl = { token ~ ident ~ "{" ~ properties ~ "}" }
+token_decl = { token_attrs ~ token ~ ident ~ "{" ~ properties ~ "}" }
 
 prop_lit_cmp    = { ident_prop ~ cmp_op ~ literal_value }
 prop_int_cmp    = { ident_prop ~ cmp_op ~ integer_value }
@@ -77,7 +83,7 @@ fn_decl_input       = { ident ~ ":" ~ reference_amp? ~ ident }
 fn_decl_output      = { ident ~ ":" ~ ident }
 fn_decl_input_list  = { "|" ~ (fn_decl_input ~ ",")* ~ (fn_decl_input)? ~ "|" }
 fn_decl_output_list = { "|" ~ (fn_decl_output ~ ",")* ~ (fn_decl_output)? ~ "|" }
-fn_decl             = { vis ~ fn ~ ident ~ fn_decl_input_list ~ "=>" ~ fn_decl_output_list ~ where ~ expr_list }
+fn_decl             = { fn_attrs ~ vis ~ fn ~ ident ~ fn_decl_input_list ~ "=>" ~ fn_decl_output_list ~ where ~ expr_list }
 
 decl    = _{ token_decl | fn_decl }
 program = _{ decl+ }

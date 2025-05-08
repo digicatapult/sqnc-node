@@ -43,6 +43,20 @@ mod test {
     }
 
     #[test]
+    fn valid_token_version_attr() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          [#version(42)]
+          token TestToken {}
+      "##
+            )
+            .is_ok(),
+            true
+        );
+    }
+
+    #[test]
     fn valid_token_fields() {
         assert_eq!(
             parse_str_to_ast(
@@ -90,6 +104,48 @@ mod test {
             parse_str_to_ast(
                 r##"
           token Test-Token {}
+      "##
+            )
+            .is_ok(),
+            false
+        );
+    }
+
+    #[test]
+    fn invalid_token_version_attr_neg() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          [#version(-42)]
+          token TestToken {}
+      "##
+            )
+            .is_ok(),
+            false
+        );
+    }
+
+    #[test]
+    fn invalid_token_version_attr_float() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          [#version(4.2)]
+          token TestToken {}
+      "##
+            )
+            .is_ok(),
+            false
+        );
+    }
+
+    #[test]
+    fn invalid_token_version_attr_alpha() {
+        assert_eq!(
+            parse_str_to_ast(
+                r##"
+          [#version(forty-two)]
+          token TestToken {}
       "##
             )
             .is_ok(),

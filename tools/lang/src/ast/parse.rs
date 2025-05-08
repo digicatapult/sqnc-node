@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
 use super::types::*;
 
@@ -23,9 +23,11 @@ fn parse_literal<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a
     })
 }
 
-fn parse_integer<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, i128>, CompilationError> {
+fn parse_from_string<'a, T: FromStr>(
+    pair: pest::iterators::Pair<'a, Rule>,
+) -> Result<AstNode<'a, T>, CompilationError> {
     let integer_value_string = pair.into_inner().next().unwrap(); // integer_value
-    let parsed_integer = integer_value_string.as_str().parse::<i128>();
+    let parsed_integer = integer_value_string.as_str().parse::<T>();
 
     match parsed_integer {
         Ok(val) => Ok(AstNode {
@@ -66,7 +68,7 @@ fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<To
         Rule::role => Ok(TokenFieldType::Role),
         Rule::none => Ok(TokenFieldType::None),
         Rule::literal_value => Ok(TokenFieldType::LiteralValue(parse_literal(pair)?)),
-        Rule::integer_value => Ok(TokenFieldType::IntegerValue(parse_integer(pair)?)),
+        Rule::integer_value => Ok(TokenFieldType::IntegerValue(parse_from_string(pair)?)),
         Rule::ident => Ok(TokenFieldType::Token(AstNode {
             span: pair.as_span(),
             value: pair.as_str(),
@@ -120,6 +122,27 @@ fn parse_token_props(
     }
 }
 
+fn parse_token_attrs(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenAttrs>, CompilationError> {
+    let span = pair.as_span();
+    if Rule::token_attrs != pair.as_rule() {
+        return produce_unexpected_pair_error(pair);
+    };
+
+    let mut pairs = pair.into_inner();
+    let value = pairs.try_fold(TokenAttrs { version: 1 }, |acc, pair| match pair.as_rule() {
+        Rule::version_attr => {
+            let number = parse_from_string(pair.into_inner().next().unwrap())?;
+            Ok(TokenAttrs {
+                version: number.value,
+                ..acc
+            })
+        }
+        _ => produce_unexpected_pair_error(pair),
+    })?;
+
+    Ok(AstNode { value, span })
+}
+
 fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDecl>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
@@ -128,6 +151,7 @@ fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDe
             Ok(AstNode {
                 span,
                 value: TokenDecl {
+                    attributes: parse_token_attrs(pairs.next().unwrap())?,
                     name: parse_ident(pairs.next().unwrap())?,
                     props: parse_token_props(pairs.next().unwrap())?,
                 },
@@ -205,6 +229,27 @@ fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Arc<[
         }
         _ => produce_unexpected_pair_error(pair),
     }
+}
+
+fn parse_fn_attrs(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnAttrs>, CompilationError> {
+    let span = pair.as_span();
+    if Rule::fn_attrs != pair.as_rule() {
+        return produce_unexpected_pair_error(pair);
+    };
+
+    let mut pairs = pair.into_inner();
+    let value = pairs.try_fold(FnAttrs { version: 1 }, |acc, pair| match pair.as_rule() {
+        Rule::version_attr => {
+            let number = parse_from_string(pair.into_inner().next().unwrap())?;
+            Ok(FnAttrs {
+                version: number.value,
+                ..acc
+            })
+        }
+        _ => produce_unexpected_pair_error(pair),
+    })?;
+
+    Ok(AstNode { value, span })
 }
 
 fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, CompilationError> {
@@ -338,7 +383,7 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
 
             let left = parse_ident_prop(pairs.next().unwrap())?;
             let op = parse_bool_cmp_op(pairs.next().unwrap())?;
-            let right = parse_integer(pairs.next().unwrap())?; // literal_value
+            let right = parse_from_string(pairs.next().unwrap())?; // literal_value
 
             Ok(AstNode {
                 value: Comparison::PropInt { left, op, right },
@@ -480,6 +525,7 @@ fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, C
     match pair.as_rule() {
         Rule::fn_decl => {
             let mut pair = pair.into_inner();
+            let attrs = pair.next().unwrap();
             let vis = pair.next().unwrap();
             let name = pair.next().unwrap();
             let inputs = pair.next().unwrap();
@@ -487,6 +533,7 @@ fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, C
             let conditions = pair.next().unwrap();
             Ok(AstNode {
                 value: FnDecl {
+                    attributes: parse_fn_attrs(attrs)?,
                     visibility: parse_fn_vis(vis)?,
                     name: AstNode {
                         value: name.as_str(),

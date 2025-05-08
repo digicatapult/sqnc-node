@@ -395,6 +395,7 @@ fn flatten_fn<'a>(fn_decl: FnDecl<'a>, all_fns: Arc<[FnDecl<'a>]>) -> Result<FnD
     called_fns.insert(fn_decl.name.value);
 
     Ok(FnDecl {
+        attributes: fn_decl.attributes,
         visibility: fn_decl.visibility,
         name: fn_decl.name,
         inputs: fn_decl.inputs.clone(),

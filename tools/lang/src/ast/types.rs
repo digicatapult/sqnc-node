@@ -84,7 +84,19 @@ impl<'a> Display for TokenPropDecl<'a> {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct TokenAttrs {
+    pub(crate) version: u32,
+}
+
+impl Display for TokenAttrs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[#version({})]", self.version)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct TokenDecl<'a> {
+    pub(crate) attributes: AstNode<'a, TokenAttrs>,
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) props: AstNode<'a, Arc<[AstNode<'a, TokenPropDecl<'a>>]>>,
 }
@@ -102,6 +114,17 @@ impl<'a> Display for TokenDecl<'a> {
                 .collect::<Vec<_>>()
                 .join("\n")
         )
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct FnAttrs {
+    pub(crate) version: u32,
+}
+
+impl Display for FnAttrs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[#version({})]", self.version)
     }
 }
 
@@ -314,6 +337,7 @@ impl<'a> Display for ExpressionTree<'a> {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FnDecl<'a> {
+    pub(crate) attributes: AstNode<'a, FnAttrs>,
     pub(crate) visibility: AstNode<'a, FnVis>,
     pub(crate) name: AstNode<'a, &'a str>,
     pub(crate) inputs: AstNode<'a, Arc<[AstNode<'a, FnArg<'a>>]>>,

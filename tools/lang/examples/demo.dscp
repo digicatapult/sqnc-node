@@ -10,6 +10,12 @@ token Example {
   example_literal_union: "a" | "b",
 }
 
+// tokens can be versioned with a version attribute
+[#version(42)]
+token VersionedExample {
+  example_role: Role
+}
+
 // `fn`s define process flow restrictions and consist of a set of inputs, a set of outputs and a set of additional conditions
 pub fn example_public | example_in: Example | => | example_out: Example | where {
   // restrictions can be comma separated and can be combined with `&` (and), | (or) operators and precedence set with `()` (parenthesis)
@@ -41,3 +47,7 @@ fn example_private | example: Example | => || where {
 pub fn reference_example | ref_in: &Example, token_in: Example | => || where {
 
 } 
+
+// functions can also be versioned with a version attribute
+[#version(2)]
+pub fn versioned_example | example: VersionedExample | => || where {}
