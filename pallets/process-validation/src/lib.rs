@@ -198,7 +198,8 @@ pub mod pallet {
                 if !Pallet::<T>::validate_program(&program) {
                     panic!("Invalid program detected in genesis!")
                 }
-                let version = Pallet::<T>::update_version(process_id).unwrap();
+                let version: <T as Config>::ProcessVersion = One::one();
+                <VersionModel<T>>::insert(&process_id, version.clone());
                 Pallet::<T>::persist_process(process_id, &version, program).unwrap();
             }
         }
@@ -248,6 +249,7 @@ pub mod pallet {
         pub fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
+            version: T::ProcessVersion,
             program: BoundedVec<
                 BooleanExpressionSymbol<
                     T::RoleKey,
@@ -261,15 +263,19 @@ pub mod pallet {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
             ensure!(Pallet::<T>::validate_program(&program), Error::<T>::InvalidProgram);
+            ensure!(version > Zero::zero(), Error::<T>::InvalidVersion);
 
-            let version: T::ProcessVersion = Pallet::<T>::update_version(&id).unwrap();
+            let previous_version = Pallet::<T>::get_previous_version(&id).unwrap_or(Zero::zero());
+            ensure!(version > previous_version, Error::<T>::AlreadyExists);
+
+            <VersionModel<T>>::insert(&id, version.clone());
             Pallet::<T>::persist_process(&id, &version, &program)?;
 
             Self::deposit_event(Event::ProcessCreated(
                 id,
                 version.clone(),
                 program,
-                version == One::one(),
+                previous_version.is_zero(),
             ));
 
             return Ok(().into());
@@ -314,22 +320,8 @@ pub mod pallet {
             executed_stack_height == Some(1u8)
         }
 
-        pub fn get_next_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
-            let current_version = <VersionModel<T>>::try_get(&id);
-            return match current_version {
-                Ok(version) => version + One::one(),
-                Err(_) => One::one(),
-            };
-        }
-
-        pub fn update_version(id: &T::ProcessIdentifier) -> Result<T::ProcessVersion, Error<T>> {
-            let version: T::ProcessVersion = Pallet::<T>::get_next_version(id);
-            match version == One::one() {
-                true => <VersionModel<T>>::insert(id, version.clone()),
-                false => <VersionModel<T>>::mutate(id, |v| *v = version.clone()),
-            };
-
-            return Ok(version);
+        pub fn get_previous_version(id: &T::ProcessIdentifier) -> Option<T::ProcessVersion> {
+            <VersionModel<T>>::try_get(&id).ok()
         }
 
         pub fn persist_process(
