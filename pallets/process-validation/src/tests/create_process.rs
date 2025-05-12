@@ -56,6 +56,20 @@ fn handles_if_process_exists_for_the_new_version() {
 }
 
 #[test]
+fn handles_if_process_exists_for_the_new_version_only_in_version_model() {
+    new_test_ext().execute_with(|| {
+        <VersionModel<Test>>::insert(PROCESS_ID1, 1);
+        let result = ProcessValidation::create_process(
+            RuntimeOrigin::root(),
+            PROCESS_ID1,
+            1,
+            bounded_vec![BooleanExpressionSymbol::Restriction(None)],
+        );
+        assert_noop!(result, Error::<Test>::AlreadyExists);
+    });
+}
+
+#[test]
 fn handles_if_process_exists_for_the_new_version_only_in_process_model() {
     new_test_ext().execute_with(|| {
         <ProcessModel<Test>>::insert(
