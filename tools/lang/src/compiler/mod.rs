@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use crate::{
     ast::{
-        types::{AstNode, FnArg, FnDecl, TokenDecl},
+        types::{AstNode, FnArg, FnDecl, TokenDecl, TokenFieldType},
         Ast,
     },
     errors::{CompilationError, CompilationStage, ErrorVariant, PestError},
@@ -30,10 +30,43 @@ use helper::to_bounded_vec;
 use self::constants::{TYPE_KEY, VERSION_KEY};
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ArgumentField {
+    pub(crate) name: String,
+    pub(crate) allow_token: bool,
+    pub(crate) allow_role: bool,
+    pub(crate) allow_file: bool,
+    pub(crate) allow_literal: bool,
+    pub(crate) allow_none: bool,
+    pub(crate) allowed_literal_values: Vec<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InputArgument {
+    pub(crate) name: String,
+    pub(crate) is_reference: bool,
+    pub(crate) fields: Vec<ArgumentField>,
+}
+
+#[derive(Serialize)]
+pub struct OutputArgument {
+    pub(crate) name: String,
+    pub(crate) fields: Vec<ArgumentField>,
+}
+
+#[derive(Serialize)]
+pub struct Arguments {
+    pub(crate) inputs: Vec<InputArgument>,
+    pub(crate) outputs: Vec<OutputArgument>,
+}
+
+#[derive(Serialize)]
 pub struct Process {
     pub(crate) name: ProcessIdentifier,
     pub(crate) version: ProcessVersion,
     pub(crate) program: RuntimeProgram,
+    pub(crate) arguments: Arguments,
 }
 
 fn make_arg_type_restrictions<'a, I>(
@@ -88,7 +121,7 @@ where
 }
 
 fn make_process_restrictions(
-    fn_decl: FnDecl,
+    fn_decl: &FnDecl,
     token_decls: &HashMap<&str, TokenDecl>,
 ) -> Result<RuntimeProgram, CompilationError> {
     // chain inputs to outputs, transform each to conditions, flatten then chain on the fn conditions
@@ -181,6 +214,80 @@ fn make_process_restrictions(
     })
 }
 
+fn map_token_props_to_arguments(token_decl: &TokenDecl) -> Vec<ArgumentField> {
+    token_decl
+        .props
+        .value
+        .iter()
+        .map(|prop| ArgumentField {
+            name: prop.value.name.value.to_owned(),
+            allow_token: prop
+                .value
+                .types
+                .iter()
+                .find(|t| matches!(t.value, TokenFieldType::Token(_)))
+                .is_some(),
+            allow_role: prop
+                .value
+                .types
+                .iter()
+                .find(|t| matches!(t.value, TokenFieldType::Role))
+                .is_some(),
+            allow_file: prop
+                .value
+                .types
+                .iter()
+                .find(|t| matches!(t.value, TokenFieldType::File))
+                .is_some(),
+            allow_literal: prop
+                .value
+                .types
+                .iter()
+                .find(|t| matches!(t.value, TokenFieldType::Literal))
+                .is_some(),
+            allow_none: prop
+                .value
+                .types
+                .iter()
+                .find(|t| matches!(t.value, TokenFieldType::None))
+                .is_some(),
+            allowed_literal_values: prop
+                .value
+                .types
+                .iter()
+                .filter_map(|t| match &t.value {
+                    TokenFieldType::LiteralValue(v) => Some(v.value.to_owned()),
+                    _ => None,
+                })
+                .collect(),
+        })
+        .collect()
+}
+
+fn make_process_arguments(fn_decl: &FnDecl, token_decls: &HashMap<&str, TokenDecl>) -> Arguments {
+    Arguments {
+        inputs: fn_decl
+            .inputs
+            .value
+            .iter()
+            .map(|input| InputArgument {
+                name: input.value.name.value.to_owned(),
+                fields: map_token_props_to_arguments(token_decls.get(input.value.token_type.value).unwrap()),
+                is_reference: input.value.is_reference,
+            })
+            .collect(),
+        outputs: fn_decl
+            .outputs
+            .value
+            .iter()
+            .map(|output| OutputArgument {
+                name: output.value.name.value.to_owned(),
+                fields: map_token_props_to_arguments(token_decls.get(output.value.token_type.value).unwrap()),
+            })
+            .collect(),
+    }
+}
+
 pub fn compile_ast_to_restrictions(ast: Ast) -> Result<Vec<Process>, CompilationError> {
     let ast = flatten_fns(ast)?;
 
@@ -199,7 +306,7 @@ pub fn compile_ast_to_restrictions(ast: Ast) -> Result<Vec<Process>, Compilation
 
     fn_nodes
         .into_iter()
-        .map(|node| match node.value {
+        .map(move |node| match node.value {
             crate::ast::types::AstRoot::TokenDecl(_) => panic!(),
             crate::ast::types::AstRoot::FnDecl(f) => {
                 let f = f.value;
@@ -209,7 +316,8 @@ pub fn compile_ast_to_restrictions(ast: Ast) -> Result<Vec<Process>, Compilation
                         span: f.name.span,
                     })?,
                     version: f.attributes.value.version,
-                    program: make_process_restrictions(f, &token_decls)?,
+                    program: make_process_restrictions(&f, &token_decls)?,
+                    arguments: make_process_arguments(&f, &token_decls),
                 })
             }
         })
