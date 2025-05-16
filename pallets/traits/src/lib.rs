@@ -1,5 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use frame_support::dispatch::RawOrigin;
 use frame_support::weights::Weight;
 use frame_support::Parameter;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -11,7 +12,11 @@ use sp_std::collections::btree_map::BTreeMap;
 use sp_std::prelude::*;
 
 #[derive(Clone)]
-pub struct ProcessIO<IoIdentifier, AccountId, RoleKey: Ord, TokenMetadataKey: Ord, TokenMetadataValue> {
+pub struct ProcessIO<IoIdentifier, AccountId, RoleKey, TokenMetadataKey, TokenMetadataValue>
+where
+    RoleKey: Ord,
+    TokenMetadataKey: Ord,
+{
     pub id: IoIdentifier,
     pub roles: BTreeMap<RoleKey, AccountId>,
     pub metadata: BTreeMap<TokenMetadataKey, TokenMetadataValue>,
@@ -65,7 +70,8 @@ where
 
     fn validate_process(
         id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
-        sender: &A,
+        sender: &RawOrigin<A>,
+        references: &Vec<ProcessIO<I, A, R, T, V>>,
         inputs: &Vec<ProcessIO<I, A, R, T, V>>,
         outputs: &Vec<ProcessIO<I, A, R, T, V>>,
     ) -> ValidationResult<Self::WeightArg>;
@@ -86,7 +92,8 @@ where
 
     fn validate_process(
         _id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
-        _sender: &A,
+        _sender: &RawOrigin<A>,
+        _references: &Vec<ProcessIO<I, A, R, T, V>>,
         _inputs: &Vec<ProcessIO<I, A, R, T, V>>,
         _outputs: &Vec<ProcessIO<I, A, R, T, V>>,
     ) -> ValidationResult<u32> {

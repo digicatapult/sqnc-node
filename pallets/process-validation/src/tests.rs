@@ -26,7 +26,6 @@ frame_support::construct_runtime!(
     pub enum Test {
         System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
         ProcessValidation: pallet_process_validation::{Pallet, Call, Storage, Event<T>},
-
     }
 );
 parameter_types! {
@@ -54,7 +53,7 @@ impl Default for ProcessIdentifier {
 #[derive(Encode, Decode, Clone, MaxEncodedLen, TypeInfo, PartialEq, Debug, Default, Eq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct TokenMetadataValueDiscriminator {
-    value: u8,
+    pub(crate) value: u8,
 }
 impl From<u128> for TokenMetadataValueDiscriminator {
     fn from(a: u128) -> TokenMetadataValueDiscriminator {

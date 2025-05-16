@@ -74,9 +74,25 @@ where
     Ok(())
 }
 
-fn mk_inputs<T: Config>(i: u32) -> Result<BoundedVec<T::TokenId, T::MaxInputCount>, &'static str> {
-    let inputs = (0..i).fold(Vec::<T::TokenId>::new(), |mut acc, _| {
-        acc.push(*acc.last().unwrap_or(&T::TokenId::default()) + One::one());
+fn next_id<T: Config>(vec: &Vec<Input<T::TokenId>>) -> T::TokenId {
+    *vec.last()
+        .map(|i| match i {
+            Input::Token(id) => id,
+            Input::Reference(id) => id,
+        })
+        .unwrap_or(&T::TokenId::default())
+        + One::one()
+}
+
+fn mk_inputs<T: Config>(i: u32, r: u32) -> Result<BoundedVec<Input<T::TokenId>, T::MaxInputCount>, &'static str> {
+    let inputs = (0..i).fold(Vec::<Input<T::TokenId>>::new(), |mut acc, _| {
+        let id = next_id::<T>(&acc);
+        acc.push(Input::Token(id));
+        acc
+    });
+    let inputs = (0..r).fold(inputs, |mut acc, _| {
+        let id = next_id::<T>(&acc);
+        acc.push(Input::Reference(id));
         acc
     });
 
@@ -131,6 +147,7 @@ benchmarks! {
 
     run_process {
         let i in 1..10;
+        let r in 1..10;
         let o in 1..10;
 
         let default_process = BoundedVec::<u8, ConstU32<32>>::try_from("default".as_bytes().to_vec()).unwrap();
@@ -139,13 +156,13 @@ benchmarks! {
             version: 1u32.into()
         };
 
-        add_nfts::<T>(i)?;
-        let inputs = mk_inputs::<T>(i)?;
+        add_nfts::<T>(i + r)?;
+        let inputs = mk_inputs::<T>(i, r)?;
         let outputs = mk_outputs::<T>(o)?;
         let caller: T::AccountId = account("owner", 0, SEED);
     }: _(RawOrigin::Signed(caller), process, inputs, outputs)
     verify {
-        assert_eq!(LastToken::<T>::get(), nth_token_id::<T>(i + o)?);
+        assert_eq!(LastToken::<T>::get(), nth_token_id::<T>(i + r + o)?);
     }
 
     delete_token {
@@ -153,7 +170,7 @@ benchmarks! {
         let caller: T::AccountId = account("owner", 0, SEED);
 
         add_nfts::<T>(1)?;
-        let inputs = mk_inputs::<T>(1)?;
+        let inputs = mk_inputs::<T>(1, 0)?;
         let outputs = mk_outputs::<T>(0)?;
         let default_process = BoundedVec::<u8, ConstU32<32>>::try_from("default".as_bytes().to_vec()).unwrap();
         let process = ProcessFullyQualifiedId {
