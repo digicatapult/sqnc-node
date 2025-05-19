@@ -46,12 +46,16 @@ pub struct ArgumentField {
 pub struct InputArgument {
     pub(crate) name: String,
     pub(crate) is_reference: bool,
+    pub(crate) token_type: String,
+    pub(crate) version: u32,
     pub(crate) fields: Vec<ArgumentField>,
 }
 
 #[derive(Serialize)]
 pub struct OutputArgument {
     pub(crate) name: String,
+    pub(crate) token_type: String,
+    pub(crate) version: u32,
     pub(crate) fields: Vec<ArgumentField>,
 }
 
@@ -270,19 +274,29 @@ fn make_process_arguments(fn_decl: &FnDecl, token_decls: &HashMap<&str, TokenDec
             .inputs
             .value
             .iter()
-            .map(|input| InputArgument {
-                name: input.value.name.value.to_owned(),
-                fields: map_token_props_to_arguments(token_decls.get(input.value.token_type.value).unwrap()),
-                is_reference: input.value.is_reference,
+            .map(|input| {
+                let decl = token_decls.get(input.value.token_type.value).unwrap();
+                InputArgument {
+                    name: input.value.name.value.to_owned(),
+                    token_type: decl.name.value.to_owned(),
+                    version: decl.attributes.value.version,
+                    fields: map_token_props_to_arguments(token_decls.get(input.value.token_type.value).unwrap()),
+                    is_reference: input.value.is_reference,
+                }
             })
             .collect(),
         outputs: fn_decl
             .outputs
             .value
             .iter()
-            .map(|output| OutputArgument {
-                name: output.value.name.value.to_owned(),
-                fields: map_token_props_to_arguments(token_decls.get(output.value.token_type.value).unwrap()),
+            .map(|output| {
+                let decl = token_decls.get(output.value.token_type.value).unwrap();
+                OutputArgument {
+                    name: output.value.name.value.to_owned(),
+                    token_type: decl.name.value.to_owned(),
+                    version: decl.attributes.value.version,
+                    fields: map_token_props_to_arguments(token_decls.get(output.value.token_type.value).unwrap()),
+                }
             })
             .collect(),
     }
