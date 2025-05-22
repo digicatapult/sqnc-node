@@ -6,15 +6,18 @@ use serde_json::Value;
 fn transform_value(val: Value) -> Value {
     match val {
         Value::Array(arr) => {
-            match arr.iter().all(|v| match v.as_u64() {
-                Some(n) => n < 256,
-                None => false,
-            }) {
-                true => {
+            match (
+                !arr.is_empty(),
+                arr.iter().all(|v| match v.as_u64() {
+                    Some(n) => n < 256,
+                    None => false,
+                }),
+            ) {
+                (true, true) => {
                     let u8_vec = arr.iter().map(|v| v.as_u64().unwrap() as u8).collect();
                     Value::String(String::from_utf8(u8_vec).unwrap())
                 }
-                false => Value::Array(arr.into_iter().map(transform_value).collect()),
+                _ => Value::Array(arr.into_iter().map(transform_value).collect()),
             }
         }
         Value::Object(map) => Value::Object(map.into_iter().map(|(key, val)| (key, transform_value(val))).collect()),
@@ -36,10 +39,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use sqnc_runtime_types::BooleanExpressionSymbol;
+    use sqnc_runtime_types::{ArgType, BooleanExpressionSymbol};
 
     use super::transform_to_json;
-    use crate::compiler::Process;
+    use crate::compiler::{Arguments, Process};
 
     #[test]
     fn transforms_name_single_process() {
@@ -51,6 +54,10 @@ mod tests {
             )]
             .try_into()
             .unwrap(),
+            arguments: Arguments {
+                inputs: vec![],
+                outputs: vec![],
+            },
         }];
         let result = transform_to_json(&processes, true);
 
@@ -59,6 +66,10 @@ mod tests {
             result.unwrap(),
             r#"[
   {
+    "arguments": {
+      "inputs": [],
+      "outputs": []
+    },
     "name": "test",
     "program": [
       {
@@ -82,13 +93,17 @@ mod tests {
             )]
             .try_into()
             .unwrap(),
+            arguments: Arguments {
+                inputs: vec![],
+                outputs: vec![],
+            },
         }];
         let result = transform_to_json(&processes, false);
 
         assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),
-            r#"[{"name":"test","program":[{"Restriction":"None"}],"version":1}]"#.to_owned()
+            r#"[{"arguments":{"inputs":[],"outputs":[]},"name":"test","program":[{"Restriction":"None"}],"version":1}]"#.to_owned()
         );
     }
 
@@ -103,6 +118,10 @@ mod tests {
                 )]
                 .try_into()
                 .unwrap(),
+                arguments: Arguments {
+                    inputs: vec![],
+                    outputs: vec![],
+                },
             },
             Process {
                 name: vec![116u8, 101u8, 115u8, 116u8, 50u8].try_into().unwrap(),
@@ -112,6 +131,10 @@ mod tests {
                 )]
                 .try_into()
                 .unwrap(),
+                arguments: Arguments {
+                    inputs: vec![],
+                    outputs: vec![],
+                },
             },
         ];
         let result = transform_to_json(&processes, true);
@@ -121,6 +144,10 @@ mod tests {
             result.unwrap(),
             r#"[
   {
+    "arguments": {
+      "inputs": [],
+      "outputs": []
+    },
     "name": "test1",
     "program": [
       {
@@ -130,6 +157,10 @@ mod tests {
     "version": 1
   },
   {
+    "arguments": {
+      "inputs": [],
+      "outputs": []
+    },
     "name": "test2",
     "program": [
       {
@@ -149,13 +180,18 @@ mod tests {
             name: vec![116u8, 101u8, 115u8, 116u8].try_into().unwrap(), // test
             version: 1u32,
             program: vec![BooleanExpressionSymbol::Restriction(
-                sqnc_runtime_types::Restriction::InputHasMetadata {
+                sqnc_runtime_types::Restriction::ArgHasMetadata {
+                    arg_type: ArgType::Input,
                     index: 1u32,
                     metadata_key: vec![107u8, 101u8, 121u8].try_into().unwrap(), // key
                 },
             )]
             .try_into()
             .unwrap(),
+            arguments: Arguments {
+                inputs: vec![],
+                outputs: vec![],
+            },
         }];
         let result = transform_to_json(&processes, true);
 
@@ -164,11 +200,16 @@ mod tests {
             result.unwrap(),
             r#"[
   {
+    "arguments": {
+      "inputs": [],
+      "outputs": []
+    },
     "name": "test",
     "program": [
       {
         "Restriction": {
-          "InputHasMetadata": {
+          "ArgHasMetadata": {
+            "arg_type": "Input",
             "index": 1,
             "metadata_key": "key"
           }
