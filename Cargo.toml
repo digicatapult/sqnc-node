@@ -12,15 +12,15 @@ version = "13.0.0"
 ##############################
 serde = { version = "1.0.219", default-features = false }
 serde_json = { version = "1.0.140", default-features = false }
-clap = { version = "4.5.39", features = ["derive"] }
+clap = { version = "4.5.40", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
 async-trait = "0.1.88"
 hex-literal = "0.4.1"
 exitcode = "1.1.2"
 lazy_static = "1.5.0"
-pest = "2.8.0"
-pest_derive = "2.8.0"
+pest = "2.8.1"
+pest_derive = "2.8.1"
 thiserror = "2.0.12"
 strum = { version = "0.27.1", default-features = false }
 strum_macros = { version = "0.27.1", default-features = false }
