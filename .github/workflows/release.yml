@@ -179,7 +179,7 @@ jobs:
             ./sqnc-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
       - name: Delete release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
