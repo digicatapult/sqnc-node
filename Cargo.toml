@@ -10,9 +10,9 @@ version = "13.0.0"
 ##############################
 # non-substrate dependencies #
 ##############################
-serde = { version = "1.0.225", default-features = false }
+serde = { version = "1.0.226", default-features = false }
 serde_json = { version = "1.0.145", default-features = false }
-clap = { version = "4.5.47", features = ["derive"] }
+clap = { version = "4.5.48", features = ["derive"] }
 futures = { version = "0.3.31", features = ["thread-pool"] }
 bs58 = "0.5.1"
 async-trait = "0.1.89"
