@@ -2,9 +2,7 @@
 
 use crate as pallet_utxo_nft;
 use frame_support::{
-    derive_impl,
-    dispatch::RawOrigin,
-    parameter_types,
+    derive_impl, parameter_types,
     traits::{ConstU32, ConstU64, Hooks},
     weights::{constants::WEIGHT_REF_TIME_PER_SECOND, Weight},
 };
@@ -94,8 +92,7 @@ impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessVa
 
     fn validate_process(
         id: &TestProcessId,
-        _sender: &RawOrigin<u64>,
-        _references: &Vec<TestProcessIO>,
+        _sender: &u64,
         _inputs: &Vec<TestProcessIO>,
         _outputs: &Vec<TestProcessIO>,
     ) -> ValidationResult<u32> {
@@ -108,7 +105,7 @@ impl ProcessValidator<u64, u64, Role, u64, MetadataValue<u64>> for MockProcessVa
 
 pub struct TestWeights {}
 impl pallet_utxo_nft::WeightInfo for TestWeights {
-    fn run_process(_: u32, _: u32, _: u32) -> Weight {
+    fn run_process(_: u32, _: u32) -> Weight {
         Weight::from_parts(1, 1)
     }
     fn delete_token() -> Weight {

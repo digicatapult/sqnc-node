@@ -130,7 +130,6 @@ fn transform_comparison<'a>(
             op,
             right,
         }),
-        Comparison::SenderRole { op, right } => Ok(Comparison::SenderRole { op, right }),
     }
 }
 
@@ -186,37 +185,21 @@ fn check_args<'a>(
     decl.value
         .iter()
         .zip(call.value.iter())
-        .map(|(a, b)| {
-            let left_type = format!(
-                "{}{}",
-                match a.value.is_reference {
-                    true => "&",
-                    false => "",
-                },
-                a.value.token_type,
-            );
-            let right_type = format!(
-                "{}{}",
-                match b.value.is_reference {
-                    true => "&",
-                    false => "",
-                },
-                b.value.token_type,
-            );
-
-            match left_type == right_type {
-                true => Ok(()),
-                false => Err(CompilationError {
-                    stage: CompilationStage::ReduceFns,
-                    exit_code: exitcode::DATAERR,
-                    inner: PestError::new_from_span(
-                        ErrorVariant::CustomError {
-                            message: format!("Expected argument of type {} got {}", left_type, right_type),
-                        },
-                        b.span,
-                    ),
-                }),
-            }
+        .map(|(a, b)| match a.value.token_type.value == b.value.token_type.value {
+            true => Ok(()),
+            false => Err(CompilationError {
+                stage: CompilationStage::ReduceFns,
+                exit_code: exitcode::DATAERR,
+                inner: PestError::new_from_span(
+                    ErrorVariant::CustomError {
+                        message: format!(
+                            "Expected argument of type {} got {}",
+                            a.value.token_type.value, b.value.token_type.value
+                        ),
+                    },
+                    b.span,
+                ),
+            }),
         })
         .collect::<Result<_, _>>()
 }
@@ -395,7 +378,6 @@ fn flatten_fn<'a>(fn_decl: FnDecl<'a>, all_fns: Arc<[FnDecl<'a>]>) -> Result<FnD
     called_fns.insert(fn_decl.name.value);
 
     Ok(FnDecl {
-        attributes: fn_decl.attributes,
         visibility: fn_decl.visibility,
         name: fn_decl.name,
         inputs: fn_decl.inputs.clone(),
@@ -695,27 +677,6 @@ mod tests {
         assert_eq!(
             result.err().unwrap().inner.variant.message(),
             "Expected argument of type Bar got Foo"
-        );
-    }
-
-    #[test]
-    fn incorrect_input_arg_ref() {
-        let ast = parse_str_to_ast(
-            r#"
-        pub fn middle | a: Foo | => || where {}
-
-        pub fn test | a: &Foo | => || where {
-            middle | a | => ||
-        }
-        "#,
-        )
-        .unwrap();
-
-        let result = flatten_fns(ast);
-        assert!(result.is_err());
-        assert_eq!(
-            result.err().unwrap().inner.variant.message(),
-            "Expected argument of type Foo got &Foo"
         );
     }
 

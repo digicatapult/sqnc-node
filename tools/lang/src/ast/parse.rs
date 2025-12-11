@@ -1,4 +1,4 @@
-use std::{str::FromStr, sync::Arc};
+use std::sync::Arc;
 
 use super::types::*;
 
@@ -23,11 +23,9 @@ fn parse_literal<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a
     })
 }
 
-fn parse_from_string<'a, T: FromStr>(
-    pair: pest::iterators::Pair<'a, Rule>,
-) -> Result<AstNode<'a, T>, CompilationError> {
+fn parse_integer<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, i128>, CompilationError> {
     let integer_value_string = pair.into_inner().next().unwrap(); // integer_value
-    let parsed_integer = integer_value_string.as_str().parse::<T>();
+    let parsed_integer = integer_value_string.as_str().parse::<i128>();
 
     match parsed_integer {
         Ok(val) => Ok(AstNode {
@@ -47,18 +45,6 @@ fn parse_from_string<'a, T: FromStr>(
     }
 }
 
-fn parse_role_literal<'a>(pair: pest::iterators::Pair<'a, Rule>) -> Result<AstNode<'a, RoleLit>, CompilationError> {
-    let role_value_string = pair.into_inner().next().unwrap(); // integer_value
-
-    match role_value_string.as_rule() {
-        Rule::root => Ok(AstNode {
-            value: RoleLit::Root,
-            span: role_value_string.as_span(),
-        }),
-        _ => produce_unexpected_pair_error(role_value_string),
-    }
-}
-
 fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenFieldType>, CompilationError> {
     let span = pair.as_span();
     let field_type = match pair.as_rule() {
@@ -68,7 +54,7 @@ fn parse_token_prop_type(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<To
         Rule::role => Ok(TokenFieldType::Role),
         Rule::none => Ok(TokenFieldType::None),
         Rule::literal_value => Ok(TokenFieldType::LiteralValue(parse_literal(pair)?)),
-        Rule::integer_value => Ok(TokenFieldType::IntegerValue(parse_from_string(pair)?)),
+        Rule::integer_value => Ok(TokenFieldType::IntegerValue(parse_integer(pair)?)),
         Rule::ident => Ok(TokenFieldType::Token(AstNode {
             span: pair.as_span(),
             value: pair.as_str(),
@@ -122,27 +108,6 @@ fn parse_token_props(
     }
 }
 
-fn parse_token_attrs(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenAttrs>, CompilationError> {
-    let span = pair.as_span();
-    if Rule::token_attrs != pair.as_rule() {
-        return produce_unexpected_pair_error(pair);
-    };
-
-    let mut pairs = pair.into_inner();
-    let value = pairs.try_fold(TokenAttrs { version: 1 }, |acc, pair| match pair.as_rule() {
-        Rule::version_attr => {
-            let number = parse_from_string(pair.into_inner().next().unwrap())?;
-            Ok(TokenAttrs {
-                version: number.value,
-                ..acc
-            })
-        }
-        _ => produce_unexpected_pair_error(pair),
-    })?;
-
-    Ok(AstNode { value, span })
-}
-
 fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDecl>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
@@ -151,7 +116,6 @@ fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDe
             Ok(AstNode {
                 span,
                 value: TokenDecl {
-                    attributes: parse_token_attrs(pairs.next().unwrap())?,
                     name: parse_ident(pairs.next().unwrap())?,
                     props: parse_token_props(pairs.next().unwrap())?,
                 },
@@ -161,45 +125,13 @@ fn parse_token_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<TokenDe
     }
 }
 
-fn parse_fn_input(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
-    if pair.as_rule() != Rule::fn_decl_input {
-        return produce_unexpected_pair_error(pair);
-    }
-
-    let span = pair.as_span();
-    let mut pairs = pair.into_inner();
-    let first = pairs.next().unwrap();
-    let second = pairs.next().unwrap();
-
-    match second.as_rule() {
-        Rule::reference_amp => Ok(AstNode {
-            value: FnArg {
-                is_reference: true,
-                name: parse_ident(first)?,
-                token_type: parse_ident(pairs.next().unwrap())?,
-            },
-            span,
-        }),
-        Rule::ident => Ok(AstNode {
-            value: FnArg {
-                is_reference: false,
-                name: parse_ident(first)?,
-                token_type: parse_ident(second)?,
-            },
-            span,
-        }),
-        _ => produce_unexpected_pair_error(second),
-    }
-}
-
-fn parse_fn_output(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
+fn parse_fn_arg(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, CompilationError> {
     match pair.as_rule() {
-        Rule::fn_decl_output => {
+        Rule::fn_decl_arg => {
             let span = pair.as_span();
             let mut pairs = pair.into_inner();
             Ok(AstNode {
                 value: FnArg {
-                    is_reference: false,
                     name: parse_ident(pairs.next().unwrap())?,
                     token_type: parse_ident(pairs.next().unwrap())?,
                 },
@@ -213,43 +145,15 @@ fn parse_fn_output(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnArg>, 
 fn parse_fn_decl_args(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Arc<[AstNode<FnArg>]>>, CompilationError> {
     let span = pair.as_span();
     match pair.as_rule() {
-        Rule::fn_decl_input_list => {
+        Rule::fn_decl_arg_list => {
             let args = pair.into_inner();
             Ok(AstNode {
-                value: args.into_iter().map(parse_fn_input).collect::<Result<Arc<[_]>, _>>()?,
-                span,
-            })
-        }
-        Rule::fn_decl_output_list => {
-            let args = pair.into_inner();
-            Ok(AstNode {
-                value: args.into_iter().map(parse_fn_output).collect::<Result<Arc<[_]>, _>>()?,
+                value: args.into_iter().map(parse_fn_arg).collect::<Result<Arc<[_]>, _>>()?,
                 span,
             })
         }
         _ => produce_unexpected_pair_error(pair),
     }
-}
-
-fn parse_fn_attrs(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnAttrs>, CompilationError> {
-    let span = pair.as_span();
-    if Rule::fn_attrs != pair.as_rule() {
-        return produce_unexpected_pair_error(pair);
-    };
-
-    let mut pairs = pair.into_inner();
-    let value = pairs.try_fold(FnAttrs { version: 1 }, |acc, pair| match pair.as_rule() {
-        Rule::version_attr => {
-            let number = parse_from_string(pair.into_inner().next().unwrap())?;
-            Ok(FnAttrs {
-                version: number.value,
-                ..acc
-            })
-        }
-        _ => produce_unexpected_pair_error(pair),
-    })?;
-
-    Ok(AstNode { value, span })
 }
 
 fn parse_fn_vis(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnVis>, CompilationError> {
@@ -383,7 +287,7 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
 
             let left = parse_ident_prop(pairs.next().unwrap())?;
             let op = parse_bool_cmp_op(pairs.next().unwrap())?;
-            let right = parse_from_string(pairs.next().unwrap())?; // literal_value
+            let right = parse_integer(pairs.next().unwrap())?; // literal_value
 
             Ok(AstNode {
                 value: Comparison::PropInt { left, op, right },
@@ -396,17 +300,6 @@ fn parse_bool_cmp(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<Compariso
                 value: Comparison::PropSender {
                     left: parse_ident_prop(pairs.next().unwrap())?,
                     op: parse_bool_cmp_op(pairs.next().unwrap())?,
-                },
-                span,
-            })
-        }
-        Rule::sender_role_cmp => {
-            let mut pairs = pair.into_inner();
-            let _sender = pairs.next(); // lhs is sender
-            Ok(AstNode {
-                value: Comparison::SenderRole {
-                    op: parse_bool_cmp_op(pairs.next().unwrap())?,
-                    right: parse_role_literal(pairs.next().unwrap())?,
                 },
                 span,
             })
@@ -525,7 +418,6 @@ fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, C
     match pair.as_rule() {
         Rule::fn_decl => {
             let mut pair = pair.into_inner();
-            let attrs = pair.next().unwrap();
             let vis = pair.next().unwrap();
             let name = pair.next().unwrap();
             let inputs = pair.next().unwrap();
@@ -533,7 +425,6 @@ fn parse_fn_decl(pair: pest::iterators::Pair<Rule>) -> Result<AstNode<FnDecl>, C
             let conditions = pair.next().unwrap();
             Ok(AstNode {
                 value: FnDecl {
-                    attributes: parse_fn_attrs(attrs)?,
                     visibility: parse_fn_vis(vis)?,
                     name: AstNode {
                         value: name.as_str(),
@@ -571,7 +462,7 @@ pub fn parse_ast(pairs: pest::iterators::Pairs<Rule>) -> Result<Vec<AstNode<AstR
                 Some(node)
             }
             Rule::EOI => None,
-            _ => Some(produce_unexpected_pair_error(pair)),
+            _ => panic!(),
         })
         .collect()
 }

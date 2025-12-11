@@ -54,11 +54,13 @@ First attempt to build each of the pallets.
 ```bash
 cargo build --release \
     -p pallet-doas \
+    -p pallet-organisation-data \
     -p pallet-process-validation \
     -p pallet-symmetric-key \
     -p sqnc-pallet-traits \
     -p pallet-transaction-payment-free \
-    -p pallet-utxo-nft
+    -p pallet-utxo-nft \
+    -p pallet-validator-set
 ```
 
 Pallets can also be built one at a time e.g. `cargo build --release -p pallet-doas`.

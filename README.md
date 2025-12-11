@@ -124,19 +124,8 @@ Tokens can be minted/burnt by calling the following extrinsic under `UtxoNFT`:
 pub fn run_process(
     origin: OriginFor<T>,
     process: ProcessId<T>,
-    inputs: BoundedVec<Input<T::TokenId>, T::MaxInputCount>,
-    outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
-) -> DispatchResultWithPostInfo { ... }
-```
-
-For processes that must be run as the system privilege (root) there is also:
-
-```rust
-pub fn run_process_as_root(
-    origin: OriginFor<T>,
-    process: ProcessId<T>,
-    inputs: BoundedVec<Input<T::TokenId>, T::MaxInputCount>,
-    outputs: BoundedVec<Output<T>, T::MaxOutputCount>,
+    inputs: BoundedVec<T::TokenId, T::MaxInputCount>,
+    outputs: BoundedVec<Output<T>, T::MaxOutputCount>
 ) -> DispatchResultWithPostInfo { ... }
 ```
 
@@ -167,7 +156,6 @@ Pallet for defining process restrictions. Intended for use with `pallet-utxo-nft
 pub fn create_process(
   origin: OriginFor<T>,
   id: T::ProcessIdentifier,
-  version: T::ProcessVersion,
   program: BoundedVec<
       BooleanExpressionSymbol<
           T::RoleKey,
@@ -242,20 +230,25 @@ A complete truth table set of binary operators is available when writing a proce
 
 The pallet defines various type of process restrictions that can be applied to a process. These include:
 
-| Restriction                 |                                                                                                       description                                                                                                       |
-| :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| `None`                      |                                                                                    Default `Restriction` value that always succeeds                                                                                     |
-| `Fail`                      |                                                                                          `Restriction` value that always fails                                                                                          |
-| `SenderIsRoot`              |                                                                         Specifies that the caller of the transaction must be the system (root)                                                                          |
-| `SenderHasArgRole`          |                                              Requires that the process `sender` is assigned to a specified role on a specified (by index) input, reference or output token                                              |
-| `ArgHasRole`                |                                                                    Requires that a specified (by index) input, reference or output token has a role                                                                     |
-| `ArgHasMetadata`            |                                                       Requires that a specified (by index) input, reference or output token has a metadata item with a given key                                                        |
-| `MatchArgsRole`             |       Requires that the account of a specified role on a specified (by index) input, reference or output token matches the account of a specified role on a specified (by index) input, reference or output token       |
-| `MatchArgsMetadataValue`    | Requires that the metadata value of a specified key on a specified (by index) input, reference or output token matches the metadata value of a specified key on a specified (by index) input, reference or output token |
-| `MatchArgIdToMetadataValue` |                Requires that the metadata value of a specified key on a specified (by index) input, reference or output token matches the id of a specified (by index) input, reference or output token                 |
-| `FixedArgCount`             |                                                                Requires that the number of input, reference or output tokens must be a specified integer                                                                |
-| `FixedArgMetadataValue`     |                                        Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input, reference or output token                                         |
-| `FixedArgMetadataValueType` |                                   Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) input, reference or output token                                    |
+| Restriction                       |                                                                                  description                                                                                   |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| `None`                            |                                                                Default `Restriction` value that always succeeds                                                                |
+| `Fail`                            |                                                                     `Restriction` value that always fails                                                                      |
+| `Combined`                        |                            Requires two specified restrictions combined via a specified operator [`AND`, `OR`, `XOR`, `NAND`, `NOR`] returns `true`                            |
+| `SenderHasInputRole`              |                                    Requires that the process `sender` is assigned to a specified role on a specified (by index) input token                                    |
+| `SenderHasOutputRole`             |                                   Requires that the process `sender` is assigned to a specified role on a specified (by index) output token                                    |
+| `OutputHasRole`                   |                                                          Requires that a specified (by index) output token has a role                                                          |
+| `OutputHasMetadata`               |                                             Requires that a specified (by index) output token has a metadata item with a given key                                             |
+| `InputHasRole`                    |                                                          Requires that a specified (by index) input token has a role                                                           |
+| `InputHasMetadata`                |                                             Requires that a specified (by index) input token has a metadata item with a given key                                              |
+| `MatchInputOutputRole`            |       Requires that the account of a specified role on a specified (by index) output token matches the account of a specified role on a specified (by index) input token       |
+| `MatchInputOutputMetadataValue`   | Requires that the metadata value of a specified key on a specified (by index) output token matches the metadata value of a specified key on a specified (by index) input token |
+| `MatchInputIdOutputMetadataValue` |                Requires that the metadata value of a specified key on a specified (by index) output token matches the id of a specified (by index) input token                 |
+| `FixedNumberOfInputs`             |                                                         Requires that the number of inputs must be a specified integer                                                         |
+| `FixedNumberOfOutputs`            |                                                        Requires that the number of outputs must be a specified integer                                                         |
+| `FixedInputMetadataValue`         |                              Requires that a metadata item of a specified key must have a specified value, on a specified (by index) input token                               |
+| `FixedOutputMetadataValue`        |                              Requires that a metadata item of a specified key must have a specified value, on a specified (by index) output token                              |
+| `FixedOutputMetadataValueType`    |                         Requires that a metadata item of a specified key must have a value of a specified type, on a specified (by index) output token                         |
 
 ### IPFSKey pallet
 

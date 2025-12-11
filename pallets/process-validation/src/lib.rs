@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{dispatch::RawOrigin, traits::Get, BoundedVec, Parameter};
+use frame_support::{traits::Get, BoundedVec, Parameter};
 pub use pallet::*;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
@@ -11,8 +11,6 @@ use sp_runtime::{
 use sp_std::prelude::*;
 
 use sqnc_pallet_traits::{ProcessFullyQualifiedId, ProcessIO, ProcessValidator, ValidationResult};
-
-pub mod migration;
 
 #[cfg(test)]
 mod tests;
@@ -139,7 +137,7 @@ pub mod pallet {
     }
 
     /// The in-code storage version.
-    const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
+    const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
     #[pallet::pallet]
     #[pallet::storage_version(STORAGE_VERSION)]
@@ -198,8 +196,7 @@ pub mod pallet {
                 if !Pallet::<T>::validate_program(&program) {
                     panic!("Invalid program detected in genesis!")
                 }
-                let version: <T as Config>::ProcessVersion = One::one();
-                <VersionModel<T>>::insert(&process_id, version.clone());
+                let version = Pallet::<T>::update_version(process_id).unwrap();
                 Pallet::<T>::persist_process(process_id, &version, program).unwrap();
             }
         }
@@ -249,7 +246,6 @@ pub mod pallet {
         pub fn create_process(
             origin: OriginFor<T>,
             id: T::ProcessIdentifier,
-            version: T::ProcessVersion,
             program: BoundedVec<
                 BooleanExpressionSymbol<
                     T::RoleKey,
@@ -263,19 +259,15 @@ pub mod pallet {
             T::CreateProcessOrigin::ensure_origin(origin)?;
 
             ensure!(Pallet::<T>::validate_program(&program), Error::<T>::InvalidProgram);
-            ensure!(version > Zero::zero(), Error::<T>::InvalidVersion);
 
-            let previous_version = Pallet::<T>::get_previous_version(&id).unwrap_or(Zero::zero());
-            ensure!(version > previous_version, Error::<T>::AlreadyExists);
-
-            <VersionModel<T>>::insert(&id, version.clone());
+            let version: T::ProcessVersion = Pallet::<T>::update_version(&id).unwrap();
             Pallet::<T>::persist_process(&id, &version, &program)?;
 
             Self::deposit_event(Event::ProcessCreated(
                 id,
                 version.clone(),
                 program,
-                previous_version.is_zero(),
+                version == One::one(),
             ));
 
             return Ok(().into());
@@ -320,8 +312,22 @@ pub mod pallet {
             executed_stack_height == Some(1u8)
         }
 
-        pub fn get_previous_version(id: &T::ProcessIdentifier) -> Option<T::ProcessVersion> {
-            <VersionModel<T>>::try_get(&id).ok()
+        pub fn get_next_version(id: &T::ProcessIdentifier) -> T::ProcessVersion {
+            let current_version = <VersionModel<T>>::try_get(&id);
+            return match current_version {
+                Ok(version) => version + One::one(),
+                Err(_) => One::one(),
+            };
+        }
+
+        pub fn update_version(id: &T::ProcessIdentifier) -> Result<T::ProcessVersion, Error<T>> {
+            let version: T::ProcessVersion = Pallet::<T>::get_next_version(id);
+            match version == One::one() {
+                true => <VersionModel<T>>::insert(id, version.clone()),
+                false => <VersionModel<T>>::mutate(id, |v| *v = version.clone()),
+            };
+
+            return Ok(version);
         }
 
         pub fn persist_process(
@@ -391,22 +397,13 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
     type WeightArg = u32;
     type Weights = T::WeightInfo;
 
-    fn validate_process<'a>(
-        id: &'a ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
-        sender: &'a RawOrigin<T::AccountId>,
-        references: &'a Vec<
-            ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>,
-        >,
-        inputs: &'a Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
-        outputs: &'a Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+    fn validate_process(
+        id: &ProcessFullyQualifiedId<Self::ProcessIdentifier, Self::ProcessVersion>,
+        sender: &T::AccountId,
+        inputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
+        outputs: &Vec<ProcessIO<T::TokenId, T::AccountId, T::RoleKey, T::TokenMetadataKey, T::TokenMetadataValue>>,
     ) -> ValidationResult<u32> {
         let maybe_process = <ProcessModel<T>>::try_get(id.id.clone(), id.version.clone());
-
-        let get_args = |arg_type: ArgType| match arg_type {
-            ArgType::Input => inputs,
-            ArgType::Output => outputs,
-            ArgType::Reference => references,
-        };
 
         match maybe_process {
             Ok(process) => {
@@ -433,7 +430,14 @@ impl<T: Config> ProcessValidator<T::TokenId, T::AccountId, T::RoleKey, T::TokenM
                             }
                         }
                         BooleanExpressionSymbol::Restriction(r) => {
-                            stack.push(validate_restriction(r, sender, get_args));
+                            stack.push(validate_restriction::<
+                                T::TokenId,
+                                T::AccountId,
+                                T::RoleKey,
+                                T::TokenMetadataKey,
+                                T::TokenMetadataValue,
+                                T::TokenMetadataValueDiscriminator,
+                            >(r, &sender, inputs, outputs));
                         }
                     }
                 }

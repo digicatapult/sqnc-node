@@ -1,5 +1,5 @@
-use crate::{graveyard::GraveyardState, input::Input, output::Output, tests::mock::*, token::Token, Error, Event};
-use frame_support::{assert_err, assert_ok, dispatch::RawOrigin};
+use crate::{graveyard::GraveyardState, output::Output, tests::mock::*, token::Token, Error, Event};
+use frame_support::{assert_err, assert_ok};
 use sp_core::H256;
 use sp_runtime::{bounded_btree_map, bounded_vec};
 use sqnc_pallet_traits::ProcessFullyQualifiedId;
@@ -37,7 +37,7 @@ fn it_works_for_creating_token_with_file() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -72,7 +72,7 @@ fn it_works_for_creating_token_with_literal() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -107,7 +107,7 @@ fn it_works_for_creating_token_with_token_id_in_metadata() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -142,7 +142,7 @@ fn it_works_for_creating_token_with_no_metadata_value() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -182,7 +182,7 @@ fn it_works_for_creating_token_with_multiple_metadata_items() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -217,7 +217,7 @@ fn it_works_for_creating_token_with_multiple_roles() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata.clone(),
@@ -264,7 +264,7 @@ fn it_works_for_creating_many_token() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata0.clone(),
@@ -278,7 +278,7 @@ fn it_works_for_creating_many_token() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata1.clone(),
@@ -292,7 +292,7 @@ fn it_works_for_creating_many_token() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata2.clone(),
@@ -347,7 +347,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata0.clone(),
@@ -361,7 +361,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata1.clone(),
@@ -375,7 +375,7 @@ fn it_works_for_creating_many_token_with_varied_metadata() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata2.clone(),
@@ -405,7 +405,7 @@ fn it_works_for_destroying_single_token() {
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1)],
+            bounded_vec![1],
             bounded_vec![]
         ));
         // assert no more tokens were created
@@ -417,7 +417,7 @@ fn it_works_for_destroying_single_token() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata.clone(),
@@ -433,67 +433,6 @@ fn it_works_for_destroying_single_token() {
             }
         );
         assert_eq!(UtxoNFT::graveyard(0), Some(1));
-    });
-}
-
-#[test]
-fn it_does_not_destroy_references() {
-    new_test_ext().execute_with(|| {
-        let roles = bounded_btree_map!(Default::default() => 1);
-        let metadata = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
-            SUCCEED_PROCESS,
-            bounded_vec![],
-            bounded_vec![Output {
-                roles: roles.clone(),
-                metadata: metadata.clone()
-            }],
-        )
-        .unwrap();
-
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
-            SUCCEED_PROCESS,
-            bounded_vec![Input::Reference(1)],
-            bounded_vec![]
-        ));
-        // assert no more tokens were created
-        assert_eq!(UtxoNFT::last_token(), 1);
-        // get the token and assert it hasn't been burnt
-        let token: Token<
-            sp_core::ConstU32<2>,
-            u64,
-            Role,
-            u64,
-            u64,
-            sp_core::ConstU32<4>,
-            u64,
-            MetadataValue<u64>,
-            sp_core::ConstU32<5>,
-            sp_core::ConstU32<5>,
-        > = UtxoNFT::tokens_by_id(1).unwrap();
-        assert_eq!(
-            token,
-            Token {
-                id: 1,
-                roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
-                created_at: 0,
-                destroyed_at: None,
-                metadata: metadata.clone(),
-                parents: bounded_vec![],
-                children: None
-            }
-        );
-        assert_eq!(
-            UtxoNFT::current_graveyard_state(),
-            GraveyardState {
-                start_index: 0,
-                end_index: 0
-            }
-        );
-        assert_eq!(UtxoNFT::graveyard(0), None);
     });
 }
 
@@ -528,7 +467,7 @@ fn it_works_for_destroying_many_tokens() {
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1), Input::Token(2), Input::Token(3)],
+            bounded_vec![1, 2, 3],
             bounded_vec![]
         ));
         // assert no more tokens were created
@@ -540,7 +479,7 @@ fn it_works_for_destroying_many_tokens() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -554,7 +493,7 @@ fn it_works_for_destroying_many_tokens() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata1.clone(),
@@ -568,7 +507,7 @@ fn it_works_for_destroying_many_tokens() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata2.clone(),
@@ -620,13 +559,13 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1)],
+            bounded_vec![1],
             bounded_vec![]
         ));
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(2), Input::Token(3)],
+            bounded_vec![2, 3],
             bounded_vec![]
         ));
         // assert no more tokens were created
@@ -638,7 +577,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
             Token {
                 id: 1,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -652,7 +591,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
             Token {
                 id: 2,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata1.clone(),
@@ -666,7 +605,7 @@ fn it_works_for_destroying_many_tokens_in_multiple_transactions() {
             Token {
                 id: 3,
                 roles: roles.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata2.clone(),
@@ -708,7 +647,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1)],
+            bounded_vec![1],
             bounded_vec![Output {
                 roles: roles1.clone(),
                 metadata: metadata1.clone()
@@ -723,7 +662,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             Token {
                 id: 1,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -737,7 +676,7 @@ fn it_works_for_creating_and_destroy_single_tokens() {
             Token {
                 id: 2,
                 roles: roles1.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata1.clone(),
@@ -777,7 +716,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1), Input::Token(2)],
+            bounded_vec![1, 2],
             bounded_vec![
                 Output {
                     roles: roles0.clone(),
@@ -798,7 +737,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 1,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata0.clone(),
@@ -812,7 +751,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 2,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: Some(0),
                 metadata: metadata1.clone(),
@@ -827,7 +766,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 3,
                 roles: roles0.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata2.clone(),
@@ -841,7 +780,7 @@ fn it_works_for_creating_and_destroy_many_tokens() {
             Token {
                 id: 4,
                 roles: roles1.clone(),
-                creator: RawOrigin::Signed(1),
+                creator: 1,
                 created_at: 0,
                 destroyed_at: None,
                 metadata: metadata3.clone(),
@@ -883,7 +822,7 @@ fn it_produces_process_ran_events_when_success() {
         assert_ok!(UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1), Input::Token(2)],
+            bounded_vec![1, 2],
             bounded_vec![
                 Output {
                     roles: roles0.clone(),
@@ -898,62 +837,7 @@ fn it_produces_process_ran_events_when_success() {
         assert_eq!(
             System::events().iter().last().unwrap().event,
             RuntimeEvent::UtxoNFT(Event::ProcessRan {
-                sender: RawOrigin::Signed(1),
-                process: SUCCEED_PROCESS,
-                inputs: bounded_vec![1, 2],
-                outputs: bounded_vec![3, 4]
-            }),
-        )
-    });
-}
-
-#[test]
-fn it_includes_references_in_event() {
-    new_test_ext().execute_with(|| {
-        run_to_block(1, false);
-
-        let roles0 = bounded_btree_map!(Default::default() => 1);
-        let roles1 = bounded_btree_map!(Default::default() => 2);
-        let metadata0 = bounded_btree_map!(0 => MetadataValue::None);
-        let metadata1 = bounded_btree_map!(0 => MetadataValue::None);
-        let metadata2 = bounded_btree_map!(0 => MetadataValue::None);
-        let metadata3 = bounded_btree_map!(0 => MetadataValue::None);
-        UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
-            SUCCEED_PROCESS,
-            bounded_vec![],
-            bounded_vec![
-                Output {
-                    roles: roles0.clone(),
-                    metadata: metadata0.clone()
-                },
-                Output {
-                    roles: roles0.clone(),
-                    metadata: metadata1.clone()
-                },
-            ],
-        )
-        .unwrap();
-        // create 2 tokens with 2 parents
-        assert_ok!(UtxoNFT::run_process(
-            RuntimeOrigin::signed(1),
-            SUCCEED_PROCESS,
-            bounded_vec![Input::Reference(1), Input::Reference(2)],
-            bounded_vec![
-                Output {
-                    roles: roles0.clone(),
-                    metadata: metadata2.clone()
-                },
-                Output {
-                    roles: roles1.clone(),
-                    metadata: metadata3.clone()
-                },
-            ]
-        ));
-        assert_eq!(
-            System::events().iter().last().unwrap().event,
-            RuntimeEvent::UtxoNFT(Event::ProcessRan {
-                sender: RawOrigin::Signed(1),
+                sender: 1,
                 process: SUCCEED_PROCESS,
                 inputs: bounded_vec![1, 2],
                 outputs: bounded_vec![3, 4]
@@ -970,7 +854,7 @@ fn it_fails_for_destroying_single_invalid_token() {
             UtxoNFT::run_process(
                 RuntimeOrigin::signed(1),
                 SUCCEED_PROCESS,
-                bounded_vec![Input::Token(42)],
+                bounded_vec![42],
                 bounded_vec![]
             ),
             Error::<Test>::InvalidInput
@@ -999,7 +883,7 @@ fn it_fails_for_destroying_single_burnt_token() {
         UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1)],
+            bounded_vec![1],
             bounded_vec![],
         )
         .unwrap();
@@ -1010,7 +894,7 @@ fn it_fails_for_destroying_single_burnt_token() {
             UtxoNFT::run_process(
                 RuntimeOrigin::signed(1),
                 SUCCEED_PROCESS,
-                bounded_vec![Input::Token(1)],
+                bounded_vec![1],
                 bounded_vec![Output {
                     roles: roles.clone(),
                     metadata: metadata1.clone()
@@ -1051,7 +935,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
         UtxoNFT::run_process(
             RuntimeOrigin::signed(1),
             SUCCEED_PROCESS,
-            bounded_vec![Input::Token(1)],
+            bounded_vec![1],
             bounded_vec![],
         )
         .unwrap();
@@ -1064,7 +948,7 @@ fn it_fails_for_destroying_multiple_tokens_with_burnt_token() {
             UtxoNFT::run_process(
                 RuntimeOrigin::signed(1),
                 SUCCEED_PROCESS,
-                bounded_vec![Input::Token(1), Input::Token(2)],
+                bounded_vec![1, 2],
                 bounded_vec![Output {
                     roles: roles.clone(),
                     metadata: metadata2.clone()
@@ -1100,7 +984,7 @@ fn it_fails_for_running_success_process_with_invalid_input() {
             UtxoNFT::run_process(
                 RuntimeOrigin::signed(1),
                 SUCCEED_PROCESS,
-                bounded_vec![Input::Token(42)],
+                bounded_vec![42],
                 bounded_vec![]
             ),
             Error::<Test>::InvalidInput
