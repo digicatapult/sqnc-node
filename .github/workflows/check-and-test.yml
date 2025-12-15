@@ -82,7 +82,7 @@ jobs:
 
   check:
     name: Check and test
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     needs: [get-version]
 
     steps:
