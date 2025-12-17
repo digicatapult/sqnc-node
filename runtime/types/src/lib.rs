@@ -11,7 +11,7 @@ use sp_runtime::{
 use strum::EnumCount;
 use strum_macros::{EnumCount, EnumDiscriminants};
 
-pub use pallet_process_validation::{ArgType, BooleanExpressionSymbol, BooleanOperator, Restriction};
+pub use pallet_process_validation::{BooleanExpressionSymbol, BooleanOperator, Restriction};
 
 /// An index to a block.
 pub type BlockNumber = u32;

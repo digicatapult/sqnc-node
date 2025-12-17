@@ -43,20 +43,6 @@ mod test {
     }
 
     #[test]
-    fn valid_token_version_attr() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          [#version(42)]
-          token TestToken {}
-      "##
-            )
-            .is_ok(),
-            true
-        );
-    }
-
-    #[test]
     fn valid_token_fields() {
         assert_eq!(
             parse_str_to_ast(
@@ -104,48 +90,6 @@ mod test {
             parse_str_to_ast(
                 r##"
           token Test-Token {}
-      "##
-            )
-            .is_ok(),
-            false
-        );
-    }
-
-    #[test]
-    fn invalid_token_version_attr_neg() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          [#version(-42)]
-          token TestToken {}
-      "##
-            )
-            .is_ok(),
-            false
-        );
-    }
-
-    #[test]
-    fn invalid_token_version_attr_float() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          [#version(4.2)]
-          token TestToken {}
-      "##
-            )
-            .is_ok(),
-            false
-        );
-    }
-
-    #[test]
-    fn invalid_token_version_attr_alpha() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          [#version(forty-two)]
-          token TestToken {}
       "##
             )
             .is_ok(),
@@ -268,23 +212,6 @@ mod test {
     }
 
     #[test]
-    fn valid_ref_args() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          fn Test |
-              foo: &Bar
-          | => |
-              biz: Baz
-          | where {}
-      "##
-            )
-            .is_ok(),
-            true
-        );
-    }
-
-    #[test]
     fn valid_args_trailing_commas() {
         assert_eq!(
             parse_str_to_ast(
@@ -308,8 +235,7 @@ mod test {
                 r##"
           fn Test |
               foo: Bar,
-              foo2: Bar,
-              foo3: &Bar,
+              foo2: Bar
           | => |
               biz: Baz,
               biz2: Baz,
@@ -382,21 +308,6 @@ mod test {
     }
 
     #[test]
-    fn invalid_output_arg_ref() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          fn Test || => |
-              foo: &Bar,
-          | where {}
-      "##
-            )
-            .is_ok(),
-            false
-        );
-    }
-
-    #[test]
     fn valid_where_eq_prop_token() {
         assert_eq!(
             parse_str_to_ast(
@@ -445,40 +356,6 @@ mod test {
               biz: Baz,
           | where {
               foo.a == biz.b
-          }
-      "##
-            )
-            .is_ok(),
-            true
-        );
-    }
-
-    #[test]
-    fn valid_where_eq_prop_sender() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          fn Test |
-              foo: Bar,
-          | => || where {
-              foo.a == sender
-          }
-      "##
-            )
-            .is_ok(),
-            true
-        );
-    }
-
-    #[test]
-    fn valid_where_eq_sender_root() {
-        assert_eq!(
-            parse_str_to_ast(
-                r##"
-          fn Test |
-              foo: Bar,
-          | => || where {
-              sender == root
           }
       "##
             )

@@ -27,13 +27,11 @@ type ProcessFullyQualifiedId<T> =
     sqnc_pallet_traits::ProcessFullyQualifiedId<<T as Config>::ProcessIdentifier, <T as Config>::ProcessVersion>;
 
 fn prepare_program<T: Config>(l: u32) -> BoundedVec<BooleanExpressionSymbol<T>, T::MaxProcessProgramLength> {
-    let metadata_restriction = Restriction::MatchArgsMetadataValue {
-        left_arg_type: ArgType::Input,
-        left_index: 0u32,
-        left_metadata_key: Default::default(),
-        right_arg_type: ArgType::Input,
-        right_index: 0u32,
-        right_metadata_key: Default::default(),
+    let metadata_restriction = Restriction::MatchInputOutputMetadataValue {
+        input_index: 0u32,
+        input_metadata_key: Default::default(),
+        output_index: 0u32,
+        output_metadata_key: Default::default(),
     };
 
     let mut program = BoundedVec::<_, _>::with_bounded_capacity(T::MaxProcessProgramLength::get() as usize);
@@ -92,45 +90,60 @@ benchmarks! {
     validate_process {
         let r in 1 .. (1 + T::MaxProcessProgramLength::get() / 2);
 
-        let origin: RawOrigin<T::AccountId> = RawOrigin::Signed(account("owner", 0, 0));
+        let account_id: T::AccountId = account("owner", 0, 0);
         let program = prepare_program::<T>(r);
         let process = create_process_fixture::<T>(&program);
 
-        let args = vec![ProcessIO::<T> {
+        let inputs = vec![ProcessIO::<T> {
+            id: Default::default(),
+            roles: BTreeMap::new(),
+            metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
+        }; 10];
+        let outputs = vec![ProcessIO::<T> {
             id: Default::default(),
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
         }; 10];
     }: {
-        let _ = ProcessValidation::<T>::validate_process(&process, &origin, &args, &args, &args);
+        let _ = ProcessValidation::<T>::validate_process(&process, &account_id, &inputs, &outputs);
     }
 
     validate_process_min {
-        let origin: RawOrigin<T::AccountId> = RawOrigin::Signed(account("owner", 0, 0));
+        let account_id: T::AccountId = account("owner", 0, 0);
         let program = prepare_program::<T>(1);
         let process = create_process_fixture::<T>(&program);
 
-        let args = vec![ProcessIO::<T> {
+        let inputs = vec![ProcessIO::<T> {
+            id: Default::default(),
+            roles: BTreeMap::new(),
+            metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
+        }; 10];
+        let outputs = vec![ProcessIO::<T> {
             id: Default::default(),
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
         }; 10];
     }: {
-        let _ = ProcessValidation::<T>::validate_process(&process, &origin, &args, &args, &args);
+        let _ = ProcessValidation::<T>::validate_process(&process, &account_id, &inputs, &outputs);
     }
 
     validate_process_max {
-        let origin: RawOrigin<T::AccountId> = RawOrigin::Signed(account("owner", 0, 0));
+        let account_id: T::AccountId = account("owner", 0, 0);
         let program = prepare_program::<T>(1 + T::MaxProcessProgramLength::get() / 2);
         let process = create_process_fixture::<T>(&program);
 
-        let args = vec![ProcessIO::<T> {
+        let inputs = vec![ProcessIO::<T> {
+            id: Default::default(),
+            roles: BTreeMap::new(),
+            metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
+        }; 10];
+        let outputs = vec![ProcessIO::<T> {
             id: Default::default(),
             roles: BTreeMap::new(),
             metadata: BTreeMap::from_iter(vec![(Default::default(), Default::default())])
         }; 10];
     }: {
-        let _ = ProcessValidation::<T>::validate_process(&process, &origin, &args, &args, &args);
+        let _ = ProcessValidation::<T>::validate_process(&process, &account_id, &inputs, &outputs);
     }
 }
 

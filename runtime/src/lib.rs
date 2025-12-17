@@ -93,7 +93,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: Cow::Borrowed("sqnc"),
     impl_name: Cow::Borrowed("sqnc"),
     authoring_version: 1,
-    spec_version: 1143,
+    spec_version: 1144,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -511,10 +511,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 
 type Migrations = (
-    pallet_symmetric_key::migrations::v1::MigrateToV1<Runtime>, // TODO: remove
-    pallet_organisation_data::migrations::v1::MigrateToV1<Runtime, GovernanceMembershipInstance>, // TODO: remove
-    pallet_process_validation::migration::v2::MigrateToV2<Runtime>,
-    pallet_utxo_nft::migration::v2::MigrateToV2<Runtime>,
+    pallet_symmetric_key::migrations::v1::MigrateToV1<Runtime>,
+    pallet_organisation_data::migrations::v1::MigrateToV1<Runtime, GovernanceMembershipInstance>,
 );
 
 /// Executive: handles dispatch to the various modules.

@@ -113,8 +113,8 @@ mod tests {
 
     use super::token_decl_to_conditions;
     use crate::ast::types::{
-        BoolCmp, BoolOp, Comparison, ExpressionTree, TokenAttrs, TokenDecl, TokenFieldType, TokenProp, TokenPropDecl,
-        TypeCmp, TypeCmpType,
+        BoolCmp, BoolOp, Comparison, ExpressionTree, TokenDecl, TokenFieldType, TokenProp, TokenPropDecl, TypeCmp,
+        TypeCmpType,
     };
     use crate::compiler::helper::tests::to_ast_node;
 
@@ -123,7 +123,6 @@ mod tests {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -151,7 +150,6 @@ mod tests {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -179,7 +177,6 @@ mod tests {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -207,7 +204,6 @@ mod tests {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -235,7 +231,6 @@ mod tests {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -263,7 +258,6 @@ mod tests {
         let token_name = to_ast_node("test");
         let prop_name = to_ast_node("prop");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -292,7 +286,6 @@ mod tests {
         let prop_name = to_ast_node("prop");
         let lit_val = to_ast_node("value");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -321,7 +314,6 @@ mod tests {
         let prop_name = to_ast_node("prop");
         let lit_val = to_ast_node(42i128);
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -350,7 +342,6 @@ mod tests {
         let prop_name = to_ast_node("prop");
         let lit_val = to_ast_node("value");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([to_ast_node(TokenPropDecl {
                 name: prop_name.clone(),
@@ -406,7 +397,6 @@ mod tests {
         let prop_name_2 = to_ast_node("prop2");
         let lit_val = to_ast_node("value");
         let token_decl = TokenDecl {
-            attributes: to_ast_node(TokenAttrs { version: 1 }),
             name: to_ast_node("token"),
             props: to_ast_node(Arc::new([
                 to_ast_node(TokenPropDecl {

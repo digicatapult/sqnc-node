@@ -1,4 +1,4 @@
-use crate::{graveyard::GraveyardState, input::Input, output::Output, tests::mock::*, Error, Event};
+use crate::{graveyard::GraveyardState, output::Output, tests::mock::*, Error, Event};
 use frame_support::{assert_err, assert_ok, traits::Hooks, weights::Weight};
 use sp_core::H256;
 use sp_runtime::{bounded_btree_map, bounded_vec};
@@ -25,7 +25,7 @@ fn create_and_burn_token() {
     UtxoNFT::run_process(
         RuntimeOrigin::signed(1),
         SUCCEED_PROCESS,
-        bounded_vec![Input::Token(UtxoNFT::last_token())],
+        bounded_vec![UtxoNFT::last_token()],
         bounded_vec![],
     )
     .unwrap();

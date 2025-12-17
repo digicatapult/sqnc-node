@@ -12,7 +12,7 @@ concurrency:
 jobs:
   get-version:
     name: Get version
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     outputs:
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
@@ -33,7 +33,7 @@ jobs:
 
   check-weights-have-changes:
     name: Check Weights
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     permissions:
       issues: write
       pull-requests: write
@@ -82,7 +82,7 @@ jobs:
 
   check:
     name: Check and test
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     needs: [get-version]
 
     steps:
@@ -135,17 +135,17 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
-          SCCACHE_CACHE_SIZE: "1G"
+          SCCACHE_CACHE_SIZE: "2G"
         run: cargo fmt --check
       - name: Cargo check
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
-          SCCACHE_CACHE_SIZE: "1G"
+          SCCACHE_CACHE_SIZE: "2G"
         run: cargo check
       - name: Cargo test
         env:
           RUSTC_WRAPPER: ${{ runner.temp }}/sccache
           SCCACHE_DIR: ${{ runner.temp }}/cache
-          SCCACHE_CACHE_SIZE: "1G"
+          SCCACHE_CACHE_SIZE: "2G"
         run: cargo test
