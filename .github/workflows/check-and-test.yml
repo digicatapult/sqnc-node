@@ -12,7 +12,7 @@ concurrency:
 jobs:
   get-version:
     name: Get version
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     outputs:
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
@@ -33,7 +33,7 @@ jobs:
 
   check-weights-have-changes:
     name: Check Weights
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     permissions:
       issues: write
       pull-requests: write

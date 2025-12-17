@@ -21,7 +21,7 @@ jobs:
   # Gets the build version and information about if this is a new version
   get-version:
     name: Get version
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     outputs:
       is_new_version: ${{ steps.get_version.outputs.IS_NEW_VERSION }}
       version: ${{ steps.get_version.outputs.VERSION }}
@@ -48,7 +48,7 @@ jobs:
   # Github releases are only performed when the release version changes
   build-binary:
     name: Build binary
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     needs: [get-version]
     if: ${{ needs.get-version.outputs.is_new_version == 'true' ||  needs.get-version.outputs.is_prerelease == 'true'}}
     strategy:
@@ -128,7 +128,7 @@ jobs:
 
   build-release:
     name: Build release
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     needs: [get-version, build-binary]
     if: ${{ needs.get-version.outputs.is_new_version == 'true' ||  needs.get-version.outputs.is_prerelease == 'true'}}
 
@@ -207,7 +207,7 @@ jobs:
   # Docker build are always performed but are only version tagged on new version
   build-docker:
     name: Build Docker
-    runs-on: ubuntu-latest
+    runs-on: sqnc-node-builder
     needs: [get-version, build-release]
     steps:
       - uses: actions/checkout@v5
