@@ -31,7 +31,7 @@ jobs:
       toolchain: ${{ steps.get_toolchain.outputs.TOOLCHAIN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - run: git fetch --tags
@@ -64,7 +64,7 @@ jobs:
             bindgenExtraClangArgs: "--sysroot=/usr/aarch64-linux-gnu"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: install toolchains
         run: |
           rustup toolchain install ${{ needs.get-version.outputs.toolchain }}
@@ -85,7 +85,7 @@ jobs:
           rm -rf $TEMP/sccache-v*-x86_64-unknown-linux-musl $TEMP/sccache-v*-x86_64-unknown-linux-musl.tar.gz $TEMP/fetch
           chmod +x $TEMP/sccache
       - name: Cache cargo registry
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -93,7 +93,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-registry-
       - name: Cache cargo index
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ github.sha }}
@@ -101,7 +101,7 @@ jobs:
             ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ runner.os }}-cargo-index-
       - name: Cache sccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ runner.temp }}/cache
           key: ${{ runner.os }}-cargo-build-cache-release-${{ matrix.architectures.arch }}-${{ needs.get-version.outputs.toolchain }}-${{ needs.get-version.outputs.sane_branch_name_key }}-${{ github.sha }}
@@ -210,7 +210,7 @@ jobs:
     runs-on: sqnc-node-builder
     needs: [get-version, build-release]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
