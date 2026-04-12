@@ -166,7 +166,7 @@ jobs:
           popd;
 
       - name: Build release version
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: ${{ needs.get-version.outputs.version }}
@@ -179,7 +179,7 @@ jobs:
             ./sqnc-node-${{ needs.get-version.outputs.version }}-runtime-wasm.tar.gz
       - name: Delete release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
@@ -192,7 +192,7 @@ jobs:
             }
       - name: Build release latest
         if: ${{ needs.get-version.outputs.is_prerelease != 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag_name: latest
@@ -212,12 +212,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: linux/amd64
       - name: Setup Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           buildkitd-flags: --debug
       - name: Generate tags
@@ -247,18 +247,18 @@ jobs:
             echo "DOCKERHUB_LATEST_TAG=" >> $GITHUB_OUTPUT
           fi;
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Dockerhub Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.SQNC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.SQNC_DOCKERHUB_TOKEN }}
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
