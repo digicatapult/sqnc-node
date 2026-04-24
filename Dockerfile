@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.20
 
-FROM ubuntu:noble AS setup
+FROM ubuntu:resolute AS setup
 
 RUN <<EOF
 apt-get update
@@ -37,7 +37,7 @@ elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
 fi
 EOF
 
-FROM ubuntu:noble AS runtime
+FROM ubuntu:resolute AS runtime
 
 RUN <<EOF
 apt-get update
