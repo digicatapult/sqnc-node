@@ -149,3 +149,8 @@ jobs:
           SCCACHE_DIR: ${{ runner.temp }}/cache
           SCCACHE_CACHE_SIZE: "2G"
         run: cargo test
+
+  scan-secrets:
+    uses: digicatapult/shared-workflows/.github/workflows/scan-secrets.yml@main
+    permissions:
+      contents: read
